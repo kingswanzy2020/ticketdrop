@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-111 16 1335 638" role="img" aria-label="The system on Docker Desktop Kubernetes in Phase 2" font-family="ui-sans-serif, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<rect x="-111" y="16" width="1335" height="638" fill="#ffffff"/>
+<defs>
+<marker id="m1e1e1e" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1e1e1e"/></marker>
+<marker id="m6741d9" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#6741d9"/></marker>
+</defs>
+<ellipse cx="-5.0" cy="320.0" rx="75.0" ry="35.0" fill="#e9ecef" stroke="#868e96" stroke-width="2"/>
+<rect x="200.0" y="40.0" width="1000.0" height="590.0" rx="10" fill="none" stroke="#1e1e1e" stroke-width="1" stroke-dasharray="7 6"/>
+<rect x="220.0" y="90.0" width="180.0" height="510.0" rx="10" fill="none" stroke="#0c8599" stroke-width="1" stroke-dasharray="7 6"/>
+<rect x="235.0" y="285.0" width="150.0" height="80.0" rx="10" fill="#99e9f2" stroke="#0c8599" stroke-width="2"/>
+<rect x="430.0" y="90.0" width="450.0" height="510.0" rx="10" fill="none" stroke="#1971c2" stroke-width="1" stroke-dasharray="7 6"/>
+<rect x="480.0" y="295.0" width="110.0" height="56.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="465.0" y="150.0" width="110.0" height="56.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="620.0" y="150.0" width="110.0" height="56.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="750.0" y="150.0" width="110.0" height="56.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="750.0" y="222.0" width="110.0" height="56.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="620.0" y="295.0" width="110.0" height="56.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="750.0" y="295.0" width="110.0" height="56.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="620.0" y="375.0" width="110.0" height="56.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="465.0" y="375.0" width="140.0" height="56.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="940.0" y="90.0" width="240.0" height="290.0" rx="10" fill="none" stroke="#2f9e44" stroke-width="1" stroke-dasharray="7 6"/>
+<rect x="960.0" y="140.0" width="200.0" height="84.0" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="960.0" y="270.0" width="200.0" height="64.0" rx="10" fill="#ffd8a8" stroke="#e8590c" stroke-width="2"/>
+<rect x="940.0" y="440.0" width="240.0" height="160.0" rx="10" fill="none" stroke="#6741d9" stroke-width="1" stroke-dasharray="7 6"/>
+<rect x="960.0" y="510.0" width="200.0" height="56.0" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<polyline points="70.0,320.0 235.0,325.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="385.0,325.0 480.0,323.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="310.0,285.0 465.0,178.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="520.0,206.0 535.0,295.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="590.0,323.0 620.0,178.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="860.0,178.0 960.0,182.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="860.0,323.0 960.0,302.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="1060.0,510.0 1060.0,334.0" fill="none" stroke="#6741d9" stroke-width="2" marker-end="url(#m6741d9)"/>
+<polyline points="960.0,538.0 805.0,351.0" fill="none" stroke="#6741d9" stroke-width="2" marker-end="url(#m6741d9)"/>
+<rect x="84.8" y="311.8" width="135.4" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="407.9" y="313.2" width="49.2" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="362.9" y="220.8" width="49.2" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="510.7" y="239.8" width="33.5" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="576.5" y="239.8" width="57.0" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="893.2" y="169.2" width="33.5" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="881.5" y="301.8" width="57.0" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="1011.9" y="411.2" width="96.2" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="854.0" y="433.8" width="57.0" height="21.5" rx="4" fill="#ffffff"/>
+<text font-size="16" text-anchor="middle" fill="#868e96" font-weight="600"><tspan x="-5.0" y="316.0">You</tspan><tspan x="-5.0" y="336.0">curl / drop-check</tspan></text>
+<text font-size="14" text-anchor="start" fill="#1e1e1e"><tspan x="212.0" y="62.0">Docker Desktop Kubernetes  (context: docker-desktop)</tspan></text>
+<text font-size="14" text-anchor="start" fill="#0c8599"><tspan x="232.0" y="112.0">namespace: traefik</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#0c8599" font-weight="600"><tspan x="310.0" y="311.0">Traefik</tspan><tspan x="310.0" y="331.0">Gateway +</tspan><tspan x="310.0" y="351.0">HTTPRoute</tspan></text>
+<text font-size="14" text-anchor="start" fill="#1971c2"><tspan x="442.0" y="112.0">namespace: ticketdrop</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#1971c2" font-weight="600"><tspan x="535.0" y="329.0">gateway</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#1971c2" font-weight="600"><tspan x="520.0" y="184.0">web</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#1971c2" font-weight="600"><tspan x="675.0" y="184.0">orders</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#1971c2" font-weight="600"><tspan x="805.0" y="184.0">inventory</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#1971c2" font-weight="600"><tspan x="805.0" y="256.0">notifications</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#1971c2" font-weight="600"><tspan x="675.0" y="329.0">payments</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#1971c2" font-weight="600"><tspan x="805.0" y="319.0">fulfillment</tspan><tspan x="805.0" y="339.0">0 → N pods</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#1971c2" font-weight="600"><tspan x="675.0" y="409.0">catalog</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#1971c2" font-weight="600"><tspan x="535.0" y="399.0">scheduler</tspan><tspan x="535.0" y="419.0">1 of 2 leads</tspan></text>
+<text font-size="14" text-anchor="start" fill="#1971c2"><tspan x="460.0" y="464.0">Every pod:  probes and metrics on :9090,</tspan><tspan x="460.0" y="481.5">non-root,  read-only filesystem.</tspan><tspan x="460.0" y="499.0">The five HTTP services also serve on :8080.</tspan></text>
+<text font-size="14" text-anchor="start" fill="#2f9e44"><tspan x="952.0" y="112.0">namespace: data</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#2f9e44" font-weight="600"><tspan x="1060.0" y="168.0">PostgreSQL</tspan><tspan x="1060.0" y="188.0">(CloudNativePG)</tspan><tspan x="1060.0" y="208.0">one DB per service</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#e8590c" font-weight="600"><tspan x="1060.0" y="298.0">goaws</tspan><tspan x="1060.0" y="318.0">SNS + SQS emulator</tspan></text>
+<text font-size="14" text-anchor="start" fill="#6741d9"><tspan x="952.0" y="462.0">namespace: keda</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#6741d9" font-weight="600"><tspan x="1060.0" y="544.0">KEDA</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="152.5" y="327.8">http://localhost</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="432.5" y="329.2">/v1/*</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="387.5" y="236.8">pages</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="527.5" y="255.8">API</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="605.0" y="255.8">routes</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="910.0" y="185.2">SQL</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="910.0" y="317.8">events</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="1060.0" y="427.2">queue depth</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="882.5" y="449.8">scales</tspan></text>
+</svg>

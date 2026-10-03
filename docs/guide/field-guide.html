@@ -1,0 +1,585 @@
+<title>TicketDrop Field Guide</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>/* Layout: one reading column, with wide "paper" panels for diagrams and
+   tables. Phases are drawn as ticket stubs with a perforated edge. */
+:root {
+  --bg: #f1f4f9;
+  --surface: #ffffff;
+  --ink: #131a2c;
+  --muted: #55607a;
+  --line: #d3dae8;
+  --accent: #b86a00;
+  --accent-soft: #fdf0d8;
+  --done: #1f7a45;
+  --done-soft: #e1f3e8;
+  --code-bg: #e8ecf4;
+  --paper: #ffffff;
+  --display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1321; --surface: #171e31; --ink: #e9edf7; --muted: #9ba6c1;
+    --line: #2b3552; --accent: #f3b340; --accent-soft: #3a2c10;
+    --done: #63d08f; --done-soft: #143222; --code-bg: #222b45; --paper: #f7f8fb;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1321; --surface: #171e31; --ink: #e9edf7; --muted: #9ba6c1;
+  --line: #2b3552; --accent: #f3b340; --accent-soft: #3a2c10;
+  --done: #63d08f; --done-soft: #143222; --code-bg: #222b45; --paper: #f7f8fb;
+  color-scheme: dark;
+}
+
+body {
+  background: var(--bg); color: var(--ink);
+  font: 16px/1.6 var(--body);
+  padding-inline: 20px; padding-block: 40px 80px;
+}
+.wrap { max-width: 1040px; margin-inline: auto; display: flex; flex-direction: column; gap: 56px; }
+section { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.prose { max-width: 68ch; display: flex; flex-direction: column; gap: 14px; }
+p, ul, ol, h1, h2, h3, h4, figure { margin: 0; }
+ul, ol { padding-left: 1.25em; display: flex; flex-direction: column; gap: 6px; }
+
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.12; }
+h1 { font-size: clamp(2.3rem, 6vw, 3.8rem); font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.5rem, 3.4vw, 2.1rem); font-weight: 700; letter-spacing: -0.01em; }
+h3 { font-size: 1.15rem; font-weight: 700; }
+.eyebrow { font: 600 0.78rem/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+.lede { font-size: 1.15rem; color: var(--muted); max-width: 62ch; }
+.muted { color: var(--muted); }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+code { font: 0.88em var(--mono); background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 4px; overflow-wrap: anywhere; }
+pre { margin: 0; font: 0.85rem/1.55 var(--mono); background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; padding: 0; overflow-wrap: normal; }
+
+header.top { display: flex; flex-direction: column; gap: 16px; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 10px; padding: 0; list-style: none; flex-direction: row; }
+.facts li { font: 0.82rem var(--mono); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; color: var(--muted); }
+.facts b { color: var(--ink); font-weight: 600; }
+
+/* Diagrams sit on white paper in both themes: they are drawings, with their
+   own fixed colours. */
+figure.diagram { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; overflow-x: auto; }
+figure.diagram svg { display: block; width: 100%; min-width: 760px; height: auto; }
+figcaption { font-size: 0.9rem; color: var(--muted); max-width: 70ch; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.85rem; color: var(--muted); }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+.table { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.93rem; }
+th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+tr:last-child td { border-bottom: 0; }
+th { font: 600 0.75rem var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+td.num { font-family: var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.pill { display: inline-block; font: 600 0.72rem var(--mono); letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; white-space: nowrap; border: 1px solid var(--line); color: var(--muted); }
+.pill.done { background: var(--done-soft); color: var(--done); border-color: transparent; }
+.pill.now { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+
+/* Ticket stubs */
+.stubs { display: flex; flex-direction: column; gap: 12px; }
+.stub { display: grid; grid-template-columns: 92px 1fr; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.stub .no { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 14px 8px; border-right: 2px dashed var(--line); font-family: var(--display); }
+.stub .no b { font-size: 2rem; line-height: 1; font-weight: 800; }
+.stub .no span { font: 0.68rem var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.stub .body { padding: 14px 18px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.stub .head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.stub.now { border-color: var(--accent); }
+.stub.now .no b { color: var(--accent); }
+.stub p { font-size: 0.95rem; }
+.stub .check { font-size: 0.9rem; color: var(--muted); }
+@media (max-width: 520px) { .stub { grid-template-columns: 60px 1fr; } .stub .no b { font-size: 1.5rem; } }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.card h3 { font-size: 1rem; }
+.card p { font-size: 0.93rem; color: var(--muted); }
+.note { border-left: 3px solid var(--accent); padding: 4px 0 4px 14px; max-width: 68ch; }
+
+/* Workbook steps */
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.step .head { display: flex; align-items: flex-start; gap: 12px; }
+.step .head label { display: flex; gap: 12px; align-items: flex-start; cursor: pointer; min-width: 0; }
+.step input[type="checkbox"] { width: 20px; height: 20px; margin-top: 4px; accent-color: var(--accent); flex: none; }
+.step dl { margin: 0; display: grid; grid-template-columns: 96px 1fr; gap: 8px 14px; font-size: 0.95rem; }
+.step dt { font: 600 0.72rem var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding-top: 4px; }
+.step dd { margin: 0; min-width: 0; }
+@media (max-width: 520px) { .step dl { grid-template-columns: 1fr; gap: 2px 0; } .step dd { margin-bottom: 8px; } }
+.progress { font: 0.85rem var(--mono); color: var(--muted); }
+p.prose { display: block; }
+td code, th code { overflow-wrap: normal; white-space: nowrap; }
+</style>
+
+<div class="wrap">
+
+<header class="top">
+  <span class="eyebrow">Field guide · updated 3 October 2026</span>
+  <h1>TicketDrop</h1>
+  <p class="lede">A ticket-selling platform made of small Go services, built to run on Amazon EKS. It exists to practise, and to prove, the work of a DevOps engineer: packaging, deploying, scaling, securing and observing a real system.</p>
+  <ul class="facts">
+    <li><b>9 of 9</b> services built</li>
+    <li>Phase <b>1</b> in progress</li>
+    <li>Phase <b>2</b> is next, and it is yours</li>
+    <li><b>24</b> decisions recorded</li>
+    <li>AWS spend so far: <b>none</b></li>
+  </ul>
+</header>
+
+<section>
+  <span class="eyebrow">The idea</span>
+  <h2>A box office that opens at 10:00 sharp</h2>
+  <div class="prose">
+    <p>Picture tickets for a big concert going on sale at 10:00. At 9:59 nobody is buying. At 10:00 ten thousand people press Buy in the same second, and there are only a thousand tickets. That moment is called a <b>drop</b>.</p>
+    <p>A drop is hard on a system in two ways. It must never sell the same ticket twice, however many people click at once. And it needs far more computing power for ten minutes than for the rest of the day, so it has to grow quickly and shrink again, or you pay for idle machines.</p>
+    <p>Those two problems are why this project is about tickets and not a shop. Both give a result you can measure: <b>zero oversold tickets</b>, and <b>how many seconds it took to scale</b>.</p>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">How it works today</span>
+  <h2>The journey of one order</h2>
+  <div class="prose">
+    <p>Think of the services as staff at the box office, each with one job. They do not shout across the room at each other. They pass notes through a shared pigeonhole, and each person has their own tray.</p>
+  </div>
+  <figure class="diagram"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-174 -94 1458 722" role="img" aria-label="The journey of one order through the services" font-family="ui-sans-serif, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<rect x="-174" y="-94" width="1458" height="722" fill="#ffffff"/>
+<defs>
+<marker id="m1e1e1e" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1e1e1e"/></marker>
+<marker id="me03131" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#e03131"/></marker>
+</defs>
+<rect x="250.0" y="-70.0" width="180.0" height="60.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="540.0" y="-70.0" width="190.0" height="60.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<ellipse cx="-90.0" cy="120.0" rx="60.0" ry="30.0" fill="#e9ecef" stroke="#868e96" stroke-width="2"/>
+<rect x="30.0" y="90.0" width="150.0" height="60.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="250.0" y="90.0" width="180.0" height="60.0" rx="10" fill="#99e9f2" stroke="#0c8599" stroke-width="2"/>
+<rect x="540.0" y="90.0" width="190.0" height="60.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="880.0" y="90.0" width="190.0" height="60.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="40.0" y="250.0" width="1100.0" height="170.0" rx="10" fill="none" stroke="#e8590c" stroke-width="1" stroke-dasharray="7 6"/>
+<rect x="70.0" y="320.0" width="190.0" height="64.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="350.0" y="320.0" width="190.0" height="64.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="630.0" y="320.0" width="190.0" height="64.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="910.0" y="320.0" width="200.0" height="64.0" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="-70.0" y="520.0" width="320.0" height="84.0" rx="10" fill="#ffc9c9" stroke="#e03131" stroke-width="2"/>
+<rect x="285.0" y="520.0" width="320.0" height="84.0" rx="10" fill="#ffc9c9" stroke="#e03131" stroke-width="2"/>
+<rect x="640.0" y="520.0" width="320.0" height="84.0" rx="10" fill="#ffec99" stroke="#f08c00" stroke-width="2"/>
+<rect x="1000.0" y="520.0" width="200.0" height="84.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<polyline points="430.0,-40.0 540.0,-40.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="730.0,-40.0 975.0,90.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="-30.0,120.0 30.0,120.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="180.0,120.0 250.0,120.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="430.0,120.0 540.0,120.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="730.0,120.0 880.0,120.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="635.0,150.0 165.0,320.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="260.0,352.0 350.0,352.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="540.0,352.0 630.0,352.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="820.0,352.0 910.0,352.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="165.0,384.0 90.0,520.0" fill="none" stroke="#e03131" stroke-width="2" marker-end="url(#me03131)"/>
+<polyline points="445.0,384.0 445.0,520.0" fill="none" stroke="#e03131" stroke-width="2" marker-end="url(#me03131)"/>
+<polyline points="725.0,384.0 800.0,520.0" fill="none" stroke="#e03131" stroke-width="2" marker-end="url(#me03131)"/>
+<polyline points="1010.0,384.0 1100.0,520.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<rect x="413.4" y="-50.8" width="143.3" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="804.4" y="14.2" width="96.2" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="-20.7" y="109.2" width="41.4" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="198.2" y="109.2" width="33.5" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="448.6" y="109.2" width="72.7" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="756.9" y="109.2" width="96.2" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="344.0" y="224.2" width="111.9" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="264.7" y="332.5" width="80.6" height="39.0" rx="4" fill="#ffffff"/>
+<rect x="544.7" y="332.5" width="80.6" height="39.0" rx="4" fill="#ffffff"/>
+<rect x="832.6" y="332.5" width="64.9" height="39.0" rx="4" fill="#ffffff"/>
+<rect x="67.6" y="441.2" width="119.8" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="393.0" y="441.2" width="104.1" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="690.9" y="441.2" width="143.3" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="991.2" y="432.5" width="127.6" height="39.0" rx="4" fill="#ffffff"/>
+<text font-size="16" text-anchor="middle" fill="#1971c2" font-weight="600"><tspan x="340.0" y="-44.0">scheduler</tspan><tspan x="340.0" y="-24.0">keeps the time</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#1971c2" font-weight="600"><tspan x="635.0" y="-44.0">catalog</tspan><tspan x="635.0" y="-24.0">opens the drop</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#868e96" font-weight="600"><tspan x="-90.0" y="126.0">Customer</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#1971c2" font-weight="600"><tspan x="105.0" y="116.0">web</tspan><tspan x="105.0" y="136.0">the shopfront</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#0c8599" font-weight="600"><tspan x="340.0" y="116.0">gateway</tspan><tspan x="340.0" y="136.0">listed routes only</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#1971c2" font-weight="600"><tspan x="635.0" y="116.0">orders</tspan><tspan x="635.0" y="136.0">accepts the order</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#1971c2" font-weight="600"><tspan x="975.0" y="116.0">inventory</tspan><tspan x="975.0" y="136.0">holds the tickets</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="485.0" y="-34.8">it is time (HTTP)</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="852.5" y="30.2">drop.opened</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="0.0" y="125.2">buys</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="215.0" y="125.2">API</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="485.0" y="125.2">forwards</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="805.0" y="125.2">hold (HTTP)</tspan></text>
+<text font-size="13" text-anchor="start" fill="#e8590c"><tspan x="620.0" y="235.0">Each arrow in this band is an event: outbox → SNS topic → the consumer&#x27;s SQS queue</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#1971c2" font-weight="600"><tspan x="165.0" y="348.0">payments</tspan><tspan x="165.0" y="368.0">charges the card</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#1971c2" font-weight="600"><tspan x="445.0" y="348.0">inventory</tspan><tspan x="445.0" y="368.0">confirms the hold</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#1971c2" font-weight="600"><tspan x="725.0" y="348.0">fulfillment</tspan><tspan x="725.0" y="368.0">issues the tickets</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#2f9e44" font-weight="600"><tspan x="1010.0" y="348.0">orders</tspan><tspan x="1010.0" y="368.0">marks it ticketed</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="400.0" y="240.2">order.created</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="305.0" y="348.5">payment.</tspan><tspan x="305.0" y="366.0">succeeded</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="585.0" y="348.5">order.</tspan><tspan x="585.0" y="366.0">confirmed</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="865.0" y="348.5">ticket.</tspan><tspan x="865.0" y="366.0">issued</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#e03131" font-weight="600"><tspan x="90.0" y="548.0">Card declined:</tspan><tspan x="90.0" y="568.0">inventory releases the tickets,</tspan><tspan x="90.0" y="588.0">orders marks the order failed</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="127.5" y="457.2">payment.failed</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#e03131" font-weight="600"><tspan x="445.0" y="548.0">No payment answer in 10 minutes:</tspan><tspan x="445.0" y="568.0">inventory releases the tickets,</tspan><tspan x="445.0" y="588.0">orders marks the order failed</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="445.0" y="457.2">hold.expired</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#f08c00" font-weight="600"><tspan x="800.0" y="548.0">A message that fails 3 times</tspan><tspan x="800.0" y="568.0">moves to that queue&#x27;s</tspan><tspan x="800.0" y="588.0">dead-letter queue</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="762.5" y="457.2">cannot be handled</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#1971c2" font-weight="600"><tspan x="1100.0" y="548.0">notifications</tspan><tspan x="1100.0" y="568.0">tells the customer</tspan><tspan x="1100.0" y="588.0">how it ended</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="1055.0" y="448.5">order.ticketed</tspan><tspan x="1055.0" y="466.0">or order.failed</tspan></text>
+</svg></figure>
+  <div class="legend">
+    <span><i style="background:#a5d8ff"></i>our services</span>
+    <span><i style="background:#99e9f2"></i>network edge</span>
+    <span><i style="background:#ffd8a8"></i>messaging</span>
+    <span><i style="background:#b2f2bb"></i>data, success</span>
+    <span><i style="background:#d0bfff"></i>cluster controllers</span>
+    <span><i style="background:#96f2d7"></i>Git and CI</span>
+    <span><i style="background:#ffc9c9"></i>failure</span>
+  </div>
+  <div class="prose">
+    <ol>
+      <li><b>The doors open on time.</b> The scheduler is the caretaker with the clock. At the drop's opening time it tells catalog, catalog announces <code>drop.opened</code>, and inventory puts the tickets on the rack. An order placed a moment early is turned away, because the rack is still empty.</li>
+      <li><b>The shopfront is what the customer sees.</b> It is a web page, and it asks the gateway for everything it shows, like any other client would.</li>
+      <li><b>The gateway is the front door.</b> It lets in only the requests on its list and turns everything else away.</li>
+      <li><b>Orders takes your order</b> and, while you wait, asks inventory to set your tickets aside. If none are left you hear "sold out" straight away.</li>
+      <li><b>Inventory guards the ticket rack.</b> Taking tickets is a single database update, and the database itself refuses to let the count go below zero.</li>
+      <li>From here nobody waits on anybody. Orders drops a note, <code>order.created</code>, in the pigeonhole. <b>Payments</b> picks it up and charges the card.</li>
+      <li>If the card works, inventory makes the hold permanent and <b>fulfillment</b> issues the tickets. If the card is declined, inventory puts the tickets back and the order is marked failed.</li>
+      <li>If no answer about the payment comes at all, the tickets are not kept for ever. A hold lasts ten minutes. When it runs out, inventory puts the tickets back, says so with <code>hold.expired</code>, and the order is marked failed. Payments will not charge an order whose hold has run out.</li>
+      <li><b>The customer is told.</b> When the order ends, either way, orders drops one last note saying how. <b>Notifications</b> picks it up and sends the customer a message.</li>
+      <li>A note nobody can read, after three tries, goes to a separate tray called the <b>dead-letter queue</b>, where a person can look at it. It never blocks the line.</li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">The staff</span>
+  <h2>Nine services, one job each</h2>
+  <div class="table"><table>
+    <thead><tr><th>Service</th><th>Its job, in plain words</th><th>Listens for</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><code>gateway</code></td><td>The front door. Forwards only listed routes.</td><td>HTTP</td><td><span class="pill done">Built</span></td></tr>
+      <tr><td><code>orders</code></td><td>Writes down each order and tracks how it ends.</td><td>HTTP, <code>ticket.issued</code>, <code>payment.failed</code>, <code>hold.expired</code></td><td><span class="pill done">Built</span></td></tr>
+      <tr><td><code>inventory</code></td><td>Guards the ticket count. Holds, confirms, releases, and frees holds that ran out of time.</td><td>HTTP, <code>drop.opened</code>, <code>payment.succeeded</code>, <code>payment.failed</code></td><td><span class="pill done">Built</span></td></tr>
+      <tr><td><code>payments</code></td><td>Charges the card through a pretend provider that can be made slow or flaky.</td><td><code>order.created</code></td><td><span class="pill done">Built</span></td></tr>
+      <tr><td><code>fulfillment</code></td><td>Produces the tickets. Deliberately slow, so a queue builds up.</td><td><code>order.confirmed</code></td><td><span class="pill done">Built</span></td></tr>
+      <tr><td><code>catalog</code></td><td>The poster board: each drop's venue, opening time, ticket tiers and prices. Announces when a drop opens.</td><td>HTTP</td><td><span class="pill done">Built</span></td></tr>
+      <tr><td><code>notifications</code></td><td>Tells the customer how their order ended. Keeps no records of its own.</td><td><code>order.ticketed</code>, <code>order.failed</code></td><td><span class="pill done">Built</span></td></tr>
+      <tr><td><code>scheduler</code></td><td>The caretaker with the clock: tells catalog when a drop is due and inventory when to free expired holds. Two run; one leads.</td><td>a clock</td><td><span class="pill done">Built</span></td></tr>
+      <tr><td><code>web</code></td><td>The shopfront people see. Asks the gateway for everything it shows.</td><td>HTTP</td><td><span class="pill done">Built</span></td></tr>
+    </tbody>
+  </table></div>
+  <p class="muted prose">All nine exist. The Kubernetes packaging is one reusable chart, so each service is one small values file.</p>
+</section>
+
+<section>
+  <span class="eyebrow">Who does what</span>
+  <h2>You build the venue. Claude writes the staff.</h2>
+  <div class="cards">
+    <div class="card"><h3>Yours</h3><p>Kubernetes manifests and the Helm chart, Terraform, GitHub Actions pipelines, the GitOps repo. You write them, apply them, and fix them when they break. This is what an interviewer will ask you about.</p></div>
+    <div class="card"><h3>Claude's</h3><p>The Go service code and the local docker-compose stack. After each piece, an explanation of the parts that matter to operations: probes, shutdown, retries, metrics.</p></div>
+    <div class="card"><h3>Shared</h3><p>Every choice goes into <code>docs/DECISIONS.md</code> with its cost. Every real failure goes into <code>docs/TROUBLESHOOTING.md</code>. Those two files become the write-up.</p></div>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">The road</span>
+  <h2>Ten phases, each ending in something you can show</h2>
+  <p class="muted prose">Phases 0 to 3 cost nothing on AWS. From Phase 4 the cluster is switched on for a work session and destroyed afterwards.</p>
+  <div class="stubs">
+    <div class="stub"><div class="no"><b>0</b><span>Both</span></div><div class="body">
+      <div class="head"><h3>Foundations</h3><span class="pill now">Open items</span></div>
+      <p>Tools, accounts and a sanity check of AWS. Done so far: AWS access confirmed, the old cluster confirmed gone, the local messaging emulator chosen and tested.</p>
+      <p class="check">Still open: turn on Kubernetes in Docker Desktop and raise its memory; install trivy and k6; the <code>kahmedt.com</code> hosted zone no longer exists and gets recreated in Phase 4.</p></div></div>
+    <div class="stub"><div class="no"><b>1</b><span>Claude</span></div><div class="body">
+      <div class="head"><h3>The services, running locally</h3><span class="pill now">In progress</span></div>
+      <p>The Go services under docker compose with Postgres and an SNS/SQS emulator. All nine exist, and the journey above runs from a click in the shopfront to the confirmation message. One thing is left: a load test that sends a real crowd at a drop, where the checks so far send 16 customers at a time.</p>
+      <p class="check">Done when: <code>make drop-check</code> orders more tickets than exist, kills a service mid-run, and still finds no oversold ticket, no lost order and no duplicate; and <code>make outage-check</code> takes the payment provider down and finds no order or ticket left stuck. Both pass with all nine services running.</p></div></div>
+    <div class="stub now"><div class="no"><b>2</b><span>You</span></div><div class="body">
+      <div class="head"><h3>Kubernetes packaging on Docker Desktop</h3><span class="pill now">Next</span></div>
+      <p>Move the same system from docker compose into a real Kubernetes cluster on your laptop: one Helm chart, a front door, a database operator, and autoscaling on queue depth.</p>
+      <p class="check">Done when: the drop passes through the Gateway, and fulfillment scales from 0 to several pods and back on its own. The Phase 2 Workbook has the steps.</p></div></div>
+    <div class="stub"><div class="no"><b>3</b><span>You</span></div><div class="body">
+      <div class="head"><h3>Continuous integration</h3><span class="pill">Later</span></div>
+      <p>Every pull request is linted, tested, built and scanned, with no cloud credentials involved. Only the services that changed are rebuilt.</p>
+      <p class="check">Done when: a failing test or a critical vulnerability blocks the merge.</p></div></div>
+    <div class="stub"><div class="no"><b>4</b><span>You</span></div><div class="body">
+      <div class="head"><h3>AWS with Terraform</h3><span class="pill">Later</span></div>
+      <p>The network, the EKS cluster, the queues, the secrets and the permissions, all as code. Split so the cheap long-lived parts survive and the expensive parts can be destroyed.</p>
+      <p class="check">Done when: <code>make aws-up</code> builds it from nothing and <code>make aws-down</code> leaves nothing that bills.</p></div></div>
+    <div class="stub"><div class="no"><b>5</b><span>You</span></div><div class="body">
+      <div class="head"><h3>The platform, installed by GitOps</h3><span class="pill">Later</span></div>
+      <p>Argo CD installs every cluster add-on from Git, in order: Karpenter, the load balancer controller, cert-manager, external-dns, Traefik, the secrets driver, KEDA, the database operator, monitoring.</p>
+      <p class="check">Done when: a test route gets a DNS name and a valid certificate with no manual <code>kubectl apply</code>.</p></div></div>
+    <div class="stub"><div class="no"><b>6</b><span>You</span></div><div class="body">
+      <div class="head"><h3>Continuous delivery, and going live</h3><span class="pill">Later</span></div>
+      <p>A merge builds an image, pushes it, and commits its tag to the GitOps repo. Argo CD does the rest.</p>
+      <p class="check">Done when: a one-line change reaches EKS with nobody running <code>kubectl</code>.</p></div></div>
+    <div class="stub"><div class="no"><b>7</b><span>Both</span></div><div class="body">
+      <div class="head"><h3>Observability</h3><span class="pill">Later</span></div>
+      <p>Dashboards and alerts kept in Git. Request rate, errors and latency for each service; queue depth and age; replicas and nodes.</p>
+      <p class="check">Done when: each alert has been set off once on purpose and seen firing.</p></div></div>
+    <div class="stub"><div class="no"><b>8</b><span>Both</span></div><div class="body">
+      <div class="head"><h3>Drills</h3><span class="pill">Later</span></div>
+      <p>A full drop on EKS with numbers taken, then things broken on purpose: a node killed, a Spot interruption, a poison message, a bad release rolled back, a database failover.</p>
+      <p class="check">Done when: there is a number and a screenshot for each.</p></div></div>
+    <div class="stub"><div class="no"><b>9</b><span>Both</span></div><div class="body">
+      <div class="head"><h3>Rebuild proof and write-up</h3><span class="pill">Later</span></div>
+      <p>Destroy everything, rebuild it from Git, time it. Then the portfolio write-up.</p>
+      <p class="check">Done when: the rebuilt cluster matches the one that was destroyed.</p></div></div>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">Where it is heading</span>
+  <h2>The finished platform on AWS</h2>
+  <figure class="diagram"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 16 1158 798" role="img" aria-label="The finished platform on AWS" font-family="ui-sans-serif, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<rect x="-4" y="16" width="1158" height="798" fill="#ffffff"/>
+<defs>
+<marker id="m1e1e1e" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1e1e1e"/></marker>
+</defs>
+<ellipse cx="95.0" cy="70.0" rx="65.0" ry="30.0" fill="#e9ecef" stroke="#868e96" stroke-width="2"/>
+<rect x="250.0" y="40.0" width="330.0" height="60.0" rx="10" fill="#99e9f2" stroke="#0c8599" stroke-width="2"/>
+<rect x="20.0" y="150.0" width="830.0" height="500.0" rx="10" fill="none" stroke="#1e1e1e" stroke-width="1" stroke-dasharray="7 6"/>
+<rect x="50.0" y="210.0" width="190.0" height="70.0" rx="10" fill="#99e9f2" stroke="#0c8599" stroke-width="2"/>
+<rect x="330.0" y="210.0" width="190.0" height="70.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="610.0" y="210.0" width="210.0" height="70.0" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="50.0" y="360.0" width="180.0" height="84.0" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="250.0" y="360.0" width="180.0" height="84.0" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="450.0" y="360.0" width="180.0" height="84.0" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="650.0" y="360.0" width="150.0" height="84.0" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="50.0" y="520.0" width="260.0" height="70.0" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="380.0" y="520.0" width="260.0" height="70.0" rx="10" fill="#96f2d7" stroke="#099268" stroke-width="2"/>
+<rect x="920.0" y="40.0" width="210.0" height="90.0" rx="10" fill="#ffd8a8" stroke="#e8590c" stroke-width="2"/>
+<rect x="920.0" y="200.0" width="210.0" height="60.0" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="920.0" y="374.0" width="210.0" height="56.0" rx="10" fill="#ffec99" stroke="#f08c00" stroke-width="2"/>
+<rect x="920.0" y="520.0" width="210.0" height="70.0" rx="10" fill="#96f2d7" stroke="#099268" stroke-width="2"/>
+<rect x="50.0" y="720.0" width="260.0" height="70.0" rx="10" fill="#96f2d7" stroke="#099268" stroke-width="2"/>
+<rect x="520.0" y="720.0" width="260.0" height="70.0" rx="10" fill="#96f2d7" stroke="#099268" stroke-width="2"/>
+<polyline points="160.0,70.0 250.0,70.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="415.0,100.0 145.0,210.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="240.0,245.0 330.0,245.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="520.0,245.0 610.0,245.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="425.0,210.0 920.0,85.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="800.0,402.0 920.0,402.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="180.0,590.0 180.0,720.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="520.0,755.0 310.0,755.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="780.0,755.0 1025.0,590.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<rect x="180.4" y="59.2" width="49.2" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="644.0" y="136.8" width="57.0" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="835.4" y="391.2" width="49.2" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="155.4" y="644.2" width="49.2" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="359.0" y="744.2" width="111.9" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="850.5" y="661.8" width="104.1" height="21.5" rx="4" fill="#ffffff"/>
+<text font-size="16" text-anchor="middle" fill="#868e96" font-weight="600"><tspan x="95.0" y="76.0">Customer</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#0c8599" font-weight="600"><tspan x="415.0" y="76.0">Route 53  →  Network Load Balancer</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="205.0" y="75.2">HTTPS</tspan></text>
+<text font-size="14" text-anchor="start" fill="#1e1e1e"><tspan x="32.0" y="172.0">Amazon EKS  ·  private subnets across 3 availability zones</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#0c8599" font-weight="600"><tspan x="145.0" y="241.0">Traefik</tspan><tspan x="145.0" y="261.0">TLS + Gateway API</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#1971c2" font-weight="600"><tspan x="425.0" y="241.0">9 Go services</tspan><tspan x="425.0" y="261.0">HPA and KEDA</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#2f9e44" font-weight="600"><tspan x="715.0" y="241.0">PostgreSQL + Valkey</tspan><tspan x="715.0" y="261.0">on EBS volumes</tspan></text>
+<text font-size="14" text-anchor="start" fill="#6741d9"><tspan x="50.0" y="344.0">Controllers that run the cluster for you</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#6741d9" font-weight="600"><tspan x="140.0" y="388.0">Karpenter</tspan><tspan x="140.0" y="408.0">adds and removes</tspan><tspan x="140.0" y="428.0">Spot nodes</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#6741d9" font-weight="600"><tspan x="340.0" y="388.0">KEDA</tspan><tspan x="340.0" y="408.0">scales consumers</tspan><tspan x="340.0" y="428.0">on queue depth</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#6741d9" font-weight="600"><tspan x="540.0" y="388.0">cert-manager +</tspan><tspan x="540.0" y="408.0">external-dns</tspan><tspan x="540.0" y="428.0">TLS and DNS</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#6741d9" font-weight="600"><tspan x="725.0" y="398.0">Secrets Store</tspan><tspan x="725.0" y="418.0">CSI driver</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#6741d9" font-weight="600"><tspan x="180.0" y="551.0">Argo CD</tspan><tspan x="180.0" y="571.0">makes the cluster match Git</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#099268" font-weight="600"><tspan x="510.0" y="551.0">Prometheus + Grafana</tspan><tspan x="510.0" y="571.0">metrics, dashboards, alerts</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#e8590c" font-weight="600"><tspan x="1025.0" y="71.0">SNS topic +</tspan><tspan x="1025.0" y="91.0">SQS queues and</tspan><tspan x="1025.0" y="111.0">dead-letter queues</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#2f9e44" font-weight="600"><tspan x="1025.0" y="226.0">S3</tspan><tspan x="1025.0" y="246.0">issued tickets</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#f08c00" font-weight="600"><tspan x="1025.0" y="408.0">Secrets Manager</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#099268" font-weight="600"><tspan x="1025.0" y="551.0">ECR</tspan><tspan x="1025.0" y="571.0">container images</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="672.5" y="152.8">events</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="860.0" y="407.2">reads</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#099268" font-weight="600"><tspan x="180.0" y="751.0">GitOps repo</tspan><tspan x="180.0" y="771.0">the cluster&#x27;s desired state</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#099268" font-weight="600"><tspan x="650.0" y="751.0">GitHub Actions</tspan><tspan x="650.0" y="771.0">test · scan · build · sign</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="180.0" y="660.2">pulls</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="415.0" y="760.2">new image tag</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="902.5" y="677.8">pushes image</tspan></text>
+</svg></figure>
+  <figcaption>Read it top to bottom. A customer reaches the load balancer, Traefik routes to the services, and the services use the database and the message queues. The violet boxes are controllers: programs inside the cluster that watch for something you declared and make it true.</figcaption>
+</section>
+
+<section>
+  <h2>What happens when a drop opens</h2>
+  <figure class="diagram"><svg xmlns="http://www.w3.org/2000/svg" viewBox="16 56 1248 308" role="img" aria-label="The scaling loop a ticket drop sets off" font-family="ui-sans-serif, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<rect x="16" y="56" width="1248" height="308" fill="#ffffff"/>
+<defs>
+<marker id="m1e1e1e" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1e1e1e"/></marker>
+</defs>
+<rect x="40.0" y="80.0" width="200.0" height="70.0" rx="10" fill="#e9ecef" stroke="#868e96" stroke-width="2"/>
+<rect x="370.0" y="80.0" width="200.0" height="70.0" rx="10" fill="#ffd8a8" stroke="#e8590c" stroke-width="2"/>
+<rect x="700.0" y="80.0" width="200.0" height="70.0" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="1030.0" y="80.0" width="210.0" height="70.0" rx="10" fill="#ffec99" stroke="#f08c00" stroke-width="2"/>
+<rect x="1030.0" y="270.0" width="210.0" height="70.0" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="700.0" y="270.0" width="200.0" height="70.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="370.0" y="270.0" width="200.0" height="70.0" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="40.0" y="270.0" width="200.0" height="70.0" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<polyline points="240.0,115.0 370.0,115.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="570.0,115.0 700.0,115.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="900.0,115.0 1030.0,115.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="1135.0,150.0 1135.0,270.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="1030.0,305.0 900.0,305.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="700.0,305.0 570.0,305.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="370.0,305.0 240.0,305.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<rect x="586.9" y="104.2" width="96.2" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="924.7" y="294.2" width="80.6" height="21.5" rx="4" fill="#ffffff"/>
+<text font-size="16" text-anchor="middle" fill="#868e96" font-weight="600"><tspan x="140.0" y="111.0">A drop opens:</tspan><tspan x="140.0" y="131.0">orders flood in</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#e8590c" font-weight="600"><tspan x="470.0" y="111.0">The fulfillment</tspan><tspan x="470.0" y="131.0">queue backs up</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#6741d9" font-weight="600"><tspan x="800.0" y="111.0">KEDA adds</tspan><tspan x="800.0" y="131.0">fulfillment pods</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#f08c00" font-weight="600"><tspan x="1135.0" y="111.0">New pods are Pending:</tspan><tspan x="1135.0" y="131.0">the nodes are full</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="635.0" y="120.2">over target</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#6741d9" font-weight="600"><tspan x="1135.0" y="301.0">Karpenter launches</tspan><tspan x="1135.0" y="321.0">Spot nodes</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#1971c2" font-weight="600"><tspan x="800.0" y="301.0">Pods start,</tspan><tspan x="800.0" y="321.0">the backlog drains</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#6741d9" font-weight="600"><tspan x="470.0" y="301.0">Queue empty: KEDA</tspan><tspan x="470.0" y="321.0">scales back to zero</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#2f9e44" font-weight="600"><tspan x="140.0" y="301.0">Karpenter removes</tspan><tspan x="140.0" y="321.0">the empty nodes</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="965.0" y="310.2">~1 minute</tspan></text>
+</svg></figure>
+  <div class="prose">
+    <p>Two controllers work as a pair. <b>KEDA</b> looks at how many messages are waiting and decides how many <i>pods</i> are needed. <b>Karpenter</b> notices pods that have nowhere to run and adds <i>machines</i>. KEDA is the manager calling in more staff; Karpenter is the one finding them desks.</p>
+    <p>Phase 2 proves the KEDA half on your laptop. Karpenter needs real AWS and arrives in Phase 5.</p>
+  </div>
+</section>
+
+<section>
+  <h2>How a change will reach the cluster</h2>
+  <figure class="diagram"><svg xmlns="http://www.w3.org/2000/svg" viewBox="6 56 1190 436" role="img" aria-label="How a code change reaches the cluster" font-family="ui-sans-serif, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<rect x="6" y="56" width="1190" height="436" fill="#ffffff"/>
+<defs>
+<marker id="m1e1e1e" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1e1e1e"/></marker>
+</defs>
+<ellipse cx="80.0" cy="110.0" rx="50.0" ry="30.0" fill="#e9ecef" stroke="#868e96" stroke-width="2"/>
+<rect x="210.0" y="80.0" width="170.0" height="60.0" rx="10" fill="#96f2d7" stroke="#099268" stroke-width="2"/>
+<rect x="470.0" y="80.0" width="180.0" height="60.0" rx="10" fill="#96f2d7" stroke="#099268" stroke-width="2"/>
+<rect x="740.0" y="80.0" width="160.0" height="60.0" rx="10" fill="#96f2d7" stroke="#099268" stroke-width="2"/>
+<rect x="990.0" y="80.0" width="160.0" height="60.0" rx="10" fill="#96f2d7" stroke="#099268" stroke-width="2"/>
+<rect x="960.0" y="290.0" width="190.0" height="84.0" rx="10" fill="#96f2d7" stroke="#099268" stroke-width="2"/>
+<rect x="660.0" y="290.0" width="180.0" height="84.0" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="360.0" y="290.0" width="180.0" height="84.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="40.0" y="290.0" width="200.0" height="84.0" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<polyline points="130.0,110.0 210.0,110.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="380.0,110.0 470.0,110.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="650.0,110.0 740.0,110.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="900.0,110.0 990.0,110.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="1070.0,140.0 1055.0,290.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="960.0,332.0 840.0,332.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="660.0,332.0 540.0,332.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="360.0,332.0 240.0,332.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<rect x="149.3" y="99.2" width="41.4" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="670.4" y="99.2" width="49.2" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="955.6" y="204.2" width="213.8" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="579.3" y="321.2" width="41.4" height="21.5" rx="4" fill="#ffffff"/>
+<text font-size="16" text-anchor="middle" fill="#868e96" font-weight="600"><tspan x="80.0" y="116.0">You</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#099268" font-weight="600"><tspan x="295.0" y="106.0">Pull request</tspan><tspan x="295.0" y="126.0">to the app repo</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#099268" font-weight="600"><tspan x="560.0" y="106.0">CI checks</tspan><tspan x="560.0" y="126.0">lint · test · scan</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#099268" font-weight="600"><tspan x="820.0" y="116.0">Merge to main</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#099268" font-weight="600"><tspan x="1070.0" y="106.0">Build image,</tspan><tspan x="1070.0" y="126.0">push to ECR</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="170.0" y="115.2">push</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="695.0" y="115.2">green</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#099268" font-weight="600"><tspan x="1055.0" y="318.0">Commit the new</tspan><tspan x="1055.0" y="338.0">image tag to the</tspan><tspan x="1055.0" y="358.0">GitOps repo</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#6741d9" font-weight="600"><tspan x="750.0" y="328.0">Argo CD sees</tspan><tspan x="750.0" y="348.0">the commit</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#1971c2" font-weight="600"><tspan x="450.0" y="318.0">Pods roll to the</tspan><tspan x="450.0" y="338.0">new image, a few</tspan><tspan x="450.0" y="358.0">at a time</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#2f9e44" font-weight="600"><tspan x="140.0" y="318.0">Readiness passes,</tspan><tspan x="140.0" y="338.0">or the rollout</tspan><tspan x="140.0" y="358.0">stops</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="1062.5" y="220.2">tagged with the commit SHA</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="600.0" y="337.2">sync</tspan></text>
+<text font-size="15" text-anchor="start" fill="#1e1e1e"><tspan x="40.0" y="445.0">The pipeline never talks to the cluster. Argo CD, running inside it, pulls from Git.</tspan><tspan x="40.0" y="463.8">So no cluster credential ever lives in GitHub.</tspan></text>
+</svg></figure>
+</section>
+
+<section>
+  <span class="eyebrow">Decisions</span>
+  <h2>What has been decided, and what each choice costs</h2>
+  <p class="muted prose">Every choice buys something and costs something. The full text of each is in <code>docs/DECISIONS.md</code>.</p>
+  <div class="table"><table>
+    <thead><tr><th>#</th><th>Decision</th><th>Why</th><th>What it costs</th></tr></thead>
+    <tbody>
+      <tr><td class="num">1</td><td>Ticket drops, not a shop</td><td>A real burst of load, and a pass-or-fail result: no ticket sold twice.</td><td>Holding and releasing tickets must be correct under pressure.</td></tr>
+      <tr><td class="num">2</td><td>One Go module with a shared platform library</td><td>A probe or a metric means the same thing in every service.</td><td>A change to the library rebuilds every service.</td></tr>
+      <tr><td class="num">3</td><td>Each service owns its database</td><td>A service can change and deploy without asking the others.</td><td>No query can join across services.</td></tr>
+      <tr><td class="num">4</td><td>One SNS topic, one SQS queue per consumer</td><td>A slow consumer backs up only its own queue, and each queue is a scaling signal for one service.</td><td>More to create and watch. A wrong filter fails silently.</td></tr>
+      <tr><td class="num">5</td><td>Events go through a transactional outbox</td><td>The order and the note about it are saved together, or not at all.</td><td>A note can be sent twice, and up to 250 ms late.</td></tr>
+      <tr><td class="num">6</td><td>Consumers record the events they handled</td><td>A note delivered twice does nothing the second time.</td><td>One extra insert per message; a table to prune later.</td></tr>
+      <tr><td class="num">7</td><td>Messages that cannot be handled go to a dead-letter queue</td><td>Deleting hides a bug; retrying forever blocks the line. An event of a type the service does not expect counts too: it means a subscription is wired wrongly.</td><td>Each poison message is tried three times first.</td></tr>
+      <tr><td class="num">8</td><td>Probes and metrics on a separate port, 9090</td><td>They can never be reached through the public address.</td><td>Two ports to declare in every manifest.</td></tr>
+      <tr><td class="num">9</td><td>Liveness checks nothing else; readiness does</td><td>A database outage must not make Kubernetes restart every pod.</td><td>A pod that is alive but stuck needs an alert to catch it.</td></tr>
+      <tr><td class="num">10</td><td>Shutdown follows a fixed order</td><td>Work in flight is finished, then its events are sent.</td><td>The pod's grace period must be longer than the shutdown.</td></tr>
+      <tr><td class="num">11</td><td>Services migrate their own schema at startup</td><td>No separate job to run first.</td><td>Each migration must work with the previous release still running.</td></tr>
+      <tr><td class="num">12</td><td>The gateway lists its routes one by one</td><td>Exposing an endpoint is a deliberate change in one file.</td><td>A new public route needs a gateway change too.</td></tr>
+      <tr><td class="num">13</td><td>goaws as the local SNS/SQS emulator</td><td>LocalStack now needs an account and a token. goaws needs neither and was tested first.</td><td>Exact-match filters only, an unreliable receive count, no S3.</td></tr>
+      <tr><td class="num">14</td><td>The first slice skipped payments and inventory</td><td>Prove the path end to end before building on it.</td><td>Superseded: both services exist, and the switch was one filter and one constant, as predicted.</td></tr>
+      <tr><td class="num">15</td><td>Tickets are held with a direct call before the order is accepted</td><td>The customer hears "sold out" immediately, and nobody is charged for tickets that are gone.</td><td>Orders cannot be placed while inventory is down. The call has a 2-second limit.</td></tr>
+      <tr><td class="num">16</td><td>Stock is one counter per tier, taken with one conditional update</td><td>Two orders racing for the last ticket cannot both win, and the database refuses a count below zero.</td><td>Every hold for a tier queues on one row. Valkey is left out until a load test shows that matters.</td></tr>
+      <tr><td class="num">17</td><td>A declined card and a provider outage are different things</td><td>A decline is an answer and ends the order. An outage is retried, then set aside.</td><td>An outage longer than a hold loses those sales, though not the tickets.</td></tr>
+      <tr><td class="num">18</td><td>An order's final status sticks</td><td>A late or out-of-order event cannot turn a failed order into a ticketed one.</td><td>The steps in between are not recorded on the order.</td></tr>
+      <tr><td class="num">19</td><td>Catalog owns a drop; inventory learns its tickets when it opens</td><td>One place decides how many tickets exist, and an early order is refused with no extra rule.</td><td>A drop is orderable up to a second after its opening time, and its capacity is fixed once open.</td></tr>
+      <tr><td class="num">20</td><td>The scheduler only keeps time, on one replica at a time</td><td>Services change their own data. A killed leader needs no cleanup; the standby took over in 5 seconds.</td><td>A database connection only to hold a lock. Timers pause up to 5 seconds on a failover.</td></tr>
+      <tr><td class="num">21</td><td>A hold expires, and nothing is charged after it has</td><td>Unpaid tickets return to sale, and a late retry cannot charge for tickets already resold.</td><td>One rare case is left to a person: a payment that succeeds but arrives after its hold was released.</td></tr>
+      <tr><td class="num">22</td><td>Orders announces how each order ended</td><td>One note from the service that owns the order says how it turned out, whichever path led there. There is exactly one per order.</td><td>One more hop before the customer hears, and a customer's email address now travels on the topic.</td></tr>
+      <tr><td class="num">23</td><td>Notifications keeps no record, so a message can be sent twice</td><td>A repeated email is a nuisance, not a loss, and a record could not prevent it. With nothing to store it can scale from zero.</td><td>The one exception to "every consumer is safe to repeat". It must be remembered when a real email provider is plugged in.</td></tr>
+      <tr><td class="num">24</td><td>The shopfront is rendered on the server and uses only the public API</td><td>Nothing to build, buying works with JavaScript off, and it can do nothing the API does not allow.</td><td>An extra hop for every page, and each waiting customer asks for news once a second. That load is not measured yet.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Agreed in the plan for later phases</h3>
+  <div class="table"><table>
+    <thead><tr><th>Compared with the project that inspired this</th><th>This build</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>IAM roles for service accounts everywhere</td><td>EKS Pod Identity by default</td><td>Roles survive a cluster rebuild, and no account IDs sit in manifests.</td></tr>
+      <tr><td>Ingress</td><td>Gateway API on Traefik</td><td>It is the successor to Ingress, and cert-manager and external-dns both read it.</td></tr>
+      <tr><td>Add-ons installed by hand with Helm</td><td>Terraform stops at Argo CD; Argo CD installs the rest</td><td>One source of truth, and a clean destroy.</td></tr>
+      <tr><td>One repo</td><td>An app repo and a GitOps repo</td><td>The pipeline never holds cluster credentials.</td></tr>
+      <tr><td>Every service rebuilt on every change</td><td>Only what changed, for two CPU types</td><td>Faster pipeline; cheaper Graviton nodes become possible.</td></tr>
+      <tr><td>Postgres as a plain StatefulSet</td><td>The CloudNativePG operator</td><td>Failover and backups come with it.</td></tr>
+      <tr><td>Always-on cluster</td><td>Up for a session, then destroyed</td><td>Low cost, and "rebuilds from Git in N minutes" is itself a result.</td></tr>
+      <tr><td>Standalone kind for local work</td><td>Docker Desktop's built-in Kubernetes</td><td>Your choice: it is already installed and you have used it before.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <span class="eyebrow">What actually broke</span>
+  <h2>Three failures so far</h2>
+  <div class="cards">
+    <div class="card"><h3>Docker Desktop refused a mount from /tmp</h3><p>It shares only some folders with its virtual machine. Files mounted into containers now live inside the repository.</p></div>
+    <div class="card"><h3>The emulator ignored its config file</h3><p>The image reads <code>/app/conf/goaws.yaml</code>, not the path older examples show. Listing the image's files found it.</p></div>
+    <div class="card"><h3>Orders stayed pending after a clean stop</h3><p>Handlers finishing during shutdown wrote events after the sender had stopped. Workers now stop one at a time and the sender goes last.</p></div>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">Your helpers</span>
+  <h2>Six agents, each for one kind of moment</h2>
+  <p class="muted prose">They live in <code>.claude/agents/</code>. In Claude Code, type <code>@</code> and the name, or just ask for it: "use the coach".</p>
+  <div class="table"><table>
+    <thead><tr><th>Agent</th><th>Call it when</th><th>What it will not do</th></tr></thead>
+    <tbody>
+      <tr><td><code>coach</code></td><td>You are on your part and want the next step, the reason for it, or a check that a step is done.</td><td>Write your manifests, charts or Terraform for you.</td></tr>
+      <tr><td><code>infra-reviewer</code></td><td>You have written something and want it reviewed before applying or merging.</td><td>Rewrite your files.</td></tr>
+      <tr><td><code>cluster-debugger</code></td><td>Something in the cluster is not working and the cause needs finding.</td><td>Change anything in the cluster.</td></tr>
+      <tr><td><code>service-builder</code></td><td>A Go service needs adding or changing.</td><td>Touch your infrastructure files.</td></tr>
+      <tr><td><code>scribe</code></td><td>A decision was made, something broke, or a step finished, and the record and these pages should catch up.</td><td>Write down anything it has not checked.</td></tr>
+      <tr><td><code>cost-guard</code></td><td>Before you end any session that touched AWS.</td><td>Delete or destroy anything.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <span class="eyebrow">Words</span>
+  <h2>The vocabulary, in plain terms</h2>
+  <div class="table"><table>
+    <tbody>
+      <tr><td><b>Outbox</b></td><td>A "to send" tray inside the database. The note is saved with the order, and posted a moment later.</td></tr>
+      <tr><td><b>Idempotent</b></td><td>Doing it twice has the same effect as doing it once. Pressing a lift button again does not call a second lift.</td></tr>
+      <tr><td><b>Dead-letter queue</b></td><td>The tray for notes nobody could deal with, kept for a person to read.</td></tr>
+      <tr><td><b>Hold</b></td><td>Tickets set aside for one order while it is being paid for. It ends one of three ways: confirmed, released, or expired.</td></tr>
+      <tr><td><b>Leader election</b></td><td>Several copies of a program run, and they agree that only one of them acts. If it dies, another takes over.</td></tr>
+      <tr><td><b>Liveness</b></td><td>"Is this process alive?" If not, Kubernetes restarts it.</td></tr>
+      <tr><td><b>Readiness</b></td><td>"Should customers be sent to this one right now?" If not, Kubernetes stops sending traffic but leaves it running.</td></tr>
+      <tr><td><b>Visibility timeout</b></td><td>How long a message is hidden from others while one worker handles it. If the worker never finishes, the message reappears.</td></tr>
+      <tr><td><b>Controller</b></td><td>A program in the cluster that keeps comparing what you asked for with what exists, and fixes the difference.</td></tr>
+      <tr><td><b>GitOps</b></td><td>The cluster copies what is in Git. To change the cluster, you change Git.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+</div>

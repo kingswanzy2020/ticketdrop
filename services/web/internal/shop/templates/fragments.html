@@ -1,0 +1,88 @@
+{{/* The pieces of a page that are also sent on their own, to be swapped in by htmx. */}}
+
+{{/* sale: everything about buying one drop. While the drop has not opened it
+     asks for itself again every second, and stops once it has. */}}
+{{define "sale"}}
+{{if .Open}}
+<section id="sale" class="sale">
+  {{template "tiers" .}}
+  <form class="buy" method="post" action="/drops/{{.Drop.ID}}/orders"
+        hx-post="/drops/{{.Drop.ID}}/orders" hx-target="#order" hx-swap="innerHTML" hx-disabled-elt="find button">
+    <div class="field">
+      <label for="tier">Ticket</label>
+      <select id="tier" name="tier" required>
+        {{range .Tiers}}<option value="{{.Name}}">{{.Name}} · {{.Price}}</option>
+        {{end}}
+      </select>
+    </div>
+    <div class="field narrow">
+      <label for="quantity">How many</label>
+      <input id="quantity" name="quantity" type="number" inputmode="numeric" min="1" max="{{.MaxQuantity}}" value="1" required>
+    </div>
+    <div class="field wide">
+      <label for="email">Email for your tickets</label>
+      <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+    </div>
+    <button type="submit">Buy tickets</button>
+  </form>
+  <div id="order" aria-live="polite"></div>
+</section>
+{{else}}
+<section id="sale" class="sale waiting" hx-get="/drops/{{.Drop.ID}}/sale" hx-trigger="every 1s" hx-swap="outerHTML">
+  <p class="opens">Tickets go on sale <time datetime="{{rfc3339 .Drop.OpensAt}}">{{when .Drop.OpensAt}}</time>.</p>
+  <p class="muted">Stay on this page. It opens by itself the moment they do.</p>
+  <table class="tiers">
+    <thead><tr><th>Ticket</th><th class="num">Price</th></tr></thead>
+    <tbody>
+      {{range .Tiers}}<tr><td>{{.Name}}</td><td class="num">{{.Price}}</td></tr>
+      {{end}}
+    </tbody>
+  </table>
+</section>
+{{end}}
+{{end}}
+
+{{/* tiers: what is left, refreshed every two seconds. It is separate from the
+     form so that refreshing it never wipes what the customer has typed. */}}
+{{define "tiers"}}
+<div id="tiers" hx-get="/drops/{{.Drop.ID}}/tiers" hx-trigger="every 2s" hx-swap="outerHTML">
+  <table class="tiers">
+    <thead><tr><th>Ticket</th><th class="num">Price</th><th class="num">Left</th></tr></thead>
+    <tbody>
+      {{range .Tiers}}<tr{{if .SoldOut}} class="gone"{{end}}><td>{{.Name}}</td><td class="num">{{.Price}}</td><td class="num">{{if .SoldOut}}Sold out{{else}}{{.Available}}{{end}}</td></tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+{{end}}
+
+{{/* order: where one order stands. While it is pending it asks for itself
+     again every second, and stops once the order has ended. */}}
+{{define "order"}}
+{{if .Pending}}
+<div class="order pending" hx-get="/orders/{{.Order.ID}}/status" hx-trigger="every 1s" hx-swap="outerHTML">
+  <h2>Order received</h2>
+  <p>We are holding {{.Tickets}} for you while your payment is confirmed. This takes a few seconds.</p>
+  <p class="ref">Order <a href="/orders/{{.Order.ID}}">{{.Order.ID}}</a></p>
+</div>
+{{else if .Ticketed}}
+<div class="order done">
+  <h2>You're in</h2>
+  <p>{{.Tickets}}, confirmed. A confirmation is on its way to {{.Order.CustomerEmail}}.</p>
+  <p class="ref">Order <a href="/orders/{{.Order.ID}}">{{.Order.ID}}</a></p>
+</div>
+{{else}}
+<div class="order failed">
+  <h2>This order did not go through</h2>
+  <p>{{.Why}} You have not been charged, and the tickets have gone back on sale.</p>
+  <p class="ref">Order <a href="/orders/{{.Order.ID}}">{{.Order.ID}}</a></p>
+</div>
+{{end}}
+{{end}}
+
+{{define "notice"}}
+<div class="order failed">
+  <h2>{{.Title}}</h2>
+  <p>{{.Text}}</p>
+</div>
+{{end}}

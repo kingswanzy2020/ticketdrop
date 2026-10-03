@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="16 56 1248 308" role="img" aria-label="The scaling loop a ticket drop sets off" font-family="ui-sans-serif, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<rect x="16" y="56" width="1248" height="308" fill="#ffffff"/>
+<defs>
+<marker id="m1e1e1e" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1e1e1e"/></marker>
+</defs>
+<rect x="40.0" y="80.0" width="200.0" height="70.0" rx="10" fill="#e9ecef" stroke="#868e96" stroke-width="2"/>
+<rect x="370.0" y="80.0" width="200.0" height="70.0" rx="10" fill="#ffd8a8" stroke="#e8590c" stroke-width="2"/>
+<rect x="700.0" y="80.0" width="200.0" height="70.0" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="1030.0" y="80.0" width="210.0" height="70.0" rx="10" fill="#ffec99" stroke="#f08c00" stroke-width="2"/>
+<rect x="1030.0" y="270.0" width="210.0" height="70.0" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="700.0" y="270.0" width="200.0" height="70.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="370.0" y="270.0" width="200.0" height="70.0" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="40.0" y="270.0" width="200.0" height="70.0" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<polyline points="240.0,115.0 370.0,115.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="570.0,115.0 700.0,115.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="900.0,115.0 1030.0,115.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="1135.0,150.0 1135.0,270.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="1030.0,305.0 900.0,305.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="700.0,305.0 570.0,305.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="370.0,305.0 240.0,305.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<rect x="586.9" y="104.2" width="96.2" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="924.7" y="294.2" width="80.6" height="21.5" rx="4" fill="#ffffff"/>
+<text font-size="16" text-anchor="middle" fill="#868e96" font-weight="600"><tspan x="140.0" y="111.0">A drop opens:</tspan><tspan x="140.0" y="131.0">orders flood in</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#e8590c" font-weight="600"><tspan x="470.0" y="111.0">The fulfillment</tspan><tspan x="470.0" y="131.0">queue backs up</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#6741d9" font-weight="600"><tspan x="800.0" y="111.0">KEDA adds</tspan><tspan x="800.0" y="131.0">fulfillment pods</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#f08c00" font-weight="600"><tspan x="1135.0" y="111.0">New pods are Pending:</tspan><tspan x="1135.0" y="131.0">the nodes are full</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="635.0" y="120.2">over target</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#6741d9" font-weight="600"><tspan x="1135.0" y="301.0">Karpenter launches</tspan><tspan x="1135.0" y="321.0">Spot nodes</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#1971c2" font-weight="600"><tspan x="800.0" y="301.0">Pods start,</tspan><tspan x="800.0" y="321.0">the backlog drains</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#6741d9" font-weight="600"><tspan x="470.0" y="301.0">Queue empty: KEDA</tspan><tspan x="470.0" y="321.0">scales back to zero</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#2f9e44" font-weight="600"><tspan x="140.0" y="301.0">Karpenter removes</tspan><tspan x="140.0" y="321.0">the empty nodes</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="965.0" y="310.2">~1 minute</tspan></text>
+</svg>

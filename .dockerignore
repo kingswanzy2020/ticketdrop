@@ -1,0 +1,10 @@
+# The images are built from go.mod, go.sum, pkg/ and one services/<name>/.
+# Nothing else needs to reach the builder.
+.git
+.github
+deploy
+docs
+loadtest
+scripts
+terraform
+**/*_test.go

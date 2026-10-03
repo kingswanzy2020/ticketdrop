@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 16 1158 798" role="img" aria-label="The finished platform on AWS" font-family="ui-sans-serif, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<rect x="-4" y="16" width="1158" height="798" fill="#ffffff"/>
+<defs>
+<marker id="m1e1e1e" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1e1e1e"/></marker>
+</defs>
+<ellipse cx="95.0" cy="70.0" rx="65.0" ry="30.0" fill="#e9ecef" stroke="#868e96" stroke-width="2"/>
+<rect x="250.0" y="40.0" width="330.0" height="60.0" rx="10" fill="#99e9f2" stroke="#0c8599" stroke-width="2"/>
+<rect x="20.0" y="150.0" width="830.0" height="500.0" rx="10" fill="none" stroke="#1e1e1e" stroke-width="1" stroke-dasharray="7 6"/>
+<rect x="50.0" y="210.0" width="190.0" height="70.0" rx="10" fill="#99e9f2" stroke="#0c8599" stroke-width="2"/>
+<rect x="330.0" y="210.0" width="190.0" height="70.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="610.0" y="210.0" width="210.0" height="70.0" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="50.0" y="360.0" width="180.0" height="84.0" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="250.0" y="360.0" width="180.0" height="84.0" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="450.0" y="360.0" width="180.0" height="84.0" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="650.0" y="360.0" width="150.0" height="84.0" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="50.0" y="520.0" width="260.0" height="70.0" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="380.0" y="520.0" width="260.0" height="70.0" rx="10" fill="#96f2d7" stroke="#099268" stroke-width="2"/>
+<rect x="920.0" y="40.0" width="210.0" height="90.0" rx="10" fill="#ffd8a8" stroke="#e8590c" stroke-width="2"/>
+<rect x="920.0" y="200.0" width="210.0" height="60.0" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="920.0" y="374.0" width="210.0" height="56.0" rx="10" fill="#ffec99" stroke="#f08c00" stroke-width="2"/>
+<rect x="920.0" y="520.0" width="210.0" height="70.0" rx="10" fill="#96f2d7" stroke="#099268" stroke-width="2"/>
+<rect x="50.0" y="720.0" width="260.0" height="70.0" rx="10" fill="#96f2d7" stroke="#099268" stroke-width="2"/>
+<rect x="520.0" y="720.0" width="260.0" height="70.0" rx="10" fill="#96f2d7" stroke="#099268" stroke-width="2"/>
+<polyline points="160.0,70.0 250.0,70.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="415.0,100.0 145.0,210.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="240.0,245.0 330.0,245.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="520.0,245.0 610.0,245.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="425.0,210.0 920.0,85.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="800.0,402.0 920.0,402.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="180.0,590.0 180.0,720.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="520.0,755.0 310.0,755.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="780.0,755.0 1025.0,590.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<rect x="180.4" y="59.2" width="49.2" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="644.0" y="136.8" width="57.0" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="835.4" y="391.2" width="49.2" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="155.4" y="644.2" width="49.2" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="359.0" y="744.2" width="111.9" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="850.5" y="661.8" width="104.1" height="21.5" rx="4" fill="#ffffff"/>
+<text font-size="16" text-anchor="middle" fill="#868e96" font-weight="600"><tspan x="95.0" y="76.0">Customer</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#0c8599" font-weight="600"><tspan x="415.0" y="76.0">Route 53  →  Network Load Balancer</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="205.0" y="75.2">HTTPS</tspan></text>
+<text font-size="14" text-anchor="start" fill="#1e1e1e"><tspan x="32.0" y="172.0">Amazon EKS  ·  private subnets across 3 availability zones</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#0c8599" font-weight="600"><tspan x="145.0" y="241.0">Traefik</tspan><tspan x="145.0" y="261.0">TLS + Gateway API</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#1971c2" font-weight="600"><tspan x="425.0" y="241.0">9 Go services</tspan><tspan x="425.0" y="261.0">HPA and KEDA</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#2f9e44" font-weight="600"><tspan x="715.0" y="241.0">PostgreSQL + Valkey</tspan><tspan x="715.0" y="261.0">on EBS volumes</tspan></text>
+<text font-size="14" text-anchor="start" fill="#6741d9"><tspan x="50.0" y="344.0">Controllers that run the cluster for you</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#6741d9" font-weight="600"><tspan x="140.0" y="388.0">Karpenter</tspan><tspan x="140.0" y="408.0">adds and removes</tspan><tspan x="140.0" y="428.0">Spot nodes</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#6741d9" font-weight="600"><tspan x="340.0" y="388.0">KEDA</tspan><tspan x="340.0" y="408.0">scales consumers</tspan><tspan x="340.0" y="428.0">on queue depth</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#6741d9" font-weight="600"><tspan x="540.0" y="388.0">cert-manager +</tspan><tspan x="540.0" y="408.0">external-dns</tspan><tspan x="540.0" y="428.0">TLS and DNS</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#6741d9" font-weight="600"><tspan x="725.0" y="398.0">Secrets Store</tspan><tspan x="725.0" y="418.0">CSI driver</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#6741d9" font-weight="600"><tspan x="180.0" y="551.0">Argo CD</tspan><tspan x="180.0" y="571.0">makes the cluster match Git</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#099268" font-weight="600"><tspan x="510.0" y="551.0">Prometheus + Grafana</tspan><tspan x="510.0" y="571.0">metrics, dashboards, alerts</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#e8590c" font-weight="600"><tspan x="1025.0" y="71.0">SNS topic +</tspan><tspan x="1025.0" y="91.0">SQS queues and</tspan><tspan x="1025.0" y="111.0">dead-letter queues</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#2f9e44" font-weight="600"><tspan x="1025.0" y="226.0">S3</tspan><tspan x="1025.0" y="246.0">issued tickets</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#f08c00" font-weight="600"><tspan x="1025.0" y="408.0">Secrets Manager</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#099268" font-weight="600"><tspan x="1025.0" y="551.0">ECR</tspan><tspan x="1025.0" y="571.0">container images</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="672.5" y="152.8">events</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="860.0" y="407.2">reads</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#099268" font-weight="600"><tspan x="180.0" y="751.0">GitOps repo</tspan><tspan x="180.0" y="771.0">the cluster&#x27;s desired state</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#099268" font-weight="600"><tspan x="650.0" y="751.0">GitHub Actions</tspan><tspan x="650.0" y="771.0">test · scan · build · sign</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="180.0" y="660.2">pulls</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="415.0" y="760.2">new image tag</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="902.5" y="677.8">pushes image</tspan></text>
+</svg>

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="6 56 1190 436" role="img" aria-label="How a code change reaches the cluster" font-family="ui-sans-serif, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<rect x="6" y="56" width="1190" height="436" fill="#ffffff"/>
+<defs>
+<marker id="m1e1e1e" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1e1e1e"/></marker>
+</defs>
+<ellipse cx="80.0" cy="110.0" rx="50.0" ry="30.0" fill="#e9ecef" stroke="#868e96" stroke-width="2"/>
+<rect x="210.0" y="80.0" width="170.0" height="60.0" rx="10" fill="#96f2d7" stroke="#099268" stroke-width="2"/>
+<rect x="470.0" y="80.0" width="180.0" height="60.0" rx="10" fill="#96f2d7" stroke="#099268" stroke-width="2"/>
+<rect x="740.0" y="80.0" width="160.0" height="60.0" rx="10" fill="#96f2d7" stroke="#099268" stroke-width="2"/>
+<rect x="990.0" y="80.0" width="160.0" height="60.0" rx="10" fill="#96f2d7" stroke="#099268" stroke-width="2"/>
+<rect x="960.0" y="290.0" width="190.0" height="84.0" rx="10" fill="#96f2d7" stroke="#099268" stroke-width="2"/>
+<rect x="660.0" y="290.0" width="180.0" height="84.0" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<rect x="360.0" y="290.0" width="180.0" height="84.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<rect x="40.0" y="290.0" width="200.0" height="84.0" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<polyline points="130.0,110.0 210.0,110.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="380.0,110.0 470.0,110.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="650.0,110.0 740.0,110.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="900.0,110.0 990.0,110.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="1070.0,140.0 1055.0,290.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="960.0,332.0 840.0,332.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="660.0,332.0 540.0,332.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="360.0,332.0 240.0,332.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<rect x="149.3" y="99.2" width="41.4" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="670.4" y="99.2" width="49.2" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="955.6" y="204.2" width="213.8" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="579.3" y="321.2" width="41.4" height="21.5" rx="4" fill="#ffffff"/>
+<text font-size="16" text-anchor="middle" fill="#868e96" font-weight="600"><tspan x="80.0" y="116.0">You</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#099268" font-weight="600"><tspan x="295.0" y="106.0">Pull request</tspan><tspan x="295.0" y="126.0">to the app repo</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#099268" font-weight="600"><tspan x="560.0" y="106.0">CI checks</tspan><tspan x="560.0" y="126.0">lint · test · scan</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#099268" font-weight="600"><tspan x="820.0" y="116.0">Merge to main</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#099268" font-weight="600"><tspan x="1070.0" y="106.0">Build image,</tspan><tspan x="1070.0" y="126.0">push to ECR</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="170.0" y="115.2">push</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="695.0" y="115.2">green</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#099268" font-weight="600"><tspan x="1055.0" y="318.0">Commit the new</tspan><tspan x="1055.0" y="338.0">image tag to the</tspan><tspan x="1055.0" y="358.0">GitOps repo</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#6741d9" font-weight="600"><tspan x="750.0" y="328.0">Argo CD sees</tspan><tspan x="750.0" y="348.0">the commit</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#1971c2" font-weight="600"><tspan x="450.0" y="318.0">Pods roll to the</tspan><tspan x="450.0" y="338.0">new image, a few</tspan><tspan x="450.0" y="358.0">at a time</tspan></text>
+<text font-size="16" text-anchor="middle" fill="#2f9e44" font-weight="600"><tspan x="140.0" y="318.0">Readiness passes,</tspan><tspan x="140.0" y="338.0">or the rollout</tspan><tspan x="140.0" y="358.0">stops</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="1062.5" y="220.2">tagged with the commit SHA</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="600.0" y="337.2">sync</tspan></text>
+<text font-size="15" text-anchor="start" fill="#1e1e1e"><tspan x="40.0" y="445.0">The pipeline never talks to the cluster. Argo CD, running inside it, pulls from Git.</tspan><tspan x="40.0" y="463.8">So no cluster credential ever lives in GitHub.</tspan></text>
+</svg>

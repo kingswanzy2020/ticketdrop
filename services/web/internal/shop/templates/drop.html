@@ -1,0 +1,8 @@
+{{define "title"}}{{.Drop.Name}} · TicketDrop{{end}}
+
+{{define "content"}}
+<a class="back" href="/">All drops</a>
+<h1>{{.Drop.Name}}</h1>
+<p class="venue">{{.Drop.Venue}}</p>
+{{template "sale" .}}
+{{end}}

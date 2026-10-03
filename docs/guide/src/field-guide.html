@@ -1,0 +1,257 @@
+<title>TicketDrop Field Guide</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>/*style*/</style>
+
+<div class="wrap">
+
+<header class="top">
+  <span class="eyebrow">Field guide · updated 3 October 2026</span>
+  <h1>TicketDrop</h1>
+  <p class="lede">A ticket-selling platform made of small Go services, built to run on Amazon EKS. It exists to practise, and to prove, the work of a DevOps engineer: packaging, deploying, scaling, securing and observing a real system.</p>
+  <ul class="facts">
+    <li><b>9 of 9</b> services built</li>
+    <li>Phase <b>1</b> in progress</li>
+    <li>Phase <b>2</b> is next, and it is yours</li>
+    <li><b>24</b> decisions recorded</li>
+    <li>AWS spend so far: <b>none</b></li>
+  </ul>
+</header>
+
+<section>
+  <span class="eyebrow">The idea</span>
+  <h2>A box office that opens at 10:00 sharp</h2>
+  <div class="prose">
+    <p>Picture tickets for a big concert going on sale at 10:00. At 9:59 nobody is buying. At 10:00 ten thousand people press Buy in the same second, and there are only a thousand tickets. That moment is called a <b>drop</b>.</p>
+    <p>A drop is hard on a system in two ways. It must never sell the same ticket twice, however many people click at once. And it needs far more computing power for ten minutes than for the rest of the day, so it has to grow quickly and shrink again, or you pay for idle machines.</p>
+    <p>Those two problems are why this project is about tickets and not a shop. Both give a result you can measure: <b>zero oversold tickets</b>, and <b>how many seconds it took to scale</b>.</p>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">How it works today</span>
+  <h2>The journey of one order</h2>
+  <div class="prose">
+    <p>Think of the services as staff at the box office, each with one job. They do not shout across the room at each other. They pass notes through a shared pigeonhole, and each person has their own tray.</p>
+  </div>
+  <figure class="diagram"><!--diagram:order-journey--></figure>
+  <div class="legend">
+    <span><i style="background:#a5d8ff"></i>our services</span>
+    <span><i style="background:#99e9f2"></i>network edge</span>
+    <span><i style="background:#ffd8a8"></i>messaging</span>
+    <span><i style="background:#b2f2bb"></i>data, success</span>
+    <span><i style="background:#d0bfff"></i>cluster controllers</span>
+    <span><i style="background:#96f2d7"></i>Git and CI</span>
+    <span><i style="background:#ffc9c9"></i>failure</span>
+  </div>
+  <div class="prose">
+    <ol>
+      <li><b>The doors open on time.</b> The scheduler is the caretaker with the clock. At the drop's opening time it tells catalog, catalog announces <code>drop.opened</code>, and inventory puts the tickets on the rack. An order placed a moment early is turned away, because the rack is still empty.</li>
+      <li><b>The shopfront is what the customer sees.</b> It is a web page, and it asks the gateway for everything it shows, like any other client would.</li>
+      <li><b>The gateway is the front door.</b> It lets in only the requests on its list and turns everything else away.</li>
+      <li><b>Orders takes your order</b> and, while you wait, asks inventory to set your tickets aside. If none are left you hear "sold out" straight away.</li>
+      <li><b>Inventory guards the ticket rack.</b> Taking tickets is a single database update, and the database itself refuses to let the count go below zero.</li>
+      <li>From here nobody waits on anybody. Orders drops a note, <code>order.created</code>, in the pigeonhole. <b>Payments</b> picks it up and charges the card.</li>
+      <li>If the card works, inventory makes the hold permanent and <b>fulfillment</b> issues the tickets. If the card is declined, inventory puts the tickets back and the order is marked failed.</li>
+      <li>If no answer about the payment comes at all, the tickets are not kept for ever. A hold lasts ten minutes. When it runs out, inventory puts the tickets back, says so with <code>hold.expired</code>, and the order is marked failed. Payments will not charge an order whose hold has run out.</li>
+      <li><b>The customer is told.</b> When the order ends, either way, orders drops one last note saying how. <b>Notifications</b> picks it up and sends the customer a message.</li>
+      <li>A note nobody can read, after three tries, goes to a separate tray called the <b>dead-letter queue</b>, where a person can look at it. It never blocks the line.</li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">The staff</span>
+  <h2>Nine services, one job each</h2>
+  <div class="table"><table>
+    <thead><tr><th>Service</th><th>Its job, in plain words</th><th>Listens for</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><code>gateway</code></td><td>The front door. Forwards only listed routes.</td><td>HTTP</td><td><span class="pill done">Built</span></td></tr>
+      <tr><td><code>orders</code></td><td>Writes down each order and tracks how it ends.</td><td>HTTP, <code>ticket.issued</code>, <code>payment.failed</code>, <code>hold.expired</code></td><td><span class="pill done">Built</span></td></tr>
+      <tr><td><code>inventory</code></td><td>Guards the ticket count. Holds, confirms, releases, and frees holds that ran out of time.</td><td>HTTP, <code>drop.opened</code>, <code>payment.succeeded</code>, <code>payment.failed</code></td><td><span class="pill done">Built</span></td></tr>
+      <tr><td><code>payments</code></td><td>Charges the card through a pretend provider that can be made slow or flaky.</td><td><code>order.created</code></td><td><span class="pill done">Built</span></td></tr>
+      <tr><td><code>fulfillment</code></td><td>Produces the tickets. Deliberately slow, so a queue builds up.</td><td><code>order.confirmed</code></td><td><span class="pill done">Built</span></td></tr>
+      <tr><td><code>catalog</code></td><td>The poster board: each drop's venue, opening time, ticket tiers and prices. Announces when a drop opens.</td><td>HTTP</td><td><span class="pill done">Built</span></td></tr>
+      <tr><td><code>notifications</code></td><td>Tells the customer how their order ended. Keeps no records of its own.</td><td><code>order.ticketed</code>, <code>order.failed</code></td><td><span class="pill done">Built</span></td></tr>
+      <tr><td><code>scheduler</code></td><td>The caretaker with the clock: tells catalog when a drop is due and inventory when to free expired holds. Two run; one leads.</td><td>a clock</td><td><span class="pill done">Built</span></td></tr>
+      <tr><td><code>web</code></td><td>The shopfront people see. Asks the gateway for everything it shows.</td><td>HTTP</td><td><span class="pill done">Built</span></td></tr>
+    </tbody>
+  </table></div>
+  <p class="muted prose">All nine exist. The Kubernetes packaging is one reusable chart, so each service is one small values file.</p>
+</section>
+
+<section>
+  <span class="eyebrow">Who does what</span>
+  <h2>You build the venue. Claude writes the staff.</h2>
+  <div class="cards">
+    <div class="card"><h3>Yours</h3><p>Kubernetes manifests and the Helm chart, Terraform, GitHub Actions pipelines, the GitOps repo. You write them, apply them, and fix them when they break. This is what an interviewer will ask you about.</p></div>
+    <div class="card"><h3>Claude's</h3><p>The Go service code and the local docker-compose stack. After each piece, an explanation of the parts that matter to operations: probes, shutdown, retries, metrics.</p></div>
+    <div class="card"><h3>Shared</h3><p>Every choice goes into <code>docs/DECISIONS.md</code> with its cost. Every real failure goes into <code>docs/TROUBLESHOOTING.md</code>. Those two files become the write-up.</p></div>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">The road</span>
+  <h2>Ten phases, each ending in something you can show</h2>
+  <p class="muted prose">Phases 0 to 3 cost nothing on AWS. From Phase 4 the cluster is switched on for a work session and destroyed afterwards.</p>
+  <div class="stubs">
+    <div class="stub"><div class="no"><b>0</b><span>Both</span></div><div class="body">
+      <div class="head"><h3>Foundations</h3><span class="pill now">Open items</span></div>
+      <p>Tools, accounts and a sanity check of AWS. Done so far: AWS access confirmed, the old cluster confirmed gone, the local messaging emulator chosen and tested.</p>
+      <p class="check">Still open: turn on Kubernetes in Docker Desktop and raise its memory; install trivy and k6; the <code>kahmedt.com</code> hosted zone no longer exists and gets recreated in Phase 4.</p></div></div>
+    <div class="stub"><div class="no"><b>1</b><span>Claude</span></div><div class="body">
+      <div class="head"><h3>The services, running locally</h3><span class="pill now">In progress</span></div>
+      <p>The Go services under docker compose with Postgres and an SNS/SQS emulator. All nine exist, and the journey above runs from a click in the shopfront to the confirmation message. One thing is left: a load test that sends a real crowd at a drop, where the checks so far send 16 customers at a time.</p>
+      <p class="check">Done when: <code>make drop-check</code> orders more tickets than exist, kills a service mid-run, and still finds no oversold ticket, no lost order and no duplicate; and <code>make outage-check</code> takes the payment provider down and finds no order or ticket left stuck. Both pass with all nine services running.</p></div></div>
+    <div class="stub now"><div class="no"><b>2</b><span>You</span></div><div class="body">
+      <div class="head"><h3>Kubernetes packaging on Docker Desktop</h3><span class="pill now">Next</span></div>
+      <p>Move the same system from docker compose into a real Kubernetes cluster on your laptop: one Helm chart, a front door, a database operator, and autoscaling on queue depth.</p>
+      <p class="check">Done when: the drop passes through the Gateway, and fulfillment scales from 0 to several pods and back on its own. The Phase 2 Workbook has the steps.</p></div></div>
+    <div class="stub"><div class="no"><b>3</b><span>You</span></div><div class="body">
+      <div class="head"><h3>Continuous integration</h3><span class="pill">Later</span></div>
+      <p>Every pull request is linted, tested, built and scanned, with no cloud credentials involved. Only the services that changed are rebuilt.</p>
+      <p class="check">Done when: a failing test or a critical vulnerability blocks the merge.</p></div></div>
+    <div class="stub"><div class="no"><b>4</b><span>You</span></div><div class="body">
+      <div class="head"><h3>AWS with Terraform</h3><span class="pill">Later</span></div>
+      <p>The network, the EKS cluster, the queues, the secrets and the permissions, all as code. Split so the cheap long-lived parts survive and the expensive parts can be destroyed.</p>
+      <p class="check">Done when: <code>make aws-up</code> builds it from nothing and <code>make aws-down</code> leaves nothing that bills.</p></div></div>
+    <div class="stub"><div class="no"><b>5</b><span>You</span></div><div class="body">
+      <div class="head"><h3>The platform, installed by GitOps</h3><span class="pill">Later</span></div>
+      <p>Argo CD installs every cluster add-on from Git, in order: Karpenter, the load balancer controller, cert-manager, external-dns, Traefik, the secrets driver, KEDA, the database operator, monitoring.</p>
+      <p class="check">Done when: a test route gets a DNS name and a valid certificate with no manual <code>kubectl apply</code>.</p></div></div>
+    <div class="stub"><div class="no"><b>6</b><span>You</span></div><div class="body">
+      <div class="head"><h3>Continuous delivery, and going live</h3><span class="pill">Later</span></div>
+      <p>A merge builds an image, pushes it, and commits its tag to the GitOps repo. Argo CD does the rest.</p>
+      <p class="check">Done when: a one-line change reaches EKS with nobody running <code>kubectl</code>.</p></div></div>
+    <div class="stub"><div class="no"><b>7</b><span>Both</span></div><div class="body">
+      <div class="head"><h3>Observability</h3><span class="pill">Later</span></div>
+      <p>Dashboards and alerts kept in Git. Request rate, errors and latency for each service; queue depth and age; replicas and nodes.</p>
+      <p class="check">Done when: each alert has been set off once on purpose and seen firing.</p></div></div>
+    <div class="stub"><div class="no"><b>8</b><span>Both</span></div><div class="body">
+      <div class="head"><h3>Drills</h3><span class="pill">Later</span></div>
+      <p>A full drop on EKS with numbers taken, then things broken on purpose: a node killed, a Spot interruption, a poison message, a bad release rolled back, a database failover.</p>
+      <p class="check">Done when: there is a number and a screenshot for each.</p></div></div>
+    <div class="stub"><div class="no"><b>9</b><span>Both</span></div><div class="body">
+      <div class="head"><h3>Rebuild proof and write-up</h3><span class="pill">Later</span></div>
+      <p>Destroy everything, rebuild it from Git, time it. Then the portfolio write-up.</p>
+      <p class="check">Done when: the rebuilt cluster matches the one that was destroyed.</p></div></div>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">Where it is heading</span>
+  <h2>The finished platform on AWS</h2>
+  <figure class="diagram"><!--diagram:aws-target--></figure>
+  <figcaption>Read it top to bottom. A customer reaches the load balancer, Traefik routes to the services, and the services use the database and the message queues. The violet boxes are controllers: programs inside the cluster that watch for something you declared and make it true.</figcaption>
+</section>
+
+<section>
+  <h2>What happens when a drop opens</h2>
+  <figure class="diagram"><!--diagram:scaling-loop--></figure>
+  <div class="prose">
+    <p>Two controllers work as a pair. <b>KEDA</b> looks at how many messages are waiting and decides how many <i>pods</i> are needed. <b>Karpenter</b> notices pods that have nowhere to run and adds <i>machines</i>. KEDA is the manager calling in more staff; Karpenter is the one finding them desks.</p>
+    <p>Phase 2 proves the KEDA half on your laptop. Karpenter needs real AWS and arrives in Phase 5.</p>
+  </div>
+</section>
+
+<section>
+  <h2>How a change will reach the cluster</h2>
+  <figure class="diagram"><!--diagram:delivery--></figure>
+</section>
+
+<section>
+  <span class="eyebrow">Decisions</span>
+  <h2>What has been decided, and what each choice costs</h2>
+  <p class="muted prose">Every choice buys something and costs something. The full text of each is in <code>docs/DECISIONS.md</code>.</p>
+  <div class="table"><table>
+    <thead><tr><th>#</th><th>Decision</th><th>Why</th><th>What it costs</th></tr></thead>
+    <tbody>
+      <tr><td class="num">1</td><td>Ticket drops, not a shop</td><td>A real burst of load, and a pass-or-fail result: no ticket sold twice.</td><td>Holding and releasing tickets must be correct under pressure.</td></tr>
+      <tr><td class="num">2</td><td>One Go module with a shared platform library</td><td>A probe or a metric means the same thing in every service.</td><td>A change to the library rebuilds every service.</td></tr>
+      <tr><td class="num">3</td><td>Each service owns its database</td><td>A service can change and deploy without asking the others.</td><td>No query can join across services.</td></tr>
+      <tr><td class="num">4</td><td>One SNS topic, one SQS queue per consumer</td><td>A slow consumer backs up only its own queue, and each queue is a scaling signal for one service.</td><td>More to create and watch. A wrong filter fails silently.</td></tr>
+      <tr><td class="num">5</td><td>Events go through a transactional outbox</td><td>The order and the note about it are saved together, or not at all.</td><td>A note can be sent twice, and up to 250 ms late.</td></tr>
+      <tr><td class="num">6</td><td>Consumers record the events they handled</td><td>A note delivered twice does nothing the second time.</td><td>One extra insert per message; a table to prune later.</td></tr>
+      <tr><td class="num">7</td><td>Messages that cannot be handled go to a dead-letter queue</td><td>Deleting hides a bug; retrying forever blocks the line. An event of a type the service does not expect counts too: it means a subscription is wired wrongly.</td><td>Each poison message is tried three times first.</td></tr>
+      <tr><td class="num">8</td><td>Probes and metrics on a separate port, 9090</td><td>They can never be reached through the public address.</td><td>Two ports to declare in every manifest.</td></tr>
+      <tr><td class="num">9</td><td>Liveness checks nothing else; readiness does</td><td>A database outage must not make Kubernetes restart every pod.</td><td>A pod that is alive but stuck needs an alert to catch it.</td></tr>
+      <tr><td class="num">10</td><td>Shutdown follows a fixed order</td><td>Work in flight is finished, then its events are sent.</td><td>The pod's grace period must be longer than the shutdown.</td></tr>
+      <tr><td class="num">11</td><td>Services migrate their own schema at startup</td><td>No separate job to run first.</td><td>Each migration must work with the previous release still running.</td></tr>
+      <tr><td class="num">12</td><td>The gateway lists its routes one by one</td><td>Exposing an endpoint is a deliberate change in one file.</td><td>A new public route needs a gateway change too.</td></tr>
+      <tr><td class="num">13</td><td>goaws as the local SNS/SQS emulator</td><td>LocalStack now needs an account and a token. goaws needs neither and was tested first.</td><td>Exact-match filters only, an unreliable receive count, no S3.</td></tr>
+      <tr><td class="num">14</td><td>The first slice skipped payments and inventory</td><td>Prove the path end to end before building on it.</td><td>Superseded: both services exist, and the switch was one filter and one constant, as predicted.</td></tr>
+      <tr><td class="num">15</td><td>Tickets are held with a direct call before the order is accepted</td><td>The customer hears "sold out" immediately, and nobody is charged for tickets that are gone.</td><td>Orders cannot be placed while inventory is down. The call has a 2-second limit.</td></tr>
+      <tr><td class="num">16</td><td>Stock is one counter per tier, taken with one conditional update</td><td>Two orders racing for the last ticket cannot both win, and the database refuses a count below zero.</td><td>Every hold for a tier queues on one row. Valkey is left out until a load test shows that matters.</td></tr>
+      <tr><td class="num">17</td><td>A declined card and a provider outage are different things</td><td>A decline is an answer and ends the order. An outage is retried, then set aside.</td><td>An outage longer than a hold loses those sales, though not the tickets.</td></tr>
+      <tr><td class="num">18</td><td>An order's final status sticks</td><td>A late or out-of-order event cannot turn a failed order into a ticketed one.</td><td>The steps in between are not recorded on the order.</td></tr>
+      <tr><td class="num">19</td><td>Catalog owns a drop; inventory learns its tickets when it opens</td><td>One place decides how many tickets exist, and an early order is refused with no extra rule.</td><td>A drop is orderable up to a second after its opening time, and its capacity is fixed once open.</td></tr>
+      <tr><td class="num">20</td><td>The scheduler only keeps time, on one replica at a time</td><td>Services change their own data. A killed leader needs no cleanup; the standby took over in 5 seconds.</td><td>A database connection only to hold a lock. Timers pause up to 5 seconds on a failover.</td></tr>
+      <tr><td class="num">21</td><td>A hold expires, and nothing is charged after it has</td><td>Unpaid tickets return to sale, and a late retry cannot charge for tickets already resold.</td><td>One rare case is left to a person: a payment that succeeds but arrives after its hold was released.</td></tr>
+      <tr><td class="num">22</td><td>Orders announces how each order ended</td><td>One note from the service that owns the order says how it turned out, whichever path led there. There is exactly one per order.</td><td>One more hop before the customer hears, and a customer's email address now travels on the topic.</td></tr>
+      <tr><td class="num">23</td><td>Notifications keeps no record, so a message can be sent twice</td><td>A repeated email is a nuisance, not a loss, and a record could not prevent it. With nothing to store it can scale from zero.</td><td>The one exception to "every consumer is safe to repeat". It must be remembered when a real email provider is plugged in.</td></tr>
+      <tr><td class="num">24</td><td>The shopfront is rendered on the server and uses only the public API</td><td>Nothing to build, buying works with JavaScript off, and it can do nothing the API does not allow.</td><td>An extra hop for every page, and each waiting customer asks for news once a second. That load is not measured yet.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Agreed in the plan for later phases</h3>
+  <div class="table"><table>
+    <thead><tr><th>Compared with the project that inspired this</th><th>This build</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>IAM roles for service accounts everywhere</td><td>EKS Pod Identity by default</td><td>Roles survive a cluster rebuild, and no account IDs sit in manifests.</td></tr>
+      <tr><td>Ingress</td><td>Gateway API on Traefik</td><td>It is the successor to Ingress, and cert-manager and external-dns both read it.</td></tr>
+      <tr><td>Add-ons installed by hand with Helm</td><td>Terraform stops at Argo CD; Argo CD installs the rest</td><td>One source of truth, and a clean destroy.</td></tr>
+      <tr><td>One repo</td><td>An app repo and a GitOps repo</td><td>The pipeline never holds cluster credentials.</td></tr>
+      <tr><td>Every service rebuilt on every change</td><td>Only what changed, for two CPU types</td><td>Faster pipeline; cheaper Graviton nodes become possible.</td></tr>
+      <tr><td>Postgres as a plain StatefulSet</td><td>The CloudNativePG operator</td><td>Failover and backups come with it.</td></tr>
+      <tr><td>Always-on cluster</td><td>Up for a session, then destroyed</td><td>Low cost, and "rebuilds from Git in N minutes" is itself a result.</td></tr>
+      <tr><td>Standalone kind for local work</td><td>Docker Desktop's built-in Kubernetes</td><td>Your choice: it is already installed and you have used it before.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <span class="eyebrow">What actually broke</span>
+  <h2>Three failures so far</h2>
+  <div class="cards">
+    <div class="card"><h3>Docker Desktop refused a mount from /tmp</h3><p>It shares only some folders with its virtual machine. Files mounted into containers now live inside the repository.</p></div>
+    <div class="card"><h3>The emulator ignored its config file</h3><p>The image reads <code>/app/conf/goaws.yaml</code>, not the path older examples show. Listing the image's files found it.</p></div>
+    <div class="card"><h3>Orders stayed pending after a clean stop</h3><p>Handlers finishing during shutdown wrote events after the sender had stopped. Workers now stop one at a time and the sender goes last.</p></div>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">Your helpers</span>
+  <h2>Six agents, each for one kind of moment</h2>
+  <p class="muted prose">They live in <code>.claude/agents/</code>. In Claude Code, type <code>@</code> and the name, or just ask for it: "use the coach".</p>
+  <div class="table"><table>
+    <thead><tr><th>Agent</th><th>Call it when</th><th>What it will not do</th></tr></thead>
+    <tbody>
+      <tr><td><code>coach</code></td><td>You are on your part and want the next step, the reason for it, or a check that a step is done.</td><td>Write your manifests, charts or Terraform for you.</td></tr>
+      <tr><td><code>infra-reviewer</code></td><td>You have written something and want it reviewed before applying or merging.</td><td>Rewrite your files.</td></tr>
+      <tr><td><code>cluster-debugger</code></td><td>Something in the cluster is not working and the cause needs finding.</td><td>Change anything in the cluster.</td></tr>
+      <tr><td><code>service-builder</code></td><td>A Go service needs adding or changing.</td><td>Touch your infrastructure files.</td></tr>
+      <tr><td><code>scribe</code></td><td>A decision was made, something broke, or a step finished, and the record and these pages should catch up.</td><td>Write down anything it has not checked.</td></tr>
+      <tr><td><code>cost-guard</code></td><td>Before you end any session that touched AWS.</td><td>Delete or destroy anything.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <span class="eyebrow">Words</span>
+  <h2>The vocabulary, in plain terms</h2>
+  <div class="table"><table>
+    <tbody>
+      <tr><td><b>Outbox</b></td><td>A "to send" tray inside the database. The note is saved with the order, and posted a moment later.</td></tr>
+      <tr><td><b>Idempotent</b></td><td>Doing it twice has the same effect as doing it once. Pressing a lift button again does not call a second lift.</td></tr>
+      <tr><td><b>Dead-letter queue</b></td><td>The tray for notes nobody could deal with, kept for a person to read.</td></tr>
+      <tr><td><b>Hold</b></td><td>Tickets set aside for one order while it is being paid for. It ends one of three ways: confirmed, released, or expired.</td></tr>
+      <tr><td><b>Leader election</b></td><td>Several copies of a program run, and they agree that only one of them acts. If it dies, another takes over.</td></tr>
+      <tr><td><b>Liveness</b></td><td>"Is this process alive?" If not, Kubernetes restarts it.</td></tr>
+      <tr><td><b>Readiness</b></td><td>"Should customers be sent to this one right now?" If not, Kubernetes stops sending traffic but leaves it running.</td></tr>
+      <tr><td><b>Visibility timeout</b></td><td>How long a message is hidden from others while one worker handles it. If the worker never finishes, the message reappears.</td></tr>
+      <tr><td><b>Controller</b></td><td>A program in the cluster that keeps comparing what you asked for with what exists, and fixes the difference.</td></tr>
+      <tr><td><b>GitOps</b></td><td>The cluster copies what is in Git. To change the cluster, you change Git.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+</div>

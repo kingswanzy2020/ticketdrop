@@ -1,0 +1,245 @@
+# The local stack: the services, Postgres, and an SNS/SQS emulator.
+# Run it from the repository root with `make up`.
+#
+# Ports on this machine (all bound to 127.0.0.1):
+#   8092  web, the shopfront           9190  gateway admin
+#   8090  gateway, the public API      9191  orders admin
+#   8091  catalog, internal API        9192  fulfillment admin
+#   4100  SNS/SQS emulator             9193  payments admin
+#                                      9194  inventory admin
+#                                      9195  catalog admin
+#                                      9196-9197  scheduler admin, one per replica
+#                                      9198  web admin
+#                                      9199  notifications admin
+# An admin port serves /healthz, /readyz and /metrics.
+name: ticketdrop
+
+# What every event-driven service needs to reach the emulator. The credentials
+# are placeholders: the emulator accepts anything, the SDK insists on something.
+x-bus: &bus
+  AWS_ENDPOINT_URL: http://goaws:4100
+  AWS_REGION: us-east-1
+  AWS_ACCESS_KEY_ID: local
+  AWS_SECRET_ACCESS_KEY: local
+  EVENTS_TOPIC_ARN: arn:aws:sns:us-east-1:000000000000:ticketdrop-events
+  CONSUMER_WAIT_TIME: 5s
+  # Below the queues' 10s visibility timeout (goaws.yaml).
+  CONSUMER_TIMEOUT: 5s
+
+x-service: &service
+  restart: unless-stopped
+  # Longer than SHUTDOWN_TIMEOUT (25s), so a stop is never cut short.
+  stop_grace_period: 30s
+
+x-backing: &backing
+  postgres:
+    condition: service_healthy
+  goaws:
+    condition: service_healthy
+
+services:
+  postgres:
+    image: postgres:18.6-alpine
+    environment:
+      POSTGRES_PASSWORD: local
+    volumes:
+      - ./postgres-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      # Over TCP on purpose. During first-run initialisation the server
+      # listens only on its socket, and a socket check would pass too early.
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "postgres"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  goaws:
+    image: admiralpiett/goaws:v0.5.4
+    volumes:
+      - ./goaws.yaml:/app/conf/goaws.yaml:ro
+    ports:
+      - "127.0.0.1:4100:4100"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "4100"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  web:
+    <<: *service
+    build:
+      context: ../..
+      dockerfile: services/web/Dockerfile
+      args:
+        VERSION: ${VERSION:-dev}
+    environment:
+      # The shopfront uses the public API, through the gateway, like any client.
+      API_URL: http://gateway:8080
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "127.0.0.1:8092:8080"
+      - "127.0.0.1:9198:9090"
+    depends_on:
+      - gateway
+
+  gateway:
+    <<: *service
+    build:
+      context: ../..
+      dockerfile: services/gateway/Dockerfile
+      args:
+        VERSION: ${VERSION:-dev}
+    environment:
+      CATALOG_URL: http://catalog:8080
+      ORDERS_URL: http://orders:8080
+      INVENTORY_URL: http://inventory:8080
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      # 8080 is taken on this machine, so the public API is on 8090.
+      - "127.0.0.1:8090:8080"
+      - "127.0.0.1:9190:9090"
+    depends_on:
+      - catalog
+      - orders
+      - inventory
+
+  catalog:
+    <<: *service
+    build:
+      context: ../..
+      dockerfile: services/catalog/Dockerfile
+      args:
+        VERSION: ${VERSION:-dev}
+    environment:
+      # Catalog publishes and consumes nothing, so it has no EVENTS_QUEUE_URL.
+      <<: *bus
+      DATABASE_URL: postgres://postgres:local@postgres:5432/catalog
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      # The internal API, reachable from this machine so that a drop can be
+      # created by hand. The gateway does not forward to these routes.
+      - "127.0.0.1:8091:8080"
+      - "127.0.0.1:9195:9090"
+    depends_on: *backing
+
+  orders:
+    <<: *service
+    build:
+      context: ../..
+      dockerfile: services/orders/Dockerfile
+      args:
+        VERSION: ${VERSION:-dev}
+    environment:
+      <<: *bus
+      DATABASE_URL: postgres://postgres:local@postgres:5432/orders
+      EVENTS_QUEUE_URL: http://goaws:4100/000000000000/orders-events
+      INVENTORY_URL: http://inventory:8080
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "127.0.0.1:9191:9090"
+    depends_on: *backing
+
+  inventory:
+    <<: *service
+    build:
+      context: ../..
+      dockerfile: services/inventory/Dockerfile
+      args:
+        VERSION: ${VERSION:-dev}
+    environment:
+      <<: *bus
+      DATABASE_URL: postgres://postgres:local@postgres:5432/inventory
+      EVENTS_QUEUE_URL: http://goaws:4100/000000000000/inventory-events
+      # How long tickets stay set aside with no payment outcome, and how long
+      # after that before they return to stock. Shortened by outage-check.
+      HOLD_TTL: ${HOLD_TTL:-10m}
+      HOLD_GRACE: ${HOLD_GRACE:-30s}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "127.0.0.1:9194:9090"
+    depends_on: *backing
+
+  payments:
+    <<: *service
+    build:
+      context: ../..
+      dockerfile: services/payments/Dockerfile
+      args:
+        VERSION: ${VERSION:-dev}
+    environment:
+      <<: *bus
+      DATABASE_URL: postgres://postgres:local@postgres:5432/payments
+      EVENTS_QUEUE_URL: http://goaws:4100/000000000000/payments-events
+      # The simulated provider: 100-200ms a call, one charge in ten declined.
+      # PAYMENT_ERROR_RATE simulates an outage and is off unless set.
+      PAYMENT_LATENCY: 100ms
+      PAYMENT_DECLINE_RATE: ${PAYMENT_DECLINE_RATE:-0.1}
+      PAYMENT_ERROR_RATE: ${PAYMENT_ERROR_RATE:-0}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "127.0.0.1:9193:9090"
+    depends_on: *backing
+
+  fulfillment:
+    <<: *service
+    build:
+      context: ../..
+      dockerfile: services/fulfillment/Dockerfile
+      args:
+        VERSION: ${VERSION:-dev}
+    environment:
+      <<: *bus
+      DATABASE_URL: postgres://postgres:local@postgres:5432/fulfillment
+      EVENTS_QUEUE_URL: http://goaws:4100/000000000000/fulfillment-events
+      # Slow and narrow on purpose: about 20 orders a second, so a burst of
+      # orders leaves a backlog on the queue that can be watched draining.
+      CONSUMER_CONCURRENCY: 4
+      SIMULATED_RENDER_TIME: 200ms
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "127.0.0.1:9192:9090"
+    depends_on: *backing
+
+  notifications:
+    <<: *service
+    build:
+      context: ../..
+      dockerfile: services/notifications/Dockerfile
+      args:
+        VERSION: ${VERSION:-dev}
+    environment:
+      # Notifications publishes nothing and has no database. Of the bus
+      # settings it needs the queue and the way to reach it, not the topic.
+      <<: *bus
+      EVENTS_QUEUE_URL: http://goaws:4100/000000000000/notifications-events
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "127.0.0.1:9199:9090"
+    depends_on:
+      goaws:
+        condition: service_healthy
+
+  scheduler:
+    <<: *service
+    build:
+      context: ../..
+      dockerfile: services/scheduler/Dockerfile
+      args:
+        VERSION: ${VERSION:-dev}
+    # Two replicas: one leads and runs the timers, the other stands by.
+    deploy:
+      replicas: 2
+    environment:
+      DATABASE_URL: postgres://postgres:local@postgres:5432/scheduler
+      CATALOG_URL: http://catalog:8080
+      INVENTORY_URL: http://inventory:8080
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      # A range, so that each replica gets a port of its own.
+      - "127.0.0.1:9196-9197:9090"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      catalog:
+        condition: service_started
+      inventory:
+        condition: service_started

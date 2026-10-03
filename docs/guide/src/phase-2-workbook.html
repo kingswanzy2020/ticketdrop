@@ -1,0 +1,214 @@
+<title>TicketDrop Phase 2 Workbook</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>/*style*/</style>
+
+<div class="wrap">
+
+<header class="top">
+  <span class="eyebrow">Phase 2 workbook · your part · updated 3 October 2026</span>
+  <h1>Into Kubernetes, on your laptop</h1>
+  <p class="lede">The services already run under docker compose. In this phase you move them into a real Kubernetes cluster on Docker Desktop, and you write every file yourself.</p>
+  <ul class="facts">
+    <li>Cluster: <b>docker-desktop</b></li>
+    <li>Your files go in <b>ticketdrop-gitops/</b></li>
+    <li>AWS cost: <b>none</b></li>
+    <li class="progress" id="progress">0 of 10 steps ticked</li>
+  </ul>
+</header>
+
+<section>
+  <span class="eyebrow">The picture</span>
+  <h2>From a folding table to a real venue</h2>
+  <div class="prose">
+    <p>Docker compose is a folding table at a market: you set everything out by hand, and it works because you are standing there. Kubernetes is a venue with a manager. You hand over a written description of what should be running, and the manager keeps it that way: restarts what dies, sends customers only to staff who are ready, and calls in more staff when the queue grows.</p>
+    <p>Your work in this phase is writing that description. Nothing about the services changes.</p>
+  </div>
+  <figure class="diagram"><!--diagram:phase2-cluster--></figure>
+  <figcaption>What you will have at the end. Four namespaces, one front door, and KEDA scaling fulfillment by watching its queue.</figcaption>
+</section>
+
+<section>
+  <span class="eyebrow">Call for help</span>
+  <h2>Your coach</h2>
+  <div class="prose">
+    <p>In Claude Code, from the <code>ticketdrop</code> folder, type <code>@coach</code> and your question, or say "use the coach". It reads this workbook and what you have written, tells you which step you are on, and briefs the next one. It will not write your files unless you tell it to.</p>
+    <p>Two more for this phase: <code>@infra-reviewer</code> once a step is written, and <code>@cluster-debugger</code> when something will not start.</p>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">Reference</span>
+  <h2>The facts you will keep looking up</h2>
+  <p class="muted prose">These come from <code>deploy/local/compose.yaml</code> and <code>deploy/local/goaws.yaml</code>, which stay the source of truth.</p>
+  <div class="table"><table>
+    <thead><tr><th>Service</th><th>Serves HTTP to</th><th>Database</th><th>Its queue</th><th>Extra settings</th></tr></thead>
+    <tbody>
+      <tr><td><code>web</code></td><td>the outside</td><td>none</td><td>none</td><td><code>API_URL</code>: the gateway's address</td></tr>
+      <tr><td><code>gateway</code></td><td>the outside, web</td><td>none</td><td>none</td><td><code>CATALOG_URL</code>, <code>ORDERS_URL</code>, <code>INVENTORY_URL</code></td></tr>
+      <tr><td><code>catalog</code></td><td>gateway, scheduler</td><td><code>catalog</code></td><td>none: it publishes and never consumes, so it has no <code>EVENTS_QUEUE_URL</code></td><td>none</td></tr>
+      <tr><td><code>orders</code></td><td>gateway</td><td><code>orders</code></td><td><code>orders-events</code></td><td><code>INVENTORY_URL</code></td></tr>
+      <tr><td><code>inventory</code></td><td>gateway, orders, scheduler</td><td><code>inventory</code></td><td><code>inventory-events</code></td><td><code>HOLD_TTL</code> (default 10m), <code>HOLD_GRACE</code> (default 30s)</td></tr>
+      <tr><td><code>payments</code></td><td>nobody</td><td><code>payments</code></td><td><code>payments-events</code></td><td><code>PAYMENT_LATENCY</code>, <code>PAYMENT_DECLINE_RATE</code>, <code>PAYMENT_ERROR_RATE</code></td></tr>
+      <tr><td><code>fulfillment</code></td><td>nobody</td><td><code>fulfillment</code></td><td><code>fulfillment-events</code></td><td><code>CONSUMER_CONCURRENCY=4</code>, <code>SIMULATED_RENDER_TIME=200ms</code></td></tr>
+      <tr><td><code>notifications</code></td><td>nobody</td><td>none</td><td><code>notifications-events</code></td><td>none. It publishes nothing, so it does not need <code>EVENTS_TOPIC_ARN</code>.</td></tr>
+      <tr><td><code>scheduler</code></td><td>nobody</td><td><code>scheduler</code>: no tables, it only holds the leader lock there</td><td>none: it uses no events and needs none of the event settings</td><td><code>CATALOG_URL</code>, <code>INVENTORY_URL</code>. Runs as two replicas; one leads.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="table"><table>
+    <thead><tr><th>True of every service</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>App port</td><td><code>8080</code> on web, gateway, catalog, orders and inventory. Payments, fulfillment, notifications and scheduler listen only on the admin port.</td></tr>
+      <tr><td>Admin port: <code>/healthz</code>, <code>/readyz</code>, <code>/metrics</code></td><td><code>9090</code></td></tr>
+      <tr><td>Runs as</td><td>UID 65532, no shell in the image, writes nothing to disk</td></tr>
+      <tr><td>Shutdown</td><td>waits <code>SHUTDOWN_DELAY</code> (default 0), then up to <code>SHUTDOWN_TIMEOUT</code> (default 25s)</td></tr>
+      <tr><td>Database (all but web, gateway and notifications)</td><td><code>DATABASE_URL</code>; at start it waits up to 60s for Postgres, then runs its migrations</td></tr>
+      <tr><td>Events (all but web, gateway and scheduler)</td><td><code>EVENTS_TOPIC_ARN</code>, <code>EVENTS_QUEUE_URL</code>, <code>AWS_ENDPOINT_URL</code>, <code>AWS_REGION</code>, and placeholder <code>AWS_ACCESS_KEY_ID</code> / <code>AWS_SECRET_ACCESS_KEY</code></td></tr>
+      <tr><td>Consumer</td><td><code>CONSUMER_TIMEOUT</code> must stay below the queue's visibility timeout, which is 10s locally</td></tr>
+      <tr><td>Build one image</td><td><code>docker build -f services/orders/Dockerfile -t ticketdrop/orders:dev .</code> from the repo root</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <span class="eyebrow">The work</span>
+  <h2>Ten steps, in order</h2>
+  <p class="muted prose">Tick a step when its "done when" check passes. Ticks are remembered in this browser only.</p>
+
+  <div class="step"><div class="head"><label><input type="checkbox" id="s1"><h3>1. Switch the cluster on</h3></label></div><dl>
+    <dt>Do</dt><dd>In Docker Desktop: enable Kubernetes, and raise memory from 8 GB to about 12 GB. Create the folder <code>ticketdrop-gitops/</code> beside <code>ticketdrop/</code> and run <code>git init</code> in it.</dd>
+    <dt>Why</dt><dd>Everything below runs here. 8 GB is tight for a database operator, an ingress controller, KEDA and nine services together.</dd>
+    <dt>Watch for</dt><dd>Your only kube context today points at an EKS cluster that no longer exists. Make sure the new one is selected before any <code>kubectl apply</code>.</dd>
+    <dt>Done when</dt><dd><code>kubectl config current-context</code> prints <code>docker-desktop</code> and <code>kubectl get nodes</code> shows Ready.</dd>
+  </dl></div>
+
+  <div class="step"><div class="head"><label><input type="checkbox" id="s2"><h3>2. Namespaces and their rules</h3></label></div><dl>
+    <dt>Do</dt><dd>Create the namespaces <code>ticketdrop</code> and <code>data</code>. Label <code>ticketdrop</code> so Pod Security Admission enforces the <code>restricted</code> standard.</dd>
+    <dt>Why</dt><dd>A namespace is a room with its own rules. With <code>restricted</code> enforced, a pod that asks to run as root is refused at the door, so a mistake in your chart shows up now and not in an audit.</dd>
+    <dt>Watch for</dt><dd>Do not enforce <code>restricted</code> on <code>data</code> yet. Check what the database operator's pods need first.</dd>
+    <dt>Done when</dt><dd><code>kubectl run test --image=nginx -n ticketdrop</code> is rejected with a Pod Security message.</dd>
+  </dl></div>
+
+  <div class="step"><div class="head"><label><input type="checkbox" id="s3"><h3>3. Get the images into the cluster</h3></label></div><dl>
+    <dt>Do</dt><dd>Build the nine images with a tag that is not <code>latest</code>, for example <code>dev</code>. Decide the pull policy your chart will use locally.</dd>
+    <dt>Why</dt><dd>There is no registry yet. Docker Desktop's cluster can use images from the local store when the containerd image store is on, which it is on your machine.</dd>
+    <dt>Watch for</dt><dd>With the tag <code>latest</code>, Kubernetes always tries to pull from a registry and fails. <code>ErrImagePull</code> on a local image nearly always means the tag or the pull policy.</dd>
+    <dt>Done when</dt><dd>A throwaway pod using <code>ticketdrop/gateway:dev</code> gets past image pull. It will then crash for lack of settings, which is expected.</dd>
+  </dl></div>
+
+  <div class="step"><div class="head"><label><input type="checkbox" id="s4"><h3>4. The emulator</h3></label></div><dl>
+    <dt>Do</dt><dd>Run goaws in <code>data</code>: a ConfigMap holding <code>goaws.yaml</code>, a Deployment mounting it at <code>/app/conf/goaws.yaml</code>, and a Service on port 4100.</dd>
+    <dt>Why</dt><dd>It stands in for SNS and SQS until Phase 4. It is also your first complete workload: config, pod, stable address.</dd>
+    <dt>Watch for</dt><dd>The file's <code>Host</code> value and every service's <code>EVENTS_QUEUE_URL</code> must use the Service's in-cluster name, such as <code>goaws.data.svc.cluster.local</code>. It keeps its queues in memory, so a restart empties them.</dd>
+    <dt>Done when</dt><dd>From a port-forward, <code>aws --endpoint-url http://localhost:4100 sqs list-queues</code> lists ten queues: five, each with its dead-letter queue.</dd>
+  </dl></div>
+
+  <div class="step"><div class="head"><label><input type="checkbox" id="s5"><h3>5. Postgres, run by an operator</h3></label></div><dl>
+    <dt>Do</dt><dd>Install the CloudNativePG operator. Declare one small Postgres cluster in <code>data</code> with six databases (<code>catalog</code>, <code>orders</code>, <code>inventory</code>, <code>payments</code>, <code>fulfillment</code>, <code>scheduler</code>), each with its own user. Each service gets a Secret holding its <code>DATABASE_URL</code>.</dd>
+    <dt>Why</dt><dd>An operator is a controller that knows how to run one piece of software. You describe "a Postgres like this" and it handles startup, storage and failover. You have already run Postgres as a bare StatefulSet; this is the next level.</dd>
+    <dt>Watch for</dt><dd>A design choice that is yours to make and record: one Postgres cluster with six databases, or six clusters. One is lighter on memory and matches local compose; six isolates better. Read the operator's current docs for how it declares extra databases and roles before you commit.</dd>
+    <dt>Done when</dt><dd><code>psql</code> through a port-forward, using one service's own user, can reach its database and is refused on another's.</dd>
+  </dl></div>
+
+  <div class="step"><div class="head"><label><input type="checkbox" id="s6"><h3>6. The chart: one service, done properly</h3></label></div><dl>
+    <dt>Do</dt><dd>Write <code>charts/service/</code>, one chart that any of the services can use, and a values file for <code>orders</code>. It needs a Deployment, a Service with both ports, a ServiceAccount, and environment from values plus the database Secret.</dd>
+    <dt>Why</dt><dd>Nine near-identical sets of YAML would drift apart. One chart means a fix to probes or security lands everywhere at once, and each service costs one values file.</dd>
+    <dt>Watch for</dt><dd><ul>
+      <li>All three probes go to port <b>9090</b>. Liveness uses <code>/healthz</code>, readiness <code>/readyz</code>.</li>
+      <li>The startup probe must allow for the 60-second database wait plus migrations, or Kubernetes kills the pod while it is still patiently waiting.</li>
+      <li><code>terminationGracePeriodSeconds</code> must exceed <code>SHUTDOWN_DELAY + SHUTDOWN_TIMEOUT</code>. Set <code>SHUTDOWN_DELAY</code> to a few seconds here: it covers the moment between readiness going false and traffic actually stopping.</li>
+      <li>Security context: non-root, read-only root filesystem, no privilege escalation, all capabilities dropped, seccomp <code>RuntimeDefault</code>. The namespace from step 2 will reject the pod otherwise.</li>
+      <li>Give every container resource requests. Karpenter will later size nodes from them.</li>
+    </ul></dd>
+    <dt>Done when</dt><dd><code>helm lint</code> is clean, the <code>orders</code> pod is Ready, and <code>kubectl delete pod</code> on it logs the shutdown steps in order and exits 0.</dd>
+  </dl></div>
+
+  <div class="step"><div class="head"><label><input type="checkbox" id="s7"><h3>7. The other eight, and staying up</h3></label></div><dl>
+    <dt>Do</dt><dd>Add values files for <code>web</code>, <code>gateway</code>, <code>catalog</code>, <code>inventory</code>, <code>payments</code>, <code>fulfillment</code>, <code>notifications</code> and <code>scheduler</code>. Add a PodDisruptionBudget and topology spread to the chart. Run two replicas of the HTTP services.</dd>
+    <dt>Why</dt><dd>This is the test of your chart: if a service needs a template change and not just values, the chart was not general enough. The disruption budget tells Kubernetes how many pods it may take away at once during maintenance.</dd>
+    <dt>Watch for</dt><dd><code>payments</code> and <code>fulfillment</code> serve no app traffic, so their Service matters only for metrics. <code>gateway</code> has no database and no queue; the chart must cope with both being absent. <code>web</code> has neither as well, and needs only <code>API_URL</code>. <code>catalog</code> has a database and the topic but no queue. <code>notifications</code> is the reverse: a queue and no database. <code>scheduler</code> is the odd one: no app port, no events at all, but it needs its database, and it should run two replicas, since the point of its leader election is surviving the loss of one.</dd>
+    <dt>Done when</dt><dd>All nine are Ready, exactly one scheduler pod reports <code>scheduler_leader 1</code> on <code>/metrics</code>, and an order ends <code>ticketed</code>. A drop has to exist before it can be ordered: through a <code>kubectl port-forward</code> to catalog, <code>curl -X PUT localhost:&lt;port&gt;/internal/v1/drops/first -d '{"name":"First","venue":"Here","opens_at":"2026-01-01T00:00:00Z","tiers":[{"tier":"general","price_cents":2500,"capacity":100}]}'</code>. An opening time in the past makes the scheduler open it within a second. Then order it through a port-forward to the gateway, or open a port-forward to <code>web</code> in a browser and buy a ticket there.</dd>
+  </dl></div>
+
+  <div class="step"><div class="head"><label><input type="checkbox" id="s8"><h3>8. The front door</h3></label></div><dl>
+    <dt>Do</dt><dd>Install Traefik with its Gateway API provider on. Write a <code>Gateway</code> and two <code>HTTPRoute</code>s: <code>/v1</code> goes to the gateway service, and everything else goes to <code>web</code>.</dd>
+    <dt>Why</dt><dd>Port-forward is a back door for you. A Gateway is the real entrance. The same two objects, with a hostname and a certificate added, are what you will use on EKS.</dd>
+    <dt>Watch for</dt><dd>Port 8080 is already taken on your machine, so choose another for Traefik's listener. A route in one namespace attaching to a Gateway in another has to be allowed by the Gateway. Confirm in the current Traefik chart docs how the Gateway API CRDs get installed.</dd>
+    <dt>Done when</dt><dd><code>curl http://localhost:&lt;port&gt;/v1/drops/x/availability</code> is answered by the app (a JSON 404 from inventory), <code>http://localhost:&lt;port&gt;/</code> in a browser shows the shopfront, and <code>/v1/healthz</code> through the same address is a 404 from the gateway: the admin port is not exposed.</dd>
+  </dl></div>
+
+  <div class="step"><div class="head"><label><input type="checkbox" id="s9"><h3>9. Who may talk to whom</h3></label></div><dl>
+    <dt>Do</dt><dd>Add NetworkPolicies: deny everything in <code>ticketdrop</code> by default, then allow only what the diagram shows. Traefik to web and to gateway; web to gateway; gateway to catalog, orders and inventory; orders to inventory; scheduler to catalog and inventory; services to Postgres, goaws and DNS.</dd>
+    <dt>Why</dt><dd>By default every pod can call every other pod. If the gateway were ever compromised, it could talk straight to the payments database. A default-deny policy means each connection exists because you wrote it down.</dd>
+    <dt>Watch for</dt><dd>Forgetting DNS is the classic mistake: everything breaks and nothing says why. Also, it is not yet confirmed that Docker Desktop's cluster enforces NetworkPolicy at all. Test that first; if it does not, write the policies anyway and prove them on EKS.</dd>
+    <dt>Done when</dt><dd>A test pod in <code>ticketdrop</code> cannot reach Postgres, while <code>orders</code> still can, and an order still completes.</dd>
+  </dl></div>
+
+  <div class="step"><div class="head"><label><input type="checkbox" id="s10"><h3>10. Scale on the queue</h3></label></div><dl>
+    <dt>Do</dt><dd>Install KEDA. Write a <code>ScaledObject</code> for <code>fulfillment</code> using the SQS scaler pointed at goaws, from 0 replicas up to a small maximum.</dd>
+    <dt>Why</dt><dd>CPU tells you a pod is busy. Queue depth tells you work is waiting, which is what matters for a consumer. With nothing waiting, zero pods run and cost nothing.</dd>
+    <dt>Watch for</dt><dd>The scaler needs an endpoint override and credentials to reach an emulator instead of AWS; check the current KEDA docs for the exact field names. Decide what "enough backlog for one more pod" is and write down why: fulfillment handles about 20 orders a second per pod.</dd>
+    <dt>Done when</dt><dd>With the queue empty there are no fulfillment pods. Placing a few hundred orders brings several up, and they go away again after the queue drains.</dd>
+  </dl></div>
+</section>
+
+<section>
+  <span class="eyebrow">The exit</span>
+  <h2>Phase 2 is finished when</h2>
+  <div class="prose">
+    <ol>
+      <li>A drop of more orders than tickets, sent through the Traefik Gateway, ends with no oversold ticket and no order left pending.</li>
+      <li>Fulfillment went from 0 pods to several and back to 0 without you touching it.</li>
+      <li>Deleting a pod mid-drop loses nothing.</li>
+      <li>Everything in the cluster was created from files in <code>ticketdrop-gitops/</code>, and you can delete the namespaces and bring it all back from those files.</li>
+      <li>Each choice you made is in <code>docs/DECISIONS.md</code>, and each thing that really broke is in <code>docs/TROUBLESHOOTING.md</code>.</li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">Not yours</span>
+  <h2>What Claude owes this phase</h2>
+  <div class="prose">
+    <ul>
+      <li><code>scripts/drop-check.sh</code> currently talks to fixed localhost ports and kills containers with docker. It needs a mode that takes the Gateway's address and deletes a pod instead, so it can be the exit check above.</li>
+      <li>A load test with k6, which sends a real crowd at a drop. It is the last piece of Phase 1.</li>
+      <li>Anything a step shows to be missing in the services themselves, such as a setting that should be configurable.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">Still open</span>
+  <h2>Things to confirm as you go</h2>
+  <div class="table"><table>
+    <thead><tr><th>Question</th><th>Settled in step</th></tr></thead>
+    <tbody>
+      <tr><td>One Postgres cluster with six databases, or six clusters?</td><td>5</td></tr>
+      <tr><td>How does Docker Desktop expose Traefik's listener on localhost, and on which port?</td><td>8</td></tr>
+      <tr><td>Does Docker Desktop's cluster enforce NetworkPolicy?</td><td>9</td></tr>
+      <tr><td>Does KEDA's SQS scaler read queue depth correctly from goaws?</td><td>10</td></tr>
+      <tr><td>Helm values per environment, or Kustomize overlays on top?</td><td>6</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+</div>
+
+<script>
+(function () {
+  var boxes = Array.prototype.slice.call(document.querySelectorAll('.step input[type="checkbox"]'));
+  var out = document.getElementById('progress');
+  function show() {
+    var n = boxes.filter(function (b) { return b.checked; }).length;
+    out.textContent = n + ' of ' + boxes.length + ' steps ticked';
+  }
+  boxes.forEach(function (b) {
+    try { b.checked = localStorage.getItem('p2-' + b.id) === '1'; } catch (e) {}
+    b.addEventListener('change', function () {
+      try { localStorage.setItem('p2-' + b.id, b.checked ? '1' : '0'); } catch (e) {}
+      show();
+    });
+  });
+  show();
+})();
+</script>

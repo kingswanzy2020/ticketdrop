@@ -1,0 +1,7 @@
+{{define "title"}}Your order · TicketDrop{{end}}
+
+{{define "content"}}
+<a class="back" href="/drops/{{.Order.DropID}}">Back to the drop</a>
+<h1>Your order</h1>
+{{template "order" .}}
+{{end}}

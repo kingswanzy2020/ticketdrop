@@ -1,0 +1,67 @@
+# The local stand-in for SNS and SQS. On AWS the same topic, queues,
+# subscriptions and redrive policies are created by Terraform.
+#
+# One topic. Each consumer has its own queue, subscribed with a filter on the
+# event_type attribute, and its own dead-letter queue.
+#
+#   drop.opened        -> inventory
+#   order.created      -> payments
+#   payment.succeeded  -> inventory
+#   payment.failed     -> inventory, orders
+#   order.confirmed    -> fulfillment
+#   hold.expired       -> orders
+#   ticket.issued      -> orders
+#   order.ticketed     -> notifications
+#   order.failed       -> notifications
+#
+# catalog, scheduler, gateway and web have no queue. Catalog only publishes;
+# the other three use no events at all.
+Local:
+  Host: goaws
+  Port: 4100
+  Region: us-east-1
+  AccountId: "000000000000"
+  LogToFile: false
+  EnableDuplicates: false
+  QueueAttributeDefaults:
+    # Short, so that a redelivery or a dead-lettering can be watched without a
+    # long wait. Each consumer's CONSUMER_TIMEOUT must stay below it.
+    VisibilityTimeout: 10
+    ReceiveMessageWaitTimeSeconds: 0
+    MaximumMessageSize: 262144
+  Queues:
+    - Name: payments-events-dlq
+    - Name: payments-events
+      RedrivePolicy: '{"maxReceiveCount": 3, "deadLetterTargetArn":"arn:aws:sqs:us-east-1:000000000000:payments-events-dlq"}'
+    - Name: inventory-events-dlq
+    - Name: inventory-events
+      RedrivePolicy: '{"maxReceiveCount": 3, "deadLetterTargetArn":"arn:aws:sqs:us-east-1:000000000000:inventory-events-dlq"}'
+    - Name: fulfillment-events-dlq
+    - Name: fulfillment-events
+      RedrivePolicy: '{"maxReceiveCount": 3, "deadLetterTargetArn":"arn:aws:sqs:us-east-1:000000000000:fulfillment-events-dlq"}'
+    - Name: orders-events-dlq
+    - Name: orders-events
+      RedrivePolicy: '{"maxReceiveCount": 3, "deadLetterTargetArn":"arn:aws:sqs:us-east-1:000000000000:orders-events-dlq"}'
+    - Name: notifications-events-dlq
+    - Name: notifications-events
+      RedrivePolicy: '{"maxReceiveCount": 3, "deadLetterTargetArn":"arn:aws:sqs:us-east-1:000000000000:notifications-events-dlq"}'
+  Topics:
+    - Name: ticketdrop-events
+      Subscriptions:
+        # Raw delivery puts the event itself in the message body, without the
+        # SNS envelope around it.
+        - QueueName: payments-events
+          Raw: true
+          FilterPolicy: '{"event_type": ["order.created"]}'
+        - QueueName: inventory-events
+          Raw: true
+          FilterPolicy: '{"event_type": ["drop.opened", "payment.succeeded", "payment.failed"]}'
+        - QueueName: fulfillment-events
+          Raw: true
+          FilterPolicy: '{"event_type": ["order.confirmed"]}'
+        - QueueName: orders-events
+          Raw: true
+          FilterPolicy: '{"event_type": ["payment.failed", "hold.expired", "ticket.issued"]}'
+        - QueueName: notifications-events
+          Raw: true
+          FilterPolicy: '{"event_type": ["order.ticketed", "order.failed"]}'

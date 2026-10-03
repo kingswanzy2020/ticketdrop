@@ -1,0 +1,23 @@
+{{define "title"}}TicketDrop{{end}}
+
+{{define "content"}}
+<h1>What's on</h1>
+{{if .Drops}}
+<ul class="stubs">
+  {{range .Drops}}
+  <li>
+    <a class="stub" href="/drops/{{.ID}}">
+      <span class="what"><b>{{.Name}}</b><span>{{.Venue}}</span></span>
+      {{if eq .Status "open"}}
+      <span class="state on">On sale</span>
+      {{else}}
+      <span class="state">Opens <time datetime="{{rfc3339 .OpensAt}}">{{when .OpensAt}}</time></span>
+      {{end}}
+    </a>
+  </li>
+  {{end}}
+</ul>
+{{else}}
+<p class="muted">Nothing has been announced yet.</p>
+{{end}}
+{{end}}
