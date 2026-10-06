@@ -40,7 +40,9 @@ contract in `pkg/contracts`, which is small and explicit.
 
 **Cost.** No query can join across services. Checking that every order has the
 right number of tickets means reading two databases and comparing, which is
-what `scripts/slice-check.sh` does.
+what `scripts/slice-check.sh` did. That comparison now lives in
+`scripts/drop-check.sh` ("orders with the wrong number of tickets"), which
+reads the `orders` and `fulfillment` databases for every ticketed order.
 
 ## 4. Events fan out through one SNS topic to one SQS queue per consumer
 
@@ -283,7 +285,10 @@ the same check that refuses an unknown drop. Nothing extra enforces the
 opening time.
 
 **Cost.** A drop becomes orderable a moment after its opening time, not at it:
-in three test runs, between 0.4 and 0.9 seconds later. A capacity cannot be
+in three test runs, between 0.4 and 0.9 seconds later, and in three later runs
+on a different machine between 1.1 and 1.2 seconds (PROOF.md). The delay is
+made of the scheduler's one-second tick, the outbox interval and the delivery
+to inventory. A capacity cannot be
 corrected after the drop has opened; that would need a new event and a
 decision about tickets already sold.
 
@@ -300,7 +305,8 @@ depends on there being exactly one leader: the lock avoids wasted calls, it
 does not prevent damage. The lock belongs to a database session and is
 released by the server when that session ends, so a killed leader needs no
 cleanup. In a test the standby took over 5 seconds after the leader was
-killed.
+killed, and in a later run 1 second: a standby tries the lock every
+`LEADER_RETRY`, so the takeover depends on where it was in that interval.
 
 **Cost.** The scheduler needs a database connection, and a database of its
 own, only to hold a lock. Kubernetes has its own mechanism for this, the Lease
