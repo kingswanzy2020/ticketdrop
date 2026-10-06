@@ -36,16 +36,14 @@ The nine services are:
 
 ## Documentation
 
-The project is documented as the decisions behind it, not just the tools in it. Start with the case study; [docs/README.md](docs/README.md) has the full index.
+The project is documented as it is built, as the decisions behind it and not just the tools in it. [docs/README.md](docs/README.md) explains how the record is kept.
 
 | Document | What it answers |
 |---|---|
-| [Case study](docs/CASE_STUDY.md) | What the problem was, why I chose this approach, what broke, what I changed, and what is still open |
 | [Decisions](docs/DECISIONS.md) | Every choice, why it was made, and what it costs |
 | [Troubleshooting](docs/TROUBLESHOOTING.md) | Failures that actually happened, their cause and their fix |
 | [Proof](docs/PROOF.md) | Each promise the system makes, how it was broken on purpose, and the results of real runs |
-| [Scaling](docs/SCALING.md) | What I would do differently for a much smaller or much larger crowd |
-| [Interview notes](docs/INTERVIEW.md) | The project told in 30 seconds, in two minutes, and as short stories with evidence |
+| [Journal](docs/JOURNAL.md) | Each phase in my own words: the problem, the approach, what broke, what I changed |
 
 ---
 
@@ -77,12 +75,10 @@ The project is documented as the decisions behind it, not just the tools in it. 
 |       `-- postgres-init.sql
 |-- docs
 |   |-- README.md
-|   |-- CASE_STUDY.md
 |   |-- DECISIONS.md
 |   |-- TROUBLESHOOTING.md
 |   |-- PROOF.md
-|   |-- SCALING.md
-|   |-- INTERVIEW.md
+|   |-- JOURNAL.md
 |   |-- diagrams
 |   `-- guide
 |-- pkg

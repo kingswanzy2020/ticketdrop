@@ -43,7 +43,7 @@ Two scripts do the work, against the local stack started by `make up`:
 
 - **A real crowd.** The checks send 16 customers at a time. Behaviour at
   thousands of concurrent buyers, and where the first bottleneck is, are
-  unmeasured ([SCALING.md](SCALING.md)).
+  unmeasured.
 - **Notifications under interruption.** "Told once" is asserted in runs where
   notifications itself is not killed; killing it may send a message twice, by
   design ([23](DECISIONS.md#23-notifications-keeps-no-record-so-a-message-can-be-sent-twice)).
