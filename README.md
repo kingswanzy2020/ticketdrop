@@ -30,7 +30,7 @@ The nine services are:
 
 ## Architecture Diagram
 
-![The journey of one order](docs/diagrams/order-journey.svg)
+![TicketDrop architecture](docs/diagrams/ticketdrop-architecture.png)
 
 ---
 
