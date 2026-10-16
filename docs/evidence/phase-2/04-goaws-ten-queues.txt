@@ -1,0 +1,15 @@
+Fri Oct 16 03:26:50 AM UTC 2026
+{
+    "QueueUrls": [
+        "http://us-east-1.goaws.data.svc.cluster.local:4100/000000000000/payments-events",
+        "http://us-east-1.goaws.data.svc.cluster.local:4100/000000000000/inventory-events-dlq",
+        "http://us-east-1.goaws.data.svc.cluster.local:4100/000000000000/inventory-events",
+        "http://us-east-1.goaws.data.svc.cluster.local:4100/000000000000/fulfillment-events-dlq",
+        "http://us-east-1.goaws.data.svc.cluster.local:4100/000000000000/orders-events",
+        "http://us-east-1.goaws.data.svc.cluster.local:4100/000000000000/notifications-events",
+        "http://us-east-1.goaws.data.svc.cluster.local:4100/000000000000/payments-events-dlq",
+        "http://us-east-1.goaws.data.svc.cluster.local:4100/000000000000/fulfillment-events",
+        "http://us-east-1.goaws.data.svc.cluster.local:4100/000000000000/orders-events-dlq",
+        "http://us-east-1.goaws.data.svc.cluster.local:4100/000000000000/notifications-events-dlq"
+    ]
+}

@@ -388,3 +388,71 @@ a second, and every open drop page asks for the ticket count every two
 seconds. That load grows with the audience and has not been measured yet. With
 JavaScript off, an order's page has to be reloaded by hand to see it finish.
 Prices are shown in dollars because the catalog stores no currency.
+
+## 25. Kubernetes 1.36, locally and on EKS
+
+**Decision.** The local cluster and the EKS cluster both run Kubernetes 1.36,
+on the latest patch available when each is created. Locally that is Docker
+Desktop's kind provisioner, which is the only one that lets the version be
+chosen, with one node. kubectl stays at its newer version, which the skew
+policy allows against a 1.36 server.
+
+**Why.** KEDA is on the path that scales `fulfillment` from zero, and its
+v2.21 is tested against Kubernetes 1.34 to 1.36; no KEDA release lists 1.37.
+Karpenter supports 1.36 from 1.13. 1.36 is supported upstream until
+2027-06-28 and on EKS until 2027-08-02, which covers the project. 1.37 was
+released upstream on 2026-08-26 and reached EKS on 2026-10-01, so problems in
+Traefik, CloudNativePG or KEDA charts would be met here first. Using one
+version in both places means an API difference cannot make a manifest pass
+locally and fail on EKS.
+
+**Cost.** 1.37 is skipped, and an upgrade is due as 1.36 nears the end of its
+support. The decision is to be revisited when KEDA's compatibility table
+lists 1.37. CloudNativePG's supported versions were not checked when this was
+written and need checking before its chart is pinned. The name kind mode gives
+the kubeconfig context on Linux was not confirmed, and the workbook expects
+`docker-desktop`.
+
+## 26. Local images are tagged `dev`, not `latest`
+
+**Decision.** Each service in `deploy/local/compose.yaml` names its image
+`ticketdrop/<service>:${TAG:-dev}`. The tag is `dev` unless `TAG` is set, for
+example to a short commit ID. Nothing in the cluster refers to `latest`.
+
+**Why.** Kubernetes pulls an image tagged `latest` from a registry every time,
+and there is no registry locally, so the pod fails with `ErrImagePull`. A
+pull policy of `Always` fails the same way for any tag. A running pod does not
+pick up a rebuilt image either way; it needs to be recreated. A tag that
+changes with each build changes the pod spec, so a rollout follows by itself.
+
+**Cost.** The first build creates new images beside the old
+`ticketdrop-<service>:latest` ones, which are removed by hand. The pull policy
+the chart uses locally is not decided here; it is set when the chart is
+written. Whether the cluster can see images built on the host has not been
+checked.
+
+## 27. The emulator runs in `data` as one pod, and names itself by its cluster address
+
+**Decision.** goaws runs in the `data` namespace as a ConfigMap, a Deployment
+with one replica and a Service on port 4100. Its `Host` setting is the
+Service's full in-cluster name, `goaws.data.svc.cluster.local`. Every manifest
+sets `namespace:` in its own metadata and is not relied on to be applied with
+`-n`. The `ticketdrop` namespace enforces the `restricted` Pod Security
+standard; `data` has no Pod Security label.
+
+**Why.** goaws writes `Host` into the queue URLs it returns, so a bare `goaws`
+works only for pods inside `data`; the services in `ticketdrop` need the full
+name. Its queues live in memory, so one replica is the only way to have a
+single set of queues. A ConfigMap mounted with `subPath` is never refreshed in
+a running pod, and goaws reads the file only at start, so a change to it is
+followed by a restart of the Deployment. `data` is left unenforced because the
+goaws image runs as root and what the database operator's pods need has not
+been checked yet (step 5).
+
+**Cost.** Any restart of the pod, from a rollout, a drain or a crash, empties
+every queue and the topic, and messages in flight are lost; the liveness probe
+is lenient for that reason. The URLs it returns carry the region in front of
+the host, `us-east-1.goaws.data.svc.cluster.local`, and the services ignore
+them and use their own configured URLs. Nothing in `data` is checked for Pod
+Security until a label is added there. The Deployment sets requests of 50m CPU
+and 64Mi of memory, which were chosen, not measured.
