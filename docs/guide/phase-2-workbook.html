@@ -113,17 +113,29 @@ td.num { font-family: var(--mono); color: var(--muted); font-variant-numeric: ta
 .progress { font: 0.85rem var(--mono); color: var(--muted); }
 p.prose { display: block; }
 td code, th code { overflow-wrap: normal; white-space: nowrap; }
+
+/* Evidence: what to capture into docs/evidence/ before moving on */
+.step dt.cap { color: var(--accent); }
+.step dd.cap { background: var(--accent-soft); border-radius: 8px; padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
+.step dd.cap.none { background: none; padding: 0; color: var(--muted); }
+.step dd.cap code { background: var(--surface); }
+.cap ul { gap: 8px; }
+.once { display: inline-block; font: 600 0.68rem var(--mono); letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; background: var(--accent); color: var(--surface); white-space: nowrap; vertical-align: 1px; }
+.stub .capture { font-size: 0.9rem; background: var(--accent-soft); border-radius: 8px; padding: 8px 12px; }
+.stub .capture b, .capture-label { font: 600 0.72rem var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.stub .capture code { background: var(--surface); }
 </style>
 
 <div class="wrap">
 
 <header class="top">
-  <span class="eyebrow">Phase 2 workbook · your part · updated 3 October 2026</span>
+  <span class="eyebrow">Phase 2 workbook · your part · updated 13 October 2026</span>
   <h1>Into Kubernetes, on your laptop</h1>
   <p class="lede">The services already run under docker compose. In this phase you move them into a real Kubernetes cluster on Docker Desktop, and you write every file yourself.</p>
   <ul class="facts">
     <li>Cluster: <b>docker-desktop</b></li>
     <li>Your files go in <b>ticketdrop-gitops/</b></li>
+    <li>Evidence goes in <b>docs/evidence/phase-2/</b></li>
     <li>AWS cost: <b>none</b></li>
     <li class="progress" id="progress">0 of 10 steps ticked</li>
   </ul>
@@ -337,13 +349,24 @@ td code, th code { overflow-wrap: normal; white-space: nowrap; }
 <section>
   <span class="eyebrow">The work</span>
   <h2>Ten steps, in order</h2>
-  <p class="muted prose">Tick a step when its "done when" check passes. Ticks are remembered in this browser only.</p>
+  <p class="muted prose">Tick a step when its "done when" check passes and its capture is saved. Ticks are remembered in this browser only.</p>
+  <div class="note prose">
+    <p><span class="capture-label">Capture</span> Each step has a Capture row naming the files to save into <code>docs/evidence/phase-2/</code> before you move on. The number at the front of a name is the step.</p>
+    <ul>
+      <li><span class="once">Only now</span> marks a capture that cannot be taken afterwards, because the thing it shows is gone once the step is over. Set it up before you start the step.</li>
+      <li>Save terminal output as text, with <code>&lt;command&gt; 2&gt;&amp;1 | tee docs/evidence/phase-2/&lt;name&gt;.txt</code>. Take a screenshot only for what is visual: a browser, Docker Desktop, a graph.</li>
+      <li>Each capture should stand alone: the command, its output, and the time. Run <code>date</code> first.</li>
+      <li>When something breaks, capture the error before you fix it, as <code>fail-&lt;step&gt;-&lt;what-broke&gt;.txt</code>, and link it from its entry in <code>docs/TROUBLESHOOTING.md</code>.</li>
+      <li>Link every file from the entry it backs in <code>docs/PROOF.md</code>, <code>docs/DECISIONS.md</code> or <code>docs/TROUBLESHOOTING.md</code>. Look through each one for passwords before you commit it.</li>
+    </ul>
+  </div>
 
   <div class="step"><div class="head"><label><input type="checkbox" id="s1"><h3>1. Switch the cluster on</h3></label></div><dl>
     <dt>Do</dt><dd>In Docker Desktop: enable Kubernetes, and raise memory from 8 GB to about 12 GB. Create the folder <code>ticketdrop-gitops/</code> beside <code>ticketdrop/</code> and run <code>git init</code> in it.</dd>
     <dt>Why</dt><dd>Everything below runs here. 8 GB is tight for a database operator, an ingress controller, KEDA and nine services together.</dd>
     <dt>Watch for</dt><dd>Your only kube context today points at an EKS cluster that no longer exists. Make sure the new one is selected before any <code>kubectl apply</code>.</dd>
     <dt>Done when</dt><dd><code>kubectl config current-context</code> prints <code>docker-desktop</code> and <code>kubectl get nodes</code> shows Ready.</dd>
+    <dt class="cap">Capture</dt><dd class="cap none">Nothing to keep from this step. If it fails, capture the error before you fix it.</dd>
   </dl></div>
 
   <div class="step"><div class="head"><label><input type="checkbox" id="s2"><h3>2. Namespaces and their rules</h3></label></div><dl>
@@ -351,6 +374,7 @@ td code, th code { overflow-wrap: normal; white-space: nowrap; }
     <dt>Why</dt><dd>A namespace is a room with its own rules. With <code>restricted</code> enforced, a pod that asks to run as root is refused at the door, so a mistake in your chart shows up now and not in an audit.</dd>
     <dt>Watch for</dt><dd>Do not enforce <code>restricted</code> on <code>data</code> yet. Check what the database operator's pods need first.</dd>
     <dt>Done when</dt><dd><code>kubectl run test --image=nginx -n ticketdrop</code> is rejected with a Pod Security message.</dd>
+    <dt class="cap">Capture</dt><dd class="cap"><code>02-restricted-rejects-root-pod.txt</code>: the <code>kubectl run</code> command and the whole Pod Security rejection message.</dd>
   </dl></div>
 
   <div class="step"><div class="head"><label><input type="checkbox" id="s3"><h3>3. Get the images into the cluster</h3></label></div><dl>
@@ -358,6 +382,7 @@ td code, th code { overflow-wrap: normal; white-space: nowrap; }
     <dt>Why</dt><dd>There is no registry yet. Docker Desktop's cluster can use images from the local store when the containerd image store is on, which it is on your machine.</dd>
     <dt>Watch for</dt><dd>With the tag <code>latest</code>, Kubernetes always tries to pull from a registry and fails. <code>ErrImagePull</code> on a local image nearly always means the tag or the pull policy.</dd>
     <dt>Done when</dt><dd>A throwaway pod using <code>ticketdrop/gateway:dev</code> gets past image pull. It will then crash for lack of settings, which is expected.</dd>
+    <dt class="cap">Capture</dt><dd class="cap none">Nothing to keep from this step. If it fails, capture the error before you fix it.</dd>
   </dl></div>
 
   <div class="step"><div class="head"><label><input type="checkbox" id="s4"><h3>4. The emulator</h3></label></div><dl>
@@ -365,6 +390,7 @@ td code, th code { overflow-wrap: normal; white-space: nowrap; }
     <dt>Why</dt><dd>It stands in for SNS and SQS until Phase 4. It is also your first complete workload: config, pod, stable address.</dd>
     <dt>Watch for</dt><dd>The file's <code>Host</code> value and every service's <code>EVENTS_QUEUE_URL</code> must use the Service's in-cluster name, such as <code>goaws.data.svc.cluster.local</code>. It keeps its queues in memory, so a restart empties them.</dd>
     <dt>Done when</dt><dd>From a port-forward, <code>aws --endpoint-url http://localhost:4100 sqs list-queues</code> lists ten queues: five, each with its dead-letter queue.</dd>
+    <dt class="cap">Capture</dt><dd class="cap"><code>04-goaws-ten-queues.txt</code>: the <code>list-queues</code> output with all ten queue URLs.</dd>
   </dl></div>
 
   <div class="step"><div class="head"><label><input type="checkbox" id="s5"><h3>5. Postgres, run by an operator</h3></label></div><dl>
@@ -372,6 +398,10 @@ td code, th code { overflow-wrap: normal; white-space: nowrap; }
     <dt>Why</dt><dd>An operator is a controller that knows how to run one piece of software. You describe "a Postgres like this" and it handles startup, storage and failover. You have already run Postgres as a bare StatefulSet; this is the next level.</dd>
     <dt>Watch for</dt><dd>A design choice that is yours to make and record: one Postgres cluster with six databases, or six clusters. One is lighter on memory and matches local compose; six isolates better. Read the operator's current docs for how it declares extra databases and roles before you commit.</dd>
     <dt>Done when</dt><dd><code>psql</code> through a port-forward, using one service's own user, can reach its database and is refused on another's.</dd>
+    <dt class="cap">Capture</dt><dd class="cap"><ul>
+      <li><code>05-postgres-cluster-healthy.txt</code>: the operator's status for your cluster, showing it healthy.</li>
+      <li><code>05-psql-own-database-only.txt</code>: both attempts in one capture, the connection that works and the one that is refused, with its error. Check that no password or full <code>DATABASE_URL</code> is in it.</li>
+    </ul></dd>
   </dl></div>
 
   <div class="step"><div class="head"><label><input type="checkbox" id="s6"><h3>6. The chart: one service, done properly</h3></label></div><dl>
@@ -385,6 +415,10 @@ td code, th code { overflow-wrap: normal; white-space: nowrap; }
       <li>Give every container resource requests. Karpenter will later size nodes from them.</li>
     </ul></dd>
     <dt>Done when</dt><dd><code>helm lint</code> is clean, the <code>orders</code> pod is Ready, and <code>kubectl delete pod</code> on it logs the shutdown steps in order and exits 0.</dd>
+    <dt class="cap">Capture</dt><dd class="cap"><ul>
+      <li><code>06-helm-lint-clean.txt</code>: the <code>helm lint</code> output.</li>
+      <li><span class="once">Only now</span> <code>06-orders-shutdown-in-order.txt</code>: the pod's log from the delete to the exit, showing the shutdown steps in order and exit code 0. The log goes with the pod, so start <code>kubectl logs -f</code> in a second terminal before you delete it.</li>
+    </ul></dd>
   </dl></div>
 
   <div class="step"><div class="head"><label><input type="checkbox" id="s7"><h3>7. The other eight, and staying up</h3></label></div><dl>
@@ -392,6 +426,11 @@ td code, th code { overflow-wrap: normal; white-space: nowrap; }
     <dt>Why</dt><dd>This is the test of your chart: if a service needs a template change and not just values, the chart was not general enough. The disruption budget tells Kubernetes how many pods it may take away at once during maintenance.</dd>
     <dt>Watch for</dt><dd><code>payments</code> and <code>fulfillment</code> serve no app traffic, so their Service matters only for metrics. <code>gateway</code> has no database and no queue; the chart must cope with both being absent. <code>web</code> has neither as well, and needs only <code>API_URL</code>. <code>catalog</code> has a database and the topic but no queue. <code>notifications</code> is the reverse: a queue and no database. <code>scheduler</code> is the odd one: no app port, no events at all, but it needs its database, and it should run two replicas, since the point of its leader election is surviving the loss of one.</dd>
     <dt>Done when</dt><dd>All nine are Ready, exactly one scheduler pod reports <code>scheduler_leader 1</code> on <code>/metrics</code>, and an order ends <code>ticketed</code>. A drop has to exist before it can be ordered: through a <code>kubectl port-forward</code> to catalog, <code>curl -X PUT localhost:&lt;port&gt;/internal/v1/drops/first -d '{"name":"First","venue":"Here","opens_at":"2026-01-01T00:00:00Z","tiers":[{"tier":"general","price_cents":2500,"capacity":100}]}'</code>. An opening time in the past makes the scheduler open it within a second. Then order it through a port-forward to the gateway, or open a port-forward to <code>web</code> in a browser and buy a ticket there.</dd>
+    <dt class="cap">Capture</dt><dd class="cap"><ul>
+      <li><code>07-nine-services-ready.txt</code>: <code>kubectl get pods -n ticketdrop</code> with all nine Ready.</li>
+      <li><code>07-scheduler-one-leader.txt</code>: <code>scheduler_leader</code> from both scheduler pods, one reporting 1 and the other 0.</li>
+      <li><code>07-order-ticketed-shopfront.png</code>: the shopfront in a browser, on an order that ended <code>ticketed</code>.</li>
+    </ul></dd>
   </dl></div>
 
   <div class="step"><div class="head"><label><input type="checkbox" id="s8"><h3>8. The front door</h3></label></div><dl>
@@ -399,6 +438,10 @@ td code, th code { overflow-wrap: normal; white-space: nowrap; }
     <dt>Why</dt><dd>Port-forward is a back door for you. A Gateway is the real entrance. The same two objects, with a hostname and a certificate added, are what you will use on EKS.</dd>
     <dt>Watch for</dt><dd>Port 8080 is already taken on your machine, so choose another for Traefik's listener. A route in one namespace attaching to a Gateway in another has to be allowed by the Gateway. Confirm in the current Traefik chart docs how the Gateway API CRDs get installed.</dd>
     <dt>Done when</dt><dd><code>curl http://localhost:&lt;port&gt;/v1/drops/x/availability</code> is answered by the app (a JSON 404 from inventory), <code>http://localhost:&lt;port&gt;/</code> in a browser shows the shopfront, and <code>/v1/healthz</code> through the same address is a 404 from the gateway: the admin port is not exposed.</dd>
+    <dt class="cap">Capture</dt><dd class="cap"><ul>
+      <li><code>08-shopfront-through-gateway.png</code>: the shopfront in a browser with the address bar visible, so the Traefik port shows.</li>
+      <li><code>08-routes-through-gateway.txt</code>: both <code>curl -i</code> calls with their status lines: the JSON 404 from inventory, and the 404 for <code>/v1/healthz</code>.</li>
+    </ul></dd>
   </dl></div>
 
   <div class="step"><div class="head"><label><input type="checkbox" id="s9"><h3>9. Who may talk to whom</h3></label></div><dl>
@@ -406,6 +449,10 @@ td code, th code { overflow-wrap: normal; white-space: nowrap; }
     <dt>Why</dt><dd>By default every pod can call every other pod. If the gateway were ever compromised, it could talk straight to the payments database. A default-deny policy means each connection exists because you wrote it down.</dd>
     <dt>Watch for</dt><dd>Forgetting DNS is the classic mistake: everything breaks and nothing says why. Also, it is not yet confirmed that Docker Desktop's cluster enforces NetworkPolicy at all. Test that first; if it does not, write the policies anyway and prove them on EKS.</dd>
     <dt>Done when</dt><dd>A test pod in <code>ticketdrop</code> cannot reach Postgres, while <code>orders</code> still can, and an order still completes.</dd>
+    <dt class="cap">Capture</dt><dd class="cap"><ul>
+      <li><span class="once">Only now</span> <code>09-networkpolicy-enforcement-test.txt</code>: your first test of whether Docker Desktop enforces NetworkPolicy at all, whichever way it comes out. It settles an open question, and if the answer is no it is the reason behind a decision.</li>
+      <li><code>09-test-pod-blocked-orders-allowed.txt</code>: the test pod failing to reach Postgres, and an order still ending <code>ticketed</code> with the policies in place.</li>
+    </ul></dd>
   </dl></div>
 
   <div class="step"><div class="head"><label><input type="checkbox" id="s10"><h3>10. Scale on the queue</h3></label></div><dl>
@@ -413,6 +460,11 @@ td code, th code { overflow-wrap: normal; white-space: nowrap; }
     <dt>Why</dt><dd>CPU tells you a pod is busy. Queue depth tells you work is waiting, which is what matters for a consumer. With nothing waiting, zero pods run and cost nothing.</dd>
     <dt>Watch for</dt><dd>The scaler needs an endpoint override and credentials to reach an emulator instead of AWS; check the current KEDA docs for the exact field names. Decide what "enough backlog for one more pod" is and write down why: fulfillment handles about 20 orders a second per pod.</dd>
     <dt>Done when</dt><dd>With the queue empty there are no fulfillment pods. Placing a few hundred orders brings several up, and they go away again after the queue drains.</dd>
+    <dt class="cap">Capture</dt><dd class="cap"><ul>
+      <li><span class="once">Only now</span> <code>10-fulfillment-scale-0-n-0.txt</code>: a watch on the fulfillment pods (<code>kubectl get pods -w</code>, with timestamps) started before the orders are placed and left running until the count is back at zero.</li>
+      <li><span class="once">Only now</span> <code>10-fulfillment-scaled-up.png</code>: one screenshot at the peak, with the pod list and the queue depth side by side.</li>
+      <li>Two timings, written into <code>docs/PROOF.md</code> with this run: orders placed to first fulfillment pod Ready, and queue empty to zero pods.</li>
+    </ul></dd>
   </dl></div>
 </section>
 
@@ -427,6 +479,15 @@ td code, th code { overflow-wrap: normal; white-space: nowrap; }
       <li>Everything in the cluster was created from files in <code>ticketdrop-gitops/</code>, and you can delete the namespaces and bring it all back from those files.</li>
       <li>Each choice you made is in <code>docs/DECISIONS.md</code>, and each thing that really broke is in <code>docs/TROUBLESHOOTING.md</code>.</li>
     </ol>
+  </div>
+  <div class="note prose">
+    <p><span class="capture-label">Capture</span> The exit run is the one <code>docs/PROOF.md</code> will quote, so save all of it.</p>
+    <ul>
+      <li><code>exit-drop-through-gateway.txt</code>: the whole output of the drop check sent through the Gateway, with its assertions. Backs item 1.</li>
+      <li><span class="once">Only now</span> <code>exit-fulfillment-scale-0-n-0.txt</code>: the same pod watch as step 10, running through this drop. Backs item 2.</li>
+      <li><span class="once">Only now</span> <code>exit-pod-deleted-mid-drop.txt</code>: the <code>kubectl delete pod</code> command with the time it ran, in the same run as the check output above. Backs item 3.</li>
+      <li><code>exit-rebuild-from-files.txt</code>: the namespaces deleted, the commands that bring everything back, and all pods Ready again, with the time it took. Backs item 4.</li>
+    </ul>
   </div>
 </section>
 

@@ -5,14 +5,14 @@
 <div class="wrap">
 
 <header class="top">
-  <span class="eyebrow">Field guide · updated 3 October 2026</span>
+  <span class="eyebrow">Field guide · updated 13 October 2026</span>
   <h1>TicketDrop</h1>
   <p class="lede">A ticket-selling platform made of small Go services, built to run on Amazon EKS. It exists to practise, and to prove, the work of a DevOps engineer: packaging, deploying, scaling, securing and observing a real system.</p>
   <ul class="facts">
     <li><b>9 of 9</b> services built</li>
     <li>Phase <b>1</b> in progress</li>
     <li>Phase <b>2</b> is next, and it is yours</li>
-    <li><b>24</b> decisions recorded</li>
+    <li><b>25</b> decisions recorded</li>
     <li>AWS spend so far: <b>none</b></li>
   </ul>
 </header>
@@ -83,7 +83,7 @@
 <section>
   <span class="eyebrow">The road</span>
   <h2>Ten phases, each ending in something you can show</h2>
-  <p class="muted prose">Phases 0 to 3 cost nothing on AWS. From Phase 4 the cluster is switched on for a work session and destroyed afterwards.</p>
+  <p class="muted prose">Phases 0 to 3 cost nothing on AWS. From Phase 4 the cluster is switched on for a work session and destroyed afterwards. Each phase also says what to capture into <code>docs/evidence/</code> before moving on; <span class="once">Only now</span> marks what cannot be taken afterwards.</p>
   <div class="stubs">
     <div class="stub"><div class="no"><b>0</b><span>Both</span></div><div class="body">
       <div class="head"><h3>Foundations</h3><span class="pill now">Open items</span></div>
@@ -92,39 +92,48 @@
     <div class="stub"><div class="no"><b>1</b><span>Claude</span></div><div class="body">
       <div class="head"><h3>The services, running locally</h3><span class="pill now">In progress</span></div>
       <p>The Go services under docker compose with Postgres and an SNS/SQS emulator. All nine exist, and the journey above runs from a click in the shopfront to the confirmation message. One thing is left: a load test that sends a real crowd at a drop, where the checks so far send 16 customers at a time.</p>
-      <p class="check">Done when: <code>make drop-check</code> orders more tickets than exist, kills a service mid-run, and still finds no oversold ticket, no lost order and no duplicate; and <code>make outage-check</code> takes the payment provider down and finds no order or ticket left stuck. Both pass with all nine services running.</p></div></div>
+      <p class="check">Done when: <code>make drop-check</code> orders more tickets than exist, kills a service mid-run, and still finds no oversold ticket, no lost order and no duplicate; and <code>make outage-check</code> takes the payment provider down and finds no order or ticket left stuck. Both pass with all nine services running.</p>
+      <p class="capture"><b>Capture</b> The whole output of each <code>make drop-check</code> run, one per <code>KILL</code> value, and of <code>make outage-check</code>; the shopfront showing one order <code>ticketed</code> and one drop sold out. All of it can be taken again by running the checks. Folder: <code>docs/evidence/phase-1/</code>.</p></div></div>
     <div class="stub now"><div class="no"><b>2</b><span>You</span></div><div class="body">
       <div class="head"><h3>Kubernetes packaging on Docker Desktop</h3><span class="pill now">Next</span></div>
       <p>Move the same system from docker compose into a real Kubernetes cluster on your laptop: one Helm chart, a front door, a database operator, and autoscaling on queue depth.</p>
-      <p class="check">Done when: the drop passes through the Gateway, and fulfillment scales from 0 to several pods and back on its own. The Phase 2 Workbook has the steps.</p></div></div>
+      <p class="check">Done when: the drop passes through the Gateway, and fulfillment scales from 0 to several pods and back on its own. The Phase 2 Workbook has the steps.</p>
+      <p class="capture"><b>Capture</b> Every step in the Phase 2 Workbook has a Capture row naming its files. <span class="once">Only now</span> The shutdown log in step 6 and the scaling run in step 10 cannot be taken afterwards. Folder: <code>docs/evidence/phase-2/</code>.</p></div></div>
     <div class="stub"><div class="no"><b>3</b><span>You</span></div><div class="body">
       <div class="head"><h3>Continuous integration</h3><span class="pill">Later</span></div>
       <p>Every pull request is linted, tested, built and scanned, with no cloud credentials involved. Only the services that changed are rebuilt.</p>
-      <p class="check">Done when: a failing test or a critical vulnerability blocks the merge.</p></div></div>
+      <p class="check">Done when: a failing test or a critical vulnerability blocks the merge.</p>
+      <p class="capture"><b>Capture</b> A pull request blocked by a failing test, and one blocked by a critical vulnerability, each with the checks list and the disabled merge button in view; a run where only the changed services were rebuilt. Folder: <code>docs/evidence/phase-3/</code>.</p></div></div>
     <div class="stub"><div class="no"><b>4</b><span>You</span></div><div class="body">
       <div class="head"><h3>AWS with Terraform</h3><span class="pill">Later</span></div>
       <p>The network, the EKS cluster, the queues, the secrets and the permissions, all as code. Split so the cheap long-lived parts survive and the expensive parts can be destroyed.</p>
-      <p class="check">Done when: <code>make aws-up</code> builds it from nothing and <code>make aws-down</code> leaves nothing that bills.</p></div></div>
+      <p class="check">Done when: <code>make aws-up</code> builds it from nothing and <code>make aws-down</code> leaves nothing that bills.</p>
+      <p class="capture"><b>Capture</b> The end of <code>make aws-up</code> with the time it took; the cluster and its nodes listed. <span class="once">Only now</span> After <code>make aws-down</code>, the check that nothing is left billing, and the next day the cost of that session. Folder: <code>docs/evidence/phase-4/</code>.</p></div></div>
     <div class="stub"><div class="no"><b>5</b><span>You</span></div><div class="body">
       <div class="head"><h3>The platform, installed by GitOps</h3><span class="pill">Later</span></div>
       <p>Argo CD installs every cluster add-on from Git, in order: Karpenter, the load balancer controller, cert-manager, external-dns, Traefik, the secrets driver, KEDA, the database operator, monitoring.</p>
-      <p class="check">Done when: a test route gets a DNS name and a valid certificate with no manual <code>kubectl apply</code>.</p></div></div>
+      <p class="check">Done when: a test route gets a DNS name and a valid certificate with no manual <code>kubectl apply</code>.</p>
+      <p class="capture"><b>Capture</b> Argo CD with every application Synced and Healthy; the test route in a browser with its DNS name and a valid certificate showing. Folder: <code>docs/evidence/phase-5/</code>.</p></div></div>
     <div class="stub"><div class="no"><b>6</b><span>You</span></div><div class="body">
       <div class="head"><h3>Continuous delivery, and going live</h3><span class="pill">Later</span></div>
       <p>A merge builds an image, pushes it, and commits its tag to the GitOps repo. Argo CD does the rest.</p>
-      <p class="check">Done when: a one-line change reaches EKS with nobody running <code>kubectl</code>.</p></div></div>
+      <p class="check">Done when: a one-line change reaches EKS with nobody running <code>kubectl</code>.</p>
+      <p class="capture"><b>Capture</b> One change followed end to end, with times: the merged pull request, the pipeline run, the tag commit in the GitOps repo, the Argo CD sync, and the change live. Folder: <code>docs/evidence/phase-6/</code>.</p></div></div>
     <div class="stub"><div class="no"><b>7</b><span>Both</span></div><div class="body">
       <div class="head"><h3>Observability</h3><span class="pill">Later</span></div>
       <p>Dashboards and alerts kept in Git. Request rate, errors and latency for each service; queue depth and age; replicas and nodes.</p>
-      <p class="check">Done when: each alert has been set off once on purpose and seen firing.</p></div></div>
+      <p class="check">Done when: each alert has been set off once on purpose and seen firing.</p>
+      <p class="capture"><b>Capture</b> <span class="once">Only now</span> Each alert while it is firing, with the time and what set it off; each dashboard during a drop, not at rest. Folder: <code>docs/evidence/phase-7/</code>.</p></div></div>
     <div class="stub"><div class="no"><b>8</b><span>Both</span></div><div class="body">
       <div class="head"><h3>Drills</h3><span class="pill">Later</span></div>
       <p>A full drop on EKS with numbers taken, then things broken on purpose: a node killed, a Spot interruption, a poison message, a bad release rolled back, a database failover.</p>
-      <p class="check">Done when: there is a number and a screenshot for each.</p></div></div>
+      <p class="check">Done when: there is a number and a screenshot for each.</p>
+      <p class="capture"><b>Capture</b> <span class="once">Only now</span> For every drill, the graph while it is happening and the number it produced: the node kill, the Spot interruption, the poison message, the rollback, the failover. Folder: <code>docs/evidence/phase-8/</code>.</p></div></div>
     <div class="stub"><div class="no"><b>9</b><span>Both</span></div><div class="body">
       <div class="head"><h3>Rebuild proof and write-up</h3><span class="pill">Later</span></div>
       <p>Destroy everything, rebuild it from Git, time it. Then the portfolio write-up.</p>
-      <p class="check">Done when: the rebuilt cluster matches the one that was destroyed.</p></div></div>
+      <p class="check">Done when: the rebuilt cluster matches the one that was destroyed.</p>
+      <p class="capture"><b>Capture</b> <span class="once">Only now</span> The destroy and the rebuild from Git, with the time each took, and the comparison showing the rebuilt cluster matches. Folder: <code>docs/evidence/phase-9/</code>.</p></div></div>
   </div>
 </section>
 
