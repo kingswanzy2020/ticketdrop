@@ -68,6 +68,8 @@ runs in PROOF.md. The runs dated 6 October were made in a cloud container, not
 on my machine; I have not yet run the checks myself.
 
 ### Notes
+October 13, 2026: Explored all the built services, trying to understand how they all connect and work together.
+
 
 ### 1. The problem
 
@@ -91,6 +93,7 @@ Dates: to . Exit check: the drop passes through the Gateway; KEDA scales
 `fulfillment` 0 → N → 0 on queue depth.
 
 ### Notes
+October,13 2026: Run the application locally on my docker desktop kind cluster
 
 ### 1. The problem
 
@@ -99,7 +102,7 @@ Dates: to . Exit check: the drop passes through the Gateway; KEDA scales
 ### 3. Why this approach
 
 ### 4. What broke
-
+1. After restricting label to the ticketdrop namespace, the test pod with the nginx image was restricted from being scheduled on the node because the image run as a root user. So, only pods that run as nonroot are allowed to be placed within that namespace, as enforced by the Pod Security Admission Controller
 ### 5. What I changed
 
 ### 6. At a different scale
