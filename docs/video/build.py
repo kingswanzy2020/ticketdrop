@@ -1,14 +1,23 @@
 #!/usr/bin/env python3
 """Builds ticketdrop-explainer.mp4, the animated walkthrough of the platform.
 
-Every frame is drawn with pycairo and piped to ffmpeg, so the video is
-reproducible: change a scene below and rebuild.
+Every frame is drawn with pycairo and piped to ffmpeg, and the narration is
+spoken by Piper, an offline text-to-speech engine, so the video is
+reproducible: change a scene or its narration below and rebuild.
 
-    python3 docs/video/build.py                  # writes the .mp4 beside this file
-    python3 docs/video/build.py --still 42 a.png # one frame, at second 42
+    python3 docs/video/build.py --voice en_US-lessac-medium.onnx
+    python3 docs/video/build.py --silent           # pictures and captions only
+    python3 docs/video/build.py --still 42 a.png   # one frame, at second 42
 
 Needs python3-cairo, the Noto Sans and Noto Sans Mono fonts, and ffmpeg: on
-PATH, named by $FFMPEG, or from `pip install imageio-ffmpeg`.
+PATH, named by $FFMPEG, or from `pip install imageio-ffmpeg`. The narration
+also needs `pip install piper-tts` and a voice (the .onnx file and the
+.onnx.json beside it), named by --voice or $PIPER_VOICE. Voices are at
+https://huggingface.co/rhasspy/piper-voices; this one is
+en/en_US/lessac/medium.
+
+A scene plays at its own pace where the narration is shorter than the
+pictures, and slows down where the narration needs longer.
 
 Every number shown on screen comes from docs/PROOF.md or docs/DECISIONS.md.
 Change it there first.
@@ -21,6 +30,8 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import wave
+from array import array
 from concurrent.futures import ProcessPoolExecutor
 
 import cairo
@@ -856,8 +867,8 @@ def scene_reliable(ctx, t, D):
 
 def scene_scheduler(ctx, t, D):
     header(ctx, 8, "PROMISE: NEVER LEAVE AN ORDER STUCK")
-    killed = seg(t, 6.0, 6.3)
-    over = seg(t, 7.0, 7.6)             # the standby holds the lock
+    killed = seg(t, 12.0, 12.3)
+    over = seg(t, 13.0, 13.6)            # the standby holds the lock
     reps = [(760, 300), (760, 600)]
     targets = [(1500, 300, "catalog", "open drops that are due", 1.0),
                (1500, 600, "inventory", "expire unpaid holds", 5.0)]
@@ -888,8 +899,8 @@ def scene_scheduler(ctx, t, D):
         text(ctx, f"every {every:g} s", x, y - 84, 19, AMBER, a, bold=True, mono=True, align="c")
         # ticks from whichever replica leads
         for src_i, (rx, ry) in enumerate(reps):
-            lead_from = 2.0 if src_i == 0 else 7.6
-            lead_to = 6.0 if src_i == 0 else 99
+            lead_from = 2.0 if src_i == 0 else 13.6
+            lead_to = 12.0 if src_i == 0 else 99
             p0, p1 = (rx + 172, ry), (x - 197, y)
             if lead_from <= t:
                 line(ctx, p0, p1, DIM, 0.6 * (1 - killed if src_i == 0 else over), lw=2, head=True)
@@ -902,11 +913,11 @@ def scene_scheduler(ctx, t, D):
                 if 0 <= p <= 1:
                     dot(ctx, (lerp(p0[0], p1[0], p), lerp(p0[1], p1[1], p)), 9, AMBER)
     text(ctx, "Both calls are safe to make twice at once, so a brief overlap between leaders does no harm.",
-         W / 2, 790, 22, MUTED, seg(t, 8.4, 9.2), align="c")
+         W / 2, 790, 22, MUTED, seg(t, 14.4, 15.2), align="c")
     captions(ctx, t, [
         (0.4, "The clock does no work itself. It taps two services on the shoulder, on time.",
          "POSTs catalog's open-due every second and inventory's expire every five; the services do the work."),
-        (6.2, "There are two clocks. If the one in charge dies, the spare takes over.",
+        (12.2, "There are two clocks. If the one in charge dies, the spare takes over.",
          "Two replicas; whichever holds a Postgres advisory lock leads (scheduler_leader gauge)."),
     ], D)
 
@@ -1057,28 +1068,192 @@ SCENES = [  # (draw, seconds)
     (scene_failure, 17.0),
     (scene_oversell, 18.5),
     (scene_reliable, 21.5),
-    (scene_scheduler, 14.0),
+    (scene_scheduler, 20.0),
     (scene_proof, 22.0),
     (scene_platform, 14.0),
     (scene_end, 8.0),
 ]
-TOTAL = sum(d for _, d in SCENES)
+
+# What the voice says: {scene: [(second within the scene, text)]}. Written to
+# be heard, so abbreviations are spelled the way they are spoken.
+NARRATION = {
+    "scene_title": [
+        (0.5, "This is Ticket Drop: a ticketing platform made of nine small Go services, built to stay correct "
+              "when a crowd arrives all at once."),
+    ],
+    "scene_problem": [
+        (0.3, "A ticket drop is the hardest moment for a ticketing system. There are far more buyers than "
+              "tickets, everyone arrives in the same second, and behind the scenes, services can crash and "
+              "restart."),
+        (6.6, "So the platform makes four promises. It never oversells. It never loses an order. It never "
+              "charges anyone twice. And it never leaves an order stuck."),
+    ],
+    "scene_services": [
+        (0.4, "The work is split between nine services, each with one job. Web is the shop window, and the "
+              "gateway is the front door. Catalog is the event listing. Orders is the order desk, inventory is "
+              "the stockroom, and payments is the till. Fulfillment prints the tickets, notifications is the "
+              "messenger, and the scheduler is the clock."),
+        (11.2, "Each service keeps its own Postgres database, and none of them can read another's tables. That "
+               "keeps them independent, but it also means nothing can be done in one shared transaction."),
+    ],
+    "scene_events": [
+        (0.4, "So how do they work together? They do not call each other. A service writes an event to its "
+              "own outbox table, and a relay publishes it to a single S N S topic, like pinning a note to a "
+              "shared noticeboard."),
+        (7.4, "Every consuming service has its own S Q S queue, its own mailbox, filtered so that it only "
+              "receives the event types it asked for. Here, a new order goes only to payments."),
+        (14.0, "One event can reach several services at once. And if a service is down, its messages simply "
+               "wait in the queue until it comes back."),
+    ],
+    "scene_journey": [(i * STEP + 0.2, line_) for i, line_ in enumerate([
+        "Let's follow one order. At the opening time, the scheduler tells catalog to open the drop. Catalog "
+        "publishes drop opened, and inventory creates the stock.",
+        "A customer places an order in the shop. It travels through the gateway, which only forwards routes "
+        "that are explicitly listed, to the orders service.",
+        "Before accepting, orders calls inventory directly to hold the tickets. If the drop is sold out, the "
+        "customer is told straight away.",
+        "Orders then saves the order as pending, and publishes order created.",
+        "Payments picks that up, charges the customer, and publishes payment succeeded.",
+        "Inventory turns the hold into a sale, and publishes order confirmed.",
+        "Fulfillment issues the tickets, and publishes ticket issued.",
+        "Orders marks the order as ticketed, and announces the result.",
+        "Finally, notifications tells the customer, and the shop page updates on its own.",
+    ])],
+    "scene_failure": [
+        (0.4, "Not every order ends well. If the card is declined, payments publishes payment failed. "
+              "Inventory puts the tickets back in stock, orders marks the order as failed, and the customer is "
+              "told."),
+        (8.2, "And if the payment provider is down, no answer comes at all. So every hold has an expiry. The "
+              "scheduler prompts inventory to release expired holds, the tickets return to stock, and the "
+              "order fails cleanly. Nobody is ever charged for a hold that has expired."),
+    ],
+    "scene_oversell": [
+        (0.4, "Now, the promises. First: never oversell. Imagine two buyers reaching for the last ticket at "
+              "the same instant."),
+        (5.0, "Only one of them gets it. A hold is a single database statement: subtract the tickets, but "
+              "only where enough are still available. The check and the change happen together, so there is "
+              "no gap for a second buyer to slip through."),
+        (12.0, "In testing, four hundred simultaneous requests for one hundred tickets produced exactly one "
+               "hundred holds."),
+    ],
+    "scene_reliable": [
+        (0.2, "Second: never lose an order. A service saves its change, and the event describing it, in one "
+              "database transaction. If the process is killed a moment later, the event is still in the "
+              "outbox, and the relay publishes it after the restart."),
+        (7.0, "That means an event can occasionally arrive twice. So each consumer records the I D of every "
+              "event it handles, in the same transaction as its work. A repeat is recognised and changes "
+              "nothing, which is why no one is charged twice."),
+        (14.0, "And a message that cannot be processed is retried three times, then moved to a dead letter "
+               "queue for a person to inspect, so it never blocks the messages behind it."),
+    ],
+    "scene_scheduler": [
+        (0.4, "Third: never leave an order stuck. The scheduler is only a clock. Every second it asks catalog "
+              "to open any drops that are due, and every five seconds it asks inventory to expire unpaid "
+              "holds."),
+        (11.2, "It runs as two replicas, and the one holding a Postgres advisory lock is the leader. If the "
+               "leader is killed, the standby takes the lock and carries on."),
+    ],
+    "scene_proof": [
+        (0.4, "None of this is taken on trust. A script sells out a drop, with six hundred orders competing "
+              "for one thousand tickets, and kills a service in the middle. In every run, nothing was "
+              "oversold, every accepted order finished as ticketed or failed, each customer was told exactly "
+              "once, and every replayed event was caught as a duplicate."),
+        (10.8, "A second script takes the payment provider down, and kills the scheduler's leader. The standby "
+               "took over in one second, all five orders failed cleanly, all twenty tickets returned to stock, "
+               "and nobody was charged."),
+    ],
+    "scene_platform": [
+        (0.4, "Today the whole platform runs on one machine with Docker Compose, using an emulator in place "
+              "of S N S and S Q S. Every service runs in a minimal container, as a non root user, and exposes "
+              "health checks and metrics."),
+        (6.8, "The next step is the cloud: Kubernetes on A W S, with the infrastructure defined in Terraform, "
+              "and consumers that scale with the length of their queues."),
+    ],
+    "scene_end": [
+        (0.4, "That is Ticket Drop: correct under a crowd, and recoverable when things break. The decisions, "
+              "their costs, and the evidence are all in the repository."),
+    ],
+}
+LEAD, TAIL = 0.2, 0.5   # silence before and after each piece of narration
+
+
+# ---------------------------------------------------------------- timing
+
+def plan(lengths):
+    """Lays the scenes out in video time.
+
+    lengths is {(scene index, cue index): seconds of speech}, or None for a
+    silent build. Each stretch of a scene between two cues is given at least
+    as long as its narration takes, so the pictures slow down for the voice.
+    Returns the segments (video start, video end, scene, scene start, scene
+    end), when each piece of narration starts, and the total length.
+    """
+    segments, starts, at = [], {}, 0.0
+    for si, (fn, d) in enumerate(SCENES):
+        cues = NARRATION.get(fn.__name__, []) if lengths else []
+        marks = [0.0] + [c for c, _ in cues] + [d]
+        for k in range(len(marks) - 1):
+            need = marks[k + 1] - marks[k]
+            if k >= 1:
+                last = k == len(marks) - 2   # leave the fade to the next scene clear
+                need = max(need, LEAD + lengths[(si, k - 1)] + TAIL + (0.4 if last else 0))
+                starts[(si, k - 1)] = at + LEAD
+            segments.append((at, at + need, si, marks[k], marks[k + 1]))
+            at += need
+    return segments, starts, at
+
+
+def speak(voice_path, folder):
+    """Speaks every line of narration into its own .wav; returns their lengths and the sample rate."""
+    try:
+        from piper import PiperVoice
+    except ImportError:
+        sys.exit("piper not found: pip install piper-tts, or build with --silent")
+    voice = PiperVoice.load(voice_path)
+    lengths, rate = {}, None
+    for si, (fn, _) in enumerate(SCENES):
+        for ci, (_, words) in enumerate(NARRATION.get(fn.__name__, [])):
+            path = os.path.join(folder, f"say-{si:02d}-{ci:02d}.wav")
+            with wave.open(path, "wb") as out:
+                voice.synthesize_wav(words, out)
+            with wave.open(path) as w:
+                assert w.getnchannels() == 1 and w.getsampwidth() == 2, "expected 16-bit mono from piper"
+                rate = w.getframerate()
+                lengths[(si, ci)] = w.getnframes() / rate
+    return lengths, rate
+
+
+def soundtrack(folder, starts, total, rate):
+    """Places every narration .wav at its start time on one track."""
+    track = array("h", bytes(2 * int(total * rate)))
+    for (si, ci), start in starts.items():
+        with wave.open(os.path.join(folder, f"say-{si:02d}-{ci:02d}.wav")) as w:
+            clip = array("h", w.readframes(w.getnframes()))
+        at = int(start * rate)
+        track[at:at + len(clip)] = clip[:len(track) - at]
+    path = os.path.join(folder, "narration.wav")
+    with wave.open(path, "wb") as out:
+        out.setnchannels(1)
+        out.setsampwidth(2)
+        out.setframerate(rate)
+        out.writeframes(track.tobytes())
+    return path
 
 
 # ---------------------------------------------------------------- render
 
-def draw_frame(ctx, T):
+def draw_frame(ctx, T, segments, total):
     g = cairo.LinearGradient(0, 0, 0, H)
     g.add_color_stop_rgb(0, *BG2)
     g.add_color_stop_rgb(1, *BG)
     ctx.set_source(g)
     ctx.paint()
-    t = T
-    for fn, d in SCENES:
-        if t < d or (fn, d) == SCENES[-1]:
+    for v0, v1, si, a, b in segments:
+        if T < v1:
             break
-        t -= d
-    last = fn is SCENES[-1][0]
+    fn, d = SCENES[si]
+    t = min(b, a + (T - v0) / (v1 - v0) * (b - a))
+    last = si == len(SCENES) - 1
     fade = seg(t, 0, 0.45) * (1 - seg(t, d - 0.4, d) if not last else 1 - seg(t, d - 0.8, d))
     ctx.push_group()
     fn(ctx, t, d)
@@ -1088,7 +1263,7 @@ def draw_frame(ctx, T):
     ctx.rectangle(0, 0, W, 5)
     ctx.fill()
     src(ctx, AMBER)
-    ctx.rectangle(0, 0, W * min(1, T / TOTAL), 5)
+    ctx.rectangle(0, 0, W * min(1, T / total), 5)
     ctx.fill()
 
 
@@ -1104,7 +1279,7 @@ def find_ffmpeg():
 
 
 def render_part(args):
-    exe, first, last, path = args
+    exe, first, last, path, segments, total = args
     surface = cairo.ImageSurface(cairo.FORMAT_RGB24, W, H)
     ctx = cairo.Context(surface)
     proc = subprocess.Popen(
@@ -1112,7 +1287,7 @@ def render_part(args):
          "-i", "-", "-c:v", "libx264", "-preset", "slow", "-crf", "20", "-pix_fmt", "yuv420p", path],
         stdin=subprocess.PIPE)
     for f in range(first, last):
-        draw_frame(ctx, f / FPS)
+        draw_frame(ctx, f / FPS, segments, total)
         surface.flush()
         proc.stdin.write(surface.get_data())
     proc.stdin.close()
@@ -1125,29 +1300,45 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--out", default=os.path.join(HERE, "ticketdrop-explainer.mp4"))
     ap.add_argument("--jobs", type=int, default=os.cpu_count() or 4)
+    ap.add_argument("--voice", default=os.environ.get("PIPER_VOICE"), help="the Piper voice, an .onnx file")
+    ap.add_argument("--silent", action="store_true", help="build without narration")
     ap.add_argument("--still", nargs=2, metavar=("SECOND", "PNG"), help="write one frame and exit")
     a = ap.parse_args()
 
-    if a.still:
-        surface = cairo.ImageSurface(cairo.FORMAT_RGB24, W, H)
-        draw_frame(cairo.Context(surface), float(a.still[0]))
-        surface.write_to_png(a.still[1])
-        return
-
-    exe = find_ffmpeg()
-    frames = round(TOTAL * FPS)
-    per = math.ceil(frames / a.jobs)
     with tempfile.TemporaryDirectory() as tmp:
-        parts = [(exe, i, min(i + per, frames), os.path.join(tmp, f"part{n:03d}.mp4"))
+        if a.silent:
+            lengths = None
+        elif a.voice:
+            lengths, rate = speak(a.voice, tmp)
+        elif a.still:   # near enough to check a layout without a voice installed
+            lengths = {(si, ci): len(words.split()) / 2.7 for si, (fn, _) in enumerate(SCENES)
+                       for ci, (_, words) in enumerate(NARRATION.get(fn.__name__, []))}
+        else:
+            sys.exit("name a Piper voice with --voice or $PIPER_VOICE, or build with --silent")
+        segments, starts, total = plan(lengths)
+
+        if a.still:
+            surface = cairo.ImageSurface(cairo.FORMAT_RGB24, W, H)
+            draw_frame(cairo.Context(surface), float(a.still[0]), segments, total)
+            surface.write_to_png(a.still[1])
+            return
+
+        exe = find_ffmpeg()
+        frames = round(total * FPS)
+        per = math.ceil(frames / a.jobs)
+        parts = [(exe, i, min(i + per, frames), os.path.join(tmp, f"part{n:03d}.mp4"), segments, total)
                  for n, i in enumerate(range(0, frames, per))]
         with ProcessPoolExecutor(a.jobs) as pool:
             done = list(pool.map(render_part, parts))
         listing = os.path.join(tmp, "parts.txt")
         with open(listing, "w") as f:
             f.writelines(f"file '{p}'\n" for p in done)
-        subprocess.run([exe, "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", listing, "-c", "copy",
-                        "-movflags", "+faststart", a.out], check=True)
-    print(f"{a.out}: {TOTAL:.0f} s, {frames} frames")
+        cmd = [exe, "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", listing]
+        if lengths:
+            cmd += ["-i", soundtrack(tmp, starts, total, rate), "-c:a", "aac", "-b:a", "128k"]
+        subprocess.run(cmd + ["-c:v", "copy", "-movflags", "+faststart", a.out], check=True)
+    print(f"{a.out}: {int(total // 60)} min {total % 60:.0f} s, {frames} frames,",
+          "narrated" if lengths else "silent")
 
 
 if __name__ == "__main__":
