@@ -620,3 +620,31 @@ database also avoids the default `app` database and role, which nothing uses.
 be remembered when looking for it: `kubectl get databaserole,database` lists
 five of each, not six. The bootstrap runs only once, so the `pg-catalog`
 Secret must exist before the Cluster is first applied.
+
+## 34. Pods in `ticketdrop` must run as non-root, enforced by Pod Security Admission
+
+**Decision.** The `ticketdrop` namespace, where the nine services run, carries
+the label `pod-security.kubernetes.io/enforce: restricted`. Kubernetes refuses
+any pod there that does not set `runAsNonRoot: true` and a `seccompProfile` of
+`RuntimeDefault` (pod level), and `allowPrivilegeEscalation: false` and
+`capabilities.drop: ["ALL"]` (container level). Only `enforce` is set, with no
+pinned version, so it follows the cluster's current rules.
+
+**Why.** The service images are already built to run as a non-root user,
+distroless `nonroot` with UID 65532, so the rule costs them nothing; it turns
+a property of the images into one the cluster checks. A pod that asks for
+root, or a chart that leaves out the security settings, is refused when it is
+created, not found later. The refusal was seen: a plain `nginx` pod, which runs
+as root, was rejected (`docs/evidence/phase-2/02-restricted-rejects-root-pod.txt`).
+The image's `USER` alone is not enough: Pod Security reads only the pod spec,
+so the gateway image, which does run as 65532, was also refused until the
+four settings were written into the pod.
+
+**Cost.** Every pod in the namespace, including throwaway test pods, has to
+carry the four settings. `runAsNonRoot` can only be checked for an image whose
+user is a number; one with a user name needs `runAsUser` as well. A
+read-only root filesystem is not part of `restricted`, so it is not enforced
+here and has to be set by the chart if it is wanted. With `enforce` only,
+there is no warning before a pod is refused. The rule covers only
+`ticketdrop`: `data` is not enforced (entry 27), and `cnpg-system` is (entry
+30).
