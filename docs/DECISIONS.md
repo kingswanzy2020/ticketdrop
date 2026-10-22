@@ -440,7 +440,11 @@ sets `namespace:` in its own metadata and is not relied on to be applied with
 `-n`. The `ticketdrop` namespace enforces the `restricted` Pod Security
 standard; `data` has no Pod Security label.
 
-**Why.** goaws writes `Host` into the queue URLs it returns, so a bare `goaws`
+**Why.** `data` holds what the services depend on, the emulator and the
+Postgres cluster, and `ticketdrop` holds only the nine services; on AWS the
+emulator is replaced by SNS and SQS and has no place in the cluster, and the
+network rules in step 7 can let `ticketdrop` reach `data` with one rule.
+goaws writes `Host` into the queue URLs it returns, so a bare `goaws`
 works only for pods inside `data`; the services in `ticketdrop` need the full
 name. Its queues live in memory, so one replica is the only way to have a
 single set of queues. A ConfigMap mounted with `subPath` is never refreshed in
@@ -456,3 +460,163 @@ the host, `us-east-1.goaws.data.svc.cluster.local`, and the services ignore
 them and use their own configured URLs. Nothing in `data` is checked for Pod
 Security until a label is added there. The Deployment sets requests of 50m CPU
 and 64Mi of memory, which were chosen, not measured.
+
+## 28. Each service can reach only its own database, enforced by `pg_hba`
+
+**Decision.** The Postgres cluster `pg` holds the six databases, and each has a
+login role of the same name. Two `pg_hba` lines in the Cluster manifest decide
+who may connect where:
+
+```
+hostssl sameuser all all scram-sha-256
+host    all      all all reject
+```
+
+The first lets a role connect, over TLS and with its password, only to the
+database that has its name. The second refuses every other network
+connection. CloudNativePG places these after its own fixed rules and before
+its default `host all all all scram-sha-256`, and Postgres uses the first rule
+that matches, so `reject` wins over the default.
+
+**Why.** Postgres grants `CONNECT` on every new database to `PUBLIC`, and
+CloudNativePG's `Database` resource has no field to take it away, so without a
+rule `orders` could log into `catalog`. The rule lives in the Cluster
+manifest, in git, so a rebuilt cluster has it from the start and nothing has
+to be remembered. A change to `pg_hba` is applied with a reload, not a
+restart. The operator connects over the local socket and replication uses
+certificate rules that come earlier, so neither is affected.
+
+The alternative was `REVOKE CONNECT ON DATABASE <db> FROM PUBLIC` in each of
+the six databases. That is Postgres's own privilege model and works whatever
+the roles are called, and the operator leaves such grants alone. It was not
+chosen because the statements are run by hand through `kubectl exec`, are not
+in git, and are lost when the cluster is recreated; forgetting them on a
+rebuild silently reopens every database to every role. It also leaves the
+refusal to the privilege check after authentication, where `pg_hba` refuses
+before a password is checked. The two can be combined later: REVOKE as a
+second layer, `pg_hba` as the one that is declared.
+
+**Cost.** `sameuser` works only while every role has the same name as its
+database; a role named differently, or one that needs two databases, needs
+its own line. Every network connection must use TLS, so `sslmode=disable`
+anywhere, including a `DATABASE_URL`, is refused. A refusal reads
+`pg_hba.conf rejects connection`, which says nothing about privileges, so the
+cause has to be known to be found. Inside the database nothing is restricted:
+a role that does connect is the owner of its database and can do anything in
+it.
+
+## 29. Deleting a role or database object leaves the real one in Postgres
+
+**Decision.** The `DatabaseRole` and `Database` objects for the five services
+other than catalog keep CloudNativePG's default reclaim policy, `retain`
+(`databaseRoleReclaimPolicy` and `databaseReclaimPolicy`). Deleting one of
+these objects from Kubernetes stops the operator managing it, and leaves the
+role or the database, with its data, in Postgres.
+
+**Why.** These databases hold orders, payments and stock. With `delete`, a
+manifest removed from git, a renamed file or a `kubectl delete -f` of the
+wrong directory would drop a database and everything in it. With `retain`, the
+same mistake only stops the operator managing it, and applying the object
+again picks it back up. Dropping something is then a deliberate act: setting
+`ensure: absent` on the object, or a `DROP` run by hand.
+
+**Cost.** Removing a service from the manifests does not remove its role or
+database; they stay behind until they are dropped by hand, and nothing reports
+them. Deleting the Cluster itself is not covered: its volume, and with it
+every database, goes with it, whatever this policy says.
+
+## 30. CloudNativePG is installed from its Helm chart, pinned
+
+**Decision.** The operator is installed with the `cloudnative-pg` Helm chart,
+version 0.29.1 (operator 1.30.1), as release `cnpg` in the `cnpg-system`
+namespace. Its values are in `platform/cnpg/values.yaml` in the GitOps
+repository and set only the operator's resources: requests of 100m CPU and
+128Mi of memory, a 256Mi memory limit and no CPU limit. `cnpg-system` is
+declared in `platform/namespaces.yaml` and enforces the `restricted` Pod
+Security standard, which the operator's pod meets.
+
+**Why.** The chart is what Argo CD will install on EKS, so the same version
+and values file carry over. Pinning the version means a reinstall gives the
+same operator, and 1.30 supports Kubernetes 1.34 to 1.36, which closes the
+question left open in entry 25. The operator can create pods, Secrets and
+volumes in every namespace, so nothing in its own namespace is allowed to run
+as root or privileged.
+
+**Cost.** One more tool to trust. The chart ships its CRDs as templates, so
+`helm upgrade` changes them for the whole cluster, and `helm uninstall` leaves
+them behind on purpose, because deleting them deletes every Cluster's data.
+Under Argo CD the CRDs are too large for a client-side apply and will need
+server-side apply. Moving to a newer operator means moving the chart. The
+operator's resources were chosen, not measured.
+
+## 31. One Postgres cluster, with one instance, holds all six databases
+
+**Decision.** A single CloudNativePG `Cluster` named `pg` in `data` runs one
+instance and holds the six databases. Its image is pinned to
+`ghcr.io/cloudnative-pg/postgresql:18.6-system-trixie`, the same Postgres 18.6
+that compose uses. It requests 250m CPU and 512Mi of memory, with a 1Gi
+memory limit and no CPU limit, and sets `shared_buffers` to 256MB, a quarter of
+that limit. Its volume is 2Gi on the `standard` StorageClass. Superuser access
+is left off.
+
+**Why.** One cluster is one Postgres pod and one volume on a laptop with one
+node, and matches the local compose stack. On one node, more instances would
+add replicas without adding failover, because they all go down with the node.
+Pinning the image keeps an operator upgrade from changing the Postgres
+version. No service needs a superuser.
+
+**Cost.** A restart or a heavy query affects all six services at once, and
+they are separated only by role and database, not by process or disk. With
+one instance there is no failover, and `pg-ro` has no endpoints. The
+`standard` class cannot grow a volume, so 2Gi is final, and it does not
+enforce the size either; the write-ahead log shares the volume. The sizes were
+chosen, not measured, and the pod is Burstable, where CloudNativePG recommends
+Guaranteed for production. Running six clusters is to be reconsidered for
+EKS.
+
+## 32. Database passwords are made once into ignored files, and the Secrets are created from them
+
+**Decision.** Each service's password is generated once with
+`openssl rand -hex 24` into `secrets/<service>.password` in the GitOps
+repository, which `.gitignore` keeps out of git. Two Secrets are created from
+that file with `kubectl`: `pg-<service>` in `data`, of type
+`kubernetes.io/basic-auth`, which CloudNativePG reads for the role's password,
+and `<service>-db` in `ticketdrop`, holding the `DATABASE_URL` the service
+reads. The commands are written out in `docs/guide/phase-2-commands.md`, and
+`scripts/db-secrets.sh` runs the same steps for a rebuild. External Secrets
+Operator, Sealed Secrets and SOPS were considered and not adopted now.
+
+**Why.** Each password has one source, so the two Secrets for a service always
+agree. The commands use `--dry-run=client -o yaml | kubectl apply`, so running
+them again changes nothing that is right, and keeping the files lets a rebuilt
+cluster get the same passwords. Typing the commands is part of learning what
+each Secret is for; the script is a backup. The plan moves secrets to AWS
+Secrets Manager in Phases 5 and 6, so an encrypted-in-git tool now would be
+replaced soon after.
+
+**Cost.** The password files are the only copy; losing them means new
+passwords and new Secrets. The Secrets are created by hand, not by the
+manifests in git, so a rebuild has a step that is not declarative. A
+`DATABASE_URL` reaches a pod as an environment variable, so a changed password
+needs a restart. It is not yet checked whether the Secrets Store CSI driver in
+the plan can supply CloudNativePG's Secrets: the driver creates a Kubernetes
+Secret only while a pod mounts it, and the operator mounts none. This is to be
+settled before Phase 5.
+
+## 33. The catalog role and database are left to the cluster's bootstrap
+
+**Decision.** `catalog` and its owner role are created by the Cluster's
+`bootstrap.initdb`, with the password from `pg-catalog`. They have no
+`DatabaseRole` or `Database` object; the other five services each have both.
+
+**Why.** The operator already keeps the owner's password in line with
+`pg-catalog` every time it reconciles the Cluster. A `DatabaseRole` for an
+existing role takes it over and resets every attribute it does not list, and
+two controllers would then manage one password. A `Database` object would add
+nothing to a database that already exists. Making `catalog` the bootstrap
+database also avoids the default `app` database and role, which nothing uses.
+
+**Cost.** `catalog` is managed differently from the other five, which has to
+be remembered when looking for it: `kubectl get databaserole,database` lists
+five of each, not six. The bootstrap runs only once, so the `pg-catalog`
+Secret must exist before the Cluster is first applied.
