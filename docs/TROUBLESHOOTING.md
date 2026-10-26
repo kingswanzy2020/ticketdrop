@@ -51,3 +51,23 @@ tickets marked `ticketed`.
 
 **Note.** Nothing was lost before the fix either: the outbox kept the events.
 They were late, and with a single replica they were late until the next start.
+
+## 4. `helm lint` cannot load the service chart's `values.yaml`
+
+**Seen.** The first lint of `charts/service` (in `ticketdrop-gitops`) failed
+before checking any template
+([`evidence/phase-2/fail-6-values-yaml.txt`](evidence/phase-2/fail-6-values-yaml.txt)):
+
+```
+[ERROR] values.yaml: unable to parse YAML: error converting YAML to JSON: yaml: line 24: could not find expected ':'
+Error: 1 chart(s) linted, 1 chart(s) failed
+```
+
+**Cause.** Line 24 was a note written as plain text under a service
+(`resources.requests, and limits if you want them`). YAML read it as a key
+with no `:` after it. The same kind of line appeared under every service.
+
+**Fix.** `values.yaml` now holds only `key: value` pairs, with notes in `#`
+comments. The chart was also changed to one release per service, with shared
+defaults in `values.yaml`. `helm lint` passes, leaving only the
+`icon is recommended` INFO line.

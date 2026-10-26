@@ -648,3 +648,78 @@ here and has to be set by the chart if it is wanted. With `enforce` only,
 there is no warning before a pod is refused. The rule covers only
 `ticketdrop`: `data` is not enforced (entry 27), and `cnpg-system` is (entry
 30).
+
+## 35. The services are installed from one shared Helm chart, one release per service
+
+**Decision.** `charts/service` in the GitOps repository is the only chart for
+the nine services. Each service is its own release, named after the service
+(`helm install orders charts/service -n ticketdrop -f
+charts/service/values/values-orders.yaml`). `values.yaml` holds defaults
+safe for every service; `values/values-<service>.yaml` holds only what
+differs. Names, labels and the image (`ticketdrop/<release>:dev` unless set)
+come from helpers in `templates/_helpers.tpl`. The selector uses only
+`app.kubernetes.io/name`. The namespace comes from `helm -n`, not the chart.
+A service's database Secret is named in `databaseSecret` and loaded with
+`envFrom`; when it is empty, as for gateway, web and notifications, the pod
+refers to no Secret. Every container sets a read-only root filesystem besides
+the settings Pod Security requires (entry 34).
+
+**Why.** A release per service can be upgraded, rolled back and inspected
+(`helm history orders`) without touching the other eight, and maps onto one
+ArgoCD Application per service in Phase 3. A first version put all nine
+services in one release and looped over them in the templates; it was replaced
+before it was installed; the chart now lints clean
+(`docs/evidence/phase-2/06-helm-lint-clean.txt`). A Deployment's selector
+cannot change once it exists,
+so a label that may change, such as a version, kept out of it does not break a
+later `helm upgrade`.
+
+**Cost.** Nine releases to install and track instead of one. A template
+change reaches every service at its next upgrade, so a mistake in the chart is
+a mistake in nine places. Whether the chart fits services that serve only on
+the admin port (payments, fulfillment, notifications, scheduler) is tested in
+step 7; the `http` port is not yet optional. How environments are separated,
+Helm values files per environment or Kustomize overlays on the rendered
+output, is not decided here: there is only the local environment so far.
+
+## 36. Pods stop with a 5s delay inside a 40s grace period, and get 80s to start
+
+**Decision.** The chart sets `SHUTDOWN_DELAY=5s` and
+`terminationGracePeriodSeconds: 40`, and leaves `SHUTDOWN_TIMEOUT` at its 25s
+default. All three probes use the admin port (9090): startup and liveness ask
+`/healthz`, readiness asks `/readyz` every 2s. The startup probe allows
+2s × 40 = 80s. Each container requests 50m CPU and 64Mi of memory, with no
+limits.
+
+**Why.** The delay keeps the pod serving while its endpoint is removed from
+the Service, so requests already on their way are answered. 40s is more than
+5s + 25s, so Kubernetes does not send SIGKILL while the workers stop. The
+admin server opens only after a service has waited up to 60s for Postgres and
+run its migrations, so the startup probe has to outlast that, and it keeps
+liveness from restarting a pod that is still booting. Seen on orders: ready
+within a second of starting, and when its pod was deleted it logged
+`shutdown signal received` with `delay=5s` and `stopped` 5s later, with no
+timeout warning (`docs/evidence/phase-2/06-orders-shutdown-in-order.txt`).
+The drain and the worker stops log only when one runs late, and the exit code
+is not in the capture; a clean exit is inferred from `stopped` with no SIGKILL.
+
+**Cost.** Every pod takes at least 5s to stop, which slows rollouts. A
+service that hangs in a way `/healthz` cannot see is not restarted. The
+resource requests are placeholders, not measured; without limits a pod can
+use more than it asked for. With no queue backlog the drain was instant, so
+how long a busy pod takes to stop has not been seen.
+
+## 37. The chart pulls images `IfNotPresent` locally
+
+**Decision.** `image.pullPolicy` defaults to `IfNotPresent`, with the `dev`
+tag from entry 26.
+
+**Why.** There is no registry locally, so the image has to be the one already
+on the node. Docker Desktop's cluster uses the host's image store: the orders
+pod ran `ticketdrop/orders:dev` as built by `make up`, which settles the
+question left open in entry 26.
+
+**Cost.** A rebuilt image with the same `dev` tag is not picked up by a
+running Deployment, because the pod spec does not change; the pod has to be
+deleted or the Deployment restarted. `Always` cannot be used locally. The
+policy is to be looked at again when images come from ECR in Phase 4.

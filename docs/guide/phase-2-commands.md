@@ -132,6 +132,22 @@ kubectl get events -n data --sort-by=.lastTimestamp | tail -20
 - `Database`: `cluster.name: pg`, `name` and `owner`, where the owner is the
   role of the same name.
 
+**Hint: one name per service.** The Secret's `username`, the role, the
+database and its owner must all carry the service's name (`orders` everywhere
+for orders). `pg_hba` uses `sameuser`, so a role can only reach the database
+with its own name: if any one of them differs, the service is refused. Check
+after applying:
+
+```sh
+# Database name and owner: the two columns must match on every row.
+kubectl get database -n data -o custom-columns=DATABASE:.spec.name,OWNER:.spec.owner
+# Role name and its password Secret: the Secret must be pg-<role>.
+kubectl get databaserole -n data -o custom-columns=ROLE:.spec.name,SECRET:.spec.passwordSecret.name
+# The same, inside Postgres, catalog included.
+kubectl exec -n data pg-1 -c postgres -- psql -c \
+  "select datname, pg_get_userbyid(datdba) as owner from pg_database where datname not in ('postgres','template0','template1')"
+```
+
 To read the fields:
 
 ```sh
