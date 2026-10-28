@@ -66,6 +66,7 @@ services:
 
   web:
     <<: *service
+    image: ticketdrop/web:${TAG:-dev}
     build:
       context: ../..
       dockerfile: services/web/Dockerfile
@@ -83,6 +84,7 @@ services:
 
   gateway:
     <<: *service
+    image: ticketdrop/gateway:${TAG:-dev}
     build:
       context: ../..
       dockerfile: services/gateway/Dockerfile
@@ -104,6 +106,7 @@ services:
 
   catalog:
     <<: *service
+    image: ticketdrop/catalog:${TAG:-dev}
     build:
       context: ../..
       dockerfile: services/catalog/Dockerfile
@@ -123,6 +126,7 @@ services:
 
   orders:
     <<: *service
+    image: ticketdrop/orders:${TAG:-dev}
     build:
       context: ../..
       dockerfile: services/orders/Dockerfile
@@ -140,6 +144,7 @@ services:
 
   inventory:
     <<: *service
+    image: ticketdrop/inventory:${TAG:-dev}
     build:
       context: ../..
       dockerfile: services/inventory/Dockerfile
@@ -160,6 +165,7 @@ services:
 
   payments:
     <<: *service
+    image: ticketdrop/payments:${TAG:-dev}
     build:
       context: ../..
       dockerfile: services/payments/Dockerfile
@@ -181,6 +187,7 @@ services:
 
   fulfillment:
     <<: *service
+    image: ticketdrop/fulfillment:${TAG:-dev}
     build:
       context: ../..
       dockerfile: services/fulfillment/Dockerfile
@@ -201,6 +208,7 @@ services:
 
   notifications:
     <<: *service
+    image: ticketdrop/notifications:${TAG:-dev}
     build:
       context: ../..
       dockerfile: services/notifications/Dockerfile
@@ -220,6 +228,7 @@ services:
 
   scheduler:
     <<: *service
+    image: ticketdrop/scheduler:${TAG:-dev}
     build:
       context: ../..
       dockerfile: services/scheduler/Dockerfile

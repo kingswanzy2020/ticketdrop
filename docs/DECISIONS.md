@@ -388,3 +388,438 @@ a second, and every open drop page asks for the ticket count every two
 seconds. That load grows with the audience and has not been measured yet. With
 JavaScript off, an order's page has to be reloaded by hand to see it finish.
 Prices are shown in dollars because the catalog stores no currency.
+
+## 25. Kubernetes 1.36, locally and on EKS
+
+**Decision.** The local cluster and the EKS cluster both run Kubernetes 1.36,
+on the latest patch available when each is created. Locally that is Docker
+Desktop's kind provisioner, which is the only one that lets the version be
+chosen, with one node. kubectl stays at its newer version, which the skew
+policy allows against a 1.36 server.
+
+**Why.** KEDA is on the path that scales `fulfillment` from zero, and its
+v2.21 is tested against Kubernetes 1.34 to 1.36; no KEDA release lists 1.37.
+Karpenter supports 1.36 from 1.13. 1.36 is supported upstream until
+2027-06-28 and on EKS until 2027-08-02, which covers the project. 1.37 was
+released upstream on 2026-08-26 and reached EKS on 2026-10-01, so problems in
+Traefik, CloudNativePG or KEDA charts would be met here first. Using one
+version in both places means an API difference cannot make a manifest pass
+locally and fail on EKS.
+
+**Cost.** 1.37 is skipped, and an upgrade is due as 1.36 nears the end of its
+support. The decision is to be revisited when KEDA's compatibility table
+lists 1.37. CloudNativePG's supported versions were not checked when this was
+written and need checking before its chart is pinned. The name kind mode gives
+the kubeconfig context on Linux was not confirmed, and the workbook expects
+`docker-desktop`.
+
+## 26. Local images are tagged `dev`, not `latest`
+
+**Decision.** Each service in `deploy/local/compose.yaml` names its image
+`ticketdrop/<service>:${TAG:-dev}`. The tag is `dev` unless `TAG` is set, for
+example to a short commit ID. Nothing in the cluster refers to `latest`.
+
+**Why.** Kubernetes pulls an image tagged `latest` from a registry every time,
+and there is no registry locally, so the pod fails with `ErrImagePull`. A
+pull policy of `Always` fails the same way for any tag. A running pod does not
+pick up a rebuilt image either way; it needs to be recreated. A tag that
+changes with each build changes the pod spec, so a rollout follows by itself.
+
+**Cost.** The first build creates new images beside the old
+`ticketdrop-<service>:latest` ones, which are removed by hand. The pull policy
+the chart uses locally is not decided here; it is set when the chart is
+written. Whether the cluster can see images built on the host has not been
+checked.
+
+## 27. The emulator runs in `data` as one pod, and names itself by its cluster address
+
+**Decision.** goaws runs in the `data` namespace as a ConfigMap, a Deployment
+with one replica and a Service on port 4100. Its `Host` setting is the
+Service's full in-cluster name, `goaws.data.svc.cluster.local`. Every manifest
+sets `namespace:` in its own metadata and is not relied on to be applied with
+`-n`. The `ticketdrop` namespace enforces the `restricted` Pod Security
+standard; `data` has no Pod Security label.
+
+**Why.** `data` holds what the services depend on, the emulator and the
+Postgres cluster, and `ticketdrop` holds only the nine services; on AWS the
+emulator is replaced by SNS and SQS and has no place in the cluster, and the
+network rules in step 7 can let `ticketdrop` reach `data` with one rule.
+goaws writes `Host` into the queue URLs it returns, so a bare `goaws`
+works only for pods inside `data`; the services in `ticketdrop` need the full
+name. Its queues live in memory, so one replica is the only way to have a
+single set of queues. A ConfigMap mounted with `subPath` is never refreshed in
+a running pod, and goaws reads the file only at start, so a change to it is
+followed by a restart of the Deployment. `data` is left unenforced because the
+goaws image runs as root and what the database operator's pods need has not
+been checked yet (step 5).
+
+**Cost.** Any restart of the pod, from a rollout, a drain or a crash, empties
+every queue and the topic, and messages in flight are lost; the liveness probe
+is lenient for that reason. The URLs it returns carry the region in front of
+the host, `us-east-1.goaws.data.svc.cluster.local`, and the services ignore
+them and use their own configured URLs. Nothing in `data` is checked for Pod
+Security until a label is added there. The Deployment sets requests of 50m CPU
+and 64Mi of memory, which were chosen, not measured.
+
+## 28. Each service can reach only its own database, enforced by `pg_hba`
+
+**Decision.** The Postgres cluster `pg` holds the six databases, and each has a
+login role of the same name. Two `pg_hba` lines in the Cluster manifest decide
+who may connect where:
+
+```
+hostssl sameuser all all scram-sha-256
+host    all      all all reject
+```
+
+The first lets a role connect, over TLS and with its password, only to the
+database that has its name. The second refuses every other network
+connection. CloudNativePG places these after its own fixed rules and before
+its default `host all all all scram-sha-256`, and Postgres uses the first rule
+that matches, so `reject` wins over the default.
+
+**Why.** Postgres grants `CONNECT` on every new database to `PUBLIC`, and
+CloudNativePG's `Database` resource has no field to take it away, so without a
+rule `orders` could log into `catalog`. The rule lives in the Cluster
+manifest, in git, so a rebuilt cluster has it from the start and nothing has
+to be remembered. A change to `pg_hba` is applied with a reload, not a
+restart. The operator connects over the local socket and replication uses
+certificate rules that come earlier, so neither is affected.
+
+The alternative was `REVOKE CONNECT ON DATABASE <db> FROM PUBLIC` in each of
+the six databases. That is Postgres's own privilege model and works whatever
+the roles are called, and the operator leaves such grants alone. It was not
+chosen because the statements are run by hand through `kubectl exec`, are not
+in git, and are lost when the cluster is recreated; forgetting them on a
+rebuild silently reopens every database to every role. It also leaves the
+refusal to the privilege check after authentication, where `pg_hba` refuses
+before a password is checked. The two can be combined later: REVOKE as a
+second layer, `pg_hba` as the one that is declared.
+
+**Cost.** `sameuser` works only while every role has the same name as its
+database; a role named differently, or one that needs two databases, needs
+its own line. Every network connection must use TLS, so `sslmode=disable`
+anywhere, including a `DATABASE_URL`, is refused. A refusal reads
+`pg_hba.conf rejects connection`, which says nothing about privileges, so the
+cause has to be known to be found. Inside the database nothing is restricted:
+a role that does connect is the owner of its database and can do anything in
+it.
+
+## 29. Deleting a role or database object leaves the real one in Postgres
+
+**Decision.** The `DatabaseRole` and `Database` objects for the five services
+other than catalog keep CloudNativePG's default reclaim policy, `retain`
+(`databaseRoleReclaimPolicy` and `databaseReclaimPolicy`). Deleting one of
+these objects from Kubernetes stops the operator managing it, and leaves the
+role or the database, with its data, in Postgres.
+
+**Why.** These databases hold orders, payments and stock. With `delete`, a
+manifest removed from git, a renamed file or a `kubectl delete -f` of the
+wrong directory would drop a database and everything in it. With `retain`, the
+same mistake only stops the operator managing it, and applying the object
+again picks it back up. Dropping something is then a deliberate act: setting
+`ensure: absent` on the object, or a `DROP` run by hand.
+
+**Cost.** Removing a service from the manifests does not remove its role or
+database; they stay behind until they are dropped by hand, and nothing reports
+them. Deleting the Cluster itself is not covered: its volume, and with it
+every database, goes with it, whatever this policy says.
+
+## 30. CloudNativePG is installed from its Helm chart, pinned
+
+**Decision.** The operator is installed with the `cloudnative-pg` Helm chart,
+version 0.29.1 (operator 1.30.1), as release `cnpg` in the `cnpg-system`
+namespace. Its values are in `platform/cnpg/values.yaml` in the GitOps
+repository and set only the operator's resources: requests of 100m CPU and
+128Mi of memory, a 256Mi memory limit and no CPU limit. `cnpg-system` is
+declared in `platform/namespaces.yaml` and enforces the `restricted` Pod
+Security standard, which the operator's pod meets.
+
+**Why.** The chart is what Argo CD will install on EKS, so the same version
+and values file carry over. Pinning the version means a reinstall gives the
+same operator, and 1.30 supports Kubernetes 1.34 to 1.36, which closes the
+question left open in entry 25. The operator can create pods, Secrets and
+volumes in every namespace, so nothing in its own namespace is allowed to run
+as root or privileged.
+
+**Cost.** One more tool to trust. The chart ships its CRDs as templates, so
+`helm upgrade` changes them for the whole cluster, and `helm uninstall` leaves
+them behind on purpose, because deleting them deletes every Cluster's data.
+Under Argo CD the CRDs are too large for a client-side apply and will need
+server-side apply. Moving to a newer operator means moving the chart. The
+operator's resources were chosen, not measured.
+
+## 31. One Postgres cluster, with one instance, holds all six databases
+
+**Decision.** A single CloudNativePG `Cluster` named `pg` in `data` runs one
+instance and holds the six databases. Its image is pinned to
+`ghcr.io/cloudnative-pg/postgresql:18.6-system-trixie`, the same Postgres 18.6
+that compose uses. It requests 250m CPU and 512Mi of memory, with a 1Gi
+memory limit and no CPU limit, and sets `shared_buffers` to 256MB, a quarter of
+that limit. Its volume is 2Gi on the `standard` StorageClass. Superuser access
+is left off.
+
+**Why.** One cluster is one Postgres pod and one volume on a laptop with one
+node, and matches the local compose stack. On one node, more instances would
+add replicas without adding failover, because they all go down with the node.
+Pinning the image keeps an operator upgrade from changing the Postgres
+version. No service needs a superuser.
+
+**Cost.** A restart or a heavy query affects all six services at once, and
+they are separated only by role and database, not by process or disk. With
+one instance there is no failover, and `pg-ro` has no endpoints. The
+`standard` class cannot grow a volume, so 2Gi is final, and it does not
+enforce the size either; the write-ahead log shares the volume. The sizes were
+chosen, not measured, and the pod is Burstable, where CloudNativePG recommends
+Guaranteed for production. Running six clusters is to be reconsidered for
+EKS.
+
+## 32. Database passwords are made once into ignored files, and the Secrets are created from them
+
+**Decision.** Each service's password is generated once with
+`openssl rand -hex 24` into `secrets/<service>.password` in the GitOps
+repository, which `.gitignore` keeps out of git. Two Secrets are created from
+that file with `kubectl`: `pg-<service>` in `data`, of type
+`kubernetes.io/basic-auth`, which CloudNativePG reads for the role's password,
+and `<service>-db` in `ticketdrop`, holding the `DATABASE_URL` the service
+reads. The commands are written out in `docs/guide/phase-2-commands.md`, and
+`scripts/db-secrets.sh` runs the same steps for a rebuild. External Secrets
+Operator, Sealed Secrets and SOPS were considered and not adopted now.
+
+**Why.** Each password has one source, so the two Secrets for a service always
+agree. The commands use `--dry-run=client -o yaml | kubectl apply`, so running
+them again changes nothing that is right, and keeping the files lets a rebuilt
+cluster get the same passwords. Typing the commands is part of learning what
+each Secret is for; the script is a backup. The plan moves secrets to AWS
+Secrets Manager in Phases 5 and 6, so an encrypted-in-git tool now would be
+replaced soon after.
+
+**Cost.** The password files are the only copy; losing them means new
+passwords and new Secrets. The Secrets are created by hand, not by the
+manifests in git, so a rebuild has a step that is not declarative. A
+`DATABASE_URL` reaches a pod as an environment variable, so a changed password
+needs a restart. It is not yet checked whether the Secrets Store CSI driver in
+the plan can supply CloudNativePG's Secrets: the driver creates a Kubernetes
+Secret only while a pod mounts it, and the operator mounts none. This is to be
+settled before Phase 5.
+
+## 33. The catalog role and database are left to the cluster's bootstrap
+
+**Decision.** `catalog` and its owner role are created by the Cluster's
+`bootstrap.initdb`, with the password from `pg-catalog`. They have no
+`DatabaseRole` or `Database` object; the other five services each have both.
+
+**Why.** The operator already keeps the owner's password in line with
+`pg-catalog` every time it reconciles the Cluster. A `DatabaseRole` for an
+existing role takes it over and resets every attribute it does not list, and
+two controllers would then manage one password. A `Database` object would add
+nothing to a database that already exists. Making `catalog` the bootstrap
+database also avoids the default `app` database and role, which nothing uses.
+
+**Cost.** `catalog` is managed differently from the other five, which has to
+be remembered when looking for it: `kubectl get databaserole,database` lists
+five of each, not six. The bootstrap runs only once, so the `pg-catalog`
+Secret must exist before the Cluster is first applied.
+
+## 34. Pods in `ticketdrop` must run as non-root, enforced by Pod Security Admission
+
+**Decision.** The `ticketdrop` namespace, where the nine services run, carries
+the label `pod-security.kubernetes.io/enforce: restricted`. Kubernetes refuses
+any pod there that does not set `runAsNonRoot: true` and a `seccompProfile` of
+`RuntimeDefault` (pod level), and `allowPrivilegeEscalation: false` and
+`capabilities.drop: ["ALL"]` (container level). Only `enforce` is set, with no
+pinned version, so it follows the cluster's current rules.
+
+**Why.** The service images are already built to run as a non-root user,
+distroless `nonroot` with UID 65532, so the rule costs them nothing; it turns
+a property of the images into one the cluster checks. A pod that asks for
+root, or a chart that leaves out the security settings, is refused when it is
+created, not found later. The refusal was seen: a plain `nginx` pod, which runs
+as root, was rejected (`docs/evidence/phase-2/02-restricted-rejects-root-pod.txt`).
+The image's `USER` alone is not enough: Pod Security reads only the pod spec,
+so the gateway image, which does run as 65532, was also refused until the
+four settings were written into the pod.
+
+**Cost.** Every pod in the namespace, including throwaway test pods, has to
+carry the four settings. `runAsNonRoot` can only be checked for an image whose
+user is a number; one with a user name needs `runAsUser` as well. A
+read-only root filesystem is not part of `restricted`, so it is not enforced
+here and has to be set by the chart if it is wanted. With `enforce` only,
+there is no warning before a pod is refused. The rule covers only
+`ticketdrop`: `data` is not enforced (entry 27), and `cnpg-system` is (entry
+30).
+
+## 35. The services are installed from one shared Helm chart, one release per service
+
+**Decision.** `charts/service` in the GitOps repository is the only chart for
+the nine services. Each service is its own release, named after the service
+(`helm install orders charts/service -n ticketdrop -f
+charts/service/values/values-orders.yaml`). `values.yaml` holds defaults
+safe for every service; `values/values-<service>.yaml` holds only what
+differs. Names, labels and the image (`ticketdrop/<release>:dev` unless set)
+come from helpers in `templates/_helpers.tpl`. The selector uses only
+`app.kubernetes.io/name`. The namespace comes from `helm -n`, not the chart.
+A service's database Secret is named in `databaseSecret` and loaded with
+`envFrom`; when it is empty, as for gateway, web and notifications, the pod
+refers to no Secret. Every container sets a read-only root filesystem besides
+the settings Pod Security requires (entry 34).
+
+**Why.** A release per service can be upgraded, rolled back and inspected
+(`helm history orders`) without touching the other eight, and maps onto one
+ArgoCD Application per service in Phase 3. A first version put all nine
+services in one release and looped over them in the templates; it was replaced
+before it was installed; the chart now lints clean
+(`docs/evidence/phase-2/06-helm-lint-clean.txt`). A Deployment's selector
+cannot change once it exists,
+so a label that may change, such as a version, kept out of it does not break a
+later `helm upgrade`.
+
+**Cost.** Nine releases to install and track instead of one. A template
+change reaches every service at its next upgrade, so a mistake in the chart is
+a mistake in nine places. Whether the chart fits services that serve only on
+the admin port (payments, fulfillment, notifications, scheduler) is tested in
+step 7; the `http` port is optional (entry 38). How environments are separated,
+Helm values files per environment or Kustomize overlays on the rendered
+output, is not decided here: there is only the local environment so far.
+
+## 36. Pods stop with a 5s delay inside a 40s grace period, and get 80s to start
+
+**Decision.** The chart sets `SHUTDOWN_DELAY=5s` and
+`terminationGracePeriodSeconds: 40`, and leaves `SHUTDOWN_TIMEOUT` at its 25s
+default. All three probes use the admin port (9090): startup and liveness ask
+`/healthz`, readiness asks `/readyz` every 2s. The startup probe allows
+2s × 40 = 80s. Each container requests 50m CPU and 64Mi of memory, with no
+limits.
+
+**Why.** The delay keeps the pod serving while its endpoint is removed from
+the Service, so requests already on their way are answered. 40s is more than
+5s + 25s, so Kubernetes does not send SIGKILL while the workers stop. The
+admin server opens only after a service has waited up to 60s for Postgres and
+run its migrations, so the startup probe has to outlast that, and it keeps
+liveness from restarting a pod that is still booting. Seen on orders: ready
+within a second of starting, and when its pod was deleted it logged
+`shutdown signal received` with `delay=5s` and `stopped` 5s later, with no
+timeout warning (`docs/evidence/phase-2/06-orders-shutdown-in-order.txt`).
+The drain and the worker stops log only when one runs late, and the exit code
+is not in the capture; a clean exit is inferred from `stopped` with no SIGKILL.
+
+**Cost.** Every pod takes at least 5s to stop, which slows rollouts. A
+service that hangs in a way `/healthz` cannot see is not restarted. The
+resource requests are placeholders, not measured; without limits a pod can
+use more than it asked for. With no queue backlog the drain was instant, so
+how long a busy pod takes to stop has not been seen.
+
+## 37. The chart pulls images `IfNotPresent` locally
+
+**Decision.** `image.pullPolicy` defaults to `IfNotPresent`, with the `dev`
+tag from entry 26.
+
+**Why.** There is no registry locally, so the image has to be the one already
+on the node. Docker Desktop's cluster uses the host's image store: the orders
+pod ran `ticketdrop/orders:dev` as built by `make up`, which settles the
+question left open in entry 26.
+
+**Cost.** A rebuilt image with the same `dev` tag is not picked up by a
+running Deployment, because the pod spec does not change; the pod has to be
+deleted or the Deployment restarted. `Always` cannot be used locally. The
+policy is to be looked at again when images come from ECR in Phase 4.
+
+## 38. A service turns off the chart's `http` port with `http: null`
+
+**Decision.** `ports.http` defaults to 8080 in the chart's `values.yaml`. A
+service with no app server sets `ports: {http: null}` in its values file, and
+the templates then leave the `http` entry out of both the container's ports
+and the Service, using `{{- with .Values.ports.http }}`. The `admin` port
+(9090) is always present, so the Service always exists. Payments,
+fulfillment, notifications and scheduler set `http: null`; web, gateway,
+catalog, orders and inventory keep 8080.
+
+**Why.** The four services pass no app handler to `service.Serve`, so nothing
+listens on 8080 in their pods, and a port named there would point at nothing.
+One key does the job: the number is both the setting and the switch, where an
+`enabled` flag beside it could disagree with it and `0` is not a port. The
+Service stays because Prometheus scrapes `/metrics` on the admin port through
+it. Checked with `helm template`: orders renders exactly as before, and with
+`ports.http=null` both the Deployment and the Service carry only `admin`;
+`helm lint` and a server-side dry run of the payments objects pass.
+
+**Cost.** Leaving `http` out of a values file does not remove it: Helm merges
+the file over the defaults, so the service still gets 8080. Only an explicit
+`null` deletes a default, which is easy to miss. The number labels the port
+only; the app listens on `HTTP_ADDR`, so changing the number in values
+without setting `HTTP_ADDR` sends the Service's traffic to a port nothing
+listens on.
+
+## 39. A service with more than one replica gets a PDB of `maxUnavailable: 1`
+
+**Decision.** The chart's `templates/pdb.yaml` renders a `policy/v1`
+PodDisruptionBudget only when `replicaCount` is above 1. It sets
+`maxUnavailable` from `pdb.maxUnavailable` (default 1), selects on the same
+`service.selectorLabels` as the Deployment, and sets
+`unhealthyPodEvictionPolicy: AlwaysAllow`.
+
+**Why.** A drain, or later Karpenter consolidating nodes, evicts pods through
+the eviction API, which honours the budget, so a two-replica service keeps
+one pod serving while the other moves. A budget on one replica either
+protects nothing (`maxUnavailable: 1`) or blocks every drain
+(`minAvailable: 1`), so none is rendered. A whole number is used because a
+percentage rounds, which on two or three replicas gives a different number
+than intended. `AlwaysAllow` lets a drain evict a pod that is not ready,
+since a crash-looping pod serves nothing and would otherwise stall the drain.
+Checked with `helm template`: no PDB at one replica, and at two its
+`matchLabels` equal the Deployment's; lint and a server-side dry run of all
+nine services pass.
+
+**Cost.** The budget guards only voluntary evictions: a node failing, or
+`kubectl delete pod`, ignores it. A service left at one replica has no
+protection and drops traffic while its pod moves. Because of `AlwaysAllow`,
+a drain during a rollout can evict a new pod that has not passed readiness yet.
+
+## 40. Replicas spread by hostname as a preference locally, by zone on EKS
+
+**Decision.** The Deployment carries one `topologySpreadConstraints` entry
+from `topologySpread` in values: `maxSkew: 1`, selecting on
+`service.selectorLabels`, with `matchLabelKeys: [pod-template-hash]`. The
+chart default is `topologyKey: kubernetes.io/hostname` with
+`whenUnsatisfiable: ScheduleAnyway`. On EKS it is to be
+`topology.kubernetes.io/zone` with `DoNotSchedule`, set by that environment's
+values. How the environment values are layered is not decided yet.
+
+**Why.** Two replicas on one node, or in one zone, go down together, which
+defeats the PDB in entry 39. The local cluster has one node, labelled with a
+hostname and no zone. Under a `DoNotSchedule` constraint a node without the
+key's label is not eligible at all, so a zone key would leave every pod
+Pending here, and hostname with `DoNotSchedule` would allow only one replica.
+`ScheduleAnyway` makes the spread a scoring preference, so both replicas still
+land. `pod-template-hash` makes a rolling update count only the new
+ReplicaSet's pods. Locally this only proves the block renders and the pods
+schedule.
+
+**Cost.** Locally the spread does nothing, so an error in the zone setting
+will first show on EKS. On EKS `DoNotSchedule` by zone leaves a replica
+Pending whenever no zone has room, instead of crowding one zone. Karpenter
+then has to bring up a node in the right zone.
+
+## 41. Six services run two replicas; the three queue consumers run one
+
+**Decision.** Web, gateway, catalog, orders, inventory and scheduler set
+`replicaCount: 2` in their values files, which also gives each a PDB (entry
+39). Payments, fulfillment and notifications keep the chart default of 1.
+
+**Why.** The first five answer HTTP requests, so with one pod a drain or a
+crash is an outage for callers; two replicas behind the PDB keep one serving.
+The scheduler runs two so a standby is ready to take the advisory lock when
+the leader goes; only the leader acts (`scheduler_leader` 1 on one pod, 0 on
+the other, in `07-scheduler-one-leader.txt`). The three consumers serve no
+requests: while their pod is away, messages wait in SQS and are processed
+when it returns, so a gap is a delay, not an error. Fulfillment's replica
+count is to be handed to KEDA, which scales it on queue depth (step 10).
+Evidence: `docs/evidence/phase-2/07-nine-services-ready.txt` (15 pods Ready,
+six PDBs each allowing one disruption) and `07-order-ticketed-shopfront.png`
+(an order through the shopfront ending confirmed).
+
+**Cost.** Six extra pods on a single node, all requesting CPU and memory. On
+one node the second replica does not survive the node itself failing; that
+needs the zone spread on EKS (entry 40). A consumer with one replica falls
+behind during a drain or a crash, and payments' delay holds tickets that
+much longer.

@@ -1,0 +1,9 @@
+Thu Oct 22 02:51:50 PM UTC 2026
+ current_user | current_database 
+--------------+------------------
+ orders       | orders
+(1 row)
+
+
+Thu Oct 22 02:50:49 PM UTC 2026
+psql: error: connection to server at "127.0.0.1", port 15432 failed: FATAL:  pg_hba.conf rejects connection for host "127.0.0.1", user "orders", database "catalog", SSL encryption

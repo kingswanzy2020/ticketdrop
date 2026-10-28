@@ -1,0 +1,16 @@
+Thu Oct 22 02:49:00 PM UTC 2026
+NAME   AGE    INSTANCES   READY   STATUS                     PRIMARY
+pg     132m   1           1       Cluster in healthy state   pg-1
+NAME                                          AGE   CLUSTER   PG NAME       APPLIED   MESSAGE
+databaserole.postgresql.cnpg.io/fulfillment   15m   pg        fulfillment   true      
+databaserole.postgresql.cnpg.io/inventory     15m   pg        inventory     true      
+databaserole.postgresql.cnpg.io/orders        15m   pg        orders        true      
+databaserole.postgresql.cnpg.io/payments      15m   pg        payments      true      
+databaserole.postgresql.cnpg.io/scheduler     15m   pg        scheduler     true      
+
+NAME                                      AGE   CLUSTER   PG NAME       APPLIED   MESSAGE
+database.postgresql.cnpg.io/fulfillment   15m   pg        fulfillment   true      
+database.postgresql.cnpg.io/inventory     15m   pg        inventory     true      
+database.postgresql.cnpg.io/orders        15m   pg        orders        true      
+database.postgresql.cnpg.io/payments      15m   pg        payments      true      
+database.postgresql.cnpg.io/scheduler     15m   pg        scheduler     true      

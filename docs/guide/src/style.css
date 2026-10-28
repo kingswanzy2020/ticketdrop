@@ -111,3 +111,14 @@ td.num { font-family: var(--mono); color: var(--muted); font-variant-numeric: ta
 .progress { font: 0.85rem var(--mono); color: var(--muted); }
 p.prose { display: block; }
 td code, th code { overflow-wrap: normal; white-space: nowrap; }
+
+/* Evidence: what to capture into docs/evidence/ before moving on */
+.step dt.cap { color: var(--accent); }
+.step dd.cap { background: var(--accent-soft); border-radius: 8px; padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
+.step dd.cap.none { background: none; padding: 0; color: var(--muted); }
+.step dd.cap code { background: var(--surface); }
+.cap ul { gap: 8px; }
+.once { display: inline-block; font: 600 0.68rem var(--mono); letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; background: var(--accent); color: var(--surface); white-space: nowrap; vertical-align: 1px; }
+.stub .capture { font-size: 0.9rem; background: var(--accent-soft); border-radius: 8px; padding: 8px 12px; }
+.stub .capture b, .capture-label { font: 600 0.72rem var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.stub .capture code { background: var(--surface); }

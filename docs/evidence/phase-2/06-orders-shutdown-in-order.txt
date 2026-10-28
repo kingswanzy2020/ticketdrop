@@ -1,0 +1,4 @@
+{"time":"2026-10-26T11:42:38.761907602Z","level":"INFO","msg":"starting","service":"orders","version":"dev"}
+{"time":"2026-10-26T11:42:38.773787951Z","level":"INFO","msg":"ready","service":"orders","http_addr":":8080","admin_addr":":9090","workers":2}
+{"time":"2026-10-26T11:45:53.030046838Z","level":"INFO","msg":"shutdown signal received","service":"orders","delay":"5s"}
+{"time":"2026-10-26T11:45:58.032098593Z","level":"INFO","msg":"stopped","service":"orders"}

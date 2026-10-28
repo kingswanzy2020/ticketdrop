@@ -113,19 +113,30 @@ td.num { font-family: var(--mono); color: var(--muted); font-variant-numeric: ta
 .progress { font: 0.85rem var(--mono); color: var(--muted); }
 p.prose { display: block; }
 td code, th code { overflow-wrap: normal; white-space: nowrap; }
+
+/* Evidence: what to capture into docs/evidence/ before moving on */
+.step dt.cap { color: var(--accent); }
+.step dd.cap { background: var(--accent-soft); border-radius: 8px; padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
+.step dd.cap.none { background: none; padding: 0; color: var(--muted); }
+.step dd.cap code { background: var(--surface); }
+.cap ul { gap: 8px; }
+.once { display: inline-block; font: 600 0.68rem var(--mono); letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; background: var(--accent); color: var(--surface); white-space: nowrap; vertical-align: 1px; }
+.stub .capture { font-size: 0.9rem; background: var(--accent-soft); border-radius: 8px; padding: 8px 12px; }
+.stub .capture b, .capture-label { font: 600 0.72rem var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.stub .capture code { background: var(--surface); }
 </style>
 
 <div class="wrap">
 
 <header class="top">
-  <span class="eyebrow">Field guide · updated 3 October 2026</span>
+  <span class="eyebrow">Field guide · updated 13 October 2026</span>
   <h1>TicketDrop</h1>
   <p class="lede">A ticket-selling platform made of small Go services, built to run on Amazon EKS. It exists to practise, and to prove, the work of a DevOps engineer: packaging, deploying, scaling, securing and observing a real system.</p>
   <ul class="facts">
     <li><b>9 of 9</b> services built</li>
     <li>Phase <b>1</b> in progress</li>
     <li>Phase <b>2</b> is next, and it is yours</li>
-    <li><b>24</b> decisions recorded</li>
+    <li><b>25</b> decisions recorded</li>
     <li>AWS spend so far: <b>none</b></li>
   </ul>
 </header>
@@ -307,6 +318,126 @@ td code, th code { overflow-wrap: normal; white-space: nowrap; }
 </section>
 
 <section>
+  <span class="eyebrow">In the cluster</span>
+  <h2>What each values file sets, and who calls whom</h2>
+  <p class="muted prose">From <code>charts/service/values/values-&lt;service&gt;.yaml</code> in <code>ticketdrop-gitops/</code>. Anything not listed comes from the chart's <code>values.yaml</code>. A service that leaves <code>http</code> out still gets 8080; only <code>http: null</code> removes it (DECISIONS entry 38).</p>
+  <div class="table"><table>
+    <thead><tr><th>Service</th><th><code>http</code></th><th>Database Secret</th><th>Event settings</th><th>Calls by URL</th><th>Its own settings</th></tr></thead>
+    <tbody>
+      <tr><td><code>web</code></td><td><span class="pill done">8080</span></td><td>none</td><td>none</td><td><code>API_URL</code> → gateway</td><td>none</td></tr>
+      <tr><td><code>gateway</code></td><td><span class="pill done">8080</span></td><td>none</td><td>none</td><td><code>CATALOG_URL</code>, <code>ORDERS_URL</code>, <code>INVENTORY_URL</code></td><td>none</td></tr>
+      <tr><td><code>catalog</code></td><td><span class="pill done">8080</span></td><td><code>catalog-db</code></td><td>topic only: publishes <code>drop.opened</code>, consumes nothing</td><td>none</td><td>none</td></tr>
+      <tr><td><code>orders</code></td><td><span class="pill done">8080</span></td><td><code>orders-db</code></td><td>topic + <code>orders-events</code></td><td><code>INVENTORY_URL</code></td><td>none</td></tr>
+      <tr><td><code>inventory</code></td><td><span class="pill done">8080</span></td><td><code>inventory-db</code></td><td>topic + <code>inventory-events</code></td><td>none</td><td><code>HOLD_TTL=10m</code>, <code>HOLD_GRACE=30s</code></td></tr>
+      <tr><td><code>payments</code></td><td><span class="pill now">null</span></td><td><code>payments-db</code></td><td>topic + <code>payments-events</code></td><td>none</td><td><code>PAYMENT_LATENCY=100ms</code>, <code>PAYMENT_DECLINE_RATE=0.1</code>, <code>PAYMENT_ERROR_RATE=0</code></td></tr>
+      <tr><td><code>fulfillment</code></td><td><span class="pill now">null</span></td><td><code>fulfillment-db</code></td><td>topic + <code>fulfillment-events</code></td><td>none</td><td><code>CONSUMER_CONCURRENCY=4</code>, <code>SIMULATED_RENDER_TIME=200ms</code></td></tr>
+      <tr><td><code>notifications</code></td><td><span class="pill now">null</span></td><td>none</td><td><code>notifications-events</code> only: publishes nothing, so no topic</td><td>none</td><td>none</td></tr>
+      <tr><td><code>scheduler</code></td><td><span class="pill now">null</span></td><td><code>scheduler-db</code></td><td>none</td><td><code>CATALOG_URL</code>, <code>INVENTORY_URL</code></td><td>none. Runs as two replicas; one leads.</td></tr>
+    </tbody>
+  </table></div>
+
+  <figure class="diagram"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 -4 1968 824" role="img" aria-label="Which services call which, by URL" font-family="ui-sans-serif, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<rect x="-4" y="-4" width="1968" height="824" fill="#f6faff"/>
+<defs>
+<marker id="m1e1e1e" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1e1e1e"/></marker>
+<marker id="m6741d9" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#6741d9"/></marker>
+</defs>
+<rect x="20.0" y="110.0" width="1920.0" height="560.0" rx="10" fill="#eef6ff" stroke="#1971c2" stroke-width="2" stroke-dasharray="7 6"/>
+<rect x="60.0" y="330.0" width="280.0" height="78.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<image x="74.0" y="347.0" width="44.0" height="44.0" href="data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjMDBBREQ4IiByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+R288L3RpdGxlPjxwYXRoIGQ9Ik0xLjgxMSAxMC4yMzFjLS4wNDcgMC0uMDU4LS4wMjMtLjAzNS0uMDU5bC4yNDYtLjMxNWMuMDIzLS4wMzUuMDgxLS4wNTguMTI4LS4wNThoNC4xNzJjLjA0NiAwIC4wNTguMDM1LjAzNS4wN2wtLjE5OS4zMDNjLS4wMjMuMDM2LS4wODIuMDctLjExNy4wN3pNLjA0NyAxMS4zMDZjLS4wNDcgMC0uMDU5LS4wMjMtLjAzNS0uMDU4bC4yNDUtLjMxNmMuMDIzLS4wMzUuMDgyLS4wNTguMTI5LS4wNThoNS4zMjhjLjA0NyAwIC4wNy4wMzUuMDU4LjA3bC0uMDkzLjI4Yy0uMDEyLjA0Ny0uMDU4LjA3LS4xMDUuMDd6bTIuODI4IDEuMDc1Yy0uMDQ3IDAtLjA1OS0uMDM1LS4wMzUtLjA3bC4xNjMtLjI5MmMuMDIzLS4wMzUuMDctLjA3LjExNy0uMDdoMi4zMzdjLjA0NyAwIC4wNy4wMzUuMDcuMDgybC0uMDIzLjI4YzAgLjA0Ny0uMDQ3LjA4Mi0uMDgyLjA4MnptMTIuMTI5LTIuMzZjLS43MzYuMTg3LTEuMjM5LjMyNy0xLjk2My41MTQtLjE3Ni4wNDYtLjE4Ny4wNTgtLjM0LS4xMTctLjE3NC0uMTk5LS4zMDMtLjMyNy0uNTQ4LS40NDQtLjczNy0uMzYyLTEuNDUtLjI1Ny0yLjExNS4xNzUtLjc5NS41MTQtMS4yMDQgMS4yNzQtMS4xOTIgMi4yMi4wMTEuOTM1LjY1NCAxLjcwNiAxLjU3NyAxLjgzNS43OTUuMTA1IDEuNDYtLjE3NSAxLjk4Ny0uNzcuMTA1LS4xMy4xOTgtLjI3LjMxNS0uNDM0SDEwLjQ3Yy0uMjQ1IDAtLjMwNC0uMTUyLS4yMjItLjM1LjE1Mi0uMzYyLjQzMi0uOTcuNTk2LTEuMjc0YS4zMTUuMzE1IDAgMDEuMjkyLS4xODdoNC4yNTNjLS4wMjMuMzE2LS4wMjMuNjMxLS4wNy45NDdhNC45ODMgNC45ODMgMCAwMS0uOTU4IDIuMjljLS44NDEgMS4xMS0xLjk0IDEuOC0zLjMzIDEuOTg2LTEuMTQ1LjE1Mi0yLjIwOS0uMDctMy4xNDMtLjc3LS44NjUtLjY1NS0xLjM1Ni0xLjUyLTEuNDg0LTIuNTk1LS4xNTItMS4yNzQuMjIyLTIuNDE5Ljk5My0zLjQyNC44My0xLjA4NiAxLjkyOC0xLjc3NiAzLjI3Mi0yLjAyIDEuMDk4LS4yIDIuMTUtLjA3IDMuMDk2LjU3MS42Mi40MSAxLjA2My45NyAxLjM1NiAxLjY0OC4wNy4xMDUuMDIzLjE2NC0uMTE3LjJtMy44NjggNi40NjFjLTEuMDY0LS4wMjQtMi4wMzQtLjMyOC0yLjg1Mi0xLjAyOWEzLjY2NSAzLjY2NSAwIDAxLTEuMjYyLTIuMjU1Yy0uMjEtMS4zMi4xNTItMi40ODkuOTQ3LTMuNTI5Ljg1My0xLjEyMiAxLjg4MS0xLjcwNiAzLjI3Mi0xLjk1IDEuMTkyLS4yMSAyLjMxNC0uMDk1IDMuMzMuNTk1LjkyMy42MyAxLjQ5NiAxLjQ4NCAxLjY0OCAyLjYwNS4xOTggMS41NzgtLjI1NyAyLjg2My0xLjM0NCAzLjk2Mi0uNzcxLjc4My0xLjcxOCAxLjI3My0yLjgwNSAxLjQ5NS0uMzE1LjA2LS42My4wNy0uOTM0LjEwNnptMi43OC00LjcyYy0uMDExLS4xNTMtLjAxMS0uMjctLjAzNC0uMzg3LS4yMS0xLjE1Ny0xLjI3NC0xLjgxLTIuMzg0LTEuNTU0LTEuMDg3LjI0NS0xLjc4OC45MzUtMi4wNDUgMi4wMzMtLjIxLjkxMi4yMzQgMS44MzUgMS4wNzUgMi4yMS42NDMuMjggMS4yODUuMjQ0IDEuOTA1LS4wNy45MjMtLjQ4IDEuNDI1LTEuMjI4IDEuNDg0LTIuMjMzeiIvPjwvc3ZnPg=="/>
+<rect x="276.0" y="336.0" width="56.0" height="22.0" rx="10" fill="#99e9f2" stroke="#0c8599" stroke-width="1"/>
+<rect x="500.0" y="330.0" width="300.0" height="78.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<image x="514.0" y="347.0" width="44.0" height="44.0" href="data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjMDBBREQ4IiByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+R288L3RpdGxlPjxwYXRoIGQ9Ik0xLjgxMSAxMC4yMzFjLS4wNDcgMC0uMDU4LS4wMjMtLjAzNS0uMDU5bC4yNDYtLjMxNWMuMDIzLS4wMzUuMDgxLS4wNTguMTI4LS4wNThoNC4xNzJjLjA0NiAwIC4wNTguMDM1LjAzNS4wN2wtLjE5OS4zMDNjLS4wMjMuMDM2LS4wODIuMDctLjExNy4wN3pNLjA0NyAxMS4zMDZjLS4wNDcgMC0uMDU5LS4wMjMtLjAzNS0uMDU4bC4yNDUtLjMxNmMuMDIzLS4wMzUuMDgyLS4wNTguMTI5LS4wNThoNS4zMjhjLjA0NyAwIC4wNy4wMzUuMDU4LjA3bC0uMDkzLjI4Yy0uMDEyLjA0Ny0uMDU4LjA3LS4xMDUuMDd6bTIuODI4IDEuMDc1Yy0uMDQ3IDAtLjA1OS0uMDM1LS4wMzUtLjA3bC4xNjMtLjI5MmMuMDIzLS4wMzUuMDctLjA3LjExNy0uMDdoMi4zMzdjLjA0NyAwIC4wNy4wMzUuMDcuMDgybC0uMDIzLjI4YzAgLjA0Ny0uMDQ3LjA4Mi0uMDgyLjA4MnptMTIuMTI5LTIuMzZjLS43MzYuMTg3LTEuMjM5LjMyNy0xLjk2My41MTQtLjE3Ni4wNDYtLjE4Ny4wNTgtLjM0LS4xMTctLjE3NC0uMTk5LS4zMDMtLjMyNy0uNTQ4LS40NDQtLjczNy0uMzYyLTEuNDUtLjI1Ny0yLjExNS4xNzUtLjc5NS41MTQtMS4yMDQgMS4yNzQtMS4xOTIgMi4yMi4wMTEuOTM1LjY1NCAxLjcwNiAxLjU3NyAxLjgzNS43OTUuMTA1IDEuNDYtLjE3NSAxLjk4Ny0uNzcuMTA1LS4xMy4xOTgtLjI3LjMxNS0uNDM0SDEwLjQ3Yy0uMjQ1IDAtLjMwNC0uMTUyLS4yMjItLjM1LjE1Mi0uMzYyLjQzMi0uOTcuNTk2LTEuMjc0YS4zMTUuMzE1IDAgMDEuMjkyLS4xODdoNC4yNTNjLS4wMjMuMzE2LS4wMjMuNjMxLS4wNy45NDdhNC45ODMgNC45ODMgMCAwMS0uOTU4IDIuMjljLS44NDEgMS4xMS0xLjk0IDEuOC0zLjMzIDEuOTg2LTEuMTQ1LjE1Mi0yLjIwOS0uMDctMy4xNDMtLjc3LS44NjUtLjY1NS0xLjM1Ni0xLjUyLTEuNDg0LTIuNTk1LS4xNTItMS4yNzQuMjIyLTIuNDE5Ljk5My0zLjQyNC44My0xLjA4NiAxLjkyOC0xLjc3NiAzLjI3Mi0yLjAyIDEuMDk4LS4yIDIuMTUtLjA3IDMuMDk2LjU3MS42Mi40MSAxLjA2My45NyAxLjM1NiAxLjY0OC4wNy4xMDUuMDIzLjE2NC0uMTE3LjJtMy44NjggNi40NjFjLTEuMDY0LS4wMjQtMi4wMzQtLjMyOC0yLjg1Mi0xLjAyOWEzLjY2NSAzLjY2NSAwIDAxLTEuMjYyLTIuMjU1Yy0uMjEtMS4zMi4xNTItMi40ODkuOTQ3LTMuNTI5Ljg1My0xLjEyMiAxLjg4MS0xLjcwNiAzLjI3Mi0xLjk1IDEuMTkyLS4yMSAyLjMxNC0uMDk1IDMuMzMuNTk1LjkyMy42MyAxLjQ5NiAxLjQ4NCAxLjY0OCAyLjYwNS4xOTggMS41NzgtLjI1NyAyLjg2My0xLjM0NCAzLjk2Mi0uNzcxLjc4My0xLjcxOCAxLjI3My0yLjgwNSAxLjQ5NS0uMzE1LjA2LS42My4wNy0uOTM0LjEwNnptMi43OC00LjcyYy0uMDExLS4xNTMtLjAxMS0uMjctLjAzNC0uMzg3LS4yMS0xLjE1Ny0xLjI3NC0xLjgxLTIuMzg0LTEuNTU0LTEuMDg3LjI0NS0xLjc4OC45MzUtMi4wNDUgMi4wMzMtLjIxLjkxMi4yMzQgMS44MzUgMS4wNzUgMi4yMS42NDMuMjggMS4yODUuMjQ0IDEuOTA1LS4wNy45MjMtLjQ4IDEuNDI1LTEuMjI4IDEuNDg0LTIuMjMzeiIvPjwvc3ZnPg=="/>
+<rect x="736.0" y="336.0" width="56.0" height="22.0" rx="10" fill="#99e9f2" stroke="#0c8599" stroke-width="1"/>
+<rect x="1060.0" y="160.0" width="300.0" height="78.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<image x="1074.0" y="177.0" width="44.0" height="44.0" href="data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjMDBBREQ4IiByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+R288L3RpdGxlPjxwYXRoIGQ9Ik0xLjgxMSAxMC4yMzFjLS4wNDcgMC0uMDU4LS4wMjMtLjAzNS0uMDU5bC4yNDYtLjMxNWMuMDIzLS4wMzUuMDgxLS4wNTguMTI4LS4wNThoNC4xNzJjLjA0NiAwIC4wNTguMDM1LjAzNS4wN2wtLjE5OS4zMDNjLS4wMjMuMDM2LS4wODIuMDctLjExNy4wN3pNLjA0NyAxMS4zMDZjLS4wNDcgMC0uMDU5LS4wMjMtLjAzNS0uMDU4bC4yNDUtLjMxNmMuMDIzLS4wMzUuMDgyLS4wNTguMTI5LS4wNThoNS4zMjhjLjA0NyAwIC4wNy4wMzUuMDU4LjA3bC0uMDkzLjI4Yy0uMDEyLjA0Ny0uMDU4LjA3LS4xMDUuMDd6bTIuODI4IDEuMDc1Yy0uMDQ3IDAtLjA1OS0uMDM1LS4wMzUtLjA3bC4xNjMtLjI5MmMuMDIzLS4wMzUuMDctLjA3LjExNy0uMDdoMi4zMzdjLjA0NyAwIC4wNy4wMzUuMDcuMDgybC0uMDIzLjI4YzAgLjA0Ny0uMDQ3LjA4Mi0uMDgyLjA4MnptMTIuMTI5LTIuMzZjLS43MzYuMTg3LTEuMjM5LjMyNy0xLjk2My41MTQtLjE3Ni4wNDYtLjE4Ny4wNTgtLjM0LS4xMTctLjE3NC0uMTk5LS4zMDMtLjMyNy0uNTQ4LS40NDQtLjczNy0uMzYyLTEuNDUtLjI1Ny0yLjExNS4xNzUtLjc5NS41MTQtMS4yMDQgMS4yNzQtMS4xOTIgMi4yMi4wMTEuOTM1LjY1NCAxLjcwNiAxLjU3NyAxLjgzNS43OTUuMTA1IDEuNDYtLjE3NSAxLjk4Ny0uNzcuMTA1LS4xMy4xOTgtLjI3LjMxNS0uNDM0SDEwLjQ3Yy0uMjQ1IDAtLjMwNC0uMTUyLS4yMjItLjM1LjE1Mi0uMzYyLjQzMi0uOTcuNTk2LTEuMjc0YS4zMTUuMzE1IDAgMDEuMjkyLS4xODdoNC4yNTNjLS4wMjMuMzE2LS4wMjMuNjMxLS4wNy45NDdhNC45ODMgNC45ODMgMCAwMS0uOTU4IDIuMjljLS44NDEgMS4xMS0xLjk0IDEuOC0zLjMzIDEuOTg2LTEuMTQ1LjE1Mi0yLjIwOS0uMDctMy4xNDMtLjc3LS44NjUtLjY1NS0xLjM1Ni0xLjUyLTEuNDg0LTIuNTk1LS4xNTItMS4yNzQuMjIyLTIuNDE5Ljk5My0zLjQyNC44My0xLjA4NiAxLjkyOC0xLjc3NiAzLjI3Mi0yLjAyIDEuMDk4LS4yIDIuMTUtLjA3IDMuMDk2LjU3MS42Mi40MSAxLjA2My45NyAxLjM1NiAxLjY0OC4wNy4xMDUuMDIzLjE2NC0uMTE3LjJtMy44NjggNi40NjFjLTEuMDY0LS4wMjQtMi4wMzQtLjMyOC0yLjg1Mi0xLjAyOWEzLjY2NSAzLjY2NSAwIDAxLTEuMjYyLTIuMjU1Yy0uMjEtMS4zMi4xNTItMi40ODkuOTQ3LTMuNTI5Ljg1My0xLjEyMiAxLjg4MS0xLjcwNiAzLjI3Mi0xLjk1IDEuMTkyLS4yMSAyLjMxNC0uMDk1IDMuMzMuNTk1LjkyMy42MyAxLjQ5NiAxLjQ4NCAxLjY0OCAyLjYwNS4xOTggMS41NzgtLjI1NyAyLjg2My0xLjM0NCAzLjk2Mi0uNzcxLjc4My0xLjcxOCAxLjI3My0yLjgwNSAxLjQ5NS0uMzE1LjA2LS42My4wNy0uOTM0LjEwNnptMi43OC00LjcyYy0uMDExLS4xNTMtLjAxMS0uMjctLjAzNC0uMzg3LS4yMS0xLjE1Ny0xLjI3NC0xLjgxLTIuMzg0LTEuNTU0LTEuMDg3LjI0NS0xLjc4OC45MzUtMi4wNDUgMi4wMzMtLjIxLjkxMi4yMzQgMS44MzUgMS4wNzUgMi4yMS42NDMuMjggMS4yODUuMjQ0IDEuOTA1LS4wNy45MjMtLjQ4IDEuNDI1LTEuMjI4IDEuNDg0LTIuMjMzeiIvPjwvc3ZnPg=="/>
+<rect x="1296.0" y="166.0" width="56.0" height="22.0" rx="10" fill="#99e9f2" stroke="#0c8599" stroke-width="1"/>
+<rect x="1060.0" y="330.0" width="300.0" height="78.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<image x="1074.0" y="347.0" width="44.0" height="44.0" href="data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjMDBBREQ4IiByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+R288L3RpdGxlPjxwYXRoIGQ9Ik0xLjgxMSAxMC4yMzFjLS4wNDcgMC0uMDU4LS4wMjMtLjAzNS0uMDU5bC4yNDYtLjMxNWMuMDIzLS4wMzUuMDgxLS4wNTguMTI4LS4wNThoNC4xNzJjLjA0NiAwIC4wNTguMDM1LjAzNS4wN2wtLjE5OS4zMDNjLS4wMjMuMDM2LS4wODIuMDctLjExNy4wN3pNLjA0NyAxMS4zMDZjLS4wNDcgMC0uMDU5LS4wMjMtLjAzNS0uMDU4bC4yNDUtLjMxNmMuMDIzLS4wMzUuMDgyLS4wNTguMTI5LS4wNThoNS4zMjhjLjA0NyAwIC4wNy4wMzUuMDU4LjA3bC0uMDkzLjI4Yy0uMDEyLjA0Ny0uMDU4LjA3LS4xMDUuMDd6bTIuODI4IDEuMDc1Yy0uMDQ3IDAtLjA1OS0uMDM1LS4wMzUtLjA3bC4xNjMtLjI5MmMuMDIzLS4wMzUuMDctLjA3LjExNy0uMDdoMi4zMzdjLjA0NyAwIC4wNy4wMzUuMDcuMDgybC0uMDIzLjI4YzAgLjA0Ny0uMDQ3LjA4Mi0uMDgyLjA4MnptMTIuMTI5LTIuMzZjLS43MzYuMTg3LTEuMjM5LjMyNy0xLjk2My41MTQtLjE3Ni4wNDYtLjE4Ny4wNTgtLjM0LS4xMTctLjE3NC0uMTk5LS4zMDMtLjMyNy0uNTQ4LS40NDQtLjczNy0uMzYyLTEuNDUtLjI1Ny0yLjExNS4xNzUtLjc5NS41MTQtMS4yMDQgMS4yNzQtMS4xOTIgMi4yMi4wMTEuOTM1LjY1NCAxLjcwNiAxLjU3NyAxLjgzNS43OTUuMTA1IDEuNDYtLjE3NSAxLjk4Ny0uNzcuMTA1LS4xMy4xOTgtLjI3LjMxNS0uNDM0SDEwLjQ3Yy0uMjQ1IDAtLjMwNC0uMTUyLS4yMjItLjM1LjE1Mi0uMzYyLjQzMi0uOTcuNTk2LTEuMjc0YS4zMTUuMzE1IDAgMDEuMjkyLS4xODdoNC4yNTNjLS4wMjMuMzE2LS4wMjMuNjMxLS4wNy45NDdhNC45ODMgNC45ODMgMCAwMS0uOTU4IDIuMjljLS44NDEgMS4xMS0xLjk0IDEuOC0zLjMzIDEuOTg2LTEuMTQ1LjE1Mi0yLjIwOS0uMDctMy4xNDMtLjc3LS44NjUtLjY1NS0xLjM1Ni0xLjUyLTEuNDg0LTIuNTk1LS4xNTItMS4yNzQuMjIyLTIuNDE5Ljk5My0zLjQyNC44My0xLjA4NiAxLjkyOC0xLjc3NiAzLjI3Mi0yLjAyIDEuMDk4LS4yIDIuMTUtLjA3IDMuMDk2LjU3MS42Mi40MSAxLjA2My45NyAxLjM1NiAxLjY0OC4wNy4xMDUuMDIzLjE2NC0uMTE3LjJtMy44NjggNi40NjFjLTEuMDY0LS4wMjQtMi4wMzQtLjMyOC0yLjg1Mi0xLjAyOWEzLjY2NSAzLjY2NSAwIDAxLTEuMjYyLTIuMjU1Yy0uMjEtMS4zMi4xNTItMi40ODkuOTQ3LTMuNTI5Ljg1My0xLjEyMiAxLjg4MS0xLjcwNiAzLjI3Mi0xLjk1IDEuMTkyLS4yMSAyLjMxNC0uMDk1IDMuMzMuNTk1LjkyMy42MyAxLjQ5NiAxLjQ4NCAxLjY0OCAyLjYwNS4xOTggMS41NzgtLjI1NyAyLjg2My0xLjM0NCAzLjk2Mi0uNzcxLjc4My0xLjcxOCAxLjI3My0yLjgwNSAxLjQ5NS0uMzE1LjA2LS42My4wNy0uOTM0LjEwNnptMi43OC00LjcyYy0uMDExLS4xNTMtLjAxMS0uMjctLjAzNC0uMzg3LS4yMS0xLjE1Ny0xLjI3NC0xLjgxLTIuMzg0LTEuNTU0LTEuMDg3LjI0NS0xLjc4OC45MzUtMi4wNDUgMi4wMzMtLjIxLjkxMi4yMzQgMS44MzUgMS4wNzUgMi4yMS42NDMuMjggMS4yODUuMjQ0IDEuOTA1LS4wNy45MjMtLjQ4IDEuNDI1LTEuMjI4IDEuNDg0LTIuMjMzeiIvPjwvc3ZnPg=="/>
+<rect x="1296.0" y="336.0" width="56.0" height="22.0" rx="10" fill="#99e9f2" stroke="#0c8599" stroke-width="1"/>
+<rect x="1060.0" y="500.0" width="300.0" height="78.0" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<image x="1074.0" y="517.0" width="44.0" height="44.0" href="data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjMDBBREQ4IiByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+R288L3RpdGxlPjxwYXRoIGQ9Ik0xLjgxMSAxMC4yMzFjLS4wNDcgMC0uMDU4LS4wMjMtLjAzNS0uMDU5bC4yNDYtLjMxNWMuMDIzLS4wMzUuMDgxLS4wNTguMTI4LS4wNThoNC4xNzJjLjA0NiAwIC4wNTguMDM1LjAzNS4wN2wtLjE5OS4zMDNjLS4wMjMuMDM2LS4wODIuMDctLjExNy4wN3pNLjA0NyAxMS4zMDZjLS4wNDcgMC0uMDU5LS4wMjMtLjAzNS0uMDU4bC4yNDUtLjMxNmMuMDIzLS4wMzUuMDgyLS4wNTguMTI5LS4wNThoNS4zMjhjLjA0NyAwIC4wNy4wMzUuMDU4LjA3bC0uMDkzLjI4Yy0uMDEyLjA0Ny0uMDU4LjA3LS4xMDUuMDd6bTIuODI4IDEuMDc1Yy0uMDQ3IDAtLjA1OS0uMDM1LS4wMzUtLjA3bC4xNjMtLjI5MmMuMDIzLS4wMzUuMDctLjA3LjExNy0uMDdoMi4zMzdjLjA0NyAwIC4wNy4wMzUuMDcuMDgybC0uMDIzLjI4YzAgLjA0Ny0uMDQ3LjA4Mi0uMDgyLjA4MnptMTIuMTI5LTIuMzZjLS43MzYuMTg3LTEuMjM5LjMyNy0xLjk2My41MTQtLjE3Ni4wNDYtLjE4Ny4wNTgtLjM0LS4xMTctLjE3NC0uMTk5LS4zMDMtLjMyNy0uNTQ4LS40NDQtLjczNy0uMzYyLTEuNDUtLjI1Ny0yLjExNS4xNzUtLjc5NS41MTQtMS4yMDQgMS4yNzQtMS4xOTIgMi4yMi4wMTEuOTM1LjY1NCAxLjcwNiAxLjU3NyAxLjgzNS43OTUuMTA1IDEuNDYtLjE3NSAxLjk4Ny0uNzcuMTA1LS4xMy4xOTgtLjI3LjMxNS0uNDM0SDEwLjQ3Yy0uMjQ1IDAtLjMwNC0uMTUyLS4yMjItLjM1LjE1Mi0uMzYyLjQzMi0uOTcuNTk2LTEuMjc0YS4zMTUuMzE1IDAgMDEuMjkyLS4xODdoNC4yNTNjLS4wMjMuMzE2LS4wMjMuNjMxLS4wNy45NDdhNC45ODMgNC45ODMgMCAwMS0uOTU4IDIuMjljLS44NDEgMS4xMS0xLjk0IDEuOC0zLjMzIDEuOTg2LTEuMTQ1LjE1Mi0yLjIwOS0uMDctMy4xNDMtLjc3LS44NjUtLjY1NS0xLjM1Ni0xLjUyLTEuNDg0LTIuNTk1LS4xNTItMS4yNzQuMjIyLTIuNDE5Ljk5My0zLjQyNC44My0xLjA4NiAxLjkyOC0xLjc3NiAzLjI3Mi0yLjAyIDEuMDk4LS4yIDIuMTUtLjA3IDMuMDk2LjU3MS42Mi40MSAxLjA2My45NyAxLjM1NiAxLjY0OC4wNy4xMDUuMDIzLjE2NC0uMTE3LjJtMy44NjggNi40NjFjLTEuMDY0LS4wMjQtMi4wMzQtLjMyOC0yLjg1Mi0xLjAyOWEzLjY2NSAzLjY2NSAwIDAxLTEuMjYyLTIuMjU1Yy0uMjEtMS4zMi4xNTItMi40ODkuOTQ3LTMuNTI5Ljg1My0xLjEyMiAxLjg4MS0xLjcwNiAzLjI3Mi0xLjk1IDEuMTkyLS4yMSAyLjMxNC0uMDk1IDMuMzMuNTk1LjkyMy42MyAxLjQ5NiAxLjQ4NCAxLjY0OCAyLjYwNS4xOTggMS41NzgtLjI1NyAyLjg2My0xLjM0NCAzLjk2Mi0uNzcxLjc4My0xLjcxOCAxLjI3My0yLjgwNSAxLjQ5NS0uMzE1LjA2LS42My4wNy0uOTM0LjEwNnptMi43OC00LjcyYy0uMDExLS4xNTMtLjAxMS0uMjctLjAzNC0uMzg3LS4yMS0xLjE1Ny0xLjI3NC0xLjgxLTIuMzg0LTEuNTU0LTEuMDg3LjI0NS0xLjc4OC45MzUtMi4wNDUgMi4wMzMtLjIxLjkxMi4yMzQgMS44MzUgMS4wNzUgMi4yMS42NDMuMjggMS4yODUuMjQ0IDEuOTA1LS4wNy45MjMtLjQ4IDEuNDI1LTEuMjI4IDEuNDg0LTIuMjMzeiIvPjwvc3ZnPg=="/>
+<rect x="1296.0" y="506.0" width="56.0" height="22.0" rx="10" fill="#99e9f2" stroke="#0c8599" stroke-width="1"/>
+<rect x="1600.0" y="330.0" width="300.0" height="78.0" rx="10" fill="#e9ecef" stroke="#868e96" stroke-width="2"/>
+<image x="1614.0" y="347.0" width="44.0" height="44.0" href="data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjMDBBREQ4IiByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+R288L3RpdGxlPjxwYXRoIGQ9Ik0xLjgxMSAxMC4yMzFjLS4wNDcgMC0uMDU4LS4wMjMtLjAzNS0uMDU5bC4yNDYtLjMxNWMuMDIzLS4wMzUuMDgxLS4wNTguMTI4LS4wNThoNC4xNzJjLjA0NiAwIC4wNTguMDM1LjAzNS4wN2wtLjE5OS4zMDNjLS4wMjMuMDM2LS4wODIuMDctLjExNy4wN3pNLjA0NyAxMS4zMDZjLS4wNDcgMC0uMDU5LS4wMjMtLjAzNS0uMDU4bC4yNDUtLjMxNmMuMDIzLS4wMzUuMDgyLS4wNTguMTI5LS4wNThoNS4zMjhjLjA0NyAwIC4wNy4wMzUuMDU4LjA3bC0uMDkzLjI4Yy0uMDEyLjA0Ny0uMDU4LjA3LS4xMDUuMDd6bTIuODI4IDEuMDc1Yy0uMDQ3IDAtLjA1OS0uMDM1LS4wMzUtLjA3bC4xNjMtLjI5MmMuMDIzLS4wMzUuMDctLjA3LjExNy0uMDdoMi4zMzdjLjA0NyAwIC4wNy4wMzUuMDcuMDgybC0uMDIzLjI4YzAgLjA0Ny0uMDQ3LjA4Mi0uMDgyLjA4MnptMTIuMTI5LTIuMzZjLS43MzYuMTg3LTEuMjM5LjMyNy0xLjk2My41MTQtLjE3Ni4wNDYtLjE4Ny4wNTgtLjM0LS4xMTctLjE3NC0uMTk5LS4zMDMtLjMyNy0uNTQ4LS40NDQtLjczNy0uMzYyLTEuNDUtLjI1Ny0yLjExNS4xNzUtLjc5NS41MTQtMS4yMDQgMS4yNzQtMS4xOTIgMi4yMi4wMTEuOTM1LjY1NCAxLjcwNiAxLjU3NyAxLjgzNS43OTUuMTA1IDEuNDYtLjE3NSAxLjk4Ny0uNzcuMTA1LS4xMy4xOTgtLjI3LjMxNS0uNDM0SDEwLjQ3Yy0uMjQ1IDAtLjMwNC0uMTUyLS4yMjItLjM1LjE1Mi0uMzYyLjQzMi0uOTcuNTk2LTEuMjc0YS4zMTUuMzE1IDAgMDEuMjkyLS4xODdoNC4yNTNjLS4wMjMuMzE2LS4wMjMuNjMxLS4wNy45NDdhNC45ODMgNC45ODMgMCAwMS0uOTU4IDIuMjljLS44NDEgMS4xMS0xLjk0IDEuOC0zLjMzIDEuOTg2LTEuMTQ1LjE1Mi0yLjIwOS0uMDctMy4xNDMtLjc3LS44NjUtLjY1NS0xLjM1Ni0xLjUyLTEuNDg0LTIuNTk1LS4xNTItMS4yNzQuMjIyLTIuNDE5Ljk5My0zLjQyNC44My0xLjA4NiAxLjkyOC0xLjc3NiAzLjI3Mi0yLjAyIDEuMDk4LS4yIDIuMTUtLjA3IDMuMDk2LjU3MS42Mi40MSAxLjA2My45NyAxLjM1NiAxLjY0OC4wNy4xMDUuMDIzLjE2NC0uMTE3LjJtMy44NjggNi40NjFjLTEuMDY0LS4wMjQtMi4wMzQtLjMyOC0yLjg1Mi0xLjAyOWEzLjY2NSAzLjY2NSAwIDAxLTEuMjYyLTIuMjU1Yy0uMjEtMS4zMi4xNTItMi40ODkuOTQ3LTMuNTI5Ljg1My0xLjEyMiAxLjg4MS0xLjcwNiAzLjI3Mi0xLjk1IDEuMTkyLS4yMSAyLjMxNC0uMDk1IDMuMzMuNTk1LjkyMy42MyAxLjQ5NiAxLjQ4NCAxLjY0OCAyLjYwNS4xOTggMS41NzgtLjI1NyAyLjg2My0xLjM0NCAzLjk2Mi0uNzcxLjc4My0xLjcxOCAxLjI3My0yLjgwNSAxLjQ5NS0uMzE1LjA2LS42My4wNy0uOTM0LjEwNnptMi43OC00LjcyYy0uMDExLS4xNTMtLjAxMS0uMjctLjAzNC0uMzg3LS4yMS0xLjE1Ny0xLjI3NC0xLjgxLTIuMzg0LTEuNTU0LTEuMDg3LjI0NS0xLjc4OC45MzUtMi4wNDUgMi4wMzMtLjIxLjkxMi4yMzQgMS44MzUgMS4wNzUgMi4yMS42NDMuMjggMS4yODUuMjQ0IDEuOTA1LS4wNy45MjMtLjQ4IDEuNDI1LTEuMjI4IDEuNDg0LTIuMjMzeiIvPjwvc3ZnPg=="/>
+<rect x="1796.0" y="336.0" width="96.0" height="22.0" rx="10" fill="#99e9f2" stroke="#0c8599" stroke-width="1"/>
+<rect x="20.0" y="700.0" width="820.0" height="59.0" rx="10" fill="#ffec99" stroke="#f08c00" stroke-width="2"/>
+<rect x="1300.0" y="700.0" width="451.0" height="96.0" rx="10" fill="#ffffff" stroke="#868e96" stroke-width="1"/>
+<polyline points="340.0,369.0 500.0,369.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="800.0,369.0 1060.0,199.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="800.0,369.0 1060.0,369.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="800.0,369.0 1060.0,539.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="1210.0,408.0 1210.0,500.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="1600.0,369.0 1360.0,199.0" fill="none" stroke="#6741d9" stroke-width="2" marker-end="url(#m6741d9)"/>
+<polyline points="1600.0,369.0 1360.0,539.0" fill="none" stroke="#6741d9" stroke-width="2" marker-end="url(#m6741d9)"/>
+<polyline points="1314.0,748.0 1358.0,748.0" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#m1e1e1e)"/>
+<polyline points="1314.0,774.0 1358.0,774.0" fill="none" stroke="#6741d9" stroke-width="2" marker-end="url(#m6741d9)"/>
+<rect x="387.6" y="358.2" width="64.9" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="881.9" y="273.2" width="96.2" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="885.8" y="358.2" width="88.4" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="874.0" y="443.2" width="111.9" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="1122.7" y="443.2" width="174.6" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="1384.8" y="273.2" width="190.3" height="21.5" rx="4" fill="#ffffff"/>
+<rect x="1377.0" y="443.2" width="206.0" height="21.5" rx="4" fill="#ffffff"/>
+<text font-size="34" text-anchor="start" fill="#1e1e1e"><tspan x="40.0" y="54.0">Services that call each other</tspan></text>
+<text font-size="16" text-anchor="start" fill="#495057"><tspan x="40.0" y="86.0">each arrow is a URL in the caller&#x27;s values file; every target serves on :8080</tspan></text>
+<text font-size="17" text-anchor="start" fill="#1971c2"><tspan x="36.0" y="139.0">namespace ticketdrop: the short Service name resolves</tspan></text>
+<text font-size="17" text-anchor="start" fill="#1e1e1e"><tspan x="130.0" y="366.5">web</tspan></text>
+<text font-size="13" text-anchor="start" fill="#495057"><tspan x="130.0" y="386.5">the shopfront</tspan></text>
+<text font-size="13" text-anchor="start" fill="#0c8599"><tspan x="284.0" y="352.0">:8080</tspan></text>
+<text font-size="17" text-anchor="start" fill="#1e1e1e"><tspan x="570.0" y="366.5">gateway</tspan></text>
+<text font-size="13" text-anchor="start" fill="#495057"><tspan x="570.0" y="386.5">the public API</tspan></text>
+<text font-size="13" text-anchor="start" fill="#0c8599"><tspan x="744.0" y="352.0">:8080</tspan></text>
+<text font-size="17" text-anchor="start" fill="#1e1e1e"><tspan x="1130.0" y="196.5">catalog</tspan></text>
+<text font-size="13" text-anchor="start" fill="#495057"><tspan x="1130.0" y="216.5">drops and prices</tspan></text>
+<text font-size="13" text-anchor="start" fill="#0c8599"><tspan x="1304.0" y="182.0">:8080</tspan></text>
+<text font-size="17" text-anchor="start" fill="#1e1e1e"><tspan x="1130.0" y="366.5">orders</tspan></text>
+<text font-size="13" text-anchor="start" fill="#495057"><tspan x="1130.0" y="386.5">takes the order</tspan></text>
+<text font-size="13" text-anchor="start" fill="#0c8599"><tspan x="1304.0" y="352.0">:8080</tspan></text>
+<text font-size="17" text-anchor="start" fill="#1e1e1e"><tspan x="1130.0" y="536.5">inventory</tspan></text>
+<text font-size="13" text-anchor="start" fill="#495057"><tspan x="1130.0" y="556.5">guards the stock</tspan></text>
+<text font-size="13" text-anchor="start" fill="#0c8599"><tspan x="1304.0" y="522.0">:8080</tspan></text>
+<text font-size="17" text-anchor="start" fill="#1e1e1e"><tspan x="1670.0" y="366.5">scheduler</tspan></text>
+<text font-size="13" text-anchor="start" fill="#495057"><tspan x="1670.0" y="386.5">2 pods, 1 leads</tspan></text>
+<text font-size="13" text-anchor="start" fill="#0c8599"><tspan x="1804.0" y="352.0">:9090 only</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="420.0" y="374.2">API_URL</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="930.0" y="289.2">CATALOG_URL</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="930.0" y="374.2">ORDERS_URL</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="930.0" y="459.2">INVENTORY_URL</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#1e1e1e"><tspan x="1210.0" y="459.2">INVENTORY_URL  (hold)</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#6741d9"><tspan x="1480.0" y="289.2">CATALOG_URL  (every 1s)</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#6741d9"><tspan x="1480.0" y="459.2">INVENTORY_URL  (every 5s)</tspan></text>
+<text font-size="14" text-anchor="middle" fill="#f08c00" font-weight="600"><tspan x="430.0" y="726.0">payments, fulfillment and notifications are called by nobody: their work arrives on their</tspan><tspan x="430.0" y="743.5">queues. Postgres and goaws are reached in namespace data by their full names.</tspan></text>
+<text font-size="15" text-anchor="start" fill="#1e1e1e"><tspan x="1314.0" y="725.0">Legend</tspan></text>
+<text font-size="14" text-anchor="start" fill="#343a40"><tspan x="1370.0" y="753.0">A request: the caller waits</tspan></text>
+<text font-size="14" text-anchor="start" fill="#343a40"><tspan x="1370.0" y="779.0">A timer call from the leading scheduler</tspan></text>
+</svg></figure>
+  <figcaption>Four services reach others over HTTP, each through a URL in its env. Every target serves on 8080, so no service calls one with <code>http: null</code>. These are the connections Phase 2's NetworkPolicies allow.</figcaption>
+  <div class="table"><table>
+    <thead><tr><th>From</th><th>Env var</th><th>To</th><th>Value</th><th>What for</th></tr></thead>
+    <tbody>
+      <tr><td><code>web</code></td><td><code>API_URL</code></td><td><code>gateway</code></td><td><code>http://gateway:8080</code></td><td>everything the shopfront shows, through the public API</td></tr>
+      <tr><td><code>gateway</code></td><td><code>CATALOG_URL</code></td><td><code>catalog</code></td><td><code>http://catalog:8080</code></td><td>drops, tiers and prices</td></tr>
+      <tr><td><code>gateway</code></td><td><code>ORDERS_URL</code></td><td><code>orders</code></td><td><code>http://orders:8080</code></td><td>placing and reading orders</td></tr>
+      <tr><td><code>gateway</code></td><td><code>INVENTORY_URL</code></td><td><code>inventory</code></td><td><code>http://inventory:8080</code></td><td>stock left on a drop</td></tr>
+      <tr><td><code>orders</code></td><td><code>INVENTORY_URL</code></td><td><code>inventory</code></td><td><code>http://inventory:8080</code></td><td>holds the tickets before the order is written: 409 sold out, 503 unreachable</td></tr>
+      <tr><td><code>scheduler</code></td><td><code>CATALOG_URL</code></td><td><code>catalog</code></td><td><code>http://catalog:8080</code></td><td>opens drops that are due, every second</td></tr>
+      <tr><td><code>scheduler</code></td><td><code>INVENTORY_URL</code></td><td><code>inventory</code></td><td><code>http://inventory:8080</code></td><td>releases expired holds, every five seconds</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Shared addresses</h3>
+  <div class="table"><table>
+    <thead><tr><th>Target</th><th>Where the address lives</th><th>Address</th><th>Used by</th></tr></thead>
+    <tbody>
+      <tr><td>Postgres primary, in <code>data</code></td><td><code>DATABASE_URL</code> in each <code>&lt;service&gt;-db</code> Secret</td><td><code>pg-rw.data.svc.cluster.local:5432/&lt;service&gt;?sslmode=require</code></td><td>catalog, orders, inventory, payments, fulfillment, scheduler</td></tr>
+      <tr><td>goaws (SNS and SQS), in <code>data</code></td><td><code>AWS_ENDPOINT_URL</code> and <code>EVENTS_QUEUE_URL</code> in values</td><td><code>http://goaws.data.svc.cluster.local:4100</code></td><td>catalog, orders, inventory, payments, fulfillment, notifications</td></tr>
+    </tbody>
+  </table></div>
+  <p class="muted prose">Anything in <code>data</code> needs its full <code>&lt;svc&gt;.data.svc.cluster.local</code> name. Every service with a queue sets <code>CONSUMER_TIMEOUT=5s</code>, below the queue's 10s visibility timeout. Events never use the URLs above: they go outbox → topic → each service's queue.</p>
+</section>
+
+<section>
   <span class="eyebrow">Who does what</span>
   <h2>You build the venue. Claude writes the staff.</h2>
   <div class="cards">
@@ -319,7 +450,7 @@ td code, th code { overflow-wrap: normal; white-space: nowrap; }
 <section>
   <span class="eyebrow">The road</span>
   <h2>Ten phases, each ending in something you can show</h2>
-  <p class="muted prose">Phases 0 to 3 cost nothing on AWS. From Phase 4 the cluster is switched on for a work session and destroyed afterwards.</p>
+  <p class="muted prose">Phases 0 to 3 cost nothing on AWS. From Phase 4 the cluster is switched on for a work session and destroyed afterwards. Each phase also says what to capture into <code>docs/evidence/</code> before moving on; <span class="once">Only now</span> marks what cannot be taken afterwards.</p>
   <div class="stubs">
     <div class="stub"><div class="no"><b>0</b><span>Both</span></div><div class="body">
       <div class="head"><h3>Foundations</h3><span class="pill now">Open items</span></div>
@@ -328,39 +459,48 @@ td code, th code { overflow-wrap: normal; white-space: nowrap; }
     <div class="stub"><div class="no"><b>1</b><span>Claude</span></div><div class="body">
       <div class="head"><h3>The services, running locally</h3><span class="pill now">In progress</span></div>
       <p>The Go services under docker compose with Postgres and an SNS/SQS emulator. All nine exist, and the journey above runs from a click in the shopfront to the confirmation message. One thing is left: a load test that sends a real crowd at a drop, where the checks so far send 16 customers at a time.</p>
-      <p class="check">Done when: <code>make drop-check</code> orders more tickets than exist, kills a service mid-run, and still finds no oversold ticket, no lost order and no duplicate; and <code>make outage-check</code> takes the payment provider down and finds no order or ticket left stuck. Both pass with all nine services running.</p></div></div>
+      <p class="check">Done when: <code>make drop-check</code> orders more tickets than exist, kills a service mid-run, and still finds no oversold ticket, no lost order and no duplicate; and <code>make outage-check</code> takes the payment provider down and finds no order or ticket left stuck. Both pass with all nine services running.</p>
+      <p class="capture"><b>Capture</b> The whole output of each <code>make drop-check</code> run, one per <code>KILL</code> value, and of <code>make outage-check</code>; the shopfront showing one order <code>ticketed</code> and one drop sold out. All of it can be taken again by running the checks. Folder: <code>docs/evidence/phase-1/</code>.</p></div></div>
     <div class="stub now"><div class="no"><b>2</b><span>You</span></div><div class="body">
       <div class="head"><h3>Kubernetes packaging on Docker Desktop</h3><span class="pill now">Next</span></div>
       <p>Move the same system from docker compose into a real Kubernetes cluster on your laptop: one Helm chart, a front door, a database operator, and autoscaling on queue depth.</p>
-      <p class="check">Done when: the drop passes through the Gateway, and fulfillment scales from 0 to several pods and back on its own. The Phase 2 Workbook has the steps.</p></div></div>
+      <p class="check">Done when: the drop passes through the Gateway, and fulfillment scales from 0 to several pods and back on its own. The Phase 2 Workbook has the steps.</p>
+      <p class="capture"><b>Capture</b> Every step in the Phase 2 Workbook has a Capture row naming its files. <span class="once">Only now</span> The shutdown log in step 6 and the scaling run in step 10 cannot be taken afterwards. Folder: <code>docs/evidence/phase-2/</code>.</p></div></div>
     <div class="stub"><div class="no"><b>3</b><span>You</span></div><div class="body">
       <div class="head"><h3>Continuous integration</h3><span class="pill">Later</span></div>
       <p>Every pull request is linted, tested, built and scanned, with no cloud credentials involved. Only the services that changed are rebuilt.</p>
-      <p class="check">Done when: a failing test or a critical vulnerability blocks the merge.</p></div></div>
+      <p class="check">Done when: a failing test or a critical vulnerability blocks the merge.</p>
+      <p class="capture"><b>Capture</b> A pull request blocked by a failing test, and one blocked by a critical vulnerability, each with the checks list and the disabled merge button in view; a run where only the changed services were rebuilt. Folder: <code>docs/evidence/phase-3/</code>.</p></div></div>
     <div class="stub"><div class="no"><b>4</b><span>You</span></div><div class="body">
       <div class="head"><h3>AWS with Terraform</h3><span class="pill">Later</span></div>
       <p>The network, the EKS cluster, the queues, the secrets and the permissions, all as code. Split so the cheap long-lived parts survive and the expensive parts can be destroyed.</p>
-      <p class="check">Done when: <code>make aws-up</code> builds it from nothing and <code>make aws-down</code> leaves nothing that bills.</p></div></div>
+      <p class="check">Done when: <code>make aws-up</code> builds it from nothing and <code>make aws-down</code> leaves nothing that bills.</p>
+      <p class="capture"><b>Capture</b> The end of <code>make aws-up</code> with the time it took; the cluster and its nodes listed. <span class="once">Only now</span> After <code>make aws-down</code>, the check that nothing is left billing, and the next day the cost of that session. Folder: <code>docs/evidence/phase-4/</code>.</p></div></div>
     <div class="stub"><div class="no"><b>5</b><span>You</span></div><div class="body">
       <div class="head"><h3>The platform, installed by GitOps</h3><span class="pill">Later</span></div>
       <p>Argo CD installs every cluster add-on from Git, in order: Karpenter, the load balancer controller, cert-manager, external-dns, Traefik, the secrets driver, KEDA, the database operator, monitoring.</p>
-      <p class="check">Done when: a test route gets a DNS name and a valid certificate with no manual <code>kubectl apply</code>.</p></div></div>
+      <p class="check">Done when: a test route gets a DNS name and a valid certificate with no manual <code>kubectl apply</code>.</p>
+      <p class="capture"><b>Capture</b> Argo CD with every application Synced and Healthy; the test route in a browser with its DNS name and a valid certificate showing. Folder: <code>docs/evidence/phase-5/</code>.</p></div></div>
     <div class="stub"><div class="no"><b>6</b><span>You</span></div><div class="body">
       <div class="head"><h3>Continuous delivery, and going live</h3><span class="pill">Later</span></div>
       <p>A merge builds an image, pushes it, and commits its tag to the GitOps repo. Argo CD does the rest.</p>
-      <p class="check">Done when: a one-line change reaches EKS with nobody running <code>kubectl</code>.</p></div></div>
+      <p class="check">Done when: a one-line change reaches EKS with nobody running <code>kubectl</code>.</p>
+      <p class="capture"><b>Capture</b> One change followed end to end, with times: the merged pull request, the pipeline run, the tag commit in the GitOps repo, the Argo CD sync, and the change live. Folder: <code>docs/evidence/phase-6/</code>.</p></div></div>
     <div class="stub"><div class="no"><b>7</b><span>Both</span></div><div class="body">
       <div class="head"><h3>Observability</h3><span class="pill">Later</span></div>
       <p>Dashboards and alerts kept in Git. Request rate, errors and latency for each service; queue depth and age; replicas and nodes.</p>
-      <p class="check">Done when: each alert has been set off once on purpose and seen firing.</p></div></div>
+      <p class="check">Done when: each alert has been set off once on purpose and seen firing.</p>
+      <p class="capture"><b>Capture</b> <span class="once">Only now</span> Each alert while it is firing, with the time and what set it off; each dashboard during a drop, not at rest. Folder: <code>docs/evidence/phase-7/</code>.</p></div></div>
     <div class="stub"><div class="no"><b>8</b><span>Both</span></div><div class="body">
       <div class="head"><h3>Drills</h3><span class="pill">Later</span></div>
       <p>A full drop on EKS with numbers taken, then things broken on purpose: a node killed, a Spot interruption, a poison message, a bad release rolled back, a database failover.</p>
-      <p class="check">Done when: there is a number and a screenshot for each.</p></div></div>
+      <p class="check">Done when: there is a number and a screenshot for each.</p>
+      <p class="capture"><b>Capture</b> <span class="once">Only now</span> For every drill, the graph while it is happening and the number it produced: the node kill, the Spot interruption, the poison message, the rollback, the failover. Folder: <code>docs/evidence/phase-8/</code>.</p></div></div>
     <div class="stub"><div class="no"><b>9</b><span>Both</span></div><div class="body">
       <div class="head"><h3>Rebuild proof and write-up</h3><span class="pill">Later</span></div>
       <p>Destroy everything, rebuild it from Git, time it. Then the portfolio write-up.</p>
-      <p class="check">Done when: the rebuilt cluster matches the one that was destroyed.</p></div></div>
+      <p class="check">Done when: the rebuilt cluster matches the one that was destroyed.</p>
+      <p class="capture"><b>Capture</b> <span class="once">Only now</span> The destroy and the rebuild from Git, with the time each took, and the comparison showing the rebuilt cluster matches. Folder: <code>docs/evidence/phase-9/</code>.</p></div></div>
   </div>
 </section>
 
