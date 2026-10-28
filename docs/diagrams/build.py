@@ -316,6 +316,37 @@ def scaling_loop():
 
 
 # --------------------------------------------------------------------------
+# 6. Which services call which, by the URL in their env
+# --------------------------------------------------------------------------
+def service_calls():
+    d = Diagram.house()
+    d.title("Services that call each other",
+            "each arrow is a URL in the caller's values file; every target serves on :8080")
+
+    d.zone(20, 110, 1920, 560, "namespace ticketdrop: the short Service name resolves", "blue")
+    web = d.card(60, 330, "web", "the shopfront", icon="go", color="blue", width=280, port=":8080")
+    gateway = d.card(500, 330, "gateway", "the public API", icon="go", color="blue", width=300, port=":8080")
+    catalog = d.card(1060, 160, "catalog", "drops and prices", icon="go", color="blue", width=300, port=":8080")
+    orders = d.card(1060, 330, "orders", "takes the order", icon="go", color="blue", width=300, port=":8080")
+    inventory = d.card(1060, 500, "inventory", "guards the stock", icon="go", color="blue", width=300, port=":8080")
+    scheduler = d.card(1600, 330, "scheduler", "2 pods, 1 leads", icon="go", color="gray", width=300, port=":9090 only")
+
+    d.flow(web, gateway, "API_URL", "black", from_side="right", to_side="left")
+    d.flow(gateway, catalog, "CATALOG_URL", "black", from_side="right", to_side="left")
+    d.flow(gateway, orders, "ORDERS_URL", "black", from_side="right", to_side="left")
+    d.flow(gateway, inventory, "INVENTORY_URL", "black", from_side="right", to_side="left")
+    d.flow(orders, inventory, "INVENTORY_URL  (hold)", "black", from_side="bottom", to_side="top")
+    d.flow(scheduler, catalog, "CATALOG_URL  (every 1s)", "violet", from_side="left", to_side="right")
+    d.flow(scheduler, inventory, "INVENTORY_URL  (every 5s)", "violet", from_side="left", to_side="right")
+
+    d.note(20, 700, "payments, fulfillment and notifications are called by nobody: their work arrives on their\n"
+                    "queues. Postgres and goaws are reached in namespace data by their full names.", width=820)
+    d.legend(1300, 700, [("A request: the caller waits", "black", False),
+                         ("A timer call from the leading scheduler", "violet", False)])
+    return d
+
+
+# --------------------------------------------------------------------------
 # Excalidraw JSON -> SVG
 # --------------------------------------------------------------------------
 FONT = "ui-sans-serif, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
@@ -402,6 +433,7 @@ DIAGRAMS = {
     "aws-target": ("The finished platform on AWS", aws_target),
     "delivery": ("How a code change reaches the cluster", delivery),
     "scaling-loop": ("The scaling loop a ticket drop sets off", scaling_loop),
+    "service-calls": ("Which services call which, by URL", service_calls),
 }
 
 if __name__ == "__main__":

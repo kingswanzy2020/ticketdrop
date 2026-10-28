@@ -678,7 +678,7 @@ later `helm upgrade`.
 change reaches every service at its next upgrade, so a mistake in the chart is
 a mistake in nine places. Whether the chart fits services that serve only on
 the admin port (payments, fulfillment, notifications, scheduler) is tested in
-step 7; the `http` port is not yet optional. How environments are separated,
+step 7; the `http` port is optional (entry 38). How environments are separated,
 Helm values files per environment or Kustomize overlays on the rendered
 output, is not decided here: there is only the local environment so far.
 
@@ -723,3 +723,103 @@ question left open in entry 26.
 running Deployment, because the pod spec does not change; the pod has to be
 deleted or the Deployment restarted. `Always` cannot be used locally. The
 policy is to be looked at again when images come from ECR in Phase 4.
+
+## 38. A service turns off the chart's `http` port with `http: null`
+
+**Decision.** `ports.http` defaults to 8080 in the chart's `values.yaml`. A
+service with no app server sets `ports: {http: null}` in its values file, and
+the templates then leave the `http` entry out of both the container's ports
+and the Service, using `{{- with .Values.ports.http }}`. The `admin` port
+(9090) is always present, so the Service always exists. Payments,
+fulfillment, notifications and scheduler set `http: null`; web, gateway,
+catalog, orders and inventory keep 8080.
+
+**Why.** The four services pass no app handler to `service.Serve`, so nothing
+listens on 8080 in their pods, and a port named there would point at nothing.
+One key does the job: the number is both the setting and the switch, where an
+`enabled` flag beside it could disagree with it and `0` is not a port. The
+Service stays because Prometheus scrapes `/metrics` on the admin port through
+it. Checked with `helm template`: orders renders exactly as before, and with
+`ports.http=null` both the Deployment and the Service carry only `admin`;
+`helm lint` and a server-side dry run of the payments objects pass.
+
+**Cost.** Leaving `http` out of a values file does not remove it: Helm merges
+the file over the defaults, so the service still gets 8080. Only an explicit
+`null` deletes a default, which is easy to miss. The number labels the port
+only; the app listens on `HTTP_ADDR`, so changing the number in values
+without setting `HTTP_ADDR` sends the Service's traffic to a port nothing
+listens on.
+
+## 39. A service with more than one replica gets a PDB of `maxUnavailable: 1`
+
+**Decision.** The chart's `templates/pdb.yaml` renders a `policy/v1`
+PodDisruptionBudget only when `replicaCount` is above 1. It sets
+`maxUnavailable` from `pdb.maxUnavailable` (default 1), selects on the same
+`service.selectorLabels` as the Deployment, and sets
+`unhealthyPodEvictionPolicy: AlwaysAllow`.
+
+**Why.** A drain, or later Karpenter consolidating nodes, evicts pods through
+the eviction API, which honours the budget, so a two-replica service keeps
+one pod serving while the other moves. A budget on one replica either
+protects nothing (`maxUnavailable: 1`) or blocks every drain
+(`minAvailable: 1`), so none is rendered. A whole number is used because a
+percentage rounds, which on two or three replicas gives a different number
+than intended. `AlwaysAllow` lets a drain evict a pod that is not ready,
+since a crash-looping pod serves nothing and would otherwise stall the drain.
+Checked with `helm template`: no PDB at one replica, and at two its
+`matchLabels` equal the Deployment's; lint and a server-side dry run of all
+nine services pass.
+
+**Cost.** The budget guards only voluntary evictions: a node failing, or
+`kubectl delete pod`, ignores it. A service left at one replica has no
+protection and drops traffic while its pod moves. Because of `AlwaysAllow`,
+a drain during a rollout can evict a new pod that has not passed readiness yet.
+
+## 40. Replicas spread by hostname as a preference locally, by zone on EKS
+
+**Decision.** The Deployment carries one `topologySpreadConstraints` entry
+from `topologySpread` in values: `maxSkew: 1`, selecting on
+`service.selectorLabels`, with `matchLabelKeys: [pod-template-hash]`. The
+chart default is `topologyKey: kubernetes.io/hostname` with
+`whenUnsatisfiable: ScheduleAnyway`. On EKS it is to be
+`topology.kubernetes.io/zone` with `DoNotSchedule`, set by that environment's
+values. How the environment values are layered is not decided yet.
+
+**Why.** Two replicas on one node, or in one zone, go down together, which
+defeats the PDB in entry 39. The local cluster has one node, labelled with a
+hostname and no zone. Under a `DoNotSchedule` constraint a node without the
+key's label is not eligible at all, so a zone key would leave every pod
+Pending here, and hostname with `DoNotSchedule` would allow only one replica.
+`ScheduleAnyway` makes the spread a scoring preference, so both replicas still
+land. `pod-template-hash` makes a rolling update count only the new
+ReplicaSet's pods. Locally this only proves the block renders and the pods
+schedule.
+
+**Cost.** Locally the spread does nothing, so an error in the zone setting
+will first show on EKS. On EKS `DoNotSchedule` by zone leaves a replica
+Pending whenever no zone has room, instead of crowding one zone. Karpenter
+then has to bring up a node in the right zone.
+
+## 41. Six services run two replicas; the three queue consumers run one
+
+**Decision.** Web, gateway, catalog, orders, inventory and scheduler set
+`replicaCount: 2` in their values files, which also gives each a PDB (entry
+39). Payments, fulfillment and notifications keep the chart default of 1.
+
+**Why.** The first five answer HTTP requests, so with one pod a drain or a
+crash is an outage for callers; two replicas behind the PDB keep one serving.
+The scheduler runs two so a standby is ready to take the advisory lock when
+the leader goes; only the leader acts (`scheduler_leader` 1 on one pod, 0 on
+the other, in `07-scheduler-one-leader.txt`). The three consumers serve no
+requests: while their pod is away, messages wait in SQS and are processed
+when it returns, so a gap is a delay, not an error. Fulfillment's replica
+count is to be handed to KEDA, which scales it on queue depth (step 10).
+Evidence: `docs/evidence/phase-2/07-nine-services-ready.txt` (15 pods Ready,
+six PDBs each allowing one disruption) and `07-order-ticketed-shopfront.png`
+(an order through the shopfront ending confirmed).
+
+**Cost.** Six extra pods on a single node, all requesting CPU and memory. On
+one node the second replica does not survive the node itself failing; that
+needs the zone spread on EKS (entry 40). A consumer with one replica falls
+behind during a drain or a crash, and payments' delay holds tickets that
+much longer.

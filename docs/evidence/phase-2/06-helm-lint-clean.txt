@@ -1,3 +1,5 @@
+Mon Oct 26 11:03:11 PM KST 2026
+$ helm lint charts/service -f charts/service/values/values-orders.yaml
 ==> Linting charts/service
 [INFO] Chart.yaml: icon is recommended
 

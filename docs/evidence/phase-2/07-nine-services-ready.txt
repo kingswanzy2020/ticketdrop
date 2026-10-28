@@ -1,0 +1,27 @@
+Thu Oct 29 01:58:50 AM KST 2026
+$ kubectl get pods -n ticketdrop -o wide
+NAME                             READY   STATUS    RESTARTS   AGE     IP            NODE                    NOMINATED NODE   READINESS GATES
+catalog-76c9849fbc-62bnf         1/1     Running   0          10m     10.244.0.12   desktop-control-plane   <none>           <none>
+catalog-76c9849fbc-tkj99         1/1     Running   0          10m     10.244.0.11   desktop-control-plane   <none>           <none>
+fulfillment-7c89d54d98-7ttd8     1/1     Running   0          10m     10.244.0.19   desktop-control-plane   <none>           <none>
+gateway-5b4dd9c645-8zs5w         1/1     Running   0          9m57s   10.244.0.23   desktop-control-plane   <none>           <none>
+gateway-5b4dd9c645-fn2kf         1/1     Running   0          9m57s   10.244.0.24   desktop-control-plane   <none>           <none>
+inventory-6b5f8d9967-4kjh6       1/1     Running   0          10m     10.244.0.13   desktop-control-plane   <none>           <none>
+inventory-6b5f8d9967-4qh65       1/1     Running   0          10m     10.244.0.14   desktop-control-plane   <none>           <none>
+notifications-69d9fddccb-nr7gl   1/1     Running   0          10m     10.244.0.20   desktop-control-plane   <none>           <none>
+orders-744bd8d7fd-klbsd          1/1     Running   0          10m     10.244.0.17   desktop-control-plane   <none>           <none>
+orders-744bd8d7fd-p5sxp          1/1     Running   0          10m     10.244.0.16   desktop-control-plane   <none>           <none>
+payments-cb85b8d59-jsdtq         1/1     Running   0          10m     10.244.0.18   desktop-control-plane   <none>           <none>
+scheduler-644fb55c47-7ts7s       1/1     Running   0          10m     10.244.0.22   desktop-control-plane   <none>           <none>
+scheduler-644fb55c47-dfdj4       1/1     Running   0          10m     10.244.0.21   desktop-control-plane   <none>           <none>
+web-c9b8d756f-cbpcr              1/1     Running   0          9m52s   10.244.0.25   desktop-control-plane   <none>           <none>
+web-c9b8d756f-xwgnd              1/1     Running   0          9m52s   10.244.0.26   desktop-control-plane   <none>           <none>
+
+$ kubectl get pdb -n ticketdrop
+NAME        MIN AVAILABLE   MAX UNAVAILABLE   ALLOWED DISRUPTIONS   AGE
+catalog     N/A             1                 1                     10m
+gateway     N/A             1                 1                     9m57s
+inventory   N/A             1                 1                     10m
+orders      N/A             1                 1                     10m
+scheduler   N/A             1                 1                     10m
+web         N/A             1                 1                     9m52s

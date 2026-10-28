@@ -71,6 +71,51 @@
 </section>
 
 <section>
+  <span class="eyebrow">In the cluster</span>
+  <h2>What each values file sets, and who calls whom</h2>
+  <p class="muted prose">From <code>charts/service/values/values-&lt;service&gt;.yaml</code> in <code>ticketdrop-gitops/</code>. Anything not listed comes from the chart's <code>values.yaml</code>. A service that leaves <code>http</code> out still gets 8080; only <code>http: null</code> removes it (DECISIONS entry 38).</p>
+  <div class="table"><table>
+    <thead><tr><th>Service</th><th><code>http</code></th><th>Database Secret</th><th>Event settings</th><th>Calls by URL</th><th>Its own settings</th></tr></thead>
+    <tbody>
+      <tr><td><code>web</code></td><td><span class="pill done">8080</span></td><td>none</td><td>none</td><td><code>API_URL</code> → gateway</td><td>none</td></tr>
+      <tr><td><code>gateway</code></td><td><span class="pill done">8080</span></td><td>none</td><td>none</td><td><code>CATALOG_URL</code>, <code>ORDERS_URL</code>, <code>INVENTORY_URL</code></td><td>none</td></tr>
+      <tr><td><code>catalog</code></td><td><span class="pill done">8080</span></td><td><code>catalog-db</code></td><td>topic only: publishes <code>drop.opened</code>, consumes nothing</td><td>none</td><td>none</td></tr>
+      <tr><td><code>orders</code></td><td><span class="pill done">8080</span></td><td><code>orders-db</code></td><td>topic + <code>orders-events</code></td><td><code>INVENTORY_URL</code></td><td>none</td></tr>
+      <tr><td><code>inventory</code></td><td><span class="pill done">8080</span></td><td><code>inventory-db</code></td><td>topic + <code>inventory-events</code></td><td>none</td><td><code>HOLD_TTL=10m</code>, <code>HOLD_GRACE=30s</code></td></tr>
+      <tr><td><code>payments</code></td><td><span class="pill now">null</span></td><td><code>payments-db</code></td><td>topic + <code>payments-events</code></td><td>none</td><td><code>PAYMENT_LATENCY=100ms</code>, <code>PAYMENT_DECLINE_RATE=0.1</code>, <code>PAYMENT_ERROR_RATE=0</code></td></tr>
+      <tr><td><code>fulfillment</code></td><td><span class="pill now">null</span></td><td><code>fulfillment-db</code></td><td>topic + <code>fulfillment-events</code></td><td>none</td><td><code>CONSUMER_CONCURRENCY=4</code>, <code>SIMULATED_RENDER_TIME=200ms</code></td></tr>
+      <tr><td><code>notifications</code></td><td><span class="pill now">null</span></td><td>none</td><td><code>notifications-events</code> only: publishes nothing, so no topic</td><td>none</td><td>none</td></tr>
+      <tr><td><code>scheduler</code></td><td><span class="pill now">null</span></td><td><code>scheduler-db</code></td><td>none</td><td><code>CATALOG_URL</code>, <code>INVENTORY_URL</code></td><td>none. Runs as two replicas; one leads.</td></tr>
+    </tbody>
+  </table></div>
+
+  <figure class="diagram"><!--diagram:service-calls--></figure>
+  <figcaption>Four services reach others over HTTP, each through a URL in its env. Every target serves on 8080, so no service calls one with <code>http: null</code>. These are the connections Phase 2's NetworkPolicies allow.</figcaption>
+  <div class="table"><table>
+    <thead><tr><th>From</th><th>Env var</th><th>To</th><th>Value</th><th>What for</th></tr></thead>
+    <tbody>
+      <tr><td><code>web</code></td><td><code>API_URL</code></td><td><code>gateway</code></td><td><code>http://gateway:8080</code></td><td>everything the shopfront shows, through the public API</td></tr>
+      <tr><td><code>gateway</code></td><td><code>CATALOG_URL</code></td><td><code>catalog</code></td><td><code>http://catalog:8080</code></td><td>drops, tiers and prices</td></tr>
+      <tr><td><code>gateway</code></td><td><code>ORDERS_URL</code></td><td><code>orders</code></td><td><code>http://orders:8080</code></td><td>placing and reading orders</td></tr>
+      <tr><td><code>gateway</code></td><td><code>INVENTORY_URL</code></td><td><code>inventory</code></td><td><code>http://inventory:8080</code></td><td>stock left on a drop</td></tr>
+      <tr><td><code>orders</code></td><td><code>INVENTORY_URL</code></td><td><code>inventory</code></td><td><code>http://inventory:8080</code></td><td>holds the tickets before the order is written: 409 sold out, 503 unreachable</td></tr>
+      <tr><td><code>scheduler</code></td><td><code>CATALOG_URL</code></td><td><code>catalog</code></td><td><code>http://catalog:8080</code></td><td>opens drops that are due, every second</td></tr>
+      <tr><td><code>scheduler</code></td><td><code>INVENTORY_URL</code></td><td><code>inventory</code></td><td><code>http://inventory:8080</code></td><td>releases expired holds, every five seconds</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Shared addresses</h3>
+  <div class="table"><table>
+    <thead><tr><th>Target</th><th>Where the address lives</th><th>Address</th><th>Used by</th></tr></thead>
+    <tbody>
+      <tr><td>Postgres primary, in <code>data</code></td><td><code>DATABASE_URL</code> in each <code>&lt;service&gt;-db</code> Secret</td><td><code>pg-rw.data.svc.cluster.local:5432/&lt;service&gt;?sslmode=require</code></td><td>catalog, orders, inventory, payments, fulfillment, scheduler</td></tr>
+      <tr><td>goaws (SNS and SQS), in <code>data</code></td><td><code>AWS_ENDPOINT_URL</code> and <code>EVENTS_QUEUE_URL</code> in values</td><td><code>http://goaws.data.svc.cluster.local:4100</code></td><td>catalog, orders, inventory, payments, fulfillment, notifications</td></tr>
+    </tbody>
+  </table></div>
+  <p class="muted prose">Anything in <code>data</code> needs its full <code>&lt;svc&gt;.data.svc.cluster.local</code> name. Every service with a queue sets <code>CONSUMER_TIMEOUT=5s</code>, below the queue's 10s visibility timeout. Events never use the URLs above: they go outbox → topic → each service's queue.</p>
+</section>
+
+<section>
   <span class="eyebrow">Who does what</span>
   <h2>You build the venue. Claude writes the staff.</h2>
   <div class="cards">
