@@ -1,0 +1,7 @@
+Fri Oct 30 10:43:05 PM KST 2026
+# Re-run on a copy of platform/traefik/values.yaml with the two original lines restored; the first failure was not saved before the fix.
+$ helm template traefik traefik/traefik --version 42.1.3 -n traefik -f platform/traefik/values.yaml --skip-crds
+Error: values don't meet the specifications of the schema(s) in the following chart(s):
+traefik:
+- at '/ports/web': additional properties 'redirectTo' not allowed
+- at '/ports/websecure/expose/default': got string, want boolean

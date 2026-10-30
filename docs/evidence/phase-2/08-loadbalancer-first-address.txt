@@ -1,0 +1,30 @@
+Sat Oct 31 12:05:31 AM KST 2026
+# Taken about five minutes after the install. The planned watch of the Service from before the install was not captured.
+# The events below show the assignment itself; they expire about an hour after the install.
+
+$ kubectl get events -n traefik --field-selector involvedObject.kind=Service
+LAST SEEN   TYPE     REASON                 OBJECT            MESSAGE
+5m48s       Normal   EnsuringLoadBalancer   service/traefik   Ensuring load balancer
+5m47s       Normal   EnsuredLoadBalancer    service/traefik   Ensured load balancer
+
+$ kubectl get svc -n traefik traefik
+NAME      TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+traefik   LoadBalancer   10.96.34.138   172.18.0.5    8088:30341/TCP   5m48s
+
+$ kubectl get svc -n traefik traefik -o jsonpath={.status}
+{"loadBalancer":{"ingress":[{"ip":"172.18.0.5","ipMode":"Proxy","ports":[{"port":8088,"protocol":"TCP"}]}]}}
+
+$ ss -ltn | grep :8088
+LISTEN 0      4096         0.0.0.0:8088       0.0.0.0:*          
+
+$ curl -si -m 5 localhost:8088/
+HTTP/1.1 404 Not Found
+Content-Type: text/plain; charset=utf-8
+X-Content-Type-Options: nosniff
+Date: Fri, 30 Oct 2026 15:05:31 GMT
+Content-Length: 19
+
+404 page not found
+
+$ curl -si -m 5 172.18.0.5:8088/
+curl exit code: 28

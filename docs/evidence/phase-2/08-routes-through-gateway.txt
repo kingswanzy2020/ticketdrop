@@ -1,0 +1,31 @@
+Sat Oct 31 12:40:55 AM KST 2026
+$ curl -i localhost:8088/v1/drops/x/availability
+HTTP/1.1 404 Not Found
+Content-Length: 89
+Content-Type: application/json
+Date: Fri, 30 Oct 2026 15:40:55 GMT
+X-Correlation-Id: d011639e-5307-4c88-b80d-8f8a1238933a
+
+{"correlation_id":"d011639e-5307-4c88-b80d-8f8a1238933a","error":"no such drop on sale"}
+
+
+$ curl -i localhost:8088/v1/healthz
+HTTP/1.1 404 Not Found
+Content-Length: 19
+Content-Type: text/plain; charset=utf-8
+Date: Fri, 30 Oct 2026 15:40:55 GMT
+X-Content-Type-Options: nosniff
+X-Correlation-Id: 44a0d84a-9958-40a5-8d69-2a9d41a34116
+
+404 page not found
+
+
+$ kubectl get gateway -n traefik; kubectl get httproute -n ticketdrop
+NAME         CLASS     ADDRESS      PROGRAMMED   AGE
+ticketdrop   traefik   172.18.0.5   True         28m
+NAME         HOSTNAMES   AGE
+ticketdrop               11m
+
+$ kubectl logs -n traefik deploy/traefik --tail=2 (access log)
+{"ClientAddr":"10.244.0.1:50992","ClientHost":"10.244.0.1","ClientPort":"50992","ClientUsername":"-","DownstreamContentSize":89,"DownstreamStatus":404,"Duration":3384357,"OriginContentSize":89,"OriginDuration":3238393,"OriginStatus":404,"Overhead":145964,"RequestAddr":"localhost:8088","RequestContentSize":0,"RequestCount":18,"RequestHost":"localhost","RequestMethod":"GET","RequestPath":"/v1/drops/x/availability","RequestPort":"8088","RequestProtocol":"HTTP/1.1","RequestScheme":"http","RetryAttempts":0,"RouterName":"httproute-ticketdrop-ticketdrop-gw-traefik-ticketdrop-ep-web-1-3c3a511ae924abc4734a@kubernetesgateway","ServiceAddr":"10.244.0.24:8080","ServiceName":"httproute-ticketdrop-ticketdrop-gw-traefik-ticketdrop-ep-web-1-3c3a511ae924abc4734a-svc-ticketdrop-gateway-0@kubernetesgateway","ServiceURL":"http://10.244.0.24:8080","StartLocal":"2026-10-30T15:40:55.932514685Z","StartUTC":"2026-10-30T15:40:55.932514685Z","entryPointName":"web","level":"info","msg":"","time":"2026-10-30T15:40:55Z"}
+{"ClientAddr":"10.244.0.1:7438","ClientHost":"10.244.0.1","ClientPort":"7438","ClientUsername":"-","DownstreamContentSize":19,"DownstreamStatus":404,"Duration":604992,"OriginContentSize":19,"OriginDuration":512495,"OriginStatus":404,"Overhead":92497,"RequestAddr":"localhost:8088","RequestContentSize":0,"RequestCount":19,"RequestHost":"localhost","RequestMethod":"GET","RequestPath":"/v1/healthz","RequestPort":"8088","RequestProtocol":"HTTP/1.1","RequestScheme":"http","RetryAttempts":0,"RouterName":"httproute-ticketdrop-ticketdrop-gw-traefik-ticketdrop-ep-web-1-3c3a511ae924abc4734a@kubernetesgateway","ServiceAddr":"10.244.0.23:8080","ServiceName":"httproute-ticketdrop-ticketdrop-gw-traefik-ticketdrop-ep-web-1-3c3a511ae924abc4734a-svc-ticketdrop-gateway-0@kubernetesgateway","ServiceURL":"http://10.244.0.23:8080","StartLocal":"2026-10-30T15:40:55.944011008Z","StartUTC":"2026-10-30T15:40:55.944011008Z","entryPointName":"web","level":"info","msg":"","time":"2026-10-30T15:40:55Z"}

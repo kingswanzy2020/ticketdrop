@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Traffic and Ports</title>
+<style>
+  :root {
+    --bg: #f7f7f4; --ink: #1d2433; --muted: #5d6675; --line: #b9bfc9;
+    --box: #ffffff; --zone-a: #eef1f6; --zone-b: #eaf3ee; --zone-c: #f5eff8;
+    --accent: #c2410c; --accent-soft: #fde7da; --port: #0f5f8f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12161f; --ink: #e8ebf1; --muted: #9aa3b2; --line: #4a5362;
+      --box: #1d2430; --zone-a: #181e29; --zone-b: #16231d; --zone-c: #221a29;
+      --accent: #fb923c; --accent-soft: #43281a; --port: #7cc4f0;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12161f; --ink: #e8ebf1; --muted: #9aa3b2; --line: #4a5362;
+    --box: #1d2430; --zone-a: #181e29; --zone-b: #16231d; --zone-c: #221a29;
+    --accent: #fb923c; --accent-soft: #43281a; --port: #7cc4f0;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, sans-serif; }
+  main { max-width: 1000px; margin: 0 auto; padding: 24px 16px 40px; }
+  h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  p.sub { margin: 0 0 16px; color: var(--muted); }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  button { font: inherit; padding: 6px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--box); color: var(--ink); cursor: pointer; }
+  button[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); }
+  svg { display: block; width: 100%; height: auto; }
+  .zone { stroke: var(--line); stroke-dasharray: 4 4; }
+  .zone-label { fill: var(--muted); font-size: 13px; font-weight: 600; }
+  .node rect { fill: var(--box); stroke: var(--line); stroke-width: 1.5; }
+  .node.on rect { stroke: var(--accent); stroke-width: 3; fill: var(--accent-soft); }
+  .name { fill: var(--ink); font-size: 14px; font-weight: 600; text-anchor: middle; }
+  .port { fill: var(--port); font: 700 15px ui-monospace, monospace; text-anchor: middle; }
+  .edge { stroke: var(--line); stroke-width: 2; fill: none; }
+  .edge.dim { opacity: .2; }
+  .edge.on { stroke: var(--accent); stroke-width: 3; }
+  .dot { fill: var(--accent); }
+  .caption { min-height: 104px; margin-top: 12px; padding: 12px 14px; border-left: 4px solid var(--accent); background: var(--box); border-radius: 0 6px 6px 0; }
+  .caption b { display: block; }
+  .caption code, .notes code { color: var(--port); font-weight: 600; }
+  .notes { margin: 16px 0 0; padding-left: 20px; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1>How a request reaches a service, port by port</h1>
+  <p class="sub">Pick a request and follow the dot. The response comes back along the same path.</p>
+  <div class="controls">
+    <button id="r-web" aria-pressed="true">Open the shopfront: GET /</button>
+    <button id="r-api" aria-pressed="false">Call the API: GET /v1/...</button>
+    <button id="play">Pause</button>
+    <button id="next">Next step</button>
+  </div>
+  <svg viewBox="0 0 940 620" role="img" aria-label="Traffic from the browser through Traefik to the services, with the port at each hop">
+    <rect class="zone" x="10" y="20" width="390" height="150" rx="8" style="fill:var(--zone-a)"/>
+    <text class="zone-label" x="24" y="42">Your machine</text>
+    <rect class="zone" x="410" y="20" width="520" height="150" rx="8" style="fill:var(--zone-c)"/>
+    <text class="zone-label" x="424" y="42">Namespace: traefik</text>
+    <rect class="zone" x="10" y="190" width="920" height="420" rx="8" style="fill:var(--zone-b)"/>
+    <text class="zone-label" x="24" y="212">Namespace: ticketdrop</text>
+    <g id="edges"></g>
+    <g id="nodes"></g>
+    <circle id="dot" class="dot" r="9"/>
+  </svg>
+  <div class="caption" id="caption" aria-live="polite"></div>
+  <ul class="notes">
+    <li>Each pod also listens on the admin port <code>9090</code> for health checks and metrics. No route points at it, so it can't be reached from outside.</li>
+    <li>The public port appears once, at <code>8088</code>. From Traefik inward, every service uses <code>8080</code>, and each has its own IP, so they don't clash.</li>
+    <li>Your Gateway listener uses <code>8000</code>, the port inside the Traefik pod, not <code>8088</code>.</li>
+  </ul>
+</main>
+<script>
+const W = 170, H = 80;
+const nodes = {
+  browser: { x: 25,  y: 60,  name: "Browser",         port: "localhost:8088" },
+  host:    { x: 215, y: 60,  name: "Docker Desktop",  port: "host :8088" },
+  svcT:    { x: 430, y: 60,  name: "Service traefik", port: "port 8088" },
+  podT:    { x: 645, y: 60,  name: "Traefik pod",     port: "web :8000" },
+  svcWeb:  { x: 430, y: 240, name: "Service web",     port: "port 8080" },
+  podWeb:  { x: 170, y: 240, name: "web pod",         port: "http :8080" },
+  svcGw:   { x: 560, y: 370, name: "Service gateway", port: "port 8080" },
+  podGw:   { x: 750, y: 240, name: "gateway pod",     port: "http :8080" },
+  backend: { x: 750, y: 500, name: "catalog / orders / inventory", port: ":8080" }
+};
+const edge = (a, b) => a + "-" + b;
+const shared = [
+  ["browser", "host", "Your browser asks for localhost:8088",
+    "<code>8088</code> is <code>exposedPort</code> in your Traefik values. It's the only port you type."],
+  ["host", "svcT", "Docker Desktop passes it to the cluster",
+    "The LoadBalancer Service is published on your machine. Your first install will confirm exactly how Docker Desktop does this."],
+  ["svcT", "podT", "The Service translates 8088 to 8000",
+    "<code>port: 8088</code> with <code>targetPort: web</code>, and <code>web</code> is the name of container port <code>8000</code>. That's <code>ports.web.port</code>."]
+];
+const routes = {
+  web: [...shared,
+    ["podT", "svcWeb", "The path matches PathPrefix /",
+      "The Gateway listener on <code>8000</code> accepts the request. The HTTPRoute for <code>/</code> points at Service <code>web</code> on <code>8080</code>."],
+    ["svcWeb", "podWeb", "A web pod gets the request",
+      "Traefik uses the Service to find the pods, then connects to one of them on <code>8080</code>. Web now needs data to build the page."],
+    ["podWeb", "svcGw", "Web calls the gateway",
+      "<code>API_URL=http://gateway:8080</code> in web's values. This call stays inside the cluster and never goes back through Traefik."],
+    ["svcGw", "podGw", "A gateway pod gets the call",
+      "Service port <code>8080</code> to container port <code>8080</code>."],
+    ["podGw", "backend", "The gateway forwards it to the right service",
+      "<code>CATALOG_URL</code>, <code>ORDERS_URL</code> or <code>INVENTORY_URL</code>, all on <code>8080</code>. Only listed routes are forwarded."]
+  ],
+  api: [...shared,
+    ["podT", "svcGw", "The path matches PathPrefix /v1",
+      "The most specific match wins, so <code>/v1</code> beats <code>/</code>. The HTTPRoute points at Service <code>gateway</code> on <code>8080</code>."],
+    ["svcGw", "podGw", "A gateway pod gets the request",
+      "Traefik uses the Service to find the pods, then connects to one of them on <code>8080</code>."],
+    ["podGw", "backend", "The gateway forwards it to the right service",
+      "For example, <code>/v1/drops/x/availability</code> goes to <code>INVENTORY_URL</code> on <code>8080</code>. A path that isn't listed gets a 404 from the gateway."]
+  ]
+};
+const center = n => ({ x: nodes[n].x + W / 2, y: nodes[n].y + H / 2 });
+const svgNS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs, parent, text) => {
+  const e = document.createElementNS(svgNS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text) e.textContent = text;
+  parent.appendChild(e);
+  return e;
+};
+const edgesG = document.getElementById("edges"), nodesG = document.getElementById("nodes");
+const edgeEls = {}, nodeEls = {};
+const seen = new Set();
+for (const r of Object.values(routes)) for (const [a, b] of r) {
+  const id = edge(a, b);
+  if (seen.has(id)) continue;
+  seen.add(id);
+  const p = center(a), q = center(b);
+  edgeEls[id] = el("line", { class: "edge", x1: p.x, y1: p.y, x2: q.x, y2: q.y }, edgesG);
+}
+for (const [id, n] of Object.entries(nodes)) {
+  const g = el("g", { class: "node" }, nodesG);
+  el("rect", { x: n.x, y: n.y, width: W, height: H, rx: 8 }, g);
+  const long = n.name.length > 20;
+  el("text", { class: "name", x: n.x + W / 2, y: n.y + 32, style: long ? "font-size:11.5px" : "" }, g, n.name);
+  el("text", { class: "port", x: n.x + W / 2, y: n.y + 57 }, g, n.port);
+  nodeEls[id] = g;
+}
+const dot = document.getElementById("dot"), caption = document.getElementById("caption");
+const playBtn = document.getElementById("play");
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let route = "web", step = 0, t = 0, playing = !reduced, last = 0;
+const MOVE = 1400, HOLD = 2600;
+
+function show() {
+  const r = routes[route], [a, b, title, body] = r[step];
+  for (const id in edgeEls) {
+    const inRoute = r.some(([x, y]) => edge(x, y) === id);
+    edgeEls[id].setAttribute("class", "edge" + (id === edge(a, b) ? " on" : inRoute ? "" : " dim"));
+  }
+  for (const id in nodeEls) nodeEls[id].setAttribute("class", "node" + (id === a || id === b ? " on" : ""));
+  caption.innerHTML = "<b>" + (step + 1) + " of " + r.length + ": " + title + "</b>" + body;
+}
+function place() {
+  const [a, b] = routes[route][step];
+  const p = center(a), q = center(b), f = Math.min(t / MOVE, 1);
+  const e = f < .5 ? 2 * f * f : 1 - 2 * (1 - f) * (1 - f);
+  dot.setAttribute("cx", p.x + (q.x - p.x) * e);
+  dot.setAttribute("cy", p.y + (q.y - p.y) * e);
+}
+function advance() {
+  step = (step + 1) % routes[route].length;
+  t = 0;
+  show();
+}
+function frame(now) {
+  const dt = Math.min(now - last, 100);
+  last = now;
+  if (playing) {
+    t += dt;
+    if (t >= MOVE + HOLD) advance();
+  }
+  place();
+  requestAnimationFrame(frame);
+}
+function pick(name) {
+  route = name; step = 0; t = 0;
+  document.getElementById("r-web").setAttribute("aria-pressed", name === "web");
+  document.getElementById("r-api").setAttribute("aria-pressed", name === "api");
+  show();
+}
+document.getElementById("r-web").onclick = () => pick("web");
+document.getElementById("r-api").onclick = () => pick("api");
+document.getElementById("next").onclick = () => { advance(); if (!playing) t = MOVE; };
+playBtn.onclick = () => { playing = !playing; playBtn.textContent = playing ? "Pause" : "Play"; };
+playBtn.textContent = playing ? "Pause" : "Play";
+if (reduced) t = MOVE;
+show();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

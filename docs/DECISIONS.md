@@ -823,3 +823,168 @@ one node the second replica does not survive the node itself failing; that
 needs the zone spread on EKS (entry 40). A consumer with one replica falls
 behind during a drain or a crash, and payments' delay holds tickets that
 much longer.
+
+## 42. Gateway API CRDs: Standard v1.6.3, vendored, applied server-side
+
+**Decision.** The Gateway API CRDs are the Standard channel of release
+v1.6.3, downloaded unchanged into
+`ticketdrop-gitops/platform/gateway-api/standard-install-v1.6.3.yaml`
+(sha256 `356c2b8e286a964dc20995435659ad1095386329974793af10bbfe3eff977fe5`)
+and applied with `kubectl apply --server-side`. They are installed on their
+own, before Traefik, and not by the Traefik chart. The file holds ten CRDs
+(GatewayClass, Gateway, HTTPRoute, GRPCRoute, ReferenceGrant,
+BackendTLSPolicy, ListenerSet, TCPRoute, TLSRoute, UDPRoute) and the
+`safe-upgrades` ValidatingAdmissionPolicy with its binding.
+
+**Why.** The CRDs are a cluster-wide API that any controller reads, so they
+should not be installed or removed with one controller; the Traefik chart no
+longer ships them for that reason. Traefik v3.7's Gateway provider is tested
+against Standard v1.6.3, and Standard is the stable set; only HTTPRoute is
+needed. Keeping the file in the repo makes Git the record of what is in the
+cluster, which is what ArgoCD will sync in Phase 3, turns an upgrade into a
+diff, and lets a rebuild work without GitHub. A plain `kubectl apply` stores
+the whole object in the `last-applied-configuration` annotation, which is
+capped at 262144 bytes; the HTTPRoute CRD is about 429 KB, so only a
+server-side apply fits. Evidence:
+`docs/evidence/phase-2/08-gateway-api-crds.txt` (checksum, apply output, all
+ten CRDs at `v1.6.3`/`standard`, Established).
+
+**Cost.** A 1.17 MB generated file in the repo that must never be edited by
+hand. Upgrades are manual and must move with the Traefik version. Deleting
+the CRDs deletes every Gateway and HTTPRoute in the cluster, and deleting the
+namespaces does not remove them. ArgoCD will need `ServerSideApply=true` for
+this file. `safe-upgrades` refuses experimental CRDs over these and any
+version below v1.5.0 until it is deliberately removed.
+
+## 43. Traefik's CRD provider is off; routing uses only the Gateway API
+
+**Decision.** `platform/traefik/values.yaml` sets
+`providers.kubernetesCRD.enabled: false`, so Traefik does not read its own
+IngressRoute and Middleware objects. The chart's Traefik CRDs are left out with
+`--skip-crds`.
+
+**Why.** The chart turns this provider on by default, which would leave two
+routing APIs in the cluster. Routes here are HTTPRoutes (entry 42), a standard
+that other controllers also read, so they should carry over to EKS unchanged;
+IngressRoutes work only with Traefik. With the provider off, nothing would use
+the chart's 25 Traefik CRDs, and Helm never upgrades CRDs it installed that way.
+
+**Cost.** Traefik Middlewares, such as rate limiting or header rules, are not
+available as Traefik objects. Using one means turning the provider back on and
+applying its CRDs from a pinned file.
+
+## 44. Traefik comes from its official chart, pinned, in a `restricted` namespace
+
+**Decision.** Traefik is Helm release `traefik` from `traefik/traefik` chart
+42.1.3 (Traefik v3.7.16), with values in `platform/traefik/values.yaml` in the
+GitOps repo. Its namespace, `traefik`, is declared in `platform/namespaces.yaml`
+and enforces the `restricted` Pod Security level.
+
+**Why.** Traefik v3.7 is the version the Gateway API CRDs in entry 42 are tested
+against, and a pinned chart installs the same thing on a rebuild. The chart's
+default security contexts already meet `restricted` (non-root UID 65532, seccomp
+`RuntimeDefault`, no privilege escalation, all capabilities dropped, read-only
+root filesystem), so the level costs no overrides. Declaring the namespace in
+the file, instead of `--create-namespace`, keeps its label in Git. Evidence:
+`docs/evidence/phase-2/08-traefik-installed.txt` (pod 1/1, GatewayClass
+`ACCEPTED True`, the Gateway provider started, no error lines in the log).
+
+**Cost.** The chart is bumped by hand and has to stay in step with the CRDs. The
+log carries `aliasHeadersStrategy` warnings for each entrypoint, about headers
+reaching backends that derive variable names from header names; the default was
+left as it is.
+
+## 45. Traefik reads only the Gateway API, and the chart's other routing is off
+
+**Decision.** Beyond the CRD provider (entry 43), the values turn off
+`providers.kubernetesIngress` and `ingressClass`, and set `gateway.enabled:
+false`. `gatewayClass` stays on, which creates GatewayClass `traefik`.
+`experimentalChannel` stays `false`. `api.dashboard` is `true`, and no route
+points at it.
+
+**Why.** Ingress is an older API nothing here uses, and an IngressClass with
+nothing behind it is noise. The chart's own Gateway is off because the Gateway is
+written by hand in the next task, so its listener and the namespaces it admits are
+in a file. The GatewayClass names the controller and carries no configuration
+worth owning, so the chart can keep it. Experimental mode would make Traefik look
+for kinds the Standard CRDs do not all carry.
+
+**Cost.** Nothing answers until the Gateway and HTTPRoutes exist: `localhost:8088`
+returns Traefik's own 404. The dashboard can be reached only by port-forward, and
+routing it through the Gateway later would make it public.
+
+## 46. The public port is 8088, Traefik listens on 8000, and HTTPS is not exposed
+
+**Decision.** `ports.web.exposedPort` is 8088 and `ports.web.port` stays 8000.
+`ports.websecure.expose.default` is `false`. `ports.traefik` is 8080 inside the
+pod and is not exposed. The Service is a `LoadBalancer` with the default
+`externalTrafficPolicy: Cluster`. The Gateway listener has to use 8000, the
+entrypoint inside the pod, not the Service's 8088.
+
+**Why.** 8080 is already taken on the host, and the host's unprivileged port range
+starts at 1024, so the chart's defaults of 80 and 443 were ruled out without being
+tried. There is no TLS locally. 8000 is the chart's default; `web` cannot share
+8080 with the `traefik` entrypoint in one pod. `Cluster` is the default, and with
+one node `Local` would have nothing to choose between.
+
+This settles how Docker Desktop's kind-based cluster exposes a LoadBalancer, as
+observed in `docs/evidence/phase-2/08-loadbalancer-first-address.txt`: the Service
+received an address about a second after the install (`EnsuredLoadBalancer`),
+`172.18.0.5` with `ipMode: Proxy`, and the host listens on `0.0.0.0:8088`.
+`curl localhost:8088/` gets Traefik's 404. `curl 172.18.0.5:8088/` from the host
+times out, so the EXTERNAL-IP is not the address to use here; `localhost` is. What
+holds the host port was not identified. A LoadBalancer on this cluster can be
+reached without a port-forward, so no NodePort fallback is needed.
+
+**Cost.** The port is bound on all host interfaces (`0.0.0.0`), so with no firewall
+rule the shop is open to the local network. Any other LoadBalancer Service on this
+cluster needs a different free port. On EKS the port and the address both change,
+and HTTPS comes with a certificate. The capture was taken about five minutes after
+the install, not during it; it rests on the Service's events and status.
+
+## 47. Traefik runs one replica, with limits as well as requests, and access logs on
+
+**Decision.** `deployment.replicas` is 1. Traefik requests `100m` CPU and `128Mi`
+of memory and is limited to `500m` and `512Mi`. `accessLog.enabled` is `true`, and
+both the access log and the Traefik log are JSON at level `INFO`.
+
+**Why.** One local node gains little from a second replica, and the chart's PDB is
+off. The chart's default of no requests would break the rule that every container
+has them. The limits stop one component from taking the laptop's resources. An
+access log line per request shows which router and backend answered, which is how
+a routing problem gets diagnosed here.
+
+**Cost.** One replica means the only way in goes down during a Traefik restart or a
+drain, so EKS needs two or more with a PDB. The CPU limit differs from the nine
+services and the CloudNativePG operator, which have none (entries 30 and 36): under
+load Traefik is throttled at half a core, so a load test can measure that limit and
+not the services behind it. Access logs add a line per request, which adds up
+during a load test.
+
+## 48. One Gateway in `traefik` admits routes from `ticketdrop` only, through one HTTPRoute
+
+**Decision.** Gateway `ticketdrop` lives in the `traefik` namespace with one HTTP
+listener on port 8000 and no hostname. Its `allowedRoutes` uses a `Selector` on
+`kubernetes.io/metadata.name: ticketdrop`. One HTTPRoute, also named `ticketdrop`,
+lives in the `ticketdrop` namespace with two rules: `PathPrefix /v1` goes to Service
+`gateway` on 8080, and `PathPrefix /` goes to Service `web` on 8080. Both files are
+in `platform/routes/` in the GitOps repo.
+
+**Why.** The listener port has to be the `web` entrypoint inside the Traefik pod
+(entry 46), not the Service's 8088. With no hostname the listener answers
+`localhost`. The Gateway is the platform's front door and the routes belong to the
+app, so they sit in their own namespaces, and a `Selector` admits only the namespace
+that should publish through it, where `All` would admit any. `/v1` goes to the API
+gateway, not to a service directly, so only the routes it lists are reachable: in
+`docs/evidence/phase-2/08-routes-through-gateway.txt`,
+`/v1/drops/x/availability` gets inventory's JSON 404, and `/v1/healthz` gets a plain
+404 from the gateway, which Traefik's access log confirms. The most specific match
+wins whatever the order, so `/v1` is never taken by `/`. One route with two rules is
+fewer objects than two, and both paths change together. `08-shopfront-through-gateway.png`
+shows the shopfront through this path.
+
+**Cost.** Every path shares one route object, so a bad edit can affect both, and its
+status does not separate them. The listener has no hostname and no TLS; EKS needs
+both, and the listener's port changes with the entrypoint. A new namespace that
+publishes routes needs the selector changed. The Gateway and the route need
+`kubectl apply` by hand until ArgoCD syncs them in Phase 3.

@@ -71,3 +71,28 @@ with no `:` after it. The same kind of line appeared under every service.
 comments. The chart was also changed to one release per service, with shared
 defaults in `values.yaml`. `helm lint` passes, leaving only the
 `icon is recommended` INFO line.
+
+## 5. The Traefik chart rejects `platform/traefik/values.yaml`
+
+**Seen.** Rendering chart 42.1.3 stopped before producing anything
+([`evidence/phase-2/fail-8-traefik-values-schema.txt`](evidence/phase-2/fail-8-traefik-values-schema.txt),
+a re-run on a copy with the two original lines restored):
+
+```
+Error: values don't meet the specifications of the schema(s) in the following chart(s):
+traefik:
+- at '/ports/web': additional properties 'redirectTo' not allowed
+- at '/ports/websecure/expose/default': got string, want boolean
+```
+
+**Cause.** The chart ships a JSON schema that refuses unknown keys and wrong
+types. `ports.web.redirectTo` does not exist in this chart version, and
+`expose.default` under `websecure` was misspelled as `fault`, which YAML reads
+as a string.
+
+**Fix.** Removed `redirectTo`, which would also have sent traffic to HTTPS with
+no TLS locally, and set `default: false`. The chart renders and a server-side
+dry run passes.
+
+**Note.** The check happens before anything reaches the cluster, so a misspelled
+key here costs a re-run and leaves nothing half installed.
