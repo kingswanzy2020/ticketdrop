@@ -7,6 +7,3 @@ CREATE DATABASE payments;
 CREATE DATABASE fulfillment;
 -- The scheduler stores nothing. Its database is where its leader lock lives.
 CREATE DATABASE scheduler;
-
-
-
