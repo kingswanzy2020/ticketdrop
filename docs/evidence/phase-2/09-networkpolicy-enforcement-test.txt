@@ -1,0 +1,51 @@
+Mon Nov  9 06:33:40 AM KST 2026
+
+$ kubectl create namespace netpol-test
+namespace/netpol-test created
+
+$ kubectl run np-client -n netpol-test --image=ghcr.io/cloudnative-pg/postgresql:18.6-system-trixie --image-pull-policy=IfNotPresent --command -- sleep 3600
+pod/np-client created
+
+$ kubectl run np-server -n netpol-test --image=ghcr.io/cloudnative-pg/postgresql:18.6-system-trixie --image-pull-policy=IfNotPresent --command -- python3 -m http.server 8000
+pod/np-server created
+
+$ kubectl wait --for=condition=Ready pod --all -n netpol-test --timeout=60s
+pod/np-client condition met
+pod/np-server condition met
+
+$ probe 10.244.0.7 4100
+exit=0
+
+$ probe 10.244.0.25 8000
+exit=0
+
+$ kubectl apply -f scratch/deny-egress.yaml
+networkpolicy.networking.k8s.io/deny-all-egress created
+
+$ probe 10.244.0.7 4100
+exit=124
+
+$ kubectl delete -f scratch/deny-egress.yaml
+networkpolicy.networking.k8s.io "deny-all-egress" deleted from netpol-test namespace
+
+$ probe 10.244.0.7 4100
+exit=0
+
+$ kubectl apply -f scratch/deny-ingress.yaml
+networkpolicy.networking.k8s.io/default-deny-ingress created
+
+$ probe 10.244.0.25 8000
+exit=124
+
+$ probe 10.244.0.7 4100
+exit=0
+
+$ kubectl delete -f scratch/deny-ingress.yaml
+networkpolicy.networking.k8s.io "default-deny-ingress" deleted from netpol-test namespace
+
+$ probe 10.244.0.25 8000
+exit=0
+
+$ kubectl delete namespace netpol-test
+namespace "netpol-test" deleted
+

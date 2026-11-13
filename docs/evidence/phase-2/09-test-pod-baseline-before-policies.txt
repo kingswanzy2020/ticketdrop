@@ -1,0 +1,62 @@
+Wed Nov 11 08:46:57 PM KST 2026
+dns () 
+{ 
+    kubectl exec -n ticketdrop np-probe -- bash -c "getent hosts $1; echo exit=\$?"
+}
+pg () 
+{ 
+    kubectl exec -n ticketdrop np-probe -- bash -c "pg_isready -h $1 -p 5432 -t 3; echo exit=\$?"
+}
+tcp () 
+{ 
+    kubectl exec -n ticketdrop np-probe -- bash -c "timeout 3 bash -c '</dev/tcp/$1/$2'; echo exit=\$?"
+}
+
+$ kubectl get netpol -A
+No resources found
+
+$ kubectl apply -f scratch/np-probe.yaml
+pod/np-probe unchanged
+
+$ kubectl wait --for=condition=Ready pod/np-probe -n ticketdrop --timeout=60s
+pod/np-probe condition met
+
+$ kubectl get pod np-probe -n ticketdrop -o wide --show-labels
+NAME       READY   STATUS    RESTARTS   AGE     IP            NODE                    NOMINATED NODE   READINESS GATES   LABELS
+np-probe   1/1     Running   0          2m15s   10.244.0.26   desktop-control-plane   <none>           <none>            run=np-probe
+
+$ kubectl exec -n ticketdrop np-probe -- id
+uid=26(postgres) gid=102(postgres) groups=102(postgres),101(ssl-cert)
+pg-rw endpoint=10.244.0.23 goaws endpoint=10.244.0.7
+
+$ dns pg-rw.data.svc.cluster.local
+10.96.71.65     pg-rw.data.svc.cluster.local
+exit=0
+
+$ dns goaws.data.svc.cluster.local
+10.96.85.237    goaws.data.svc.cluster.local
+exit=0
+
+$ dns inventory
+10.96.189.1     inventory.ticketdrop.svc.cluster.local
+exit=0
+
+$ pg pg-rw.data.svc.cluster.local
+pg-rw.data.svc.cluster.local:5432 - accepting connections
+exit=0
+
+$ pg 10.244.0.23
+10.244.0.23:5432 - accepting connections
+exit=0
+
+$ tcp goaws.data.svc.cluster.local 4100
+exit=0
+
+$ tcp 10.244.0.7 4100
+exit=0
+
+$ tcp inventory 8080
+exit=0
+
+$ kubectl delete -f scratch/np-probe.yaml
+pod "np-probe" deleted from ticketdrop namespace

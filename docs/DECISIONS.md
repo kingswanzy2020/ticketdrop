@@ -461,6 +461,11 @@ them and use their own configured URLs. Nothing in `data` is checked for Pod
 Security until a label is added there. The Deployment sets requests of 50m CPU
 and 64Mi of memory, which were chosen, not measured.
 
+**Superseded.** The network rules came in step 9, not step 7, and are not one
+rule for the namespace: each service may reach only the pods in `data` it uses,
+by pod label (entry 51). One rule for all of `ticketdrop` would also let a
+debug pod reach Postgres.
+
 ## 28. Each service can reach only its own database, enforced by `pg_hba`
 
 **Decision.** The Postgres cluster `pg` holds the six databases, and each has a
@@ -988,3 +993,118 @@ status does not separate them. The listener has no hostname and no TLS; EKS need
 both, and the listener's port changes with the entrypoint. A new namespace that
 publishes routes needs the selector changed. The Gateway and the route need
 `kubectl apply` by hand until ArgoCD syncs them in Phase 3.
+
+## 49. NetworkPolicy is proven on the local cluster, not left for EKS
+
+**Decision.** Docker Desktop's cluster enforces NetworkPolicy in both directions,
+so the step 9 policies are written and proven here rather than written blind and
+proven only on EKS. This settles the open question in the Phase 2 workbook.
+
+**Why.** In `docs/evidence/phase-2/09-networkpolicy-enforcement-test.txt`, two pods
+in a scratch namespace `netpol-test` first reached goaws (`10.244.0.7:4100`) and a
+test server (`10.244.0.25:8000`) with a new TCP connection each time (`exit=0`). A
+policy selecting every pod with `policyTypes: [Egress]` and no rules made the goaws
+probe time out (`exit=124`); deleting it brought `exit=0` back. A policy with
+`policyTypes: [Ingress]` and no rules made the server probe time out while the
+client's egress to goaws still worked; deleting it brought the server back. The
+enforcer is kindnet's `kube-network-policies` controller (image
+`kindest/kindnetd:v20260820-69b56db7`, Kubernetes v1.36.4), whose log reports
+"Policy engine is ready". A blocked connection timed out after the probe's three
+seconds instead of being refused, so this enforcer drops packets.
+
+**Cost.** The proof is of kindnet, not of the plugin EKS will run, so the policies
+must be proven again there; on EKS, enforcement depends on how the cluster's network
+plugin is configured. Only new connections were tested: whether a connection opened
+before a policy survives it was not, so after a policy change the pods are restarted
+before anything is called proven. A blocked call fails by timing out, so a missing
+rule shows up as a slow failure rather than a fast refusal. The `kubectl describe`
+output of the two test policies was not captured; the policy files themselves were
+throwaway files in the GitOps repo's ignored `scratch/`.
+
+## 50. Each service's NetworkPolicy comes from the chart; default-deny and DNS are plain manifests
+
+**Decision.** `charts/service/templates/networkpolicy.yaml` renders one
+NetworkPolicy per release, named after the service. Each `values-<svc>.yaml`
+names its peers under `networkPolicy`: `callers` and `calls` are services in
+`ticketdrop`, and `externalCallers` and `externalCalls` are keys of
+`networkPolicy.external` in the chart's `values.yaml`, which defines `traefik`,
+`postgres` and `goaws` by namespace, pod labels and port. The two policies that
+select every pod in `ticketdrop`, `default-deny` and `allow-dns`, are plain
+manifests in `platform/network-policies/` in the GitOps repo.
+
+**Why.** A service's connections are reviewed next to the env vars that make
+them, and are installed and removed with its release; a new service gets its
+policy from its values file. The peers are named, not worked out from
+`databaseSecret` or `AWS_ENDPOINT_URL`, so the intent can be read in the values
+file and the destinations can change per environment without touching the
+template. A policy that selects the whole namespace cannot come from the chart:
+nine releases would render the same object, and Helm refuses an object another
+release owns (known Helm behaviour, not tried here). `default-deny` must also
+exist with no release installed, because it covers pods no chart creates. A DNS
+rule inside each service's policy was the alternative; it was not taken because
+pods outside the chart, such as the step 9 test pod, would then have no DNS, and
+a failed probe would show a missing lookup instead of a blocked connection. The
+template refuses to render when callers are listed for a service with no `http`
+port, or when a peer key is not in `external`; both were tried and fail with
+that message.
+
+**Cost.** The policies live in two places, and the chart's rules are read
+through `helm template`, not as applied. The namespace-wide files are applied by
+hand until ArgoCD syncs `platform/` in Phase 3. For payments, fulfillment,
+notifications and scheduler the template writes `ingress: []`, which the API
+server drops, so `kubectl diff` reports a change on those four (only
+`generation`) when nothing would change.
+
+## 51. Every pod in `ticketdrop` is denied by default, and each service may make and take only the calls it needs
+
+**Decision.** `default-deny` selects every pod in `ticketdrop` for Ingress and
+Egress with no rules. `allow-dns` lets every pod there send to CoreDNS
+(`kube-system`, `k8s-app: kube-dns`) on 53 UDP and TCP. Each service's policy
+isolates both directions and opens only these, on TCP:
+
+| Service | May be called on 8080 by | May call |
+|---|---|---|
+| web | Traefik | gateway |
+| gateway | Traefik, web | catalog, orders, inventory |
+| catalog | gateway, scheduler | Postgres, goaws |
+| orders | gateway | inventory, Postgres, goaws |
+| inventory | gateway, orders, scheduler | Postgres, goaws |
+| payments | nobody | Postgres, goaws |
+| fulfillment | nobody | Postgres, goaws |
+| notifications | nobody | goaws |
+| scheduler | nobody | catalog, inventory, Postgres |
+
+Services are called on 8080, Postgres on 5432 and goaws on 4100. Postgres is the
+pods labelled `cnpg.io/cluster: pg` in `data`, goaws the pods labelled
+`app: goaws` there, and Traefik the pods labelled
+`app.kubernetes.io/name: traefik` in `traefik`. Each outside peer is one entry
+holding both a namespace selector and a pod selector, and each outside
+destination is its own rule with its own port. No rule opens the admin port,
+9090. `data` and `traefik` have no policies.
+
+**Why.** The table is the calls the services make: the URLs in their values
+files, which ones have a database, and which use the event bus. A rule for the
+whole of `ticketdrop` to reach `data` would let any pod there, a debug pod
+included, reach Postgres, which is what step 9 sets out to prevent. The cluster
+label, not `role=primary`, keeps the Postgres rule valid after a failover. A
+namespace and pod selector in one entry must both match; as two entries they
+would admit every pod in `data`. Ports in one rule apply to every peer in it, so
+Postgres and goaws are separate rules. DNS is open to every pod, not only the
+services, so a test pod fails on the connection and not on the lookup. The
+admin port needs no rule because Kubernetes always admits traffic from a pod's
+own node, which is where the kubelet's probes come from. The policies were
+applied on 2026-11-13 in this order: `allow-dns` at 03:09:26Z, the nine service
+policies through `helm upgrade` at 03:18:16Z to 03:18:19Z, and `default-deny` at
+03:18:32Z, so no service was ever isolated without DNS. All nine Deployments
+were then restarted, because only new connections were tested (entry 49); the
+15 new pods became Ready with no restarts, which shows the probes on 9090 still
+reach them.
+
+**Cost.** Every new call between services needs a values change, and a
+forgotten one shows up as a timeout, not a refusal (entry 49). Anything that
+later scrapes `/metrics` on 9090 from another pod, such as Prometheus, needs an
+ingress rule on every service. `data` stays open to other namespaces, such as
+`traefik`, where Postgres is protected only by `pg_hba` and passwords (entry 28).
+On EKS, Postgres and the event bus move outside the cluster, so the `external`
+peers change. That the test pod is now refused Postgres and that an order still
+completes has not been checked yet.
