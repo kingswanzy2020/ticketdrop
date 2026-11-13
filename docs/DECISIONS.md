@@ -1107,4 +1107,4 @@ ingress rule on every service. `data` stays open to other namespaces, such as
 `traefik`, where Postgres is protected only by `pg_hba` and passwords (entry 28).
 On EKS, Postgres and the event bus move outside the cluster, so the `external`
 peers change. That the test pod is now refused Postgres and that an order still
-completes has already been checked yet.
+completes has already been checked.
