@@ -1108,3 +1108,147 @@ ingress rule on every service. `data` stays open to other namespaces, such as
 On EKS, Postgres and the event bus move outside the cluster, so the `external`
 peers change. That the test pod is now refused Postgres and that an order still
 completes has already been checked.
+
+## 52. KEDA 2.21.0 runs in its own restricted namespace and watches only `ticketdrop`
+
+**Decision.** KEDA is installed from the `kedacore/keda` chart, version 2.21.0,
+as release `keda` in a new namespace `keda` labelled
+`pod-security.kubernetes.io/enforce: restricted` (in `platform/namespaces.yaml`),
+with `platform/keda/values.yaml`: `watchNamespace: ticketdrop`, `crds.install:
+true`, one replica each of the operator and the metrics server, requests of
+`100m` CPU and `100Mi` for the operator, metrics server and webhooks, and
+`networkPolicy.enabled: false`. It was installed on 2026-11-14 at 05:19:01Z.
+
+**Why.** Only `fulfillment` in `ticketdrop` is scaled, so the operator has no
+reason to watch the rest of the cluster; all three Deployments run with
+`WATCH_NAMESPACE=ticketdrop`. Its own namespace keeps it apart from the
+services, as CloudNativePG and Traefik are (entries 30 and 44). The chart's pods
+already set `runAsNonRoot`, `allowPrivilegeEscalation: false`, all capabilities
+dropped and a `RuntimeDefault` seccomp profile, so they were admitted under
+`restricted` with no values change, and a server dry run of the label on the
+namespace reported nothing to change. One replica each is enough on one node. The
+chart's own NetworkPolicy is off because `keda` has no default-deny: the operator
+needs to reach goaws in `data` on 4100 and the API server, and nothing blocks
+either (entry 51). After the install the external metrics API
+`v1beta1.external.metrics.k8s.io` was `Available` and the six `keda.sh` CRDs
+existed (`docs/evidence/phase-2/10-keda-installed.txt`).
+
+**Cost.** A ScaledObject in any other namespace is ignored by this operator, so
+scaling something outside `ticketdrop` needs a values change first. The operator's
+ClusterRole still lists and watches Secrets in every namespace; `watchNamespace`
+narrows what it acts on, not that grant. The CRDs are templates in this release, so
+`helm uninstall keda` deletes them and every ScaledObject and TriggerAuthentication
+with them. The values set requests only, so the chart's default limits apply: 1 CPU
+and `1000Mi` for each of the three containers, unlike the nine services, which have
+no CPU limit (entries 30 and 36), and Traefik's `500m` (entry 47). With one operator
+replica, scaling stops while it restarts; it restarted once in its first two minutes
+on install, and the cause was not captured. The operator in `keda` has no
+NetworkPolicy of its own, so on EKS, where `data` moves outside the cluster, its
+route to the queue has to be opened and proven again.
+
+## 53. With `autoscaling.enabled`, the chart leaves `replicas` out of the Deployment
+
+**Decision.** The service chart has an `autoscaling.enabled` value, `false` by
+default. `templates/deployment.yaml` writes `replicas: {{ .Values.replicaCount }}`
+only when it is false. `values-fulfillment.yaml` sets it to `true`; the other eight
+services are unchanged. `replicaCount` stays in the values and still decides the
+PDB, so `fulfillment`, at the default 1, still has none (entry 39). The first
+ScaledObject draft, which had a fixed name, no triggers and sat in `templates/`,
+was moved out of the chart before this upgrade so no release rendered it.
+
+**Why.** Once KEDA creates an HPA for `fulfillment`, the HPA owns the replica count.
+A `replicas` line in the chart would set it back to 1 on every `helm upgrade`, and
+the HPA would then scale it again; in Phase 3 ArgoCD would show it as drift. The
+Kubernetes HPA documentation recommends removing `spec.replicas` from the manifest
+for this reason. Renders of all nine releases before and after the change differ
+only in `fulfillment`, by its `replicas: 1` line, and `helm lint` passes for all
+nine. `helm upgrade fulfillment` on 2026-11-14 at 12:26:34Z (revision 3) left the
+release manifest with no `replicas:` line, `spec.replicas` at 1, the Deployment's
+`generation` at 2 and the same pod, `fulfillment-6b77c59747-mpfbc`, running with no
+restarts (`docs/evidence/phase-2/10-chart-replicas-switch.txt`).
+
+**Cost.** The Kubernetes documentation warns that removing `spec.replicas` can drop
+a Deployment to 1 once; at 1 already, nothing moved here, but a service switched
+over at more replicas would briefly lose pods. The API server still lists `helm` as
+the manager of `spec.replicas`, from the 2026-10-28 install. That a later upgrade
+leaves the count alone is expected from Helm 3's patching; it held for the two
+upgrades after this one (entries 54 and 55), but neither ran while KEDA had
+fulfillment above 1. For a scaled service `replicaCount` only decides the PDB,
+which the comments in the values files state.
+
+## 54. The scaler signs in with its own placeholder Secret, not the service's environment
+
+**Decision.** With `autoscaling.enabled`, the chart renders a TriggerAuthentication
+named after the release (`templates/triggerauthentication.yaml`). How it gets
+credentials is `autoscaling.auth.provider`. With `secret`, the default, the chart
+also renders a Secret `<release>-keda-aws` (`templates/keda-aws-secret.yaml`) with
+`AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`, and the TriggerAuthentication maps
+them to the scaler's `awsAccessKeyID` and `awsSecretAccessKey` with
+`secretTargetRef`. With `aws`, it renders `podIdentity.provider: aws` and no Secret,
+for an IAM role on EKS. Any other value fails the render. The values are the
+placeholders `local` and `local`, committed to git.
+
+**Why.** goaws accepts any credentials, but KEDA's SQS scaler will not run without
+some. A TriggerAuthentication can also read `env` from the target's container, and
+the KEDA 2.21.0 source (`pkg/scaling/resolver/scale_resolvers.go`) reads that from
+the Deployment's pod template, so it would work at 0 replicas. It was turned down
+because resolving `env` also reads the container's `envFrom`, which for
+fulfillment is the `fulfillment-db` Secret: the operator would read the database
+password to find two placeholders. A separate Secret also keeps the scaler's
+identity apart from the service's, which on AWS are two roles: the operator only
+reads queue attributes, fulfillment receives and deletes messages. The placeholders
+go in git because they are not secrets: the same `local` values are already in
+every service's values file, and on EKS no Secret is rendered. Upgrade to revision 4
+on 2026-11-14 at 14:10:18Z: the TriggerAuthentication listed secret
+`fulfillment-keda-aws`, the operator logged `New TriggerAuthentication configured`,
+the Secret showed two 5-byte keys, and the fulfillment pod was not restarted
+(`docs/evidence/phase-2/10-trigger-auth.txt`). That the credentials work was shown
+when the ScaledObject read the queue (entry 55).
+
+**Cost.** The placeholders now appear twice, in fulfillment's env and in the
+Secret. The line is that a real credential never goes in values; Helm also stores
+each revision's values in its `sh.helm.release.v1.*` Secrets, so one put there by
+mistake would stay in the release history. KEDA puts `finalizer.keda.sh` on the
+TriggerAuthentication, so if KEDA is removed while it exists, deleting it may hang
+until the finalizer is removed by hand; this is inferred and was not tried. The
+`aws` provider has only been rendered, not run.
+
+## 55. Fulfillment scales from 0 to 5 at 100 messages a pod, polled every 5 s, back to 0 a minute after the queue empties
+
+**Decision.** `templates/scaledobject.yaml` renders a ScaledObject named after the
+release when `autoscaling.enabled` is true, targeting its Deployment with one
+`aws-sqs-queue` trigger that uses the TriggerAuthentication of entry 54. The
+defaults in `values.yaml` are `minReplicaCount` 0, `maxReplicaCount` 5,
+`pollingInterval` 5, `cooldownPeriod` 60, a scale-down stabilization window of 30 s,
+a fallback of 1 replica after 3 failed reads, `queueLength` 5 and
+`activationQueueLength` 0; `queueURL` is required and `endpoint` is set only for an
+emulator. Fulfillment sets the goaws queue URL and endpoint as plain text and
+`queueLength` 100. Every trigger value is quoted.
+
+**Why.** One fulfillment pod handles about 20 orders a second (4 handlers at 200 ms),
+so 100 messages is about 5 s of work per pod. Five pods at 50m CPU and 64Mi each fit
+the one node easily. A single waiting order should start a pod, so activation is 0.
+The 30 s default polling would add up to 30 s before the first pod; the default
+300 s cooldown and HPA window would keep pods for five minutes after the work. The
+queue URL is text, not `queueURLFromEnv`, for the same reason as entry 54. Upgrade to
+revision 5 on 2026-11-14 at 16:11:34Z, with an empty queue: KEDA took fulfillment
+from 1 to 0 in 6 s, the ScaledObject was `READY True`, and the HPA
+`keda-hpa-fulfillment` read metric `s0-aws-sqs-fulfillment-events` at `0` from
+goaws (`docs/evidence/phase-2/10-scaledobject.txt`). In the proof run on
+2026-11-14 at 16:17Z, 1,500 orders through port 8088 started the first pod 3 s
+after the orders began and had it Ready at 6 s. The backlog peaked at 243, which
+gave 3 replicas. The last pod was gone 61 s after the queue emptied, and nothing was
+pending or dead-lettered (`docs/PROOF.md`,
+`docs/evidence/phase-2/10-fulfillment-scale-0-n-0.txt`). This settles the
+workbook's open question: KEDA's SQS scaler reads queue depth correctly from goaws.
+
+**Cost.** Each read of the queue is an SQS request on AWS, so a 5 s poll is about
+17,000 requests a day for one queue, idle or not. Short windows mean more pods
+started and stopped for a bursty load. The first order after a quiet minute waits
+for a pod to start, about 6 s here. The maximum of 5 was never reached, because the
+backlog is limited by how fast payments and inventory pass orders on, which was not
+measured. The fallback has not been tested, and the KEDA documentation does not say
+whether it starts a pod from 0, so if goaws cannot be read while fulfillment is at 0,
+orders may wait with no pod to handle them. At 5 pods, fulfillment's connections to
+the one Postgres instance (`max_connections` 100) grow with them; this was not
+measured. The queue URL is written twice, in the env and in the trigger.

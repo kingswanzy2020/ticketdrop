@@ -49,8 +49,9 @@ Two scripts do the work, against the local stack started by `make up`:
   design ([23](DECISIONS.md#23-notifications-keeps-no-record-so-a-message-can-be-sent-twice)).
 - **The late `payment.succeeded`** that reaches inventory after its hold was
   released. Known, documented, not exercised by a check.
-- **Kubernetes behaviour:** pod deletion mid-drop, rolling updates, probes,
-  network policies and queue-depth scaling arrive with Phase 2.
+- **Kubernetes behaviour:** pod deletion mid-drop and rolling updates are not
+  checked yet. Network policies (DECISIONS 49 to 51) and queue-depth scaling
+  (15 November, below) have been proven on the local cluster only.
 
 ---
 
@@ -70,6 +71,51 @@ Recorded in DECISIONS.md when each decision was made.
 ---
 
 ## Results
+
+### 15 November 2026: KEDA scales fulfillment 0 → N → 0 on queue depth
+
+Machine: the Docker Desktop cluster, one node, Kubernetes v1.36.4, KEDA 2.21.0.
+Commits: `ticketdrop` `d6e3467`, `ticketdrop-gitops` `436f8e4` plus the step 10
+chart changes, not yet committed (fulfillment at Helm revision 5). Not a
+`make` check: a script placed the orders through the public port 8088 and
+sampled the queue, KEDA's metric and the replicas every 2 to 3 seconds.
+Output: [10-fulfillment-scale-0-n-0.txt](evidence/phase-2/10-fulfillment-scale-0-n-0.txt);
+the first scale to 0, when the ScaledObject was applied, is in
+[10-scaledobject.txt](evidence/phase-2/10-scaledobject.txt).
+
+Settings: `minReplicaCount` 0, `maxReplicaCount` 5, `queueLength` 100,
+`activationQueueLength` 0, `pollingInterval` 5 s, `cooldownPeriod` 60 s,
+scale-down stabilization 30 s. Load: 1,500 orders of one ticket for 1,500
+tickets, 16 at a time. Times are local (KST).
+
+| Assertion | Result |
+|---|---|
+| Fulfillment pods when the ScaledObject was applied to an empty queue | 1 → 0, in 6 s (01:11:34 to 01:11:40) |
+| Orders accepted | 1,500 of 1,500 (`201`), placed in 10 s (01:17:57 to 01:18:07) |
+| Orders start → first fulfillment pod created / Ready | 3 s / 6 s |
+| Highest backlog seen (visible + in flight) | 243, at 01:18:08 |
+| Highest replica count | 3 (HPA "above target"), all Ready 11 s after the orders started |
+| Queue empty and no order pending | 01:18:29, 32 s after the orders started |
+| Scale-down | 3 → 2 at 01:18:35, 2 → 1 at 01:18:50, 1 → 0 at 01:19:25 (KEDA) |
+| Queue empty → no fulfillment pods | 61 s (01:18:29 to 01:19:30) |
+| Orders ticketed / failed / pending | 1,355 / 145 / 0 |
+| Tickets issued / back in stock | 1,355 / 145 |
+| Messages in the five dead-letter queues | 0 before, 0 after |
+| Operator log lines with `error` or `fail` | none |
+| **Verdict** | **passed** |
+
+#### Observations
+
+- **It stopped at 3 of 5 replicas.** The backlog peaked at 243 against a target
+  of 100 per pod, so the HPA asked for 3. The backlog is limited by how fast
+  payments and inventory pass orders on, which was not measured; reaching 5
+  needs a faster upstream or a lower `queueLength`.
+- **Back to 0 took 61 s, not the 90 s of window plus cooldown.** The HPA's 30 s
+  window and KEDA's 60 s cooldown run at the same time, from when the queue was
+  last busy, so the last pod went at about the cooldown alone.
+- **The 145 failed orders are declined payments** (`PAYMENT_DECLINE_RATE` 0.1),
+  and their tickets went back to stock.
+
 
 ### 6 October 2026: drop-check, once per `KILL` value, then outage-check
 

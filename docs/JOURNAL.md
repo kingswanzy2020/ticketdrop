@@ -100,6 +100,13 @@ Dates: to . Exit check: the drop passes through the Gateway; KEDA scales
 
 ### Notes
 October,13 2026: Run the application locally on my docker desktop kind cluster
+November 13, 2026: Proved the cluster enforces NetworkPolicy. A blocked call times out after 3s, it is not refused.
+November 13, 2026: Applied DNS first, then the nine service policies, then default-deny, and restarted everything. All 15 pods came back Ready.
+November 14, 2026: Installed KEDA 2.21.0. The kubectl dry run failed on one CRD, but helm install was fine.
+November 14, 2026: Took `replicas` out of fulfillment's Deployment. Same pod, no restart, still 1 replica.
+November 14, 2026: Gave KEDA its own placeholder Secret for goaws, so it never reads fulfillment's database password.
+November 15, 2026: Applied the ScaledObject on an empty queue and fulfillment went from 1 to 0 in 6s.
+November 15, 2026: 1500 orders through 8088. First pod Ready in 6s, 3 pods at the peak, back to 0 pods 61s after the queue emptied. Nothing pending, nothing in the DLQs.
 
 ### 1. The problem
 1. No kubernetes cluster to run the application.
@@ -117,6 +124,11 @@ October,13 2026: Run the application locally on my docker desktop kind cluster
 10. Wrote one shared Helm chart, with a values file for each of the nine services, and installed them as nine releases.
 11. Added the PDB and topology spread to the chart. Six services run two replicas, so 15 pods in total.
 12. Installed the Gateway API CRDs and Traefik, then wrote the Gateway and the HTTPRoute. The shop now answers on localhost:8088 with no port-forward.
+13. Wrote a NetworkPolicy template in the chart, with each service's callers and calls in its values file, plus default-deny and DNS as plain manifests in platform/network-policies/.
+14. Installed KEDA with Helm into its own keda namespace, labelled restricted, watching only ticketdrop.
+15. Added an autoscaling switch to the chart. With it on, the Deployment has no replicas line, so KEDA's HPA can own the count. Only fulfillment has it on.
+16. Added a TriggerAuthentication and a placeholder Secret to the chart, so KEDA can sign its calls to goaws. On EKS one value switches it to an IAM role.
+17. Added a ScaledObject to the chart: fulfillment scales from 0 to 5 on its queue, 100 messages per pod.
 
 ### 3. Why this approach
 1. I put `enforce: restricted` on the ticketdrop namespace, so a pod has to be locked down before it can land there: `runAsNonRoot` and a `RuntimeDefault` seccomp profile on the pod, `allowPrivilegeEscalation: false` and all capabilities dropped on the container. A pod that breaks the rule is refused when it is created, not found later. The service images already run as non-root (UID 65532), so the rule costs them nothing, but Pod Security reads only the pod spec, so the four settings have to be written there even when the image is fine. The cost is that every pod in the namespace has to carry them, including throwaway test pods. data stays unenforced because the goaws image runs as root. See DECISIONS 27 and 34, and [the refused pod](evidence/phase-2/02-restricted-rejects-root-pod.txt).
@@ -129,6 +141,13 @@ October,13 2026: Run the application locally on my docker desktop kind cluster
 8. One release per service, so each one upgrades and rolls back alone (DECISIONS 35).
 9. The PDB only renders above one replica, and the three queue consumers stay at one because their messages can wait in the queue (DECISIONS 39 to 41).
 10. Only the Gateway API, not Traefik's own CRDs, so the routes should carry over to EKS (DECISIONS 42 to 48).
+11. Tested NetworkPolicy on this cluster before writing any, so the rules are proven here and not left for EKS (DECISIONS 49).
+12. Each service names the exact pods it may call and be called by, instead of one rule for the whole namespace, which would let a test pod reach Postgres. A test pod is now refused Postgres and goaws, and an order still ends ticketed (DECISIONS 50 and 51).
+13. Default-deny and DNS cover the whole namespace, so they are plain manifests: nine releases cannot own one object (DECISIONS 50).
+14. KEDA watches only ticketdrop, so a ScaledObject anywhere else is ignored. Its CRDs belong to the release, so uninstalling it deletes every ScaledObject (DECISIONS 52).
+15. Left replicas out of the scaled Deployment, so a helm upgrade does not reset what the HPA set (DECISIONS 53).
+16. KEDA gets its own Secret instead of reading fulfillment's env, because reading the env would also hand it the database password (DECISIONS 54).
+17. Polling every 5s and a 60s cooldown, so a drop gets a pod in seconds and the pods go a minute after it, not five. On AWS that is a paid request every 5s (DECISIONS 55).
 
 ### 4. What broke
 1. After restricting label to the ticketdrop namespace, the test pod with the nginx image was restricted from being scheduled on the node because the image run as a root user. So, only pods that run as nonroot are allowed to be placed within that namespace, as enforced by the Pod Security Admission Controller
@@ -138,12 +157,22 @@ October,13 2026: Run the application locally on my docker desktop kind cluster
 5. My first PDB had no end to its if, and my first topology spread was a map with topologyKey twice. It also used zone with DoNotSchedule, which would have left every pod Pending on a node with no zone label.
 6. The Traefik chart rejected my values: redirectTo does not exist, and I typed fault for false (TROUBLESHOOTING 5).
 7. My HTTPRoute had an uppercase name, no namespace on the parentRef, and sent /v1 to catalog when it should go to the gateway.
+8. `kubectl apply --dry-run=server` on the KEDA chart failed: the scaledjobs CRD is too big for kubectl's last-applied annotation. `--server-side` passed, and helm install never had the problem.
+9. On install, the KEDA metrics server's image pull failed with a short read, so my wait timed out. It pulled on the retry and came up.
+10. My first ScaledObject sat in the chart's templates with a fixed name and no triggers, so every release would have tried to create it. I also put autoscaling in KEDA's values, where it does nothing. Both were caught before any upgrade.
+11. A pod watch I left running in the background kept my capture script from finishing, until I killed it.
+12. A port-forward started in the background was not ready when the next curl ran, so it failed to connect. Waiting a few seconds fixed it.
 ### 5. What I changed
 1. The ConfigMap's Host was fixed to goaws.data.svc.cluster.local, and the ConfigMap needed a pod restart because of subPath.
 2. Ten queues listed.
 3. Made the http port optional with `http: null`, because only five of the nine services serve 8080.
 4. Moved the public port to 8088, because 8080 is taken on my machine and I cannot bind below 1024.
+5. The autoscaler in the values for a microservice is inverted, meaning that the replicas block in deployment template only runs when the final boolean value is true, and skipped when its false. 
+6. Dry runs of charts with big CRDs now use `kubectl apply --server-side --dry-run=server`.
+7. Every new call between services is now a values change, or it times out (DECISIONS 51).
+8. Check a port-forward is listening before using it.
 ### 6. At a different scale
 
 ### Evidence
 1. The screenshots and evidence texts in [evidence/phase-2/](evidence/phase-2/).
+2. The KEDA run, 0 to 3 to 0, in [PROOF.md](PROOF.md), [10-fulfillment-scale-0-n-0.txt](evidence/phase-2/10-fulfillment-scale-0-n-0.txt) and [10-fulfillment-scaled-up.png](evidence/phase-2/10-fulfillment-scaled-up.png).

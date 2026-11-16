@@ -1,0 +1,246 @@
+Sat Nov 14 11:10:17 PM KST 2026
+
+# Part 1: the change (the Secret template prints value references, not values)
+
+$ git diff charts/service/values.yaml
+diff --git a/charts/service/values.yaml b/charts/service/values.yaml
+index 65032a1..6be676f 100644
+--- a/charts/service/values.yaml
++++ b/charts/service/values.yaml
+@@ -87,3 +87,20 @@ probes:
+     # 2s x 40 = 80s, covering the 60s wait for Postgres plus migrations.
+     periodSeconds: 2
+     failureThreshold: 40
++
++# true leaves replicas out of the Deployment, so the HPA that KEDA creates
++# owns the count and an upgrade does not reset it. The ScaledObject that
++# drives it comes in step 10 task 4. replicaCount is then not rendered, but
++# pdb.yaml still reads it: keep it at 1 and the service gets no budget.
++autoscaling:
++  enabled: false
++  # How KEDA's operator signs its calls to the queue (entry 54). Not the
++  # service's own credentials: on AWS the two are different roles.
++  auth:
++    # secret: a Secret <release>-keda-aws with the two keys below, for goaws,
++    #   which accepts anything but the scaler insists on something.
++    # aws: pod identity, an IAM role on EKS; no Secret is rendered.
++    provider: secret
++    # Placeholders only. A real credential never goes in values.
++    accessKeyID: local
++    secretAccessKey: local
+
+$ cat charts/service/templates/keda-aws-secret.yaml charts/service/templates/triggerauthentication.yaml
+{{- /* The scaler's placeholder credentials for goaws (entry 54). */}}
+{{- $auth := .Values.autoscaling.auth }}
+{{- if and .Values.autoscaling.enabled (eq $auth.provider "secret") }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "service.name" . }}-keda-aws
+  labels:
+    {{- include "service.labels" . | nindent 4 }}
+type: Opaque
+stringData:
+  AWS_ACCESS_KEY_ID: {{ required "autoscaling.auth.accessKeyID is needed with provider secret" $auth.accessKeyID | quote }}
+  AWS_SECRET_ACCESS_KEY: {{ required "autoscaling.auth.secretAccessKey is needed with provider secret" $auth.secretAccessKey | quote }}
+{{- end }}
+{{- /*
+How KEDA's operator authenticates when it reads this service's queue depth.
+It must sit in the ScaledObject's namespace (entry 54).
+*/}}
+{{- if .Values.autoscaling.enabled }}
+{{- $provider := .Values.autoscaling.auth.provider }}
+{{- if not (has $provider (list "secret" "aws")) }}
+{{- fail (printf "autoscaling.auth.provider is %q; use secret or aws" $provider) }}
+{{- end }}
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: {{ include "service.name" . }}
+  labels:
+    {{- include "service.labels" . | nindent 4 }}
+spec:
+  {{- if eq $provider "aws" }}
+  podIdentity:
+    provider: aws
+  {{- else }}
+  secretTargetRef:
+    - parameter: awsAccessKeyID
+      name: {{ include "service.name" . }}-keda-aws
+      key: AWS_ACCESS_KEY_ID
+    - parameter: awsSecretAccessKey
+      name: {{ include "service.name" . }}-keda-aws
+      key: AWS_SECRET_ACCESS_KEY
+  {{- end }}
+{{- end }}
+
+# Part 2: renders before and after, per release: count of changed lines, and kinds in fulfillment's diff
+catalog: 0 changed lines
+orders: 0 changed lines
+inventory: 0 changed lines
+payments: 0 changed lines
+fulfillment: 30 changed lines
+notifications: 0 changed lines
+scheduler: 0 changed lines
+gateway: 0 changed lines
+web: 0 changed lines
+
+$ diff /tmp/claude-1000/-home-king-Desktop-Personal-Lab-DevOps-ticketdrop/cd4c2b97-4711-4dde-be12-e5549988484e/scratchpad/t3/before-fulfillment.yaml /tmp/claude-1000/-home-king-Desktop-Personal-Lab-DevOps-ticketdrop/cd4c2b97-4711-4dde-be12-e5549988484e/scratchpad/t3/after-fulfillment.yaml | grep -E '^> (kind|  name):'
+> kind: Secret
+>   name: fulfillment-keda-aws
+> kind: TriggerAuthentication
+>   name: fulfillment
+
+$ helm lint charts/service -f charts/service/values/values-catalog.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint charts/service -f charts/service/values/values-orders.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint charts/service -f charts/service/values/values-inventory.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint charts/service -f charts/service/values/values-payments.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint charts/service -f charts/service/values/values-fulfillment.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint charts/service -f charts/service/values/values-notifications.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint charts/service -f charts/service/values/values-scheduler.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint charts/service -f charts/service/values/values-gateway.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint charts/service -f charts/service/values/values-web.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm template fulfillment charts/service -n ticketdrop -f charts/service/values/values-fulfillment.yaml -s templates/triggerauthentication.yaml
+---
+# Source: service/templates/triggerauthentication.yaml
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: fulfillment
+  labels:
+    app.kubernetes.io/name: fulfillment
+    app.kubernetes.io/part-of: ticketdrop
+spec:
+  secretTargetRef:
+    - parameter: awsAccessKeyID
+      name: fulfillment-keda-aws
+      key: AWS_ACCESS_KEY_ID
+    - parameter: awsSecretAccessKey
+      name: fulfillment-keda-aws
+      key: AWS_SECRET_ACCESS_KEY
+
+$ helm template fulfillment charts/service -n ticketdrop -f charts/service/values/values-fulfillment.yaml --set autoscaling.auth.provider=aws -s templates/triggerauthentication.yaml
+---
+# Source: service/templates/triggerauthentication.yaml
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: fulfillment
+  labels:
+    app.kubernetes.io/name: fulfillment
+    app.kubernetes.io/part-of: ticketdrop
+spec:
+  podIdentity:
+    provider: aws
+
+$ helm template fulfillment charts/service -n ticketdrop -f charts/service/values/values-fulfillment.yaml --set autoscaling.auth.provider=aws | grep -c 'kind: Secret'
+0
+
+$ helm template fulfillment charts/service -n ticketdrop -f charts/service/values/values-fulfillment.yaml --set autoscaling.auth.provider=foo 2>&1 | head -1
+Error: execution error at (service/templates/triggerauthentication.yaml:8:4): autoscaling.auth.provider is "foo"; use secret or aws
+
+$ helm template fulfillment charts/service -n ticketdrop -f charts/service/values/values-fulfillment.yaml | kubectl apply --dry-run=server -n ticketdrop -f - 2>&1 | grep -v '^Warning'
+networkpolicy.networking.k8s.io/fulfillment configured (server dry run)
+secret/fulfillment-keda-aws created (server dry run)
+service/fulfillment configured (server dry run)
+deployment.apps/fulfillment configured (server dry run)
+triggerauthentication.keda.sh/fulfillment created (server dry run)
+
+# Part 3: the upgrade
+
+$ kubectl get pods -n ticketdrop -l app.kubernetes.io/name=fulfillment
+NAME                           READY   STATUS    RESTARTS   AGE
+fulfillment-6b77c59747-mpfbc   1/1     Running   0          34h
+
+$ helm upgrade fulfillment charts/service -n ticketdrop -f charts/service/values/values-fulfillment.yaml
+Release "fulfillment" has been upgraded. Happy Helming!
+NAME: fulfillment
+LAST DEPLOYED: Sat Nov 14 23:10:18 2026
+NAMESPACE: ticketdrop
+STATUS: deployed
+REVISION: 4
+TEST SUITE: None
+
+$ helm history fulfillment -n ticketdrop --max 2
+REVISION	UPDATED                 	STATUS    	CHART        	APP VERSION	DESCRIPTION     
+3       	Sat Nov 14 21:26:34 2026	superseded	service-0.1.0	0.1.0      	Upgrade complete
+4       	Sat Nov 14 23:10:18 2026	deployed  	service-0.1.0	0.1.0      	Upgrade complete
+
+$ kubectl get triggerauthentication -n ticketdrop
+NAME          PODIDENTITY   SECRET                 ENV   VAULTADDRESS
+fulfillment                 fulfillment-keda-aws         
+
+$ kubectl describe triggerauthentication fulfillment -n ticketdrop
+Name:         fulfillment
+Namespace:    ticketdrop
+Labels:       app.kubernetes.io/managed-by=Helm
+              app.kubernetes.io/name=fulfillment
+              app.kubernetes.io/part-of=ticketdrop
+Annotations:  meta.helm.sh/release-name: fulfillment
+              meta.helm.sh/release-namespace: ticketdrop
+API Version:  keda.sh/v1alpha1
+Kind:         TriggerAuthentication
+Metadata:
+  Creation Timestamp:  2026-11-14T14:10:19Z
+  Finalizers:
+    finalizer.keda.sh
+  Generation:        1
+  Resource Version:  1621445
+  UID:               9e4bc03d-7425-4e8c-bbfc-e4d9026b2724
+Spec:
+  Secret Target Ref:
+    Key:        AWS_ACCESS_KEY_ID
+    Name:       fulfillment-keda-aws
+    Parameter:  awsAccessKeyID
+    Key:        AWS_SECRET_ACCESS_KEY
+    Name:       fulfillment-keda-aws
+    Parameter:  awsSecretAccessKey
+Events:
+  Type    Reason                      Age   From           Message
+  ----    ------                      ----  ----           -------
+  Normal  TriggerAuthenticationAdded  0s    keda-operator  New TriggerAuthentication configured
+
+$ kubectl describe secret fulfillment-keda-aws -n ticketdrop
+Name:         fulfillment-keda-aws
+Namespace:    ticketdrop
+Labels:       app.kubernetes.io/managed-by=Helm
+              app.kubernetes.io/name=fulfillment
+              app.kubernetes.io/part-of=ticketdrop
+Annotations:  meta.helm.sh/release-name: fulfillment
+              meta.helm.sh/release-namespace: ticketdrop
+
+Type:  Opaque
+
+Data
+====
+AWS_ACCESS_KEY_ID:      5 bytes
+AWS_SECRET_ACCESS_KEY:  5 bytes
+
+$ kubectl get pods -n ticketdrop -l app.kubernetes.io/name=fulfillment
+NAME                           READY   STATUS    RESTARTS   AGE
+fulfillment-6b77c59747-mpfbc   1/1     Running   0          34h
+
+$ kubectl get pods -n ticketdrop --no-headers | awk '{print $3}' | sort | uniq -c
+     15 Running
+
+$ kubectl logs -n keda deploy/keda-operator --since=2m | grep -i -E 'error|triggerauth' || echo 'no errors or TriggerAuthentication lines in the last 2m'
+2026-11-14T14:10:19Z	INFO	Adding Finalizer for the TriggerAuthentication	{"controller": "triggerauthentication", "controllerGroup": "keda.sh", "controllerKind": "TriggerAuthentication", "TriggerAuthentication": {"name":"fulfillment","namespace":"ticketdrop"}, "namespace": "ticketdrop", "name": "fulfillment", "reconcileID": "d592d2fe-247d-4c45-ab63-83e0b8d7731b"}
+2026-11-14T14:10:19Z	INFO	metadata.finalizers: "finalizer.keda.sh": prefer a domain-qualified finalizer name including a path (/) to avoid accidental conflicts with other finalizer writers	{"controller": "triggerauthentication", "controllerGroup": "keda.sh", "controllerKind": "TriggerAuthentication", "TriggerAuthentication": {"name":"fulfillment","namespace":"ticketdrop"}, "namespace": "ticketdrop", "name": "fulfillment", "reconcileID": "d592d2fe-247d-4c45-ab63-83e0b8d7731b"}
