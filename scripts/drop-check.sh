@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Runs a drop against the local stack (`make up`) and proves:
+# Runs a drop against the local stack (`make up`), or with TARGET=cluster
+# against the Kubernetes cluster through its Gateway, and proves:
 #
 #   1. a drop cannot be ordered before its opening time, and goes on sale
 #      without anyone touching it
@@ -16,6 +17,8 @@
 #   ORDERS    orders placed (default 600; each asks for 1 to 4 tickets)
 #   CAPACITY  tickets in the drop (default 1000)
 #   KILL      service killed mid-run: payments (default), inventory or fulfillment
+#   TARGET    compose (default) or cluster; in the cluster the kill deletes one
+#             of the service's pods with no grace period
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -121,17 +124,17 @@ echo "  placed $ORDERS orders in $((SECONDS - started))s: $burst accepted, $sold
 # messages the service was holding come back when their visibility timeout
 # expires.
 wait_for 60 finished_at_least $((accepted / 10)) || true
-compose kill -s SIGKILL "$KILL" >/dev/null 2>&1
+kill_service "$KILL"
 at_kill=$(handled "$KILL")
 echo "  killed $KILL after it had handled $at_kill orders"
 sleep 2
 
-compose start "$KILL" >/dev/null 2>&1
+restart_service "$KILL"
 restarted=$SECONDS
 if wait_for 240 finished_at_least "$accepted"; then
-  echo "  restarted $KILL; every order finished $((SECONDS - restarted))s later"
+  echo "  $KILL is back; every order finished $((SECONDS - restarted))s later"
 else
-  echo "  restarted $KILL; still waiting after $((SECONDS - restarted))s"
+  echo "  $KILL is back; still waiting after $((SECONDS - restarted))s"
 fi
 echo
 

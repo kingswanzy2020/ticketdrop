@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -28,8 +29,6 @@ var (
 	ErrSoldOut = errors.New("not enough tickets left")
 	// ErrNoTier means the drop is not on sale, or has no such tier.
 	ErrNoTier = errors.New("no such drop or tier")
-
-	errAlreadyHeld = errors.New("order already has a hold")
 )
 
 // Tier is the stock of one tier of a drop.
@@ -79,6 +78,11 @@ type Service struct {
 	// HoldGrace is how long past its expiry a hold is kept before it is
 	// released (see ReleaseExpired).
 	HoldGrace time.Duration
+	// Metrics may be nil.
+	Metrics *Metrics
+
+	once  sync.Once
+	queue chan holdCall
 }
 
 // Availability returns the stock of every tier of a drop. It returns no tiers
@@ -94,82 +98,6 @@ func (s *Service) Availability(ctx context.Context, dropID string) ([]Tier, erro
 		return nil, fmt.Errorf("read stock of %s: %w", dropID, err)
 	}
 	return tiers, nil
-}
-
-// Hold takes tickets out of stock for an order. It reports whether a new hold
-// was made: asking again for an order that already has one returns that hold
-// and takes nothing more.
-func (s *Service) Hold(ctx context.Context, req HoldRequest) (h Hold, created bool, err error) {
-	h = Hold{
-		ID:        uuid.NewString(),
-		OrderID:   req.OrderID,
-		DropID:    req.DropID,
-		Tier:      req.Tier,
-		Quantity:  req.Quantity,
-		ExpiresAt: time.Now().Add(s.HoldTTL).UTC(),
-	}
-
-	err = pgx.BeginFunc(ctx, s.Pool, func(tx pgx.Tx) error {
-		// This statement is what prevents overselling. The comparison and the
-		// subtraction happen under one row lock, so two orders racing for the
-		// last ticket are served one after the other and the second finds
-		// none left. Reading the number first and writing it back afterwards
-		// would let both succeed.
-		tag, err := tx.Exec(ctx, `
-			UPDATE stock SET available = available - $3
-			WHERE drop_id = $1 AND tier = $2 AND available >= $3`,
-			h.DropID, h.Tier, h.Quantity)
-		if err != nil {
-			return fmt.Errorf("take stock: %w", err)
-		}
-		if tag.RowsAffected() == 0 {
-			return ErrSoldOut
-		}
-
-		tag, err = tx.Exec(ctx, `
-			INSERT INTO holds (id, order_id, drop_id, tier, quantity, expires_at)
-			VALUES ($1, $2, $3, $4, $5, $6)
-			ON CONFLICT (order_id) DO NOTHING`,
-			h.ID, h.OrderID, h.DropID, h.Tier, h.Quantity, h.ExpiresAt)
-		if err != nil {
-			return fmt.Errorf("record hold: %w", err)
-		}
-		if tag.RowsAffected() == 0 {
-			// Returning an error rolls the transaction back, which puts the
-			// tickets just taken back into stock.
-			return errAlreadyHeld
-		}
-		return nil
-	})
-
-	switch {
-	case err == nil:
-		return h, true, nil
-	case errors.Is(err, errAlreadyHeld):
-		h, err = s.holdOf(ctx, req.OrderID)
-		return h, false, err
-	case errors.Is(err, ErrSoldOut):
-		return Hold{}, false, s.whyNothingTaken(ctx, req)
-	default:
-		return Hold{}, false, err
-	}
-}
-
-// whyNothingTaken explains an UPDATE of stock that matched no row. That has
-// two causes, and they deserve different answers.
-func (s *Service) whyNothingTaken(ctx context.Context, req HoldRequest) error {
-	var exists bool
-	err := s.Pool.QueryRow(ctx,
-		`SELECT EXISTS (SELECT 1 FROM stock WHERE drop_id = $1 AND tier = $2)`,
-		req.DropID, req.Tier,
-	).Scan(&exists)
-	if err != nil {
-		return fmt.Errorf("read stock of %s/%s: %w", req.DropID, req.Tier, err)
-	}
-	if !exists {
-		return ErrNoTier
-	}
-	return ErrSoldOut
 }
 
 func (s *Service) holdOf(ctx context.Context, orderID string) (Hold, error) {

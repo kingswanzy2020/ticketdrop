@@ -1,0 +1,39 @@
+Tue Nov 17 01:00:05 PM KST 2026
+ORDERS=600 CAPACITY=1000 KILL=payments TARGET=cluster ./scripts/drop-check.sh
+drop check: 600 orders for 1000 tickets in drop check-1794888005, killing payments mid-run
+
+  PASS  an order placed before the opening time is refused (HTTP status) (404)
+  PASS  the drop went on sale 1201ms after its opening time
+  PASS  the shopfront shows the drop and its order form
+  PASS  an order placed through the shopfront was accepted
+
+  placed 600 orders in 3s: 418 accepted, 182 refused as sold out
+  2026-11-17T13:00:19+09:00 $ kubectl delete pod -n ticketdrop payments-c4bc6c9bb-jtvph --grace-period=0 --force
+  killed payments after it had handled 165 orders
+  payments is back; every order finished 12s later
+
+  PASS  responses that were neither accepted nor sold out (0)
+  PASS  demand exceeded capacity (182 orders refused as sold out)
+  PASS  payments was killed mid-run (165 of 419 orders handled)
+  PASS  accepted orders that finished (ticketed 368 + failed 51) (419)
+  PASS  tickets issued within capacity (918 of 1000)
+  PASS  orders with the wrong number of tickets (0)
+  PASS  tickets gone from stock equals tickets issued (918)
+  PASS  holds still waiting for a payment (0)
+  PASS  holds released equals orders failed (51)
+  PASS  messages dead-lettered during the run (0)
+  PASS  customers told how their order ended, once each (419)
+  PASS  the shopfront shows its order as ticketed
+
+  PASS  replayed drop.opened recognised as a duplicate by inventory
+  PASS  replayed order.created recognised as a duplicate by payments
+  PASS  replayed payment.succeeded recognised as a duplicate by inventory
+  PASS  replayed payment.failed recognised as a duplicate by inventory
+  PASS  replayed payment.failed recognised as a duplicate by orders
+  PASS  replayed order.confirmed recognised as a duplicate by fulfillment
+  PASS  replayed ticket.issued recognised as a duplicate by orders
+  PASS  nothing changed after the replays: orders[failed=51 ticketed=368] payments[419] holds[confirmed=368 released=51] available[82] tickets[918] notices[1959]
+
+  PASS  poison message reached the dead-letter queue after 34s
+
+drop check passed

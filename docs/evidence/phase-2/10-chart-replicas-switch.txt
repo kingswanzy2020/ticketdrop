@@ -1,0 +1,181 @@
+Sat Nov 14 09:26:33 PM KST 2026
+
+# Part 1: the change
+
+$ git diff charts/service/templates/deployment.yaml charts/service/values.yaml charts/service/values/values-fulfillment.yaml
+diff --git a/charts/service/templates/deployment.yaml b/charts/service/templates/deployment.yaml
+index 743dcc0..78a5541 100644
+--- a/charts/service/templates/deployment.yaml
++++ b/charts/service/templates/deployment.yaml
+@@ -5,7 +5,10 @@ metadata:
+   labels:
+     {{- include "service.labels" . | nindent 4 }}
+ spec:
++  {{- /* With autoscaling the HPA owns the count; a value here would reset it on every upgrade. */}}
++  {{- if not .Values.autoscaling.enabled }}
+   replicas: {{ .Values.replicaCount }}
++  {{- end }}
+   selector:
+     matchLabels:
+       {{- include "service.selectorLabels" . | nindent 6 }}
+diff --git a/charts/service/values.yaml b/charts/service/values.yaml
+index 65032a1..6de0b07 100644
+--- a/charts/service/values.yaml
++++ b/charts/service/values.yaml
+@@ -87,3 +87,10 @@ probes:
+     # 2s x 40 = 80s, covering the 60s wait for Postgres plus migrations.
+     periodSeconds: 2
+     failureThreshold: 40
++
++# true leaves replicas out of the Deployment, so the HPA that KEDA creates
++# owns the count and an upgrade does not reset it. The ScaledObject that
++# drives it comes in step 10 task 4. replicaCount is then not rendered, but
++# pdb.yaml still reads it: keep it at 1 and the service gets no budget.
++autoscaling:
++  enabled: false
+diff --git a/charts/service/values/values-fulfillment.yaml b/charts/service/values/values-fulfillment.yaml
+index c244b02..e721774 100644
+--- a/charts/service/values/values-fulfillment.yaml
++++ b/charts/service/values/values-fulfillment.yaml
+@@ -29,3 +29,8 @@ networkPolicy:
+   callers: []
+   calls: []
+   externalCalls: [postgres, goaws]
++
++# KEDA scales it on its queue's backlog, so the chart leaves replicas out.
++# replicaCount stays at the default 1, so it gets no PDB (entry 39).
++autoscaling:
++  enabled: true
+
+# Part 2: renders before (deployment.yaml unchanged) and after, per release. Only fulfillment differs, by its replicas line
+
+$ diff before-catalog.yaml after-catalog.yaml
+exit=0
+
+$ diff before-orders.yaml after-orders.yaml
+exit=0
+
+$ diff before-inventory.yaml after-inventory.yaml
+exit=0
+
+$ diff before-payments.yaml after-payments.yaml
+exit=0
+
+$ diff before-fulfillment.yaml after-fulfillment.yaml
+68d67
+<   replicas: 1
+exit=1
+
+$ diff before-notifications.yaml after-notifications.yaml
+exit=0
+
+$ diff before-scheduler.yaml after-scheduler.yaml
+exit=0
+
+$ diff before-gateway.yaml after-gateway.yaml
+exit=0
+
+$ diff before-web.yaml after-web.yaml
+exit=0
+
+$ helm lint charts/service -f charts/service/values/values-catalog.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint charts/service -f charts/service/values/values-orders.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint charts/service -f charts/service/values/values-inventory.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint charts/service -f charts/service/values/values-payments.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint charts/service -f charts/service/values/values-fulfillment.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint charts/service -f charts/service/values/values-notifications.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint charts/service -f charts/service/values/values-scheduler.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint charts/service -f charts/service/values/values-gateway.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint charts/service -f charts/service/values/values-web.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm template fulfillment charts/service -n ticketdrop -f charts/service/values/values-fulfillment.yaml | kubectl apply --dry-run=server -n ticketdrop -f - 2>&1 | grep -v '^Warning'
+networkpolicy.networking.k8s.io/fulfillment configured (server dry run)
+service/fulfillment configured (server dry run)
+deployment.apps/fulfillment configured (server dry run)
+
+# Part 3: the upgrade that removes the field (once only)
+
+$ helm history fulfillment -n ticketdrop
+REVISION	UPDATED                 	STATUS    	CHART        	APP VERSION	DESCRIPTION     
+1       	Thu Oct 29 01:48:41 2026	superseded	service-0.1.0	0.1.0      	Install complete
+2       	Fri Nov 13 12:18:18 2026	deployed  	service-0.1.0	0.1.0      	Upgrade complete
+
+$ helm get manifest fulfillment -n ticketdrop | grep -c 'replicas:'
+1
+
+$ kubectl get deploy fulfillment -n ticketdrop -o jsonpath='{.spec.replicas} {.metadata.generation}{"\n"}'
+1 2
+
+$ kubectl get pods -n ticketdrop -l app.kubernetes.io/name=fulfillment
+NAME                           READY   STATUS    RESTARTS   AGE
+fulfillment-6b77c59747-mpfbc   1/1     Running   0          33h
+
+$ helm upgrade fulfillment charts/service -n ticketdrop -f charts/service/values/values-fulfillment.yaml
+Release "fulfillment" has been upgraded. Happy Helming!
+NAME: fulfillment
+LAST DEPLOYED: Sat Nov 14 21:26:34 2026
+NAMESPACE: ticketdrop
+STATUS: deployed
+REVISION: 3
+TEST SUITE: None
+
+$ kubectl rollout status deploy/fulfillment -n ticketdrop --timeout=60s
+deployment "fulfillment" successfully rolled out
+
+$ helm get manifest fulfillment -n ticketdrop | grep -c 'replicas:'
+0
+
+$ kubectl get deploy fulfillment -n ticketdrop -o jsonpath='{.spec.replicas} {.metadata.generation}{"\n"}'
+1 2
+
+$ kubectl get pods -n ticketdrop -l app.kubernetes.io/name=fulfillment
+NAME                           READY   STATUS    RESTARTS   AGE
+fulfillment-6b77c59747-mpfbc   1/1     Running   0          33h
+
+$ kubectl get pods -n ticketdrop
+NAME                             READY   STATUS    RESTARTS   AGE
+catalog-596f454c56-2zb5r         1/1     Running   0          33h
+catalog-596f454c56-cm48h         1/1     Running   0          33h
+fulfillment-6b77c59747-mpfbc     1/1     Running   0          33h
+gateway-5594f948f8-jmgdm         1/1     Running   0          33h
+gateway-5594f948f8-vzblr         1/1     Running   0          33h
+inventory-7669b5fb4-ftnnn        1/1     Running   0          33h
+inventory-7669b5fb4-sfq4l        1/1     Running   0          33h
+notifications-5f5bc5c76f-fjgmz   1/1     Running   0          33h
+orders-f9c7d75bc-4cbb9           1/1     Running   0          33h
+orders-f9c7d75bc-jdq6d           1/1     Running   0          33h
+payments-c4bc6c9bb-qxsrh         1/1     Running   0          33h
+scheduler-64dc6894b8-4wszh       1/1     Running   0          33h
+scheduler-64dc6894b8-6m9m7       1/1     Running   0          33h
+web-6468cd87c8-nnqzc             1/1     Running   0          33h
+web-6468cd87c8-sntlp             1/1     Running   0          33h
+
+$ curl -s -o /dev/null -w '%{http_code}\n' localhost:8088/v1/drops/x/availability
+404
+
+# Part 4: who the API server lists as owning spec.replicas after the upgrade
+
+$ helm version --short
+v3.20.2+g8fb76d6
+
+$ kubectl get deploy fulfillment -n ticketdrop --show-managed-fields -o json | jq -r '.metadata.managedFields[] | "\(.manager) \(.operation) \(.time) replicas=\(.fieldsV1["f:spec"]["f:replicas"] != null)"'
+helm Update 2026-10-28T16:48:41Z replicas=true
+kubectl-rollout Update 2026-11-13T03:18:53Z replicas=false
+kube-controller-manager Update 2026-11-13T03:19:01Z replicas=false

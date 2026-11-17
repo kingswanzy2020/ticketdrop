@@ -27,6 +27,7 @@ func main() {
 func run(ctx context.Context, s *service.Service) error {
 	var (
 		dbURL    = s.Config.Required("DATABASE_URL")
+		maxConns = s.Config.Int("DATABASE_MAX_CONNS", 0)
 		topicARN = s.Config.Required("EVENTS_TOPIC_ARN")
 
 		relayInterval = s.Config.Duration("OUTBOX_INTERVAL", 250*time.Millisecond)
@@ -36,7 +37,7 @@ func run(ctx context.Context, s *service.Service) error {
 		return err
 	}
 
-	pool, err := db.Connect(ctx, dbURL, s.Log)
+	pool, err := db.Connect(ctx, dbURL, maxConns, s.Log)
 	if err != nil {
 		return err
 	}

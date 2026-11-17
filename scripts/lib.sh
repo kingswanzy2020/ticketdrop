@@ -1,6 +1,11 @@
 # Shared by the check scripts in this directory. Source it; do not run it.
 # It expects the caller to have set DROP and TIER before using the helpers
 # that read a drop's state.
+#
+# TARGET=compose (the default) talks to the stack from `make up`. TARGET=cluster
+# talks to the Kubernetes cluster instead: the public API through the Gateway on
+# localhost:8088, and catalog and goaws through port-forwards. The cluster
+# versions of the helpers are at the end of this file.
 
 WEB=http://localhost:8092
 GATEWAY=http://localhost:8090
@@ -80,6 +85,11 @@ require_stack() {
   done
   [ "$(leaders | wc -l)" -eq 1 ] || { echo "the scheduler has no leader; run 'make up' first" >&2; exit 2; }
 }
+
+# kill_service <service>: stops it with no graceful shutdown, as when a node
+# disappears. restart_service <service>: brings it back.
+kill_service() { compose kill -s SIGKILL "$1" >/dev/null 2>&1; }
+restart_service() { compose start "$1" >/dev/null 2>&1; }
 
 # --- the scheduler ---------------------------------------------------------------
 
@@ -213,3 +223,92 @@ redrive() {
   done
   echo "$moved"
 }
+
+# --- TARGET=cluster ----------------------------------------------------------------
+
+if [ "${TARGET:-compose}" = cluster ]; then
+  NS=ticketdrop
+  # Traefik's public port: / goes to web, /v1 to the gateway.
+  WEB=http://localhost:8088
+  GATEWAY=http://localhost:8088
+  # Catalog's internal API and the bus are not on the Gateway, so each run
+  # forwards a local port to them and stops the forward when it exits.
+  CATALOG=http://localhost:${CATALOG_PORT:-18091}
+  BUS=http://localhost:${BUS_PORT:-14100}
+  QUEUES=$BUS/000000000000
+
+  forwards=()
+  trap '[ ${#forwards[@]} -eq 0 ] || kill "${forwards[@]}" 2>/dev/null || true' EXIT
+
+  # forward <namespace> <service> <local url> <port>: a port-forward for this run.
+  forward() {
+    local port=${3##*:}
+    kubectl port-forward -n "$1" "svc/$2" "$port:$4" >/dev/null 2>&1 &
+    forwards+=($!)
+    wait_for 10 curl -s -o /dev/null --max-time 1 "$3/" ||
+      { echo "the port-forward to $2 on $port did not come up" >&2; exit 2; }
+  }
+
+  sql() { kubectl exec -n data pg-1 -c postgres -- psql -U postgres -d "$1" -AtX -v ON_ERROR_STOP=1 -c "$2"; }
+
+  # pods <service>: its running pods.
+  pods() {
+    kubectl get pods -n "$NS" -l "app.kubernetes.io/name=$1" --field-selector=status.phase=Running \
+      -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}'
+  }
+
+  # metrics <service>: /metrics of every pod of that service, read through the
+  # API server. A pod's counters start again at 0 when the pod is replaced.
+  metrics() {
+    local pod
+    for pod in $(pods "$1"); do
+      kubectl get --raw "/api/v1/namespaces/$NS/pods/$pod:9090/proxy/metrics" 2>/dev/null || true
+    done
+  }
+
+  notified() { metrics notifications | awk '/^notifications_sent_total\{/ { n += $NF } END { print n + 0 }'; }
+
+  duplicates() {
+    metrics "$1" |
+      awk -v type="$2" 'index($0, "events_consumed_total{event_type=\"" type "\",result=\"duplicate\"}") == 1 { n += $NF } END { print n + 0 }'
+  }
+
+  # ready <service>: whether at least one of its pods is Ready.
+  ready() { [ "$(kubectl get deploy -n "$NS" "$1" -o jsonpath='{.status.readyReplicas}' 2>/dev/null)" -ge 1 ] 2>/dev/null; }
+
+  schedulers() { pods scheduler; }
+  leads() {
+    [ "$(kubectl get --raw "/api/v1/namespaces/$NS/pods/$1:9090/proxy/metrics" 2>/dev/null | awk '$1 == "scheduler_leader" { print $2 }')" = 1 ]
+  }
+
+  # fulfillment is not required to be Ready: KEDA keeps it at 0 pods while its
+  # queue is empty.
+  require_stack() {
+    local tool service
+    for tool in kubectl curl jq aws; do
+      command -v "$tool" >/dev/null || { echo "$tool is required" >&2; exit 2; }
+    done
+    for service in web gateway catalog orders inventory payments notifications; do
+      ready "$service" || { echo "$service has no Ready pod in $NS" >&2; exit 2; }
+    done
+    kubectl get deploy -n "$NS" fulfillment >/dev/null || exit 2
+    [ "$(leaders | wc -l)" -eq 1 ] || { echo "the scheduler has no leader" >&2; exit 2; }
+    curl -s -o /dev/null --max-time 3 "$GATEWAY/" || { echo "nothing answers on $GATEWAY" >&2; exit 2; }
+    forward "$NS" catalog "$CATALOG" 8080
+    forward data goaws "$BUS" 4100
+  }
+
+  # Deleting a pod with no grace period is as close to SIGKILL as Kubernetes
+  # gets. Its Deployment starts a replacement, so there is nothing to restart.
+  kill_service() {
+    local pod
+    pod=$(pods "$1" | head -n1)
+    if [ -z "$pod" ]; then
+      fail "there was no running $1 pod to delete"
+      return
+    fi
+    echo "  $(date -Is) \$ kubectl delete pod -n $NS $pod --grace-period=0 --force"
+    kubectl delete pod -n "$NS" "$pod" --grace-period=0 --force >/dev/null 2>&1
+  }
+  restart_service() { :; }
+fi

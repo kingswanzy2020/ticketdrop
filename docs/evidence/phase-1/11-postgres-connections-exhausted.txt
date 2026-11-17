@@ -1,0 +1,26 @@
+# 17 November 2026, cluster, after load-1794918941 (2,000 customers, batched holds), cluster idle
+# orders' errors during the run (counts, timestamps and IDs removed)
+     62 "error":"failed to connect to `user=orders database=orders`: 10.96.44.100:5432 (pg-rw.data.svc.cluster.local): server error: FATAL: remaining connection slots are reserved for roles with the SUPERUSER attribute (SQLSTATE 53300)
+     26 "error":"read order ID: failed to connect to `user=orders database=orders`: 10.96.44.100:5432 (pg-rw.data.svc.cluster.local): server error: FATAL: remaining connection slots are reserved for roles with the SUPERUSER attribute (SQL
+     12 "error":"failed to connect to `user=orders database=orders`: 10.96.44.100:5432 (pg-rw.data.svc.cluster.local): server error: FATAL: sorry, too many clients already (SQLSTATE 53300)
+      2 "error":"read order ID: failed to connect to `user=orders database=orders`: 10.96.44.100:5432 (pg-rw.data.svc.cluster.local): server error: FATAL: sorry, too many clients already (SQLSTATE 53300)
+      1 "error":"begin: failed to connect to `user=orders database=orders`: 10.96.44.100:5432 (pg-rw.data.svc.cluster.local): server error: FATAL: sorry, too many clients already (SQLSTATE 53300)
+
+# Postgres limits and connections held per database, idle after the run
+max_connections=100 superuser_reserved_connections=3
+catalog|32
+inventory|26
+orders|25
+payments|9
+(background)|9
+scheduler|3
+postgres|1
+
+# Each pod's pool: pgxpool default MaxConns = max(4, NumCPU) = 16 on this 16-CPU node, no pool_max_conns set
+DEPLOYMENT    REPLICAS
+catalog       2
+orders        2
+inventory     2
+payments      1
+scheduler     2
+fulfillment   <none>

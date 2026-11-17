@@ -1,0 +1,289 @@
+Tue Nov 17 03:38:11 PM KST 2026
+
+$ kubectl get pods -A | grep -v kube-system
+NAMESPACE            NAME                                              READY   STATUS    RESTARTS       AGE
+cnpg-system          cnpg-cloudnative-pg-6f69d46c76-7ncs4              1/1     Running   12 (26h ago)   29d
+data                 goaws-5fd6cfdff-54xtc                             1/1     Running   7 (26h ago)    32d
+data                 pg-1                                              1/1     Running   5 (26h ago)    25d
+keda                 keda-admission-webhooks-6cd878f4c-qf9n4           1/1     Running   1 (26h ago)    3d1h
+keda                 keda-operator-9797f4bfc-4bp5w                     1/1     Running   2 (26h ago)    3d1h
+keda                 keda-operator-metrics-apiserver-58d6dc445-xvdpx   1/1     Running   1 (26h ago)    3d1h
+local-path-storage   local-path-provisioner-56c4685b7c-5jgvz           1/1     Running   14 (26h ago)   33d
+ticketdrop           catalog-596f454c56-2zb5r                          1/1     Running   1 (26h ago)    4d3h
+ticketdrop           catalog-596f454c56-cm48h                          1/1     Running   1 (26h ago)    4d3h
+ticketdrop           gateway-5594f948f8-jmgdm                          1/1     Running   1 (26h ago)    4d3h
+ticketdrop           gateway-5594f948f8-vzblr                          1/1     Running   1 (26h ago)    4d3h
+ticketdrop           inventory-7669b5fb4-ftnnn                         1/1     Running   1 (26h ago)    4d3h
+ticketdrop           inventory-7669b5fb4-sfq4l                         1/1     Running   1 (26h ago)    4d3h
+ticketdrop           notifications-5f5bc5c76f-fjgmz                    1/1     Running   1 (26h ago)    4d3h
+ticketdrop           orders-f9c7d75bc-4cbb9                            1/1     Running   1 (26h ago)    4d3h
+ticketdrop           orders-f9c7d75bc-jdq6d                            1/1     Running   1 (26h ago)    4d3h
+ticketdrop           payments-c4bc6c9bb-f2tzf                          1/1     Running   0              157m
+ticketdrop           scheduler-64dc6894b8-4wszh                        1/1     Running   1 (26h ago)    4d3h
+ticketdrop           scheduler-64dc6894b8-6m9m7                        1/1     Running   1 (26h ago)    4d3h
+ticketdrop           web-6468cd87c8-nnqzc                              1/1     Running   1 (26h ago)    4d3h
+ticketdrop           web-6468cd87c8-sntlp                              1/1     Running   1 (26h ago)    4d3h
+traefik              traefik-845587d97f-rtm45                          1/1     Running   4 (26h ago)    17d
+15:50:40 teardown starts
+
+$ kubectl delete ns ticketdrop --timeout=180s
+namespace "ticketdrop" deleted
+error: timed out waiting for the condition on namespaces/ticketdrop
+
+$ kubectl delete ns data --timeout=180s
+namespace "data" deleted
+
+$ helm uninstall keda -n keda --wait
+Error: uninstallation completed with 1 error(s): context deadline exceeded
+
+$ helm uninstall traefik -n traefik --wait
+release "traefik" uninstalled
+
+$ helm uninstall cnpg -n cnpg-system --wait
+These resources were kept due to the resource policy:
+[CustomResourceDefinition] poolers.postgresql.cnpg.io
+[CustomResourceDefinition] publications.postgresql.cnpg.io
+[CustomResourceDefinition] scheduledbackups.postgresql.cnpg.io
+[CustomResourceDefinition] subscriptions.postgresql.cnpg.io
+[CustomResourceDefinition] backups.postgresql.cnpg.io
+[CustomResourceDefinition] clusterimagecatalogs.postgresql.cnpg.io
+[CustomResourceDefinition] clusters.postgresql.cnpg.io
+[CustomResourceDefinition] databaseroles.postgresql.cnpg.io
+[CustomResourceDefinition] databases.postgresql.cnpg.io
+[CustomResourceDefinition] failoverquorums.postgresql.cnpg.io
+[CustomResourceDefinition] imagecatalogs.postgresql.cnpg.io
+
+release "cnpg" uninstalled
+
+$ kubectl delete ns keda traefik cnpg-system --timeout=180s
+namespace "keda" deleted
+namespace "traefik" deleted
+namespace "cnpg-system" deleted
+
+$ kubectl get ns
+NAME                 STATUS        AGE
+default              Active        33d
+kube-node-lease      Active        33d
+kube-public          Active        33d
+kube-system          Active        33d
+local-path-storage   Active        33d
+ticketdrop           Terminating   33d
+
+$ kubectl get gatewayclass,validatingwebhookconfiguration,mutatingwebhookconfiguration,apiservice 2>&1 | grep -E -i 'keda|cnpg|traefik' || echo 'nothing left from keda, cnpg or traefik'
+apiservice.apiregistration.k8s.io/v1.postgresql.cnpg.io               Local     True        29d
+apiservice.apiregistration.k8s.io/v1alpha1.keda.sh                    Local     True        3d1h
+
+$ kubectl get crd | grep -c gateway.networking.k8s.io
+10
+16:03:02 rebuild starts
+
+$ kubectl apply -f platform/namespaces.yaml
+Warning: Detected changes to resource ticketdrop which is currently being deleted.
+namespace/ticketdrop unchanged
+namespace/data created
+namespace/cnpg-system created
+namespace/traefik created
+namespace/keda created
+
+$ kubectl apply --server-side -f platform/gateway-api/standard-install-v1.6.3.yaml
+customresourcedefinition.apiextensions.k8s.io/backendtlspolicies.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/gatewayclasses.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/gateways.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/grpcroutes.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/httproutes.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/listenersets.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/referencegrants.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/tcproutes.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/tlsroutes.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/udproutes.gateway.networking.k8s.io serverside-applied
+validatingadmissionpolicy.admissionregistration.k8s.io/safe-upgrades.gateway.networking.k8s.io serverside-applied
+validatingadmissionpolicybinding.admissionregistration.k8s.io/safe-upgrades.gateway.networking.k8s.io serverside-applied
+
+$ helm install cnpg cnpg/cloudnative-pg --version 0.29.1 -n cnpg-system -f platform/cnpg/values.yaml --wait
+NAME: cnpg
+LAST DEPLOYED: Tue Nov 17 16:03:03 2026
+NAMESPACE: cnpg-system
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+CloudNativePG operator should be installed in namespace "cnpg-system".
+You can now create a PostgreSQL cluster with 3 nodes as follows:
+
+cat <<EOF | kubectl apply -f -
+# Example of PostgreSQL cluster
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cluster-example
+  
+spec:
+  instances: 3
+  storage:
+    size: 1Gi
+EOF
+
+kubectl get -A cluster
+
+$ kubectl apply -f platform/goaws/
+configmap/goaws created
+deployment.apps/goaws created
+service/goaws created
+
+$ kubectl rollout status deploy/goaws -n data --timeout=120s
+Waiting for deployment "goaws" rollout to finish: 0 of 1 updated replicas are available...
+deployment "goaws" successfully rolled out
+
+$ scripts/db-secrets.sh
+secret/pg-catalog created
+secret/pg-catalog labeled
+Error from server (Forbidden): error when creating "STDIN": secrets "catalog-db" is forbidden: unable to create new content in namespace ticketdrop because it is being terminated
+
+$ kubectl apply -f platform/postgres/cluster.yaml
+cluster.postgresql.cnpg.io/pg created
+
+$ kubectl wait cluster/pg -n data --for=condition=Ready --timeout=300s
+cluster.postgresql.cnpg.io/pg condition met
+
+$ kubectl apply -f platform/postgres/roles.yaml -f platform/postgres/databases.yaml
+databaserole.postgresql.cnpg.io/scheduler created
+databaserole.postgresql.cnpg.io/fulfillment created
+databaserole.postgresql.cnpg.io/orders created
+databaserole.postgresql.cnpg.io/payments created
+databaserole.postgresql.cnpg.io/inventory created
+database.postgresql.cnpg.io/scheduler created
+database.postgresql.cnpg.io/fulfillment created
+database.postgresql.cnpg.io/orders created
+database.postgresql.cnpg.io/payments created
+database.postgresql.cnpg.io/inventory created
+
+$ helm install keda kedacore/keda --version 2.21.0 -n keda -f platform/keda/values.yaml --wait
+Error: INSTALLATION FAILED: failed to create resource: rolebindings.rbac.authorization.k8s.io "keda-operator" is forbidden: unable to create new content in namespace ticketdrop because it is being terminated
+
+$ helm install traefik traefik/traefik --version 42.1.3 -n traefik -f platform/traefik/values.yaml --wait
+NAME: traefik
+LAST DEPLOYED: Tue Nov 17 16:03:49 2026
+NAMESPACE: traefik
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+traefik with docker.io/traefik:v3.7.16 has been deployed successfully on traefik namespace!
+
+⚠️ DEPRECATION WARNING: Gateway API CRDs will no longer be shipped with this chart in a future major version.
+You will need to install them yourself before deploying Traefik v3.7:
+  kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/standard-install.yaml
+
+$ kubectl apply -f platform/routes/
+gateway.gateway.networking.k8s.io/ticketdrop created
+Error from server (Forbidden): error when creating "platform/routes/httproute.yaml": httproutes.gateway.networking.k8s.io "ticketdrop" is forbidden: unable to create new content in namespace ticketdrop because it is being terminated
+
+$ kubectl apply -f platform/network-policies/dns.yaml
+Error from server (Forbidden): error when creating "platform/network-policies/dns.yaml": networkpolicies.networking.k8s.io "allow-dns" is forbidden: unable to create new content in namespace ticketdrop because it is being terminated
+
+$ helm install catalog charts/service -n ticketdrop -f charts/service/values/values-catalog.yaml
+Error: INSTALLATION FAILED: create: failed to create: secrets "sh.helm.release.v1.catalog.v1" is forbidden: unable to create new content in namespace ticketdrop because it is being terminated
+
+$ helm install inventory charts/service -n ticketdrop -f charts/service/values/values-inventory.yaml
+Error: INSTALLATION FAILED: create: failed to create: secrets "sh.helm.release.v1.inventory.v1" is forbidden: unable to create new content in namespace ticketdrop because it is being terminated
+
+$ helm install orders charts/service -n ticketdrop -f charts/service/values/values-orders.yaml
+Error: INSTALLATION FAILED: create: failed to create: secrets "sh.helm.release.v1.orders.v1" is forbidden: unable to create new content in namespace ticketdrop because it is being terminated
+
+$ helm install payments charts/service -n ticketdrop -f charts/service/values/values-payments.yaml
+Error: INSTALLATION FAILED: create: failed to create: secrets "sh.helm.release.v1.payments.v1" is forbidden: unable to create new content in namespace ticketdrop because it is being terminated
+
+$ helm install fulfillment charts/service -n ticketdrop -f charts/service/values/values-fulfillment.yaml
+Error: INSTALLATION FAILED: create: failed to create: secrets "sh.helm.release.v1.fulfillment.v1" is forbidden: unable to create new content in namespace ticketdrop because it is being terminated
+
+$ helm install notifications charts/service -n ticketdrop -f charts/service/values/values-notifications.yaml
+Error: INSTALLATION FAILED: create: failed to create: secrets "sh.helm.release.v1.notifications.v1" is forbidden: unable to create new content in namespace ticketdrop because it is being terminated
+
+$ helm install scheduler charts/service -n ticketdrop -f charts/service/values/values-scheduler.yaml
+Error: INSTALLATION FAILED: create: failed to create: secrets "sh.helm.release.v1.scheduler.v1" is forbidden: unable to create new content in namespace ticketdrop because it is being terminated
+
+$ helm install gateway charts/service -n ticketdrop -f charts/service/values/values-gateway.yaml
+Error: INSTALLATION FAILED: create: failed to create: secrets "sh.helm.release.v1.gateway.v1" is forbidden: unable to create new content in namespace ticketdrop because it is being terminated
+
+$ helm install web charts/service -n ticketdrop -f charts/service/values/values-web.yaml
+Error: INSTALLATION FAILED: create: failed to create: secrets "sh.helm.release.v1.web.v1" is forbidden: unable to create new content in namespace ticketdrop because it is being terminated
+
+$ kubectl apply -f platform/network-policies/default-deny.yaml
+Error from server (Forbidden): error when creating "platform/network-policies/default-deny.yaml": networkpolicies.networking.k8s.io "default-deny" is forbidden: unable to create new content in namespace ticketdrop because it is being terminated
+
+$ kubectl wait --for=condition=Available deploy --all -n ticketdrop --timeout=300s
+error: no matching resources found
+16:04:03 everything Available
+
+# Diagnosis, Tue Nov 17 04:07:34 PM KST 2026
+
+$ kubectl get ns ticketdrop -o jsonpath=... (conditions)
+deletionTimestamp 2026-11-17T06:50:40Z
+NamespaceContentRemaining: Some resources are remaining: scaledobjects.keda.sh has 1 resource instances, triggerauthentications.keda.sh has 1 resource instances
+NamespaceFinalizersRemaining: Some content in the namespace has finalizers remaining: finalizer.keda.sh in 2 resource instances
+
+$ kubectl get scaledobject,triggerauthentication -n ticketdrop -o custom-columns=...
+KIND                    NAME          DELETED                FINALIZERS
+ScaledObject            fulfillment   2026-11-17T06:51:11Z   [finalizer.keda.sh]
+TriggerAuthentication   fulfillment   2026-11-17T06:51:12Z   [finalizer.keda.sh]
+
+$ helm template keda kedacore/keda --version 2.21.0 -n keda -f platform/keda/values.yaml   # objects rendered into ticketdrop
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: keda-operator    
+    helm.sh/chart: keda-2.21.0
+    app.kubernetes.io/component: operator
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: keda-operator
+    app.kubernetes.io/version: 2.21.0
+    app.kubernetes.io/instance: keda
+  name: keda-operator
+  namespace: ticketdrop
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: keda-operator
+subjects:
+- kind: ServiceAccount
+  name: keda-operator
+  namespace: keda
+
+$ helm list -A -a
+NAME   	NAMESPACE  	REVISION	UPDATED                                	STATUS  	CHART                	APP VERSION
+cnpg   	cnpg-system	1       	2026-11-17 16:03:03.862891327 +0900 KST	deployed	cloudnative-pg-0.29.1	1.30.1     
+keda   	keda       	1       	2026-11-17 16:03:46.662276337 +0900 KST	failed  	keda-2.21.0          	2.21.0     
+traefik	traefik    	1       	2026-11-17 16:03:49.527769976 +0900 KST	deployed	traefik-42.1.3       	v3.7.16    
+
+$ kubectl get databaserole -n data
+NAME          APPLIED   MESSAGE
+fulfillment   false     secrets "pg-fulfillment" not found
+inventory     false     secrets "pg-inventory" not found
+orders        false     secrets "pg-orders" not found
+payments      false     secrets "pg-payments" not found
+scheduler     false     secrets "pg-scheduler" not found
+
+# Recovery, Tue Nov 17 05:07:16 PM KST 2026
+
+$ kubectl patch scaledobject fulfillment -n ticketdrop --type=merge -p '{"metadata":{"finalizers":null}}'
+Error from server (NotFound): namespaces "ticketdrop" not found
+
+$ kubectl patch triggerauthentication fulfillment -n ticketdrop --type=merge -p '{"metadata":{"finalizers":null}}'
+Error from server (NotFound): namespaces "ticketdrop" not found
+
+$ kubectl wait --for=delete ns/ticketdrop --timeout=120s
+
+$ kubectl get ns
+NAME                 STATUS   AGE
+cnpg-system          Active   64m
+data                 Active   64m
+default              Active   33d
+keda                 Active   64m
+kube-node-lease      Active   33d
+kube-public          Active   33d
+kube-system          Active   33d
+local-path-storage   Active   33d
+traefik              Active   64m
+
+(ticketdrop had already finished deleting before these commands ran, after the finalizers were removed earlier; the NotFound errors above mean there was nothing left to patch.)

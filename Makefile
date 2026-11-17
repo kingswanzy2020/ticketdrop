@@ -32,9 +32,13 @@ logs: ## Follow the services' logs
 	$(COMPOSE) logs -f --tail=50 web gateway catalog orders inventory payments fulfillment notifications scheduler
 
 .PHONY: drop-check
-drop-check: ## Run a drop and prove nothing is oversold, lost or duplicated (ORDERS=600 CAPACITY=1000 KILL=payments)
-	ORDERS=$(ORDERS) CAPACITY=$(CAPACITY) KILL=$(KILL) ./scripts/drop-check.sh
+drop-check: ## Run a drop and prove nothing is oversold, lost or duplicated (ORDERS=600 CAPACITY=1000 KILL=payments TARGET=compose|cluster)
+	ORDERS=$(ORDERS) CAPACITY=$(CAPACITY) KILL=$(KILL) TARGET=$(TARGET) ./scripts/drop-check.sh
 
 .PHONY: outage-check
 outage-check: ## Take the payment provider down and prove no order or ticket is left stuck (about 2 minutes)
 	ORDERS=$(ORDERS) ./scripts/outage-check.sh
+
+.PHONY: demo-drop
+demo-drop: ## Send a k6 crowd at a drop and check nothing was oversold (CUSTOMERS=1000 CAPACITY=1000 ARRIVE=15 TARGET=compose|cluster)
+	CUSTOMERS=$(CUSTOMERS) CAPACITY=$(CAPACITY) ARRIVE=$(ARRIVE) TARGET=$(TARGET) ./scripts/demo-drop.sh

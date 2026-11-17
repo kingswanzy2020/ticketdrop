@@ -1,0 +1,458 @@
+Fri Nov 13 09:50:09 PM KST 2026
+
+$ helm repo add kedacore https://kedacore.github.io/charts
+"kedacore" has been added to your repositories
+
+$ helm repo update kedacore
+Hang tight while we grab the latest from your chart repositories...
+...Successfully got an update from the "kedacore" chart repository
+Update Complete. ⎈Happy Helming!⎈
+
+$ helm search repo kedacore/keda --version 2.21.0
+NAME         	CHART VERSION	APP VERSION	DESCRIPTION                                       
+kedacore/keda	2.21.0       	2.21.0     	Event-based autoscaler for workloads on Kubernetes
+
+$ kubectl apply -f platform/namespaces.yaml
+namespace/ticketdrop unchanged
+namespace/data unchanged
+namespace/cnpg-system unchanged
+namespace/traefik unchanged
+namespace/keda created
+
+$ kubectl get ns keda --show-labels
+NAME   STATUS   AGE   LABELS
+keda   Active   0s    kubernetes.io/metadata.name=keda,pod-security.kubernetes.io/enforce=restricted
+
+$ grep -E '^kind:' tmp/keda-render.yaml | sort | uniq -c
+      1 kind: APIService
+      4 kind: ClusterRole
+      4 kind: ClusterRoleBinding
+      6 kind: CustomResourceDefinition
+      3 kind: Deployment
+      1 kind: Role
+      4 kind: RoleBinding
+      3 kind: Service
+      3 kind: ServiceAccount
+      1 kind: ValidatingWebhookConfiguration
+
+$ grep -n -A4 'resources:' tmp/keda-render.yaml
+231:    subresources:
+232-      status: {}
+233----
+234-# Source: keda/templates/crds/crd-clustercloudeventsources.yaml
+235-apiVersion: apiextensions.k8s.io/v1
+--
+410:    subresources:
+411-      status: {}
+412----
+413-# Source: keda/templates/crds/crd-clustertriggerauthentications.yaml
+414-apiVersion: apiextensions.k8s.io/v1
+--
+1173:    subresources:
+1174-      status: {}
+1175----
+1176-# Source: keda/templates/crds/crd-scaledjobs.yaml
+1177-apiVersion: apiextensions.k8s.io/v1
+--
+3497:                                resources:
+3498-                                  description: |-
+3499-                                    Compute Resources required by this container.
+3500-                                    Cannot be updated.
+3501-                                    More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+--
+5104:                                resources:
+5105-                                  description: |-
+5106-                                    Resources are not allowed for ephemeral containers. Ephemeral containers use spare resources
+5107-                                    already allocated to the pod.
+5108-                                  properties:
+--
+6747:                                resources:
+6748-                                  description: |-
+6749-                                    Compute Resources required by this container.
+6750-                                    Cannot be updated.
+6751-                                    More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+--
+7583:                          resources:
+7584-                            description: |-
+7585-                              Resources is the total amount of CPU and Memory resources required by all
+7586-                              containers in the pod. It supports specifying Requests and Limits for
+7587-                              "cpu", "memory" and "hugepages-" resource names only. ResourceClaims are not supported.
+--
+8830:                                            resources:
+8831-                                              description: |-
+8832-                                                resources represents the minimum resources the volume should have.
+8833-                                                Users are allowed to specify resource requirements
+8834-                                                that are lower than previous value but must still be higher than capacity recorded in the
+--
+10352:    subresources:
+10353-      status: {}
+10354----
+10355-# Source: keda/templates/crds/crd-scaledobjects.yaml
+10356-apiVersion: apiextensions.k8s.io/v1
+--
+10844:    subresources:
+10845-      status: {}
+10846----
+10847-# Source: keda/templates/crds/crd-triggerauthentications.yaml
+10848-apiVersion: apiextensions.k8s.io/v1
+--
+11603:    subresources:
+11604-      status: {}
+11605----
+11606-# Source: keda/templates/manager/clusterrole.yaml
+11607-apiVersion: rbac.authorization.k8s.io/v1
+--
+11622:  resources:
+11623-  - configmaps
+11624-  - configmaps/status
+11625-  - limitranges
+11626-  - pods
+--
+11636:  resources:
+11637-  - events
+11638-  verbs:
+11639-  - create
+11640-  - patch
+--
+11643:  resources:
+11644-    - endpointslices
+11645-  verbs:
+11646-    - get
+11647-    - list
+--
+11651:  resources:
+11652-  - secrets
+11653-  verbs:
+11654-  - list
+11655-  - watch
+--
+11658:  resources:
+11659-  - "*/scale"
+11660-  verbs:
+11661-  - get
+11662-  - list
+--
+11668:  resources:
+11669-  - "*"
+11670-  verbs:
+11671-  - get
+11672-- apiGroups:
+--
+11674:  resources:
+11675-  - deployments/scale
+11676-  - statefulsets/scale
+11677-  verbs:
+11678-  - get
+--
+11685:  resources:
+11686-  - deployments
+11687-  - replicasets
+11688-  - statefulsets
+11689-  verbs:
+--
+11695:  resources:
+11696-  - horizontalpodautoscalers
+11697-  verbs:
+11698-  - create
+11699-  - delete
+--
+11707:  resources:
+11708-  - jobs
+11709-  verbs:
+11710-  - create
+11711-  - delete
+--
+11719:  resources:
+11720-  - cloudeventsources
+11721-  - cloudeventsources/status
+11722-  - clustercloudeventsources
+11723-  - clustercloudeventsources/status
+--
+11732:  resources:
+11733-  - scaledjobs
+11734-  - scaledjobs/finalizers
+11735-  - scaledjobs/status
+11736-  - scaledobjects
+--
+11764:  resources:
+11765-  - clustertriggerauthentications
+11766-  - clustertriggerauthentications/status
+11767-  verbs:
+11768-  - get
+--
+11775:  resources:
+11776-  - validatingwebhookconfigurations
+11777-  verbs:
+11778-  - get
+11779-  - list
+--
+11785:  resources:
+11786-  - apiservices
+11787-  verbs:
+11788-  - get
+11789-  - list
+--
+11795:  resources:
+11796-  - cloudeventsources
+11797-  - cloudeventsources/status
+11798-  - clustercloudeventsources
+11799-  - clustercloudeventsources/status
+--
+11823:  resources:
+11824-  - 'externalmetrics'
+11825-  verbs:
+11826-  - 'get'
+11827----
+--
+11844:  resources:
+11845-  - horizontalpodautoscalers
+11846-  verbs:
+11847-  - list
+11848-  - watch
+--
+11851:  resources:
+11852-  - scaledobjects
+11853-  verbs:
+11854-  - list
+11855-  - watch
+--
+11858:  resources:
+11859-  - deployments
+11860-  - statefulsets
+11861-  verbs:
+11862-  - get
+--
+11867:  resources:
+11868-  - limitranges
+11869-  verbs:
+11870-  - list
+11871-- apiGroups:
+--
+11873:  resources:
+11874-  - events
+11875-  verbs:
+11876-  - create
+11877-  - patch
+--
+11984:  resources:
+11985-  - leases
+11986-  verbs:
+11987-  - create
+11988-  - delete
+--
+11996:  resources:
+11997-  - secrets
+11998-  verbs:
+11999-  - get
+12000-  resourceNames:
+--
+12004:  resources:
+12005-  - secrets
+12006-  verbs:
+12007-  - create
+12008-  - update
+--
+12318:          resources:
+12319-            limits:
+12320-              cpu: 1
+12321-              memory: 1000Mi
+12322-            requests:
+--
+12458:          resources:
+12459-            limits:
+12460-              cpu: 1
+12461-              memory: 1000Mi
+12462-            requests:
+--
+12573:          resources:
+12574-            limits:
+12575-              cpu: 1
+12576-              memory: 1000Mi
+12577-            requests:
+--
+12646:    resources:
+12647-    - scaledobjects
+12648-  sideEffects: None
+12649-  timeoutSeconds: 10
+12650-- admissionReviewVersions:
+--
+12670:    resources:
+12671-    - scaledjobs
+12672-  sideEffects: None
+12673-  timeoutSeconds: 10
+12674-- admissionReviewVersions:
+--
+12694:    resources:
+12695-    - triggerauthentications
+12696-  sideEffects: None
+12697-  timeoutSeconds: 10
+12698-- admissionReviewVersions:
+--
+12718:    resources:
+12719-    - clustertriggerauthentications
+12720-  sideEffects: None
+12721-  timeoutSeconds: 10
+12722-- admissionReviewVersions:
+--
+12742:    resources:
+12743-    - cloudeventsources
+12744-  sideEffects: None
+12745-  timeoutSeconds: 10
+12746-- admissionReviewVersions:
+--
+12766:    resources:
+12767-    - clustercloudeventsources
+12768-  sideEffects: None
+12769-  timeoutSeconds: 10
+
+$ kubectl apply --dry-run=server -f tmp/keda-render.yaml
+serviceaccount/keda-operator created (server dry run)
+serviceaccount/keda-metrics-server created (server dry run)
+serviceaccount/keda-webhook created (server dry run)
+customresourcedefinition.apiextensions.k8s.io/cloudeventsources.eventing.keda.sh created (server dry run)
+customresourcedefinition.apiextensions.k8s.io/clustercloudeventsources.eventing.keda.sh created (server dry run)
+customresourcedefinition.apiextensions.k8s.io/clustertriggerauthentications.keda.sh created (server dry run)
+customresourcedefinition.apiextensions.k8s.io/scaledobjects.keda.sh created (server dry run)
+customresourcedefinition.apiextensions.k8s.io/triggerauthentications.keda.sh created (server dry run)
+clusterrole.rbac.authorization.k8s.io/keda-operator created (server dry run)
+clusterrole.rbac.authorization.k8s.io/keda-operator-minimal-cluster-role created (server dry run)
+clusterrole.rbac.authorization.k8s.io/keda-operator-external-metrics-reader created (server dry run)
+clusterrole.rbac.authorization.k8s.io/keda-operator-webhook created (server dry run)
+clusterrolebinding.rbac.authorization.k8s.io/keda-operator-minimal created (server dry run)
+clusterrolebinding.rbac.authorization.k8s.io/keda-operator-system-auth-delegator created (server dry run)
+clusterrolebinding.rbac.authorization.k8s.io/keda-operator-hpa-controller-external-metrics created (server dry run)
+clusterrolebinding.rbac.authorization.k8s.io/keda-operator-webhook created (server dry run)
+role.rbac.authorization.k8s.io/keda-operator-certs created (server dry run)
+rolebinding.rbac.authorization.k8s.io/keda-operator created (server dry run)
+rolebinding.rbac.authorization.k8s.io/keda-operator created (server dry run)
+rolebinding.rbac.authorization.k8s.io/keda-operator-certs created (server dry run)
+rolebinding.rbac.authorization.k8s.io/keda-operator-auth-reader created (server dry run)
+service/keda-operator created (server dry run)
+service/keda-operator-metrics-apiserver created (server dry run)
+service/keda-admission-webhooks created (server dry run)
+deployment.apps/keda-operator created (server dry run)
+deployment.apps/keda-operator-metrics-apiserver created (server dry run)
+deployment.apps/keda-admission-webhooks created (server dry run)
+apiservice.apiregistration.k8s.io/v1beta1.external.metrics.k8s.io created (server dry run)
+validatingwebhookconfiguration.admissionregistration.k8s.io/keda-admission created (server dry run)
+The CustomResourceDefinition "scaledjobs.keda.sh" is invalid: metadata.annotations: Too long: may not be more than 262144 bytes
+
+$ helm install keda kedacore/keda --version 2.21.0 -n keda -f platform/keda/values.yaml
+NAME: keda
+LAST DEPLOYED: Sat Nov 14 14:19:01 2026
+NAMESPACE: keda
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+:::^.     .::::^:     :::::::::::::::    .:::::::::.                   .^.                  
+7???~   .^7????~.     7??????????????.   :?????????77!^.              .7?7.                 
+7???~  ^7???7~.       ~!!!!!!!!!!!!!!.   :????!!!!7????7~.           .7???7.                
+7???~^7????~.                            :????:    :~7???7.         :7?????7.               
+7???7????!.           ::::::::::::.      :????:      .7???!        :7??77???7.              
+7????????7:           7???????????~      :????:       :????:      :???7?5????7.             
+7????!~????^          !77777777777^      :????:       :????:     ^???7?#P7????7.            
+7???~  ^????~                            :????:      :7???!     ^???7J#@J7?????7.           
+7???~   :7???!.                          :????:   .:~7???!.    ~???7Y&@#7777????7.          
+7???~    .7???7:      !!!!!!!!!!!!!!!    :????7!!77????7^     ~??775@@@GJJYJ?????7.         
+7???~     .!????^     7?????????????7.   :?????????7!~:      !????G@@@@@@@@5??????7:        
+::::.       :::::     :::::::::::::::    .::::::::..        .::::JGGGB@@@&7:::::::::        
+                                                                      ?@@#~                  
+                                                                      P@B^                   
+                                                                    :&G:                    
+                                                                    !5.                     
+                                                                    .Kubernetes Event-driven Autoscaling (KEDA) - Application autoscaling made simple.
+
+Get started by deploying Scaled Objects to your cluster:
+    - Information about Scaled Objects : https://keda.sh/docs/latest/concepts/
+    - Samples: https://github.com/kedacore/samples
+
+Get information about the deployed ScaledObjects:
+  kubectl get scaledobject [--namespace <namespace>]
+
+Get details about a deployed ScaledObject:
+  kubectl describe scaledobject <scaled-object-name> [--namespace <namespace>]
+
+Get information about the deployed TriggerAuthentications:
+  kubectl get triggerauthentication [--namespace <namespace>]
+
+Get details about a deployed TriggerAuthentication:
+  kubectl describe triggerauthentication <trigger-authentication-name> [--namespace <namespace>]
+
+Get an overview of the Horizontal Pod Autoscalers (HPA) that KEDA is using behind the scenes:
+  kubectl get hpa [--all-namespaces] [--namespace <namespace>]
+
+Learn more about KEDA:
+- Documentation: https://keda.sh/
+- Support: https://keda.sh/support/
+- File an issue: https://github.com/kedacore/keda/issues/new/choose
+
+$ kubectl wait --for=condition=Available deploy --all -n keda --timeout=180s
+deployment.apps/keda-admission-webhooks condition met
+deployment.apps/keda-operator condition met
+error: timed out waiting for the condition on deployments/keda-operator-metrics-apiserver
+
+$ helm list -n keda
+NAME	NAMESPACE	REVISION	UPDATED                                	STATUS  	CHART      	APP VERSION
+keda	keda     	1       	2026-11-14 14:19:01.468168968 +0900 KST	deployed	keda-2.21.0	2.21.0     
+
+$ helm list -n keda
+NAME	NAMESPACE	REVISION	UPDATED                                	STATUS  	CHART      	APP VERSION
+keda	keda     	1       	2026-11-14 14:19:01.468168968 +0900 KST	deployed	keda-2.21.0	2.21.0     
+
+$ kubectl get pods -n keda -o wide
+NAME                                              READY   STATUS    RESTARTS      AGE   IP            NODE                    NOMINATED NODE   READINESS GATES
+keda-admission-webhooks-6cd878f4c-qf9n4           1/1     Running   0             18m   10.244.0.42   desktop-control-plane   <none>           <none>
+keda-operator-9797f4bfc-4bp5w                     1/1     Running   1 (16m ago)   18m   10.244.0.40   desktop-control-plane   <none>           <none>
+keda-operator-metrics-apiserver-58d6dc445-xvdpx   1/1     Running   0             18m   10.244.0.41   desktop-control-plane   <none>           <none>
+
+$ kubectl get apiservice v1beta1.external.metrics.k8s.io
+NAME                              SERVICE                                AVAILABLE   AGE
+v1beta1.external.metrics.k8s.io   keda/keda-operator-metrics-apiserver   True        18m
+
+$ kubectl get crd | grep keda.sh
+cloudeventsources.eventing.keda.sh             2026-11-14T05:19:01Z
+clustercloudeventsources.eventing.keda.sh      2026-11-14T05:19:01Z
+clustertriggerauthentications.keda.sh          2026-11-14T05:19:01Z
+scaledjobs.keda.sh                             2026-11-14T05:19:01Z
+scaledobjects.keda.sh                          2026-11-14T05:19:01Z
+triggerauthentications.keda.sh                 2026-11-14T05:19:01Z
+
+$ kubectl get validatingwebhookconfiguration keda-admission
+NAME             WEBHOOKS   AGE
+keda-admission   6          18m
+
+$ kubectl label --dry-run=server --overwrite ns keda pod-security.kubernetes.io/enforce=restricted
+namespace/keda not labeled (server dry run)
+
+$ kubectl get events -n keda | grep -i -E 'podsecurity|failed' || echo 'no PodSecurity or failure events'
+17m         Warning   FailedMount         pod/keda-admission-webhooks-6cd878f4c-qf9n4            MountVolume.SetUp failed for volume "certificates" : secret "kedaorg-certs" not found
+17m         Warning   FailedMount         pod/keda-operator-metrics-apiserver-58d6dc445-xvdpx    MountVolume.SetUp failed for volume "certificates" : secret "kedaorg-certs" not found
+15m         Warning   Failed              pod/keda-operator-metrics-apiserver-58d6dc445-xvdpx    Failed to pull image "ghcr.io/kedacore/keda-metrics-apiserver:2.21.0": failed to pull and unpack image "ghcr.io/kedacore/keda-metrics-apiserver:2.21.0": short read: expected 2362 bytes but got 0: unexpected EOF
+14m         Warning   Failed              pod/keda-operator-metrics-apiserver-58d6dc445-xvdpx    Error: ErrImagePull
+14m         Warning   Failed              pod/keda-operator-metrics-apiserver-58d6dc445-xvdpx    Error: ImagePullBackOff
+14m         Warning   Failed              pod/keda-operator-metrics-apiserver-58d6dc445-xvdpx    Failed to pull image "ghcr.io/kedacore/keda-metrics-apiserver:2.21.0": rpc error: code = NotFound desc = failed to pull and unpack image "ghcr.io/kedacore/keda-metrics-apiserver:2.21.0": failed to copy: httpReadSeeker: failed open: could not fetch content descriptor sha256:34cd6f0d95632a4849f96c37e237c252866015811055cf213ff37e51d2e3b88c (application/vnd.oci.image.layer.v1.tar+gzip) from remote: not found
+
+$ kubectl logs -n keda deploy/keda-operator --tail=200 | grep -i -E 'error|fail' || echo 'no error lines'
+no error lines
+
+$ kubectl get pods -n ticketdrop
+NAME                             READY   STATUS    RESTARTS   AGE
+catalog-596f454c56-2zb5r         1/1     Running   0          26h
+catalog-596f454c56-cm48h         1/1     Running   0          26h
+fulfillment-6b77c59747-mpfbc     1/1     Running   0          26h
+gateway-5594f948f8-jmgdm         1/1     Running   0          26h
+gateway-5594f948f8-vzblr         1/1     Running   0          26h
+inventory-7669b5fb4-ftnnn        1/1     Running   0          26h
+inventory-7669b5fb4-sfq4l        1/1     Running   0          26h
+notifications-5f5bc5c76f-fjgmz   1/1     Running   0          26h
+orders-f9c7d75bc-4cbb9           1/1     Running   0          26h
+orders-f9c7d75bc-jdq6d           1/1     Running   0          26h
+payments-c4bc6c9bb-qxsrh         1/1     Running   0          26h
+scheduler-64dc6894b8-4wszh       1/1     Running   0          26h
+scheduler-64dc6894b8-6m9m7       1/1     Running   0          26h
+web-6468cd87c8-nnqzc             1/1     Running   0          26h
+web-6468cd87c8-sntlp             1/1     Running   0          26h
+
+$ curl -s -o /dev/null -w %{http_code}\n localhost:8088/v1/drops/x/availability
+404n

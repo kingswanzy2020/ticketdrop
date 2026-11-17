@@ -20,6 +20,9 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 source scripts/lib.sh
 
+# It restarts services with other settings through compose, so it has no cluster mode.
+[ "${TARGET:-compose}" = compose ] || { echo "outage-check runs only against the compose stack" >&2; exit 2; }
+
 ORDERS=${ORDERS:-5}
 CAPACITY=$((ORDERS * 4))
 # Long enough for payments to give up on each order (three tries, about 30s)

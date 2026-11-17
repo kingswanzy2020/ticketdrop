@@ -240,6 +240,14 @@ front of Postgres for this. It has been left out until a load test shows the
 row is the bottleneck, because a second store brings its own consistency
 problems.
 
+**Superseded in part.** The prediction held. The first load test (17 November
+2026, `docs/PROOF.md`) found this row to be the bottleneck: about 110 to 130
+holds a second for one tier on the Docker Desktop cluster, with holds queueing
+on its lock. Valkey was not added. Holds are now granted in batches, many per
+transaction (entry 56). The single conditional `UPDATE` became a locked read
+and one `UPDATE` per batch. The row lock and the CHECK still decide, so the
+reason above still holds.
+
 ## 17. A declined payment and a provider outage are handled differently
 
 **Decision.** A decline is an answer: `payments` publishes `payment.failed`,
@@ -460,6 +468,11 @@ the host, `us-east-1.goaws.data.svc.cluster.local`, and the services ignore
 them and use their own configured URLs. Nothing in `data` is checked for Pod
 Security until a label is added there. The Deployment sets requests of 50m CPU
 and 64Mi of memory, which were chosen, not measured.
+
+**Superseded.** The network rules came in step 9, not step 7, and are not one
+rule for the namespace: each service may reach only the pods in `data` it uses,
+by pod label (entry 51). One rule for all of `ticketdrop` would also let a
+debug pod reach Postgres.
 
 ## 28. Each service can reach only its own database, enforced by `pg_hba`
 
@@ -724,6 +737,17 @@ running Deployment, because the pod spec does not change; the pod has to be
 deleted or the Deployment restarted. `Always` cannot be used locally. The
 policy is to be looked at again when images come from ECR in Phase 4.
 
+**Superseded in part.** The policy stands; the reason above was wrong. On 17
+November 2026 a rebuilt `inventory:dev` and a `rollout restart` still left the
+pods on the old code (TROUBLESHOOTING 8). The node, `desktop-control-plane`,
+has its own containerd image store, separate from the host's, and nothing
+copies a rebuild into it. So a restart is not enough: the image has to be
+loaded into the node first (`docker save ... | docker exec -i
+desktop-control-plane ctr -n k8s.io images import -`), and the restart after
+that is what picks it up. Why the orders pod ran the `make up` build when this
+entry was written is not known. `IfNotPresent` is still right, because there
+is no registry to pull from, and it is what lets a loaded image be used.
+
 ## 38. A service turns off the chart's `http` port with `http: null`
 
 **Decision.** `ports.http` defaults to 8080 in the chart's `values.yaml`. A
@@ -823,3 +847,506 @@ one node the second replica does not survive the node itself failing; that
 needs the zone spread on EKS (entry 40). A consumer with one replica falls
 behind during a drain or a crash, and payments' delay holds tickets that
 much longer.
+
+## 42. Gateway API CRDs: Standard v1.6.3, vendored, applied server-side
+
+**Decision.** The Gateway API CRDs are the Standard channel of release
+v1.6.3, downloaded unchanged into
+`ticketdrop-gitops/platform/gateway-api/standard-install-v1.6.3.yaml`
+(sha256 `356c2b8e286a964dc20995435659ad1095386329974793af10bbfe3eff977fe5`)
+and applied with `kubectl apply --server-side`. They are installed on their
+own, before Traefik, and not by the Traefik chart. The file holds ten CRDs
+(GatewayClass, Gateway, HTTPRoute, GRPCRoute, ReferenceGrant,
+BackendTLSPolicy, ListenerSet, TCPRoute, TLSRoute, UDPRoute) and the
+`safe-upgrades` ValidatingAdmissionPolicy with its binding.
+
+**Why.** The CRDs are a cluster-wide API that any controller reads, so they
+should not be installed or removed with one controller; the Traefik chart no
+longer ships them for that reason. Traefik v3.7's Gateway provider is tested
+against Standard v1.6.3, and Standard is the stable set; only HTTPRoute is
+needed. Keeping the file in the repo makes Git the record of what is in the
+cluster, which is what ArgoCD will sync in Phase 3, turns an upgrade into a
+diff, and lets a rebuild work without GitHub. A plain `kubectl apply` stores
+the whole object in the `last-applied-configuration` annotation, which is
+capped at 262144 bytes; the HTTPRoute CRD is about 429 KB, so only a
+server-side apply fits. Evidence:
+`docs/evidence/phase-2/08-gateway-api-crds.txt` (checksum, apply output, all
+ten CRDs at `v1.6.3`/`standard`, Established).
+
+**Cost.** A 1.17 MB generated file in the repo that must never be edited by
+hand. Upgrades are manual and must move with the Traefik version. Deleting
+the CRDs deletes every Gateway and HTTPRoute in the cluster, and deleting the
+namespaces does not remove them. ArgoCD will need `ServerSideApply=true` for
+this file. `safe-upgrades` refuses experimental CRDs over these and any
+version below v1.5.0 until it is deliberately removed.
+
+## 43. Traefik's CRD provider is off; routing uses only the Gateway API
+
+**Decision.** `platform/traefik/values.yaml` sets
+`providers.kubernetesCRD.enabled: false`, so Traefik does not read its own
+IngressRoute and Middleware objects. The chart's Traefik CRDs are left out with
+`--skip-crds`.
+
+**Why.** The chart turns this provider on by default, which would leave two
+routing APIs in the cluster. Routes here are HTTPRoutes (entry 42), a standard
+that other controllers also read, so they should carry over to EKS unchanged;
+IngressRoutes work only with Traefik. With the provider off, nothing would use
+the chart's 25 Traefik CRDs, and Helm never upgrades CRDs it installed that way.
+
+**Cost.** Traefik Middlewares, such as rate limiting or header rules, are not
+available as Traefik objects. Using one means turning the provider back on and
+applying its CRDs from a pinned file.
+
+## 44. Traefik comes from its official chart, pinned, in a `restricted` namespace
+
+**Decision.** Traefik is Helm release `traefik` from `traefik/traefik` chart
+42.1.3 (Traefik v3.7.16), with values in `platform/traefik/values.yaml` in the
+GitOps repo. Its namespace, `traefik`, is declared in `platform/namespaces.yaml`
+and enforces the `restricted` Pod Security level.
+
+**Why.** Traefik v3.7 is the version the Gateway API CRDs in entry 42 are tested
+against, and a pinned chart installs the same thing on a rebuild. The chart's
+default security contexts already meet `restricted` (non-root UID 65532, seccomp
+`RuntimeDefault`, no privilege escalation, all capabilities dropped, read-only
+root filesystem), so the level costs no overrides. Declaring the namespace in
+the file, instead of `--create-namespace`, keeps its label in Git. Evidence:
+`docs/evidence/phase-2/08-traefik-installed.txt` (pod 1/1, GatewayClass
+`ACCEPTED True`, the Gateway provider started, no error lines in the log).
+
+**Cost.** The chart is bumped by hand and has to stay in step with the CRDs. The
+log carries `aliasHeadersStrategy` warnings for each entrypoint, about headers
+reaching backends that derive variable names from header names; the default was
+left as it is.
+
+## 45. Traefik reads only the Gateway API, and the chart's other routing is off
+
+**Decision.** Beyond the CRD provider (entry 43), the values turn off
+`providers.kubernetesIngress` and `ingressClass`, and set `gateway.enabled:
+false`. `gatewayClass` stays on, which creates GatewayClass `traefik`.
+`experimentalChannel` stays `false`. `api.dashboard` is `true`, and no route
+points at it.
+
+**Why.** Ingress is an older API nothing here uses, and an IngressClass with
+nothing behind it is noise. The chart's own Gateway is off because the Gateway is
+written by hand in the next task, so its listener and the namespaces it admits are
+in a file. The GatewayClass names the controller and carries no configuration
+worth owning, so the chart can keep it. Experimental mode would make Traefik look
+for kinds the Standard CRDs do not all carry.
+
+**Cost.** Nothing answers until the Gateway and HTTPRoutes exist: `localhost:8088`
+returns Traefik's own 404. The dashboard can be reached only by port-forward, and
+routing it through the Gateway later would make it public.
+
+## 46. The public port is 8088, Traefik listens on 8000, and HTTPS is not exposed
+
+**Decision.** `ports.web.exposedPort` is 8088 and `ports.web.port` stays 8000.
+`ports.websecure.expose.default` is `false`. `ports.traefik` is 8080 inside the
+pod and is not exposed. The Service is a `LoadBalancer` with the default
+`externalTrafficPolicy: Cluster`. The Gateway listener has to use 8000, the
+entrypoint inside the pod, not the Service's 8088.
+
+**Why.** 8080 is already taken on the host, and the host's unprivileged port range
+starts at 1024, so the chart's defaults of 80 and 443 were ruled out without being
+tried. There is no TLS locally. 8000 is the chart's default; `web` cannot share
+8080 with the `traefik` entrypoint in one pod. `Cluster` is the default, and with
+one node `Local` would have nothing to choose between.
+
+This settles how Docker Desktop's kind-based cluster exposes a LoadBalancer, as
+observed in `docs/evidence/phase-2/08-loadbalancer-first-address.txt`: the Service
+received an address about a second after the install (`EnsuredLoadBalancer`),
+`172.18.0.5` with `ipMode: Proxy`, and the host listens on `0.0.0.0:8088`.
+`curl localhost:8088/` gets Traefik's 404. `curl 172.18.0.5:8088/` from the host
+times out, so the EXTERNAL-IP is not the address to use here; `localhost` is. What
+holds the host port was not identified. A LoadBalancer on this cluster can be
+reached without a port-forward, so no NodePort fallback is needed.
+
+**Cost.** The port is bound on all host interfaces (`0.0.0.0`), so with no firewall
+rule the shop is open to the local network. Any other LoadBalancer Service on this
+cluster needs a different free port. On EKS the port and the address both change,
+and HTTPS comes with a certificate. The capture was taken about five minutes after
+the install, not during it; it rests on the Service's events and status.
+
+## 47. Traefik runs one replica, with limits as well as requests, and access logs on
+
+**Decision.** `deployment.replicas` is 1. Traefik requests `100m` CPU and `128Mi`
+of memory and is limited to `500m` and `512Mi`. `accessLog.enabled` is `true`, and
+both the access log and the Traefik log are JSON at level `INFO`.
+
+**Why.** One local node gains little from a second replica, and the chart's PDB is
+off. The chart's default of no requests would break the rule that every container
+has them. The limits stop one component from taking the laptop's resources. An
+access log line per request shows which router and backend answered, which is how
+a routing problem gets diagnosed here.
+
+**Cost.** One replica means the only way in goes down during a Traefik restart or a
+drain, so EKS needs two or more with a PDB. The CPU limit differs from the nine
+services and the CloudNativePG operator, which have none (entries 30 and 36): under
+load Traefik is throttled at half a core, so a load test can measure that limit and
+not the services behind it. Access logs add a line per request, which adds up
+during a load test.
+
+## 48. One Gateway in `traefik` admits routes from `ticketdrop` only, through one HTTPRoute
+
+**Decision.** Gateway `ticketdrop` lives in the `traefik` namespace with one HTTP
+listener on port 8000 and no hostname. Its `allowedRoutes` uses a `Selector` on
+`kubernetes.io/metadata.name: ticketdrop`. One HTTPRoute, also named `ticketdrop`,
+lives in the `ticketdrop` namespace with two rules: `PathPrefix /v1` goes to Service
+`gateway` on 8080, and `PathPrefix /` goes to Service `web` on 8080. Both files are
+in `platform/routes/` in the GitOps repo.
+
+**Why.** The listener port has to be the `web` entrypoint inside the Traefik pod
+(entry 46), not the Service's 8088. With no hostname the listener answers
+`localhost`. The Gateway is the platform's front door and the routes belong to the
+app, so they sit in their own namespaces, and a `Selector` admits only the namespace
+that should publish through it, where `All` would admit any. `/v1` goes to the API
+gateway, not to a service directly, so only the routes it lists are reachable: in
+`docs/evidence/phase-2/08-routes-through-gateway.txt`,
+`/v1/drops/x/availability` gets inventory's JSON 404, and `/v1/healthz` gets a plain
+404 from the gateway, which Traefik's access log confirms. The most specific match
+wins whatever the order, so `/v1` is never taken by `/`. One route with two rules is
+fewer objects than two, and both paths change together. `08-shopfront-through-gateway.png`
+shows the shopfront through this path.
+
+**Cost.** Every path shares one route object, so a bad edit can affect both, and its
+status does not separate them. The listener has no hostname and no TLS; EKS needs
+both, and the listener's port changes with the entrypoint. A new namespace that
+publishes routes needs the selector changed. The Gateway and the route need
+`kubectl apply` by hand until ArgoCD syncs them in Phase 3.
+
+## 49. NetworkPolicy is proven on the local cluster, not left for EKS
+
+**Decision.** Docker Desktop's cluster enforces NetworkPolicy in both directions,
+so the step 9 policies are written and proven here rather than written blind and
+proven only on EKS. This settles the open question in the Phase 2 workbook.
+
+**Why.** In `docs/evidence/phase-2/09-networkpolicy-enforcement-test.txt`, two pods
+in a scratch namespace `netpol-test` first reached goaws (`10.244.0.7:4100`) and a
+test server (`10.244.0.25:8000`) with a new TCP connection each time (`exit=0`). A
+policy selecting every pod with `policyTypes: [Egress]` and no rules made the goaws
+probe time out (`exit=124`); deleting it brought `exit=0` back. A policy with
+`policyTypes: [Ingress]` and no rules made the server probe time out while the
+client's egress to goaws still worked; deleting it brought the server back. The
+enforcer is kindnet's `kube-network-policies` controller (image
+`kindest/kindnetd:v20260820-69b56db7`, Kubernetes v1.36.4), whose log reports
+"Policy engine is ready". A blocked connection timed out after the probe's three
+seconds instead of being refused, so this enforcer drops packets.
+
+**Cost.** The proof is of kindnet, not of the plugin EKS will run, so the policies
+must be proven again there; on EKS, enforcement depends on how the cluster's network
+plugin is configured. Only new connections were tested: whether a connection opened
+before a policy survives it was not, so after a policy change the pods are restarted
+before anything is called proven. A blocked call fails by timing out, so a missing
+rule shows up as a slow failure rather than a fast refusal. The `kubectl describe`
+output of the two test policies was not captured; the policy files themselves were
+throwaway files in the GitOps repo's ignored `scratch/`.
+
+## 50. Each service's NetworkPolicy comes from the chart; default-deny and DNS are plain manifests
+
+**Decision.** `charts/service/templates/networkpolicy.yaml` renders one
+NetworkPolicy per release, named after the service. Each `values-<svc>.yaml`
+names its peers under `networkPolicy`: `callers` and `calls` are services in
+`ticketdrop`, and `externalCallers` and `externalCalls` are keys of
+`networkPolicy.external` in the chart's `values.yaml`, which defines `traefik`,
+`postgres` and `goaws` by namespace, pod labels and port. The two policies that
+select every pod in `ticketdrop`, `default-deny` and `allow-dns`, are plain
+manifests in `platform/network-policies/` in the GitOps repo.
+
+**Why.** A service's connections are reviewed next to the env vars that make
+them, and are installed and removed with its release; a new service gets its
+policy from its values file. The peers are named, not worked out from
+`databaseSecret` or `AWS_ENDPOINT_URL`, so the intent can be read in the values
+file and the destinations can change per environment without touching the
+template. A policy that selects the whole namespace cannot come from the chart:
+nine releases would render the same object, and Helm refuses an object another
+release owns (known Helm behaviour, not tried here). `default-deny` must also
+exist with no release installed, because it covers pods no chart creates. A DNS
+rule inside each service's policy was the alternative; it was not taken because
+pods outside the chart, such as the step 9 test pod, would then have no DNS, and
+a failed probe would show a missing lookup instead of a blocked connection. The
+template refuses to render when callers are listed for a service with no `http`
+port, or when a peer key is not in `external`; both were tried and fail with
+that message.
+
+**Cost.** The policies live in two places, and the chart's rules are read
+through `helm template`, not as applied. The namespace-wide files are applied by
+hand until ArgoCD syncs `platform/` in Phase 3. For payments, fulfillment,
+notifications and scheduler the template writes `ingress: []`, which the API
+server drops, so `kubectl diff` reports a change on those four (only
+`generation`) when nothing would change.
+
+## 51. Every pod in `ticketdrop` is denied by default, and each service may make and take only the calls it needs
+
+**Decision.** `default-deny` selects every pod in `ticketdrop` for Ingress and
+Egress with no rules. `allow-dns` lets every pod there send to CoreDNS
+(`kube-system`, `k8s-app: kube-dns`) on 53 UDP and TCP. Each service's policy
+isolates both directions and opens only these, on TCP:
+
+| Service | May be called on 8080 by | May call |
+|---|---|---|
+| web | Traefik | gateway |
+| gateway | Traefik, web | catalog, orders, inventory |
+| catalog | gateway, scheduler | Postgres, goaws |
+| orders | gateway | inventory, Postgres, goaws |
+| inventory | gateway, orders, scheduler | Postgres, goaws |
+| payments | nobody | Postgres, goaws |
+| fulfillment | nobody | Postgres, goaws |
+| notifications | nobody | goaws |
+| scheduler | nobody | catalog, inventory, Postgres |
+
+Services are called on 8080, Postgres on 5432 and goaws on 4100. Postgres is the
+pods labelled `cnpg.io/cluster: pg` in `data`, goaws the pods labelled
+`app: goaws` there, and Traefik the pods labelled
+`app.kubernetes.io/name: traefik` in `traefik`. Each outside peer is one entry
+holding both a namespace selector and a pod selector, and each outside
+destination is its own rule with its own port. No rule opens the admin port,
+9090. `data` and `traefik` have no policies.
+
+**Why.** The table is the calls the services make: the URLs in their values
+files, which ones have a database, and which use the event bus. A rule for the
+whole of `ticketdrop` to reach `data` would let any pod there, a debug pod
+included, reach Postgres, which is what step 9 sets out to prevent. The cluster
+label, not `role=primary`, keeps the Postgres rule valid after a failover. A
+namespace and pod selector in one entry must both match; as two entries they
+would admit every pod in `data`. Ports in one rule apply to every peer in it, so
+Postgres and goaws are separate rules. DNS is open to every pod, not only the
+services, so a test pod fails on the connection and not on the lookup. The
+admin port needs no rule because Kubernetes always admits traffic from a pod's
+own node, which is where the kubelet's probes come from. The policies were
+applied on 2026-11-13 in this order: `allow-dns` at 03:09:26Z, the nine service
+policies through `helm upgrade` at 03:18:16Z to 03:18:19Z, and `default-deny` at
+03:18:32Z, so no service was ever isolated without DNS. All nine Deployments
+were then restarted, because only new connections were tested (entry 49); the
+15 new pods became Ready with no restarts, which shows the probes on 9090 still
+reach them.
+
+**Cost.** Every new call between services needs a values change, and a
+forgotten one shows up as a timeout, not a refusal (entry 49). Anything that
+later scrapes `/metrics` on 9090 from another pod, such as Prometheus, needs an
+ingress rule on every service. `data` stays open to other namespaces, such as
+`traefik`, where Postgres is protected only by `pg_hba` and passwords (entry 28).
+On EKS, Postgres and the event bus move outside the cluster, so the `external`
+peers change. That the test pod is now refused Postgres and that an order still
+completes has already been checked.
+
+## 52. KEDA 2.21.0 runs in its own restricted namespace and watches only `ticketdrop`
+
+**Decision.** KEDA is installed from the `kedacore/keda` chart, version 2.21.0,
+as release `keda` in a new namespace `keda` labelled
+`pod-security.kubernetes.io/enforce: restricted` (in `platform/namespaces.yaml`),
+with `platform/keda/values.yaml`: `watchNamespace: ticketdrop`, `crds.install:
+true`, one replica each of the operator and the metrics server, requests of
+`100m` CPU and `100Mi` for the operator, metrics server and webhooks, and
+`networkPolicy.enabled: false`. It was installed on 2026-11-14 at 05:19:01Z.
+
+**Why.** Only `fulfillment` in `ticketdrop` is scaled, so the operator has no
+reason to watch the rest of the cluster; all three Deployments run with
+`WATCH_NAMESPACE=ticketdrop`. Its own namespace keeps it apart from the
+services, as CloudNativePG and Traefik are (entries 30 and 44). The chart's pods
+already set `runAsNonRoot`, `allowPrivilegeEscalation: false`, all capabilities
+dropped and a `RuntimeDefault` seccomp profile, so they were admitted under
+`restricted` with no values change, and a server dry run of the label on the
+namespace reported nothing to change. One replica each is enough on one node. The
+chart's own NetworkPolicy is off because `keda` has no default-deny: the operator
+needs to reach goaws in `data` on 4100 and the API server, and nothing blocks
+either (entry 51). After the install the external metrics API
+`v1beta1.external.metrics.k8s.io` was `Available` and the six `keda.sh` CRDs
+existed (`docs/evidence/phase-2/10-keda-installed.txt`).
+
+**Cost.** A ScaledObject in any other namespace is ignored by this operator, so
+scaling something outside `ticketdrop` needs a values change first. The operator's
+ClusterRole still lists and watches Secrets in every namespace; `watchNamespace`
+narrows what it acts on, not that grant. The CRDs are templates in this release, so
+`helm uninstall keda` deletes them and every ScaledObject and TriggerAuthentication
+with them. The values set requests only, so the chart's default limits apply: 1 CPU
+and `1000Mi` for each of the three containers, unlike the nine services, which have
+no CPU limit (entries 30 and 36), and Traefik's `500m` (entry 47). With one operator
+replica, scaling stops while it restarts; it restarted once in its first two minutes
+on install, and the cause was not captured. The operator in `keda` has no
+NetworkPolicy of its own, so on EKS, where `data` moves outside the cluster, its
+route to the queue has to be opened and proven again.
+
+## 53. With `autoscaling.enabled`, the chart leaves `replicas` out of the Deployment
+
+**Decision.** The service chart has an `autoscaling.enabled` value, `false` by
+default. `templates/deployment.yaml` writes `replicas: {{ .Values.replicaCount }}`
+only when it is false. `values-fulfillment.yaml` sets it to `true`; the other eight
+services are unchanged. `replicaCount` stays in the values and still decides the
+PDB, so `fulfillment`, at the default 1, still has none (entry 39). The first
+ScaledObject draft, which had a fixed name, no triggers and sat in `templates/`,
+was moved out of the chart before this upgrade so no release rendered it.
+
+**Why.** Once KEDA creates an HPA for `fulfillment`, the HPA owns the replica count.
+A `replicas` line in the chart would set it back to 1 on every `helm upgrade`, and
+the HPA would then scale it again; in Phase 3 ArgoCD would show it as drift. The
+Kubernetes HPA documentation recommends removing `spec.replicas` from the manifest
+for this reason. Renders of all nine releases before and after the change differ
+only in `fulfillment`, by its `replicas: 1` line, and `helm lint` passes for all
+nine. `helm upgrade fulfillment` on 2026-11-14 at 12:26:34Z (revision 3) left the
+release manifest with no `replicas:` line, `spec.replicas` at 1, the Deployment's
+`generation` at 2 and the same pod, `fulfillment-6b77c59747-mpfbc`, running with no
+restarts (`docs/evidence/phase-2/10-chart-replicas-switch.txt`).
+
+**Cost.** The Kubernetes documentation warns that removing `spec.replicas` can drop
+a Deployment to 1 once; at 1 already, nothing moved here, but a service switched
+over at more replicas would briefly lose pods. The API server still lists `helm` as
+the manager of `spec.replicas`, from the 2026-10-28 install. That a later upgrade
+leaves the count alone is expected from Helm 3's patching; it held for the two
+upgrades after this one (entries 54 and 55), but neither ran while KEDA had
+fulfillment above 1. For a scaled service `replicaCount` only decides the PDB,
+which the comments in the values files state.
+
+## 54. The scaler signs in with its own placeholder Secret, not the service's environment
+
+**Decision.** With `autoscaling.enabled`, the chart renders a TriggerAuthentication
+named after the release (`templates/triggerauthentication.yaml`). How it gets
+credentials is `autoscaling.auth.provider`. With `secret`, the default, the chart
+also renders a Secret `<release>-keda-aws` (`templates/keda-aws-secret.yaml`) with
+`AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`, and the TriggerAuthentication maps
+them to the scaler's `awsAccessKeyID` and `awsSecretAccessKey` with
+`secretTargetRef`. With `aws`, it renders `podIdentity.provider: aws` and no Secret,
+for an IAM role on EKS. Any other value fails the render. The values are the
+placeholders `local` and `local`, committed to git.
+
+**Why.** goaws accepts any credentials, but KEDA's SQS scaler will not run without
+some. A TriggerAuthentication can also read `env` from the target's container, and
+the KEDA 2.21.0 source (`pkg/scaling/resolver/scale_resolvers.go`) reads that from
+the Deployment's pod template, so it would work at 0 replicas. It was turned down
+because resolving `env` also reads the container's `envFrom`, which for
+fulfillment is the `fulfillment-db` Secret: the operator would read the database
+password to find two placeholders. A separate Secret also keeps the scaler's
+identity apart from the service's, which on AWS are two roles: the operator only
+reads queue attributes, fulfillment receives and deletes messages. The placeholders
+go in git because they are not secrets: the same `local` values are already in
+every service's values file, and on EKS no Secret is rendered. Upgrade to revision 4
+on 2026-11-14 at 14:10:18Z: the TriggerAuthentication listed secret
+`fulfillment-keda-aws`, the operator logged `New TriggerAuthentication configured`,
+the Secret showed two 5-byte keys, and the fulfillment pod was not restarted
+(`docs/evidence/phase-2/10-trigger-auth.txt`). That the credentials work was shown
+when the ScaledObject read the queue (entry 55).
+
+**Cost.** The placeholders now appear twice, in fulfillment's env and in the
+Secret. The line is that a real credential never goes in values; Helm also stores
+each revision's values in its `sh.helm.release.v1.*` Secrets, so one put there by
+mistake would stay in the release history. KEDA puts `finalizer.keda.sh` on the
+TriggerAuthentication, so if KEDA is removed while it exists, deleting it may hang
+until the finalizer is removed by hand; this is inferred and was not tried. The
+`aws` provider has only been rendered, not run.
+
+## 55. Fulfillment scales from 0 to 5 at 100 messages a pod, polled every 5 s, back to 0 a minute after the queue empties
+
+**Decision.** `templates/scaledobject.yaml` renders a ScaledObject named after the
+release when `autoscaling.enabled` is true, targeting its Deployment with one
+`aws-sqs-queue` trigger that uses the TriggerAuthentication of entry 54. The
+defaults in `values.yaml` are `minReplicaCount` 0, `maxReplicaCount` 5,
+`pollingInterval` 5, `cooldownPeriod` 60, a scale-down stabilization window of 30 s,
+a fallback of 1 replica after 3 failed reads, `queueLength` 5 and
+`activationQueueLength` 0; `queueURL` is required and `endpoint` is set only for an
+emulator. Fulfillment sets the goaws queue URL and endpoint as plain text and
+`queueLength` 100. Every trigger value is quoted.
+
+**Why.** One fulfillment pod handles about 20 orders a second (4 handlers at 200 ms),
+so 100 messages is about 5 s of work per pod. Five pods at 50m CPU and 64Mi each fit
+the one node easily. A single waiting order should start a pod, so activation is 0.
+The 30 s default polling would add up to 30 s before the first pod; the default
+300 s cooldown and HPA window would keep pods for five minutes after the work. The
+queue URL is text, not `queueURLFromEnv`, for the same reason as entry 54. Upgrade to
+revision 5 on 2026-11-14 at 16:11:34Z, with an empty queue: KEDA took fulfillment
+from 1 to 0 in 6 s, the ScaledObject was `READY True`, and the HPA
+`keda-hpa-fulfillment` read metric `s0-aws-sqs-fulfillment-events` at `0` from
+goaws (`docs/evidence/phase-2/10-scaledobject.txt`). In the proof run on
+2026-11-14 at 16:17Z, 1,500 orders through port 8088 started the first pod 3 s
+after the orders began and had it Ready at 6 s. The backlog peaked at 243, which
+gave 3 replicas. The last pod was gone 61 s after the queue emptied, and nothing was
+pending or dead-lettered (`docs/PROOF.md`,
+`docs/evidence/phase-2/10-fulfillment-scale-0-n-0.txt`). This settles the
+workbook's open question: KEDA's SQS scaler reads queue depth correctly from goaws.
+
+**Cost.** Each read of the queue is an SQS request on AWS, so a 5 s poll is about
+17,000 requests a day for one queue, idle or not. Short windows mean more pods
+started and stopped for a bursty load. The first order after a quiet minute waits
+for a pod to start, about 6 s here. The maximum of 5 was never reached, because the
+backlog is limited by how fast payments and inventory pass orders on, which was not
+measured. The fallback has not been tested, and the KEDA documentation does not say
+whether it starts a pod from 0, so if goaws cannot be read while fulfillment is at 0,
+orders may wait with no pod to handle them. At 5 pods, fulfillment's connections to
+the one Postgres instance (`max_connections` 100) grow with them; this was not
+measured. The queue URL is written twice, in the env and in the trigger.
+
+## 56. Inventory grants holds in batches, many in one transaction
+
+**Decision.** Each `inventory` pod runs one batcher (`RunBatcher`, a worker).
+A hold request waits for it. The batcher takes every request that queued up
+while its previous transaction was committing, up to 500, and answers them all
+with one transaction: it locks each tier's stock row with `SELECT ... FOR
+UPDATE`, decides in arrival order which requests fit (`allocate`), inserts the
+granted holds in one statement, and subtracts their total in one `UPDATE`. A
+request whose caller has already given up is skipped before anything is
+taken. The HTTP API is unchanged, and so is an order asked for twice: it gets
+the hold it already has.
+
+**Why.** The load test showed the cause of the failures at 1,000 customers:
+each hold was its own transaction, and each one kept the tier's row locked
+until its commit had been flushed to disk, so holds went through one flush at
+a time (entry 16). Most customers' hold calls then passed `orders`' 2-second
+timeout and they were told the box office could not be reached while tickets
+were left. Batching makes one lock and one flush serve a whole batch. It keeps
+Postgres as the only store and keeps the guarantee where it was, in the row
+lock and the CHECK. The alternatives were Valkey in front of Postgres (a new
+component to run, and code to keep two stores agreeing after a crash),
+splitting each tier over several rows (a request can fail on one row while
+tickets remain on another), and accepting the ceiling. On compose, with 2,000
+customers, refused buys went from 1,456 to 0 and the p95 buy time from 2,013
+ms to 33 ms; 4,000 customers passed with a p95 of 177 ms
+(`docs/PROOF.md`, 17 November 2026).
+
+**Cost.** One batch is one transaction, so a database error fails every
+request in it, not just one. When it is quiet a batch is a single request and
+nothing waits; under load a request waits for the batch before it to commit.
+The batcher is one goroutine per pod, so a pod grants one batch at a time.
+More code sits between a request and the row than one `UPDATE` did, and most
+of it is only exercised against a real database by the checks, not by unit
+tests. Measured on compose only: the Docker Desktop cluster was still running
+the previous image (TROUBLESHOOTING 8).
+
+## 57. Each service's connection pool has a fixed size, set per pod
+
+**Decision.** `db.Connect` takes a pool size, read from `DATABASE_MAX_CONNS`
+by the six services with a database; 0 or unset keeps pgx's default. Each
+service's values file sets it, and compose sets the same numbers. With every
+pod at its most, the pools add up to 83 of the 97 connections Postgres allows
+(`max_connections` 100, 3 reserved for the superuser):
+
+| Service | Pool per pod | Pods at most | Connections |
+|---|---|---|---|
+| orders | 10 | 2 | 20 |
+| inventory | 8 | 2 | 16 |
+| catalog | 8 | 2 | 16 |
+| payments | 5 | 1 | 5 |
+| fulfillment | 4 | 5 (KEDA's maximum) | 20 |
+| scheduler | 2, plus the leader lock's connection | 2 | 6 |
+
+The 14 left over are for `psql`, the checks' SQL and a pod that is starting
+while the one it replaces has not yet closed its connections.
+
+**Why.** At 2,000 customers on the cluster the pools, each free to grow to 16
+on a 16-CPU node, filled the server and `orders` was refused connections after
+its holds were granted (TROUBLESHOOTING 9). The sizes follow what each pod does
+at once: `orders` serves the buy and runs eight consumer workers, inventory
+grants one batch at a time but also serves lookups, expiry and its consumer,
+catalog serves the drop page, payments and fulfillment call the provider and
+render outside their transactions, and the scheduler only ticks. The size is an
+env setting rather than `pool_max_conns` in the URL because the URL is in a
+Secret made by `db-secrets.sh`, and the size belongs with the replica count in
+the values file. Raising `max_connections` only moves the limit, since KEDA
+can add pods. A pooler (CloudNativePG's PgBouncer `Pooler`, or RDS Proxy on
+AWS) is the answer when the pods outgrow one server's connections, at the
+price of another component in the path.
+
+**Cost.** The budget is kept by hand. A change to a replica count, KEDA's
+`maxReplicaCount` or a new database service has to be checked against the
+table, and nothing fails until a load finds it. A request that finds its pool
+full waits for a connection instead of being refused, so a pool set too small
+shows up as slower answers: in the 1,000-customer run catalog and inventory
+sat at their caps (16 each over two pods) and the p95 buy time was 183 ms,
+against 110 ms with the default pools. On EKS the server and its limit will be
+different, so the numbers are to be done again in Phase 4.

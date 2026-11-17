@@ -1,0 +1,39 @@
+Fri Oct 30 08:54:06 PM KST 2026
+$ sha256sum platform/gateway-api/standard-install-v1.6.3.yaml
+356c2b8e286a964dc20995435659ad1095386329974793af10bbfe3eff977fe5  platform/gateway-api/standard-install-v1.6.3.yaml
+
+$ kubectl apply --server-side -f platform/gateway-api/standard-install-v1.6.3.yaml
+customresourcedefinition.apiextensions.k8s.io/backendtlspolicies.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/gatewayclasses.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/gateways.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/grpcroutes.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/httproutes.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/listenersets.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/referencegrants.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/tcproutes.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/tlsroutes.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/udproutes.gateway.networking.k8s.io serverside-applied
+validatingadmissionpolicy.admissionregistration.k8s.io/safe-upgrades.gateway.networking.k8s.io serverside-applied
+validatingadmissionpolicybinding.admissionregistration.k8s.io/safe-upgrades.gateway.networking.k8s.io serverside-applied
+
+$ kubectl get crd (bundle version and channel)
+NAME                                           BUNDLE   CHANNEL
+backendtlspolicies.gateway.networking.k8s.io   v1.6.3   standard
+gatewayclasses.gateway.networking.k8s.io       v1.6.3   standard
+gateways.gateway.networking.k8s.io             v1.6.3   standard
+grpcroutes.gateway.networking.k8s.io           v1.6.3   standard
+httproutes.gateway.networking.k8s.io           v1.6.3   standard
+listenersets.gateway.networking.k8s.io         v1.6.3   standard
+referencegrants.gateway.networking.k8s.io      v1.6.3   standard
+tcproutes.gateway.networking.k8s.io            v1.6.3   standard
+tlsroutes.gateway.networking.k8s.io            v1.6.3   standard
+udproutes.gateway.networking.k8s.io            v1.6.3   standard
+
+$ kubectl wait --for=condition=Established (gatewayclasses, gateways, httproutes)
+customresourcedefinition.apiextensions.k8s.io/gatewayclasses.gateway.networking.k8s.io condition met
+customresourcedefinition.apiextensions.k8s.io/gateways.gateway.networking.k8s.io condition met
+customresourcedefinition.apiextensions.k8s.io/httproutes.gateway.networking.k8s.io condition met
+
+$ kubectl get validatingadmissionpolicy safe-upgrades.gateway.networking.k8s.io
+NAME                                      VALIDATIONS   PARAMKIND   AGE
+safe-upgrades.gateway.networking.k8s.io   2             <unset>     6h26m

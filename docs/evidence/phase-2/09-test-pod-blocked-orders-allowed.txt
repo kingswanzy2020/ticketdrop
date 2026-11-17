@@ -1,0 +1,147 @@
+Fri Nov 13 12:49:05 PM KST 2026
+dns () 
+{ 
+    kubectl exec -n ticketdrop np-probe -- bash -c "getent hosts $1; echo exit=\$?"
+}
+pg () 
+{ 
+    kubectl exec -n ticketdrop np-probe -- bash -c "pg_isready -h $1 -p 5432 -t 3; echo exit=\$?"
+}
+tcp () 
+{ 
+    kubectl exec -n ticketdrop np-probe -- bash -c "timeout 3 bash -c '</dev/tcp/$1/$2'; echo exit=\$?"
+}
+
+# Part 1: the same pod and the same eight probes as 09-test-pod-baseline-before-policies.txt, with the policies in place
+
+$ kubectl get netpol -n ticketdrop
+NAME            POD-SELECTOR                           AGE
+allow-dns       <none>                                 39m
+catalog         app.kubernetes.io/name=catalog         30m
+default-deny    <none>                                 30m
+fulfillment     app.kubernetes.io/name=fulfillment     30m
+gateway         app.kubernetes.io/name=gateway         30m
+inventory       app.kubernetes.io/name=inventory       30m
+notifications   app.kubernetes.io/name=notifications   30m
+orders          app.kubernetes.io/name=orders          30m
+payments        app.kubernetes.io/name=payments        30m
+scheduler       app.kubernetes.io/name=scheduler       30m
+web             app.kubernetes.io/name=web             30m
+
+$ kubectl apply -f scratch/np-probe.yaml
+pod/np-probe created
+
+$ kubectl wait --for=condition=Ready pod/np-probe -n ticketdrop --timeout=60s
+pod/np-probe condition met
+
+$ kubectl get pod np-probe -n ticketdrop -o wide --show-labels
+NAME       READY   STATUS    RESTARTS   AGE   IP            NODE                    NOMINATED NODE   READINESS GATES   LABELS
+np-probe   1/1     Running   0          1s    10.244.0.39   desktop-control-plane   <none>           <none>            run=np-probe
+pg-rw endpoint=10.244.0.23 goaws endpoint=10.244.0.4
+
+$ dns pg-rw.data.svc.cluster.local
+10.96.71.65     pg-rw.data.svc.cluster.local
+exit=0
+
+$ dns goaws.data.svc.cluster.local
+10.96.85.237    goaws.data.svc.cluster.local
+exit=0
+
+$ dns inventory
+10.96.189.1     inventory.ticketdrop.svc.cluster.local
+exit=0
+
+$ pg pg-rw.data.svc.cluster.local
+pg-rw.data.svc.cluster.local:5432 - no response
+exit=2
+
+$ pg 10.244.0.23
+10.244.0.23:5432 - no response
+exit=2
+
+$ tcp goaws.data.svc.cluster.local 4100
+exit=124
+
+$ tcp 10.244.0.4 4100
+exit=124
+
+$ tcp inventory 8080
+exit=124
+
+$ kubectl delete pod np-probe -n ticketdrop --wait=false
+pod "np-probe" deleted from ticketdrop namespace
+
+# Part 2: a real order through the public port, which needs orders to reach inventory, Postgres and goaws
+
+$ curl -sS -i -X PUT localhost:18080/internal/v1/drops/np-1794541762 -H 'Content-Type: application/json' -d '{"name":"Step 9 check","venue":"localhost","opens_at":"2026-11-13T03:48:25Z","tiers":[{"tier":"general","price_cents":2500,"capacity":10}]}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+X-Correlation-Id: 5e723637-3412-4a58-afa2-9faee7ce8f19
+Date: Fri, 13 Nov 2026 03:49:25 GMT
+Content-Length: 187
+
+{"drop_id":"np-1794541762","name":"Step 9 check","venue":"localhost","opens_at":"2026-11-13T03:48:25Z","status":"scheduled","tiers":[{"tier":"general","price_cents":2500,"capacity":10}]}
+
+$ curl -sS -i localhost:8088/v1/drops/np-1794541762/availability
+HTTP/1.1 200 OK
+Content-Length: 86
+Content-Type: application/json
+Date: Fri, 13 Nov 2026 03:49:26 GMT
+X-Correlation-Id: ceb7ed3e-abbf-4f99-9c4a-e5ca5fb3d075
+
+{"drop_id":"np-1794541762","tiers":[{"tier":"general","capacity":10,"available":10}]}
+
+$ curl -sS -X POST localhost:8088/v1/orders -H 'Content-Type: application/json' -d '{"drop_id":"np-1794541762","tier":"general","quantity":1,"customer_email":"step9@example.com"}'
+{"order_id":"562a29b6-4622-4af3-bb23-da0527fa7015","drop_id":"np-1794541762","tier":"general","quantity":1,"customer_email":"step9@example.com","status":"pending","created_at":"2026-11-13T03:49:26.347866Z"}
+
+$ curl -sS -i localhost:8088/v1/orders/562a29b6-4622-4af3-bb23-da0527fa7015
+HTTP/1.1 200 OK
+Content-Length: 208
+Content-Type: application/json
+Date: Fri, 13 Nov 2026 03:49:28 GMT
+X-Correlation-Id: 97526608-c2e2-4727-bc03-cba17eca829c
+
+{"order_id":"562a29b6-4622-4af3-bb23-da0527fa7015","drop_id":"np-1794541762","tier":"general","quantity":1,"customer_email":"step9@example.com","status":"ticketed","created_at":"2026-11-13T03:49:26.347866Z"}
+
+$ kubectl logs -n ticketdrop -l app.kubernetes.io/name=notifications --tail=200 | grep 562a29b6-4622-4af3-bb23-da0527fa7015
+{"time":"2026-11-13T03:49:27.788478097Z","level":"INFO","msg":"notification sent","service":"notifications","message_id":"3cd06108-7e6c-4821-b07b-52c60337d0b3","to":"step9@example.com","subject":"Your tickets for np-1794541762 are confirmed","body":"Order 562a29b6-4622-4af3-bb23-da0527fa7015: 1 general ticket for np-1794541762. See you there.","correlation_id":"e8e20ab4-6bde-480a-bac6-c038e7edb3d4"}
+
+# Part 3: the two step 8 calls again
+
+$ curl -sS -i localhost:8088/v1/drops/x/availability
+HTTP/1.1 404 Not Found
+Content-Length: 89
+Content-Type: application/json
+Date: Fri, 13 Nov 2026 03:49:28 GMT
+X-Correlation-Id: 87558c57-0ada-43ec-b6b8-95a9f8dbba63
+
+{"correlation_id":"87558c57-0ada-43ec-b6b8-95a9f8dbba63","error":"no such drop on sale"}
+
+$ curl -sS -i localhost:8088/v1/healthz
+HTTP/1.1 404 Not Found
+Content-Length: 19
+Content-Type: text/plain; charset=utf-8
+Date: Fri, 13 Nov 2026 03:49:28 GMT
+X-Content-Type-Options: nosniff
+X-Correlation-Id: 741c7b0c-a92e-4dc8-9725-7f20aebf1687
+
+404 page not found
+
+$ kubectl get pods -n ticketdrop
+NAME                             READY   STATUS        RESTARTS   AGE
+catalog-596f454c56-2zb5r         1/1     Running       0          30m
+catalog-596f454c56-cm48h         1/1     Running       0          30m
+fulfillment-6b77c59747-mpfbc     1/1     Running       0          30m
+gateway-5594f948f8-jmgdm         1/1     Running       0          30m
+gateway-5594f948f8-vzblr         1/1     Running       0          30m
+inventory-7669b5fb4-ftnnn        1/1     Running       0          30m
+inventory-7669b5fb4-sfq4l        1/1     Running       0          30m
+notifications-5f5bc5c76f-fjgmz   1/1     Running       0          30m
+np-probe                         1/1     Terminating   0          23s
+orders-f9c7d75bc-4cbb9           1/1     Running       0          30m
+orders-f9c7d75bc-jdq6d           1/1     Running       0          30m
+payments-c4bc6c9bb-qxsrh         1/1     Running       0          30m
+scheduler-64dc6894b8-4wszh       1/1     Running       0          30m
+scheduler-64dc6894b8-6m9m7       1/1     Running       0          30m
+web-6468cd87c8-nnqzc             1/1     Running       0          30m
+web-6468cd87c8-sntlp             1/1     Running       0          30m

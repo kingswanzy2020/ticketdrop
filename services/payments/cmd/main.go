@@ -26,6 +26,7 @@ func main() {
 func run(ctx context.Context, s *service.Service) error {
 	var (
 		dbURL    = s.Config.Required("DATABASE_URL")
+		maxConns = s.Config.Int("DATABASE_MAX_CONNS", 0)
 		topicARN = s.Config.Required("EVENTS_TOPIC_ARN")
 		queueURL = s.Config.Required("EVENTS_QUEUE_URL")
 
@@ -51,7 +52,7 @@ func run(ctx context.Context, s *service.Service) error {
 		}
 	}
 
-	pool, err := db.Connect(ctx, dbURL, s.Log)
+	pool, err := db.Connect(ctx, dbURL, maxConns, s.Log)
 	if err != nil {
 		return err
 	}

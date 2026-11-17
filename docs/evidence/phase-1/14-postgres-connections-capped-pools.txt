@@ -1,0 +1,9 @@
+# 17 November 2026, cluster, load-1794921857 (1,000 customers) with DATABASE_MAX_CONNS set (entry 57)
+# client connections per database, sampled every second by pg_stat_activity, peak last
+      5 catalog=16 fulfillment=4 inventory=16 orders=17 payments=4 scheduler=3 total=60
+      9 catalog=16 fulfillment=4 inventory=16 orders=18 payments=4 scheduler=2 total=60
+     22 catalog=16 fulfillment=4 inventory=16 orders=18 payments=4 scheduler=3 total=61
+      7 catalog=16 fulfillment=8 inventory=16 orders=18 payments=4 scheduler=2 total=64
+     23 catalog=16 fulfillment=8 inventory=16 orders=18 payments=4 scheduler=3 total=65
+
+# before the change, idle after load-1794918941: catalog 32, inventory 26, orders 25, payments 9, scheduler 3 (94)

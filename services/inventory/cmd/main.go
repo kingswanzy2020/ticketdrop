@@ -29,6 +29,7 @@ func main() {
 func run(ctx context.Context, s *service.Service) error {
 	var (
 		dbURL    = s.Config.Required("DATABASE_URL")
+		maxConns = s.Config.Int("DATABASE_MAX_CONNS", 0)
 		topicARN = s.Config.Required("EVENTS_TOPIC_ARN")
 		queueURL = s.Config.Required("EVENTS_QUEUE_URL")
 
@@ -47,7 +48,7 @@ func run(ctx context.Context, s *service.Service) error {
 		return err
 	}
 
-	pool, err := db.Connect(ctx, dbURL, s.Log)
+	pool, err := db.Connect(ctx, dbURL, maxConns, s.Log)
 	if err != nil {
 		return err
 	}
@@ -65,7 +66,10 @@ func run(ctx context.Context, s *service.Service) error {
 		return fmt.Errorf("load AWS config: %w", err)
 	}
 
-	inventory := &stock.Service{Pool: pool, Log: s.Log, HoldTTL: holdTTL, HoldGrace: holdGrace}
+	inventory := &stock.Service{
+		Pool: pool, Log: s.Log, HoldTTL: holdTTL, HoldGrace: holdGrace,
+		Metrics: stock.NewMetrics(s.Registry),
+	}
 	busMetrics := events.NewMetrics(s.Registry)
 	relay := &events.Relay{
 		Pool:      pool,
@@ -93,6 +97,9 @@ func run(ctx context.Context, s *service.Service) error {
 	// The relay is registered first so that it stops last (see Serve).
 	return s.Serve(ctx, app,
 		service.Worker{Name: "outbox-relay", Run: relay.Run},
+		// Workers stop after the HTTP server has drained, so no hold request
+		// is left waiting for the batcher.
+		service.Worker{Name: "hold-batcher", Run: inventory.RunBatcher},
 		service.Worker{Name: "consumer", Run: consumer.Run},
 	)
 }

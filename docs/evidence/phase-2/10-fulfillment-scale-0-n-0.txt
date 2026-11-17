@@ -1,0 +1,176 @@
+Sun Nov 15 01:17:43 AM KST 2026
+
+# Settings: ScaledObject fulfillment min 0, max 5, queueLength 100, activation 0, pollingInterval 5s, cooldownPeriod 60s, scale-down window 30s. Load: 1500 orders of 1 ticket, 16 at a time, through the public port 8088
+
+# Part 1: before
+
+$ kubectl get scaledobject,hpa -n ticketdrop
+NAME                               SCALETARGETKIND      SCALETARGETNAME   MIN   MAX   READY   ACTIVE   FALLBACK   PAUSED   TRIGGERS        AUTHENTICATIONS   AGE
+scaledobject.keda.sh/fulfillment   apps/v1.Deployment   fulfillment       0     5     True    False    False      False    aws-sqs-queue   fulfillment       6m12s
+
+NAME                                                       REFERENCE                TARGETS               MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/keda-hpa-fulfillment   Deployment/fulfillment   <unknown>/100 (avg)   1         5         0          6m12s
+
+$ kubectl get deploy fulfillment -n ticketdrop
+NAME          READY   UP-TO-DATE   AVAILABLE   AGE
+fulfillment   0/0     0            0           16d
+01:17:49 fulfillment-events: 0 visible, 0 in flight
+
+$ dlqs
+orders-events-dlq: 0 visible, 0 in flight
+inventory-events-dlq: 0 visible, 0 in flight
+payments-events-dlq: 0 visible, 0 in flight
+fulfillment-events-dlq: 0 visible, 0 in flight
+notifications-events-dlq: 0 visible, 0 in flight
+
+$ curl -sS -o /dev/null -w '%{http_code}\n' -X PUT localhost:18080/internal/v1/drops/keda-1794673072 -H 'Content-Type: application/json' -d '{"name":"Step 10 KEDA check","venue":"localhost","opens_at":"2026-11-14T16:16:52Z","tiers":[{"tier":"general","price_cents":2500,"capacity":1500}]}'
+200
+
+$ curl -sS localhost:8088/v1/drops/keda-1794673072/availability
+{"drop_id":"keda-1794673072","tiers":[{"tier":"general","capacity":1500,"available":1500}]}
+
+# Part 2: the run. Samples every 2s: queue depth from goaws, KEDA's metric, Deployment replicas desired/ready, HPA desired
+01:17:57 orders start
+   1500 201
+01:18:07 orders placed
+01:18:29 no orders pending
+01:19:31 no fulfillment pods
+
+# Pod watch
+01:18:00 EVENT      NAME                           READY   STATUS    RESTARTS   AGE
+01:18:00 ADDED      fulfillment-6b77c59747-k852n   0/1     Pending   0          0s
+01:18:00 MODIFIED   fulfillment-6b77c59747-k852n   0/1     Pending   0          0s
+01:18:00 MODIFIED   fulfillment-6b77c59747-k852n   0/1     ContainerCreating   0          0s
+01:18:00 MODIFIED   fulfillment-6b77c59747-k852n   0/1     ContainerCreating   0          0s
+01:18:01 MODIFIED   fulfillment-6b77c59747-k852n   0/1     Running             0          1s
+01:18:02 MODIFIED   fulfillment-6b77c59747-k852n   0/1     Running             0          2s
+01:18:02 MODIFIED   fulfillment-6b77c59747-k852n   0/1     Running             0          2s
+01:18:03 MODIFIED   fulfillment-6b77c59747-k852n   1/1     Running             0          3s
+01:18:05 ADDED      fulfillment-6b77c59747-t6t6t   0/1     Pending             0          0s
+01:18:05 MODIFIED   fulfillment-6b77c59747-t6t6t   0/1     Pending             0          0s
+01:18:05 ADDED      fulfillment-6b77c59747-khbzh   0/1     Pending             0          0s
+01:18:05 MODIFIED   fulfillment-6b77c59747-khbzh   0/1     Pending             0          0s
+01:18:05 MODIFIED   fulfillment-6b77c59747-t6t6t   0/1     ContainerCreating   0          0s
+01:18:05 MODIFIED   fulfillment-6b77c59747-khbzh   0/1     ContainerCreating   0          0s
+01:18:05 MODIFIED   fulfillment-6b77c59747-t6t6t   0/1     ContainerCreating   0          0s
+01:18:05 MODIFIED   fulfillment-6b77c59747-khbzh   0/1     ContainerCreating   0          0s
+01:18:06 MODIFIED   fulfillment-6b77c59747-t6t6t   0/1     Running             0          1s
+01:18:06 MODIFIED   fulfillment-6b77c59747-khbzh   0/1     Running             0          1s
+01:18:07 MODIFIED   fulfillment-6b77c59747-t6t6t   0/1     Running             0          2s
+01:18:07 MODIFIED   fulfillment-6b77c59747-t6t6t   0/1     Running             0          2s
+01:18:07 MODIFIED   fulfillment-6b77c59747-khbzh   0/1     Running             0          2s
+01:18:08 MODIFIED   fulfillment-6b77c59747-khbzh   0/1     Running             0          3s
+01:18:08 MODIFIED   fulfillment-6b77c59747-khbzh   1/1     Running             0          3s
+01:18:08 MODIFIED   fulfillment-6b77c59747-t6t6t   1/1     Running             0          3s
+01:18:35 MODIFIED   fulfillment-6b77c59747-t6t6t   1/1     Terminating         0          30s
+01:18:35 MODIFIED   fulfillment-6b77c59747-t6t6t   1/1     Terminating         0          30s
+01:18:40 MODIFIED   fulfillment-6b77c59747-t6t6t   0/1     Terminating         0          35s
+01:18:40 MODIFIED   fulfillment-6b77c59747-t6t6t   0/1     Completed           0          35s
+01:18:41 MODIFIED   fulfillment-6b77c59747-t6t6t   0/1     Completed           0          36s
+01:18:41 DELETED    fulfillment-6b77c59747-t6t6t   0/1     Completed           0          36s
+01:18:50 MODIFIED   fulfillment-6b77c59747-khbzh   1/1     Terminating         0          45s
+01:18:50 MODIFIED   fulfillment-6b77c59747-khbzh   1/1     Terminating         0          45s
+01:18:55 MODIFIED   fulfillment-6b77c59747-khbzh   0/1     Completed           0          50s
+01:18:56 MODIFIED   fulfillment-6b77c59747-khbzh   0/1     Completed           0          51s
+01:18:56 MODIFIED   fulfillment-6b77c59747-khbzh   0/1     Completed           0          51s
+01:18:56 DELETED    fulfillment-6b77c59747-khbzh   0/1     Completed           0          51s
+01:19:19 MODIFIED   fulfillment-6b77c59747-k852n   1/1     Running             0          79s
+01:19:25 MODIFIED   fulfillment-6b77c59747-k852n   1/1     Terminating         0          85s
+01:19:25 MODIFIED   fulfillment-6b77c59747-k852n   1/1     Terminating         0          85s
+01:19:29 MODIFIED   fulfillment-6b77c59747-k852n   0/1     Terminating         0          89s
+01:19:30 MODIFIED   fulfillment-6b77c59747-k852n   0/1     Completed           0          90s
+01:19:30 MODIFIED   fulfillment-6b77c59747-k852n   0/1     Completed           0          90s
+01:19:30 DELETED    fulfillment-6b77c59747-k852n   0/1     Completed           0          90s
+
+# Samples
+01:17:54 queue: 0 visible, 0 in flight | metric: 0 | replicas desired/ready: 0/ | hpa desired: 0
+01:17:57 queue: 0 visible, 0 in flight | metric: 0 | replicas desired/ready: 0/ | hpa desired: 0
+01:18:01 queue: 94 visible, 0 in flight | metric: 121 | replicas desired/ready: 1/ | hpa desired: 0
+01:18:04 queue: 197 visible, 4 in flight | metric: 206 | replicas desired/ready: 1/1 | hpa desired: 0
+01:18:08 queue: 231 visible, 12 in flight | metric: 245 | replicas desired/ready: 3/1 | hpa desired: 3
+01:18:11 queue: 205 visible, 12 in flight | metric: 196 | replicas desired/ready: 3/3 | hpa desired: 3
+01:18:14 queue: 160 visible, 12 in flight | metric: 162 | replicas desired/ready: 3/3 | hpa desired: 3
+01:18:17 queue: 129 visible, 12 in flight | metric: 131 | replicas desired/ready: 3/3 | hpa desired: 3
+01:18:20 queue: 97 visible, 12 in flight | metric: 98 | replicas desired/ready: 3/3 | hpa desired: 3
+01:18:23 queue: 62 visible, 12 in flight | metric: 73 | replicas desired/ready: 3/3 | hpa desired: 3
+01:18:26 queue: 20 visible, 12 in flight | metric: 28 | replicas desired/ready: 3/3 | hpa desired: 3
+01:18:29 queue: 0 visible, 0 in flight | metric: 0 | replicas desired/ready: 3/3 | hpa desired: 3
+01:18:32 queue: 0 visible, 0 in flight | metric: 0 | replicas desired/ready: 3/3 | hpa desired: 3
+01:18:35 queue: 0 visible, 0 in flight | metric: 0 | replicas desired/ready: 2/2 | hpa desired: 2
+01:18:38 queue: 0 visible, 0 in flight | metric: 0 | replicas desired/ready: 2/2 | hpa desired: 2
+01:18:41 queue: 0 visible, 0 in flight | metric: 0 | replicas desired/ready: 2/2 | hpa desired: 2
+01:18:44 queue: 0 visible, 0 in flight | metric: 0 | replicas desired/ready: 2/2 | hpa desired: 2
+01:18:47 queue: 0 visible, 0 in flight | metric: 0 | replicas desired/ready: 2/2 | hpa desired: 2
+01:18:50 queue: 0 visible, 0 in flight | metric: 0 | replicas desired/ready: 1/2 | hpa desired: 1
+01:18:53 queue: 0 visible, 0 in flight | metric: 0 | replicas desired/ready: 1/1 | hpa desired: 1
+01:18:56 queue: 0 visible, 0 in flight | metric: 0 | replicas desired/ready: 1/1 | hpa desired: 1
+01:18:59 queue: 0 visible, 0 in flight | metric: 0 | replicas desired/ready: 1/1 | hpa desired: 1
+01:19:02 queue: 0 visible, 0 in flight | metric: 0 | replicas desired/ready: 1/1 | hpa desired: 1
+01:19:05 queue: 0 visible, 0 in flight | metric: 0 | replicas desired/ready: 1/1 | hpa desired: 1
+01:19:08 queue: 0 visible, 0 in flight | metric: 0 | replicas desired/ready: 1/1 | hpa desired: 1
+01:19:10 queue: 0 visible, 0 in flight | metric: 0 | replicas desired/ready: 1/1 | hpa desired: 1
+01:19:13 queue: 0 visible, 0 in flight | metric: 0 | replicas desired/ready: 1/1 | hpa desired: 1
+01:19:16 queue: 0 visible, 0 in flight | metric: 0 | replicas desired/ready: 1/1 | hpa desired: 1
+01:19:19 queue: 0 visible, 0 in flight | metric: 0 | replicas desired/ready: 1/1 | hpa desired: 1
+01:19:22 queue: 0 visible, 0 in flight | metric: 0 | replicas desired/ready: 1/1 | hpa desired: 1
+01:19:25 queue: 0 visible, 0 in flight | metric: 0 | replicas desired/ready: 0/ | hpa desired: 1
+01:19:28 queue: 0 visible, 0 in flight | metric: 0 | replicas desired/ready: 0/ | hpa desired: 1
+01:19:31 queue: 0 visible, 0 in flight | metric: 0 | replicas desired/ready: 0/ | hpa desired: 1
+01:19:34 queue: 0 visible, 0 in flight | metric: 0 | replicas desired/ready: 0/ | hpa desired: 1
+
+# Part 3: after
+
+$ psql orders "SELECT status, count(*) FROM orders WHERE drop_id='keda-1794673072' GROUP BY status ORDER BY status"
+failed|145
+ticketed|1355
+
+$ psql fulfillment "SELECT count(*) AS tickets FROM tickets WHERE drop_id='keda-1794673072'"
+1355
+
+$ psql inventory "SELECT tier, available FROM stock WHERE drop_id='keda-1794673072'"
+general|145
+01:19:36 fulfillment-events: 0 visible, 0 in flight
+
+$ dlqs
+orders-events-dlq: 0 visible, 0 in flight
+inventory-events-dlq: 0 visible, 0 in flight
+payments-events-dlq: 0 visible, 0 in flight
+fulfillment-events-dlq: 0 visible, 0 in flight
+notifications-events-dlq: 0 visible, 0 in flight
+
+$ kubectl get scaledobject,hpa -n ticketdrop
+NAME                               SCALETARGETKIND      SCALETARGETNAME   MIN   MAX   READY   ACTIVE   FALLBACK   PAUSED   TRIGGERS        AUTHENTICATIONS   AGE
+scaledobject.keda.sh/fulfillment   apps/v1.Deployment   fulfillment       0     5     True    False    False      False    aws-sqs-queue   fulfillment       8m6s
+
+NAME                                                       REFERENCE                TARGETS               MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/keda-hpa-fulfillment   Deployment/fulfillment   <unknown>/100 (avg)   1         5         0          8m6s
+
+$ kubectl describe scaledobject fulfillment -n ticketdrop | sed -n '/^Events:/,$p'
+Events:
+  Type    Reason                      Age   From           Message
+  ----    ------                      ----  ----           -------
+  Normal  KEDAScalersStarted          8m5s  keda-operator  Scaler aws-sqs-queue is built
+  Normal  KEDAScalersStarted          8m5s  keda-operator  Started scalers watch
+  Normal  ScaledObjectReady           8m5s  keda-operator  ScaledObject is ready for scaling
+  Normal  KEDAScaleTargetDeactivated  8m5s  keda-operator  Deactivated apps/v1.Deployment ticketdrop/fulfillment from 1 to 0
+  Normal  ScaledObjectReady           8m5s  keda-operator  ScaledObject is ready for scaling
+  Normal  KEDAScaleTargetActivated    100s  keda-operator  Scaled apps/v1.Deployment ticketdrop/fulfillment from 0 to 1, triggered by s0-aws-sqs-fulfillment-events
+  Normal  KEDAScaleTargetDeactivated  15s   keda-operator  Deactivated apps/v1.Deployment ticketdrop/fulfillment from 1 to 0
+
+$ kubectl get hpa keda-hpa-fulfillment -n ticketdrop -o jsonpath='{range .status.conditions[*]}{.type}={.status} {.reason}{"\n"}{end}'
+AbleToScale=True SucceededGetScale
+ScalingActive=False ScalingDisabled
+ScalingLimited=True TooFewReplicas
+
+$ kubectl describe hpa keda-hpa-fulfillment -n ticketdrop | sed -n '/^Events:/,$p'
+Events:
+  Type    Reason             Age   From                       Message
+  ----    ------             ----  ----                       -------
+  Normal  SuccessfulRescale  95s   horizontal-pod-autoscaler  New size: 3; reason: external metric s0-aws-sqs-fulfillment-events(&LabelSelector{MatchLabels:map[string]string{scaledobject.keda.sh/name: fulfillment,},MatchExpressions:[]LabelSelectorRequirement{},}) above target
+  Normal  SuccessfulRescale  65s   horizontal-pod-autoscaler  New size: 2; reason: All metrics below target
+  Normal  SuccessfulRescale  50s   horizontal-pod-autoscaler  New size: 1; reason: All metrics below target
+
+$ kubectl logs -n keda deploy/keda-operator --since=15m | grep -i -E 'error|fail' | tail -20 || echo 'no error or fail lines'
+
+$ kubectl get pods -n ticketdrop --no-headers | awk '{print $3}' | sort | uniq -c
+     14 Running

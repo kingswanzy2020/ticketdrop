@@ -1,0 +1,87 @@
+Sat Oct 31 12:05:30 AM KST 2026
+$ helm list -n traefik
+NAME   	NAMESPACE	REVISION	UPDATED                                	STATUS  	CHART         	APP VERSION
+traefik	traefik  	1       	2026-10-30 23:59:42.993653383 +0900 KST	deployed	traefik-42.1.3	v3.7.16    
+
+$ helm get values traefik -n traefik
+USER-SUPPLIED VALUES:
+accessLog:
+  enabled: true
+  format: json
+api:
+  dashboard: true
+  insecure: false
+deployment:
+  enabled: true
+  kind: Deployment
+  replicas: 1
+gateway:
+  enabled: false
+gatewayClass:
+  enabled: true
+  name: traefik
+ingressClass:
+  enabled: false
+log:
+  format: json
+  level: INFO
+ports:
+  traefik:
+    expose:
+      default: false
+    port: 8080
+  web:
+    expose:
+      default: true
+    exposedPort: 8088
+    port: 8000
+    protocol: TCP
+  websecure:
+    expose:
+      default: false
+    exposedPort: 443
+    port: 8443
+    protocol: TCP
+providers:
+  kubernetesCRD:
+    enabled: false
+  kubernetesGateway:
+    enabled: true
+    experimentalChannel: false
+    namespaces: []
+  kubernetesIngress:
+    enabled: false
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+service:
+  annotations: {}
+  enabled: true
+  type: LoadBalancer
+
+$ kubectl get ns traefik --show-labels
+NAME      STATUS   AGE    LABELS
+traefik   Active   164m   kubernetes.io/metadata.name=traefik,pod-security.kubernetes.io/enforce=restricted
+
+$ kubectl get pods -n traefik -o wide
+NAME                       READY   STATUS    RESTARTS   AGE     IP            NODE                    NOMINATED NODE   READINESS GATES
+traefik-845587d97f-rtm45   1/1     Running   0          5m48s   10.244.0.27   desktop-control-plane   <none>           <none>
+
+$ kubectl get gatewayclass
+NAME      CONTROLLER                      ACCEPTED   AGE
+traefik   traefik.io/gateway-controller   True       5m48s
+
+$ kubectl get svc -n traefik traefik
+NAME      TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+traefik   LoadBalancer   10.96.34.138   172.18.0.5    8088:30341/TCP   5m48s
+
+$ kubectl logs -n traefik deploy/traefik | grep -E "Starting provider|\"level\":\"error\"" (error count follows)
+{"level":"info","time":"2026-10-30T14:59:51Z","message":"Starting provider aggregator *aggregator.ProviderAggregator"}
+{"level":"info","time":"2026-10-30T14:59:51Z","message":"Starting provider *traefik.Provider"}
+{"level":"info","time":"2026-10-30T14:59:51Z","message":"Starting provider *gateway.Provider"}
+{"level":"info","time":"2026-10-30T14:59:51Z","message":"Starting provider *acme.ChallengeTLSALPN"}
+error lines: 0

@@ -1,0 +1,326 @@
+Sun Nov 15 01:11:31 AM KST 2026
+
+# Part 1: the change. templates/scaledobject.yaml was the draft in tmp/ (shown first), moved into the chart and rewritten
+
+$ cat /tmp/claude-1000/-home-king-Desktop-Personal-Lab-DevOps-ticketdrop/cd4c2b97-4711-4dde-be12-e5549988484e/scratchpad/t4/draft-scaledobject.yaml
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: ticketdrop-scaler
+  namespace: ticketdrop
+spec:
+  scaleTargetRef:
+    name: ticketdrop
+  minReplicaCount: 1
+  maxReplicaCount: 5
+
+$ git diff charts/service/values.yaml charts/service/values/values-fulfillment.yaml
+diff --git a/charts/service/values.yaml b/charts/service/values.yaml
+index 65032a1..055ed97 100644
+--- a/charts/service/values.yaml
++++ b/charts/service/values.yaml
+@@ -87,3 +87,43 @@ probes:
+     # 2s x 40 = 80s, covering the 60s wait for Postgres plus migrations.
+     periodSeconds: 2
+     failureThreshold: 40
++
++# true renders a ScaledObject and its TriggerAuthentication, and leaves
++# replicas out of the Deployment, so the HPA that KEDA creates owns the count
++# and an upgrade does not reset it. replicaCount is then not rendered, but
++# pdb.yaml still reads it: keep it at 1 and the service gets no budget.
++autoscaling:
++  enabled: false
++  # 0 when idle; KEDA starts the first pod when the queue has work.
++  minReplicaCount: 0
++  maxReplicaCount: 5
++  # Seconds between reads of the queue. On AWS each read is a paid request.
++  pollingInterval: 5
++  # Seconds after the queue was last busy before 1 goes to 0.
++  cooldownPeriod: 60
++  # Seconds the HPA waits before scaling N down towards 1.
++  scaleDownStabilizationSeconds: 30
++  fallback:
++    failureThreshold: 3
++    replicas: 1
++  sqs:
++    # The queue the service consumes, as plain text: read from the
++    # container's env, KEDA would also read its database Secret.
++    queueURL: ""
++    region: us-east-1
++    # Empty on AWS; set only for the goaws emulator.
++    endpoint: ""
++    # Messages per pod, visible plus in flight, before another is added.
++    queueLength: 5
++    # Above this many messages a pod is started from 0.
++    activationQueueLength: 0
++  # How KEDA's operator signs its calls to the queue (entry 54). Not the
++  # service's own credentials: on AWS the two are different roles.
++  auth:
++    # secret: a Secret <release>-keda-aws with the two keys below, for goaws,
++    #   which accepts anything but the scaler insists on something.
++    # aws: pod identity, an IAM role on EKS; no Secret is rendered.
++    provider: secret
++    # Placeholders only. A real credential never goes in values.
++    accessKeyID: local
++    secretAccessKey: local
+diff --git a/charts/service/values/values-fulfillment.yaml b/charts/service/values/values-fulfillment.yaml
+index c244b02..4eee36f 100644
+--- a/charts/service/values/values-fulfillment.yaml
++++ b/charts/service/values/values-fulfillment.yaml
+@@ -29,3 +29,14 @@ networkPolicy:
+   callers: []
+   calls: []
+   externalCalls: [postgres, goaws]
++
++# KEDA scales it on its queue's backlog, so the chart leaves replicas out.
++# replicaCount stays at the default 1, so it gets no PDB (entry 39).
++autoscaling:
++  enabled: true
++  sqs:
++    queueURL: http://goaws.data.svc.cluster.local:4100/000000000000/fulfillment-events
++    endpoint: http://goaws.data.svc.cluster.local:4100
++    # One pod does about 20 orders a second (4 handlers, 200ms each), so 100
++    # is about 5s of waiting work per pod.
++    queueLength: 100
+
+$ cat charts/service/templates/scaledobject.yaml
+{{- /*
+Scales the service on its queue's backlog. KEDA moves it between 0 and 1 and
+creates an HPA for 1 to maxReplicaCount. The TriggerAuthentication of the
+same name says how the scaler signs its calls.
+*/}}
+{{- if .Values.autoscaling.enabled }}
+{{- $a := .Values.autoscaling }}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "service.name" . }}
+  labels:
+    {{- include "service.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    name: {{ include "service.name" . }}
+  minReplicaCount: {{ $a.minReplicaCount }}
+  maxReplicaCount: {{ $a.maxReplicaCount }}
+  pollingInterval: {{ $a.pollingInterval }}
+  # Applies only from 1 to 0, after the trigger was last active.
+  cooldownPeriod: {{ $a.cooldownPeriod }}
+  {{- with $a.fallback }}
+  # After this many failed reads of the queue, run this many pods.
+  fallback:
+    failureThreshold: {{ .failureThreshold }}
+    replicas: {{ .replicas }}
+  {{- end }}
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleDown:
+          # From N towards 1; the HPA's default is 300s.
+          stabilizationWindowSeconds: {{ $a.scaleDownStabilizationSeconds }}
+  triggers:
+    - type: aws-sqs-queue
+      authenticationRef:
+        name: {{ include "service.name" . }}
+      # KEDA reads every value here as a string, so each is quoted.
+      metadata:
+        queueURL: {{ required "autoscaling.sqs.queueURL is needed to scale on a queue" $a.sqs.queueURL | quote }}
+        awsRegion: {{ required "autoscaling.sqs.region is needed" $a.sqs.region | quote }}
+        {{- with $a.sqs.endpoint }}
+        # Only for an emulator; on AWS the region decides the endpoint.
+        awsEndpoint: {{ . | quote }}
+        {{- end }}
+        queueLength: {{ $a.sqs.queueLength | quote }}
+        activationQueueLength: {{ $a.sqs.activationQueueLength | quote }}
+{{- end }}
+
+# Part 2: renders before and after, per release (changed lines), lint, render, dry run
+catalog: 0 changed lines
+orders: 0 changed lines
+inventory: 0 changed lines
+payments: 0 changed lines
+fulfillment: 39 changed lines
+notifications: 0 changed lines
+scheduler: 0 changed lines
+gateway: 0 changed lines
+web: 0 changed lines
+
+$ diff /tmp/claude-1000/-home-king-Desktop-Personal-Lab-DevOps-ticketdrop/cd4c2b97-4711-4dde-be12-e5549988484e/scratchpad/t4/before-fulfillment.yaml /tmp/claude-1000/-home-king-Desktop-Personal-Lab-DevOps-ticketdrop/cd4c2b97-4711-4dde-be12-e5549988484e/scratchpad/t4/after-fulfillment.yaml | grep -E '^> (kind|  name):'
+> kind: ScaledObject
+>   name: fulfillment
+
+$ helm lint charts/service -f charts/service/values/values-catalog.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint charts/service -f charts/service/values/values-orders.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint charts/service -f charts/service/values/values-inventory.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint charts/service -f charts/service/values/values-payments.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint charts/service -f charts/service/values/values-fulfillment.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint charts/service -f charts/service/values/values-notifications.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint charts/service -f charts/service/values/values-scheduler.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint charts/service -f charts/service/values/values-gateway.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint charts/service -f charts/service/values/values-web.yaml | tail -1
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm template fulfillment charts/service -n ticketdrop -f charts/service/values/values-fulfillment.yaml -s templates/scaledobject.yaml
+---
+# Source: service/templates/scaledobject.yaml
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: fulfillment
+  labels:
+    app.kubernetes.io/name: fulfillment
+    app.kubernetes.io/part-of: ticketdrop
+spec:
+  scaleTargetRef:
+    name: fulfillment
+  minReplicaCount: 0
+  maxReplicaCount: 5
+  pollingInterval: 5
+  # Applies only from 1 to 0, after the trigger was last active.
+  cooldownPeriod: 60
+  # After this many failed reads of the queue, run this many pods.
+  fallback:
+    failureThreshold: 3
+    replicas: 1
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleDown:
+          # From N towards 1; the HPA's default is 300s.
+          stabilizationWindowSeconds: 30
+  triggers:
+    - type: aws-sqs-queue
+      authenticationRef:
+        name: fulfillment
+      # KEDA reads every value here as a string, so each is quoted.
+      metadata:
+        queueURL: "http://goaws.data.svc.cluster.local:4100/000000000000/fulfillment-events"
+        awsRegion: "us-east-1"
+        # Only for an emulator; on AWS the region decides the endpoint.
+        awsEndpoint: "http://goaws.data.svc.cluster.local:4100"
+        queueLength: "100"
+        activationQueueLength: "0"
+
+$ helm template fulfillment charts/service -n ticketdrop -f charts/service/values/values-fulfillment.yaml --set autoscaling.sqs.queueURL= 2>&1 | head -1
+Error: execution error at (service/templates/scaledobject.yaml:40:21): autoscaling.sqs.queueURL is needed to scale on a queue
+
+$ helm template fulfillment charts/service -n ticketdrop -f charts/service/values/values-fulfillment.yaml | kubectl apply --dry-run=server -n ticketdrop -f - 2>&1 | grep -v '^Warning'
+networkpolicy.networking.k8s.io/fulfillment configured (server dry run)
+secret/fulfillment-keda-aws configured (server dry run)
+service/fulfillment configured (server dry run)
+deployment.apps/fulfillment configured (server dry run)
+scaledobject.keda.sh/fulfillment created (server dry run)
+triggerauthentication.keda.sh/fulfillment configured (server dry run)
+
+# Part 3: the upgrade with an empty queue, and fulfillment going 1 -> 0 (once only). Pod watch with local timestamps
+
+$ kubectl get pods -n ticketdrop -l app.kubernetes.io/name=fulfillment
+NAME                           READY   STATUS    RESTARTS   AGE
+fulfillment-6b77c59747-mpfbc   1/1     Running   0          36h
+01:11:34 helm upgrade starts
+
+$ helm upgrade fulfillment charts/service -n ticketdrop -f charts/service/values/values-fulfillment.yaml
+Release "fulfillment" has been upgraded. Happy Helming!
+NAME: fulfillment
+LAST DEPLOYED: Sun Nov 15 01:11:34 2026
+NAMESPACE: ticketdrop
+STATUS: deployed
+REVISION: 5
+TEST SUITE: None
+01:11:41 no fulfillment pods
+
+$ cat /tmp/claude-1000/-home-king-Desktop-Personal-Lab-DevOps-ticketdrop/cd4c2b97-4711-4dde-be12-e5549988484e/scratchpad/t4/watch-1-0.txt
+01:11:32 EVENT      NAME                           READY   STATUS    RESTARTS   AGE
+01:11:32 ADDED      fulfillment-6b77c59747-mpfbc   1/1     Running   0          36h
+01:11:35 MODIFIED   fulfillment-6b77c59747-mpfbc   1/1     Terminating   0          36h
+01:11:35 MODIFIED   fulfillment-6b77c59747-mpfbc   1/1     Terminating   0          36h
+01:11:39 MODIFIED   fulfillment-6b77c59747-mpfbc   0/1     Terminating   0          36h
+01:11:40 MODIFIED   fulfillment-6b77c59747-mpfbc   0/1     Completed     0          36h
+01:11:40 MODIFIED   fulfillment-6b77c59747-mpfbc   0/1     Completed     0          36h
+01:11:40 DELETED    fulfillment-6b77c59747-mpfbc   0/1     Completed     0          36h
+
+$ kubectl get deploy fulfillment -n ticketdrop
+NAME          READY   UP-TO-DATE   AVAILABLE   AGE
+fulfillment   0/0     0            0           16d
+
+$ kubectl get pods -n ticketdrop -l app.kubernetes.io/name=fulfillment
+No resources found in ticketdrop namespace.
+
+# Part 4: what KEDA made of it
+
+$ kubectl get scaledobject -n ticketdrop
+NAME          SCALETARGETKIND      SCALETARGETNAME   MIN   MAX   READY   ACTIVE   FALLBACK   PAUSED   TRIGGERS        AUTHENTICATIONS   AGE
+fulfillment   apps/v1.Deployment   fulfillment       0     5     True    False    False      False    aws-sqs-queue   fulfillment       19s
+
+$ kubectl get hpa -n ticketdrop
+NAME                   REFERENCE                TARGETS               MINPODS   MAXPODS   REPLICAS   AGE
+keda-hpa-fulfillment   Deployment/fulfillment   <unknown>/100 (avg)   1         5         0          19s
+
+$ kubectl get hpa keda-hpa-fulfillment -n ticketdrop -o jsonpath='{.spec.metrics[0].external.metric}{"\n"}{.spec.behavior.scaleDown}{"\n"}'
+{"name":"s0-aws-sqs-fulfillment-events","selector":{"matchLabels":{"scaledobject.keda.sh/name":"fulfillment"}}}
+{"policies":[{"periodSeconds":15,"type":"Percent","value":100}],"selectPolicy":"Max","stabilizationWindowSeconds":30}
+
+$ kubectl get --raw '/apis/external.metrics.k8s.io/v1beta1/namespaces/ticketdrop/s0-aws-sqs-fulfillment-events?labelSelector=scaledobject.keda.sh%2Fname%3Dfulfillment'
+{"kind":"ExternalMetricValueList","apiVersion":"external.metrics.k8s.io/v1beta1","metadata":{},"items":[{"metricName":"s0-aws-sqs-fulfillment-events","metricLabels":null,"timestamp":"2026-11-14T16:11:53Z","value":"0"}]}
+
+$ kubectl describe scaledobject fulfillment -n ticketdrop | sed -n '/Status:/,$p'
+Status:
+  Authentications Types:  fulfillment
+  Conditions:
+    Status:   Unknown
+    Type:     Ready
+    Status:   Unknown
+    Type:     Active
+    Message:  No fallbacks are active on this scaled object
+    Reason:   NoFallbackFound
+    Status:   False
+    Type:     Fallback
+    Status:   False
+    Type:     Paused
+  External Metric Names:
+    s0-aws-sqs-fulfillment-events
+  Health:
+    s0-aws-sqs-fulfillment-events:
+      Number Of Failures:  0
+      Status:              Happy
+  Hpa Name:                keda-hpa-fulfillment
+  Original Replica Count:  1
+  Scale Target GVKR:
+    Group:            apps
+    Kind:             Deployment
+    Resource:         deployments
+    Version:          v1
+  Scale Target Kind:  apps/v1.Deployment
+  Triggers Activity:
+    s0-aws-sqs-fulfillment-events:
+      Is Active:   false
+  Triggers Types:  aws-sqs-queue
+Events:
+  Type    Reason                      Age   From           Message
+  ----    ------                      ----  ----           -------
+  Normal  KEDAScalersStarted          18s   keda-operator  Scaler aws-sqs-queue is built
+  Normal  KEDAScalersStarted          18s   keda-operator  Started scalers watch
+  Normal  ScaledObjectReady           18s   keda-operator  ScaledObject is ready for scaling
+  Normal  KEDAScaleTargetDeactivated  18s   keda-operator  Deactivated apps/v1.Deployment ticketdrop/fulfillment from 1 to 0
+  Normal  ScaledObjectReady           18s   keda-operator  ScaledObject is ready for scaling
+
+$ kubectl logs -n keda deploy/keda-operator --since=3m | grep -i -E 'error|fail' || echo 'no error or fail lines in the last 3m'
+no error or fail lines in the last 3m
+
+$ kubectl get pods -n ticketdrop --no-headers | awk '{print $3}' | sort | uniq -c
+     14 Running
