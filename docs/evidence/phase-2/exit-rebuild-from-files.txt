@@ -1,0 +1,430 @@
+Tue Nov 17 05:12:41 PM KST 2026
+
+17:12:41 teardown starts (0s)
+
+$ kubectl get pods -A | grep -v kube-system
+NAMESPACE            NAME                                              READY   STATUS    RESTARTS        AGE
+cnpg-system          cnpg-cloudnative-pg-6f69d46c76-jcjvb              1/1     Running   0               4m29s
+data                 goaws-5fd6cfdff-g8gzx                             1/1     Running   0               4m17s
+data                 pg-1                                              1/1     Running   0               4m1s
+keda                 keda-admission-webhooks-6cd878f4c-wgjpf           1/1     Running   0               3m48s
+keda                 keda-operator-9797f4bfc-m5dq8                     1/1     Running   1 (3m44s ago)   3m48s
+keda                 keda-operator-metrics-apiserver-58d6dc445-bxn4z   1/1     Running   0               3m48s
+local-path-storage   local-path-provisioner-56c4685b7c-5jgvz           1/1     Running   14 (28h ago)    33d
+ticketdrop           catalog-76c9849fbc-54pm8                          1/1     Running   0               3m1s
+ticketdrop           catalog-76c9849fbc-7nzld                          1/1     Running   0               3m1s
+ticketdrop           gateway-5b4dd9c645-2zmz5                          1/1     Running   0               2m59s
+ticketdrop           gateway-5b4dd9c645-9lczr                          1/1     Running   0               2m59s
+ticketdrop           inventory-6b5f8d9967-dp2jn                        1/1     Running   0               3m1s
+ticketdrop           inventory-6b5f8d9967-h77vt                        1/1     Running   0               3m1s
+ticketdrop           notifications-69d9fddccb-qfdgk                    1/1     Running   0               3m
+ticketdrop           orders-744bd8d7fd-b8jxj                           1/1     Running   0               3m1s
+ticketdrop           orders-744bd8d7fd-tm4qp                           1/1     Running   0               3m1s
+ticketdrop           payments-cb85b8d59-9mtxg                          1/1     Running   0               3m
+ticketdrop           scheduler-644fb55c47-vc6pp                        1/1     Running   0               2m59s
+ticketdrop           scheduler-644fb55c47-wx8db                        1/1     Running   0               2m59s
+ticketdrop           web-c9b8d756f-j95cl                               1/1     Running   0               2m58s
+ticketdrop           web-c9b8d756f-zl8xq                               1/1     Running   0               2m58s
+traefik              traefik-845587d97f-r46gs                          1/1     Running   0               3m14s
+
+$ helm list -A -a
+NAME         	NAMESPACE  	REVISION	UPDATED                                	STATUS  	CHART                	APP VERSION
+catalog      	ticketdrop 	1       	2026-11-17 17:09:39.86253965 +0900 KST 	deployed	service-0.1.0        	0.1.0      
+cnpg         	cnpg-system	1       	2026-11-17 17:08:10.908929046 +0900 KST	deployed	cloudnative-pg-0.29.1	1.30.1     
+fulfillment  	ticketdrop 	1       	2026-11-17 17:09:41.1384627 +0900 KST  	deployed	service-0.1.0        	0.1.0      
+gateway      	ticketdrop 	1       	2026-11-17 17:09:42.448394063 +0900 KST	deployed	service-0.1.0        	0.1.0      
+inventory    	ticketdrop 	1       	2026-11-17 17:09:40.128837741 +0900 KST	deployed	service-0.1.0        	0.1.0      
+keda         	keda       	1       	2026-11-17 17:08:53.235624483 +0900 KST	deployed	keda-2.21.0          	2.21.0     
+notifications	ticketdrop 	1       	2026-11-17 17:09:41.679395069 +0900 KST	deployed	service-0.1.0        	0.1.0      
+orders       	ticketdrop 	1       	2026-11-17 17:09:40.486849773 +0900 KST	deployed	service-0.1.0        	0.1.0      
+payments     	ticketdrop 	1       	2026-11-17 17:09:40.828195304 +0900 KST	deployed	service-0.1.0        	0.1.0      
+scheduler    	ticketdrop 	1       	2026-11-17 17:09:42.015341153 +0900 KST	deployed	service-0.1.0        	0.1.0      
+traefik      	traefik    	1       	2026-11-17 17:09:27.146375973 +0900 KST	deployed	traefik-42.1.3       	v3.7.16    
+web          	ticketdrop 	1       	2026-11-17 17:09:42.776012905 +0900 KST	deployed	service-0.1.0        	0.1.0      
+
+$ helm uninstall catalog -n ticketdrop --wait --ignore-not-found
+release "catalog" uninstalled
+
+$ helm uninstall inventory -n ticketdrop --wait --ignore-not-found
+release "inventory" uninstalled
+
+$ helm uninstall orders -n ticketdrop --wait --ignore-not-found
+release "orders" uninstalled
+
+$ helm uninstall payments -n ticketdrop --wait --ignore-not-found
+release "payments" uninstalled
+
+$ helm uninstall fulfillment -n ticketdrop --wait --ignore-not-found
+release "fulfillment" uninstalled
+
+$ helm uninstall notifications -n ticketdrop --wait --ignore-not-found
+release "notifications" uninstalled
+
+$ helm uninstall scheduler -n ticketdrop --wait --ignore-not-found
+release "scheduler" uninstalled
+
+$ helm uninstall gateway -n ticketdrop --wait --ignore-not-found
+release "gateway" uninstalled
+
+$ helm uninstall web -n ticketdrop --wait --ignore-not-found
+release "web" uninstalled
+
+$ kubectl get scaledobject,triggerauthentication -n ticketdrop --no-headers 2>/dev/null | wc -l
+0
+
+$ kubectl delete ns ticketdrop --ignore-not-found --timeout=120s
+namespace "ticketdrop" deleted
+
+$ kubectl delete ns data --ignore-not-found --timeout=180s
+namespace "data" deleted
+
+$ helm uninstall keda -n keda --ignore-not-found
+release "keda" uninstalled
+
+$ helm uninstall traefik -n traefik --wait --ignore-not-found
+release "traefik" uninstalled
+
+$ helm uninstall cnpg -n cnpg-system --wait --ignore-not-found
+These resources were kept due to the resource policy:
+[CustomResourceDefinition] poolers.postgresql.cnpg.io
+[CustomResourceDefinition] publications.postgresql.cnpg.io
+[CustomResourceDefinition] scheduledbackups.postgresql.cnpg.io
+[CustomResourceDefinition] subscriptions.postgresql.cnpg.io
+[CustomResourceDefinition] backups.postgresql.cnpg.io
+[CustomResourceDefinition] clusterimagecatalogs.postgresql.cnpg.io
+[CustomResourceDefinition] clusters.postgresql.cnpg.io
+[CustomResourceDefinition] databaseroles.postgresql.cnpg.io
+[CustomResourceDefinition] databases.postgresql.cnpg.io
+[CustomResourceDefinition] failoverquorums.postgresql.cnpg.io
+[CustomResourceDefinition] imagecatalogs.postgresql.cnpg.io
+
+release "cnpg" uninstalled
+
+$ kubectl delete ns keda traefik cnpg-system --ignore-not-found --timeout=180s
+namespace "keda" deleted
+namespace "traefik" deleted
+namespace "cnpg-system" deleted
+
+$ kubectl get ns
+NAME                 STATUS   AGE
+default              Active   33d
+kube-node-lease      Active   33d
+kube-public          Active   33d
+kube-system          Active   33d
+local-path-storage   Active   33d
+
+$ helm list -A -a
+NAME	NAMESPACE	REVISION	UPDATED	STATUS	CHART	APP VERSION
+
+$ kubectl get gatewayclass,validatingwebhookconfiguration,mutatingwebhookconfiguration -o name
+
+17:13:18 teardown done (37s)
+Tue Nov 17 05:13:19 PM KST 2026
+ticketdrop-gitops at aaeeeb7
+
+17:13:19 rebuild starts (1s)
+
+$ kubectl apply -f platform/namespaces.yaml
+namespace/ticketdrop created
+namespace/data created
+namespace/cnpg-system created
+namespace/traefik created
+namespace/keda created
+
+$ kubectl apply --server-side -f platform/gateway-api/standard-install-v1.6.3.yaml
+customresourcedefinition.apiextensions.k8s.io/backendtlspolicies.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/gatewayclasses.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/gateways.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/grpcroutes.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/httproutes.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/listenersets.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/referencegrants.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/tcproutes.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/tlsroutes.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/udproutes.gateway.networking.k8s.io serverside-applied
+validatingadmissionpolicy.admissionregistration.k8s.io/safe-upgrades.gateway.networking.k8s.io serverside-applied
+validatingadmissionpolicybinding.admissionregistration.k8s.io/safe-upgrades.gateway.networking.k8s.io serverside-applied
+
+$ helm upgrade --install cnpg cnpg/cloudnative-pg --version 0.29.1 -n cnpg-system -f platform/cnpg/values.yaml --wait
+Release "cnpg" does not exist. Installing it now.
+NAME: cnpg
+LAST DEPLOYED: Tue Nov 17 17:13:21 2026
+NAMESPACE: cnpg-system
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+CloudNativePG operator should be installed in namespace "cnpg-system".
+You can now create a PostgreSQL cluster with 3 nodes as follows:
+
+cat <<EOF | kubectl apply -f -
+# Example of PostgreSQL cluster
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cluster-example
+  
+spec:
+  instances: 3
+  storage:
+    size: 1Gi
+EOF
+
+kubectl get -A cluster
+
+$ kubectl apply -f platform/goaws/
+configmap/goaws created
+deployment.apps/goaws created
+service/goaws created
+
+$ kubectl rollout status deploy/goaws -n data --timeout=120s
+Waiting for deployment "goaws" rollout to finish: 0 of 1 updated replicas are available...
+deployment "goaws" successfully rolled out
+
+$ scripts/db-secrets.sh
+secret/pg-catalog created
+secret/pg-catalog labeled
+secret/catalog-db created
+secret/pg-orders created
+secret/pg-orders labeled
+secret/orders-db created
+secret/pg-inventory created
+secret/pg-inventory labeled
+secret/inventory-db created
+secret/pg-payments created
+secret/pg-payments labeled
+secret/payments-db created
+secret/pg-fulfillment created
+secret/pg-fulfillment labeled
+secret/fulfillment-db created
+secret/pg-scheduler created
+secret/pg-scheduler labeled
+secret/scheduler-db created
+
+$ kubectl apply -f platform/postgres/cluster.yaml
+cluster.postgresql.cnpg.io/pg created
+
+$ until kubectl get cluster/pg -n data -o jsonpath='{.status.phase}' 2>/dev/null | grep -q .; do sleep 2; done
+
+$ kubectl wait cluster/pg -n data --for=condition=Ready --timeout=300s
+cluster.postgresql.cnpg.io/pg condition met
+
+$ kubectl apply -f platform/postgres/roles.yaml -f platform/postgres/databases.yaml
+databaserole.postgresql.cnpg.io/scheduler created
+databaserole.postgresql.cnpg.io/fulfillment created
+databaserole.postgresql.cnpg.io/orders created
+databaserole.postgresql.cnpg.io/payments created
+databaserole.postgresql.cnpg.io/inventory created
+database.postgresql.cnpg.io/scheduler created
+database.postgresql.cnpg.io/fulfillment created
+database.postgresql.cnpg.io/orders created
+database.postgresql.cnpg.io/payments created
+database.postgresql.cnpg.io/inventory created
+
+$ helm upgrade --install keda kedacore/keda --version 2.21.0 -n keda -f platform/keda/values.yaml --wait
+Release "keda" does not exist. Installing it now.
+NAME: keda
+LAST DEPLOYED: Tue Nov 17 17:14:04 2026
+NAMESPACE: keda
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+:::^.     .::::^:     :::::::::::::::    .:::::::::.                   .^.                  
+7???~   .^7????~.     7??????????????.   :?????????77!^.              .7?7.                 
+7???~  ^7???7~.       ~!!!!!!!!!!!!!!.   :????!!!!7????7~.           .7???7.                
+7???~^7????~.                            :????:    :~7???7.         :7?????7.               
+7???7????!.           ::::::::::::.      :????:      .7???!        :7??77???7.              
+7????????7:           7???????????~      :????:       :????:      :???7?5????7.             
+7????!~????^          !77777777777^      :????:       :????:     ^???7?#P7????7.            
+7???~  ^????~                            :????:      :7???!     ^???7J#@J7?????7.           
+7???~   :7???!.                          :????:   .:~7???!.    ~???7Y&@#7777????7.          
+7???~    .7???7:      !!!!!!!!!!!!!!!    :????7!!77????7^     ~??775@@@GJJYJ?????7.         
+7???~     .!????^     7?????????????7.   :?????????7!~:      !????G@@@@@@@@5??????7:        
+::::.       :::::     :::::::::::::::    .::::::::..        .::::JGGGB@@@&7:::::::::        
+                                                                      ?@@#~                  
+                                                                      P@B^                   
+                                                                    :&G:                    
+                                                                    !5.                     
+                                                                    .Kubernetes Event-driven Autoscaling (KEDA) - Application autoscaling made simple.
+
+Get started by deploying Scaled Objects to your cluster:
+    - Information about Scaled Objects : https://keda.sh/docs/latest/concepts/
+    - Samples: https://github.com/kedacore/samples
+
+Get information about the deployed ScaledObjects:
+  kubectl get scaledobject [--namespace <namespace>]
+
+Get details about a deployed ScaledObject:
+  kubectl describe scaledobject <scaled-object-name> [--namespace <namespace>]
+
+Get information about the deployed TriggerAuthentications:
+  kubectl get triggerauthentication [--namespace <namespace>]
+
+Get details about a deployed TriggerAuthentication:
+  kubectl describe triggerauthentication <trigger-authentication-name> [--namespace <namespace>]
+
+Get an overview of the Horizontal Pod Autoscalers (HPA) that KEDA is using behind the scenes:
+  kubectl get hpa [--all-namespaces] [--namespace <namespace>]
+
+Learn more about KEDA:
+- Documentation: https://keda.sh/
+- Support: https://keda.sh/support/
+- File an issue: https://github.com/kedacore/keda/issues/new/choose
+
+$ helm upgrade --install traefik traefik/traefik --version 42.1.3 -n traefik -f platform/traefik/values.yaml --wait
+Release "traefik" does not exist. Installing it now.
+NAME: traefik
+LAST DEPLOYED: Tue Nov 17 17:14:48 2026
+NAMESPACE: traefik
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+traefik with docker.io/traefik:v3.7.16 has been deployed successfully on traefik namespace!
+
+⚠️ DEPRECATION WARNING: Gateway API CRDs will no longer be shipped with this chart in a future major version.
+You will need to install them yourself before deploying Traefik v3.7:
+  kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/standard-install.yaml
+
+$ kubectl apply -f platform/routes/
+gateway.gateway.networking.k8s.io/ticketdrop created
+httproute.gateway.networking.k8s.io/ticketdrop created
+
+$ kubectl apply -f platform/network-policies/dns.yaml
+networkpolicy.networking.k8s.io/allow-dns created
+
+$ helm upgrade --install catalog charts/service -n ticketdrop -f charts/service/values/values-catalog.yaml
+Release "catalog" does not exist. Installing it now.
+NAME: catalog
+LAST DEPLOYED: Tue Nov 17 17:15:01 2026
+NAMESPACE: ticketdrop
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+
+$ helm upgrade --install inventory charts/service -n ticketdrop -f charts/service/values/values-inventory.yaml
+Release "inventory" does not exist. Installing it now.
+NAME: inventory
+LAST DEPLOYED: Tue Nov 17 17:15:01 2026
+NAMESPACE: ticketdrop
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+
+$ helm upgrade --install orders charts/service -n ticketdrop -f charts/service/values/values-orders.yaml
+Release "orders" does not exist. Installing it now.
+NAME: orders
+LAST DEPLOYED: Tue Nov 17 17:15:02 2026
+NAMESPACE: ticketdrop
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+
+$ helm upgrade --install payments charts/service -n ticketdrop -f charts/service/values/values-payments.yaml
+Release "payments" does not exist. Installing it now.
+NAME: payments
+LAST DEPLOYED: Tue Nov 17 17:15:02 2026
+NAMESPACE: ticketdrop
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+
+$ helm upgrade --install fulfillment charts/service -n ticketdrop -f charts/service/values/values-fulfillment.yaml
+Release "fulfillment" does not exist. Installing it now.
+NAME: fulfillment
+LAST DEPLOYED: Tue Nov 17 17:15:02 2026
+NAMESPACE: ticketdrop
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+
+$ helm upgrade --install notifications charts/service -n ticketdrop -f charts/service/values/values-notifications.yaml
+Release "notifications" does not exist. Installing it now.
+NAME: notifications
+LAST DEPLOYED: Tue Nov 17 17:15:03 2026
+NAMESPACE: ticketdrop
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+
+$ helm upgrade --install scheduler charts/service -n ticketdrop -f charts/service/values/values-scheduler.yaml
+Release "scheduler" does not exist. Installing it now.
+NAME: scheduler
+LAST DEPLOYED: Tue Nov 17 17:15:03 2026
+NAMESPACE: ticketdrop
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+
+$ helm upgrade --install gateway charts/service -n ticketdrop -f charts/service/values/values-gateway.yaml
+Release "gateway" does not exist. Installing it now.
+NAME: gateway
+LAST DEPLOYED: Tue Nov 17 17:15:04 2026
+NAMESPACE: ticketdrop
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+
+$ helm upgrade --install web charts/service -n ticketdrop -f charts/service/values/values-web.yaml
+Release "web" does not exist. Installing it now.
+NAME: web
+LAST DEPLOYED: Tue Nov 17 17:15:04 2026
+NAMESPACE: ticketdrop
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+
+$ kubectl apply -f platform/network-policies/default-deny.yaml
+networkpolicy.networking.k8s.io/default-deny created
+
+$ kubectl wait --for=condition=Available deploy --all -n ticketdrop --timeout=300s
+deployment.apps/catalog condition met
+deployment.apps/fulfillment condition met
+deployment.apps/gateway condition met
+deployment.apps/inventory condition met
+deployment.apps/notifications condition met
+deployment.apps/orders condition met
+deployment.apps/payments condition met
+deployment.apps/scheduler condition met
+deployment.apps/web condition met
+
+17:15:08 everything Available (110s)
+
+17:15:08 checks
+  ok    5 databaseroles applied
+  ok    5 databases applied
+  ok    catalog 2/2 available
+  ok    inventory 2/2 available
+  ok    orders 2/2 available
+  ok    payments 1/1 available
+  ok    notifications 1/1 available
+  ok    scheduler 2/2 available
+  ok    gateway 2/2 available
+  ok    web 2/2 available
+  ok    fulfillment ScaledObject Ready
+  ok    Gateway Programmed
+  ok    11 NetworkPolicies
+  ok    one scheduler leads
+  ok    gateway answers: no such drop on sale
+  ok    shopfront 200
+
+NAME                             READY   STATUS    RESTARTS   AGE
+catalog-76c9849fbc-dshbq         1/1     Running   0          9s
+catalog-76c9849fbc-rc9sw         1/1     Running   0          9s
+gateway-5b4dd9c645-g4wd5         1/1     Running   0          6s
+gateway-5b4dd9c645-gjbds         1/1     Running   0          6s
+inventory-6b5f8d9967-gkmql       1/1     Running   0          9s
+inventory-6b5f8d9967-h7nkv       1/1     Running   0          9s
+notifications-69d9fddccb-d9r62   1/1     Running   0          7s
+orders-744bd8d7fd-72zlm          1/1     Running   0          8s
+orders-744bd8d7fd-k5thz          1/1     Running   0          8s
+payments-cb85b8d59-srbt6         1/1     Running   0          8s
+scheduler-644fb55c47-44f2x       1/1     Running   0          6s
+scheduler-644fb55c47-8s77j       1/1     Running   0          6s
+web-c9b8d756f-2wdn7              1/1     Running   0          6s
+web-c9b8d756f-8968h              1/1     Running   0          6s
+
+all checks passed
+
+17:15:10 rebuild done (112s)

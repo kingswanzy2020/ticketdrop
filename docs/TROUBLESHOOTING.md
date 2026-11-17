@@ -96,3 +96,61 @@ dry run passes.
 
 **Note.** The check happens before anything reaches the cluster, so a misspelled
 key here costs a re-run and leaves nothing half installed.
+
+## 6. The rebuild left `ticketdrop` stuck in `Terminating`, and every install into it failed
+
+**Seen.** In the Phase 2 exit rebuild (17 November 2026),
+`kubectl delete ns ticketdrop --timeout=180s` timed out. The teardown carried
+on, and every later object meant for `ticketdrop` was refused
+([`evidence/phase-2/fail-exit-rebuild-namespace-stuck.txt`](evidence/phase-2/fail-exit-rebuild-namespace-stuck.txt)):
+
+```
+error: timed out waiting for the condition on namespaces/ticketdrop
+...
+NamespaceFinalizersRemaining: Some content in the namespace has finalizers remaining: finalizer.keda.sh in 2 resource instances
+...
+Error: INSTALLATION FAILED: failed to create resource: rolebindings.rbac.authorization.k8s.io "keda-operator" is forbidden: unable to create new content in namespace ticketdrop because it is being terminated
+```
+
+The ScaledObject and TriggerAuthentication `fulfillment` kept
+`finalizer.keda.sh`, although the KEDA operator ran for over three minutes after
+the delete started. Later, `helm uninstall keda --wait` ended with
+`context deadline exceeded`. The reinstall of KEDA failed with no pods left, as
+did all nine service installs and the `ticketdrop` HTTPRoute and NetworkPolicies.
+
+**Cause.** With `watchNamespace: ticketdrop` (entry 52), the KEDA chart gives
+the operator its rights over ScaledObjects through a RoleBinding `keda-operator`
+in `ticketdrop` itself. Its only ClusterRoleBinding covers cluster-scoped kinds.
+Deleting the namespace deletes that RoleBinding along with the rest, so the
+operator could no longer update the two objects to drop its finalizer. That the
+RoleBinding lives in `ticketdrop` is verified from `helm template`. That it went
+before the ScaledObject was finalised is inferred: the operator's logs went with
+the `keda` namespace and the 403s were not captured. The `helm uninstall keda`
+timeout was not diagnosed.
+
+**Fix.** Remove what KEDA owns while its rights still exist: `helm uninstall`
+the nine releases first, wait until no ScaledObject is left, and only then
+delete the namespace. The stuck run was recovered by removing the two
+finalizers by hand. That is safe here because the finalizer only cleans up the
+HPA KEDA made, which the namespace deletion had already removed.
+
+**Note.** The capture script ran every command even after one failed, so it
+printed `everything Available` after a run where nothing was installed. Stop at
+the first failure.
+
+## 7. `db-secrets.sh` stopped after the first Secret and left a password in `/tmp`
+
+**Seen.** In the same rebuild, `scripts/db-secrets.sh` created `data/pg-catalog`,
+then stopped when `ticketdrop/catalog-db` was refused, because `ticketdrop` was
+still terminating (entry 6). The CNPG cluster bootstrapped from `pg-catalog`,
+but the other five DatabaseRoles reported `secrets "pg-<svc>" not found`. A
+file `/tmp/tmp.*` (mode 0600) held catalog's full `DATABASE_URL`, password
+included.
+
+**Cause.** The script runs under `set -e`. The failed `kubectl apply` exited it
+before the next service's Secrets were made, and before the `rm` of the file the
+URL had been written to.
+
+**Fix.** The rebuild runs the script again once `ticketdrop` exists, and deletes
+the leftover file. Not yet changed in the script: a `trap` that removes the file
+on exit would stop a failure leaving it behind.

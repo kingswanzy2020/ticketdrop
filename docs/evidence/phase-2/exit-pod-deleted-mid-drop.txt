@@ -1,0 +1,7 @@
+Tue Nov 17 01:01:55 PM KST 2026
+drop check: 600 orders for 1000 tickets in drop check-1794888005, killing payments mid-run
+  2026-11-17T13:00:19+09:00 $ kubectl delete pod -n ticketdrop payments-c4bc6c9bb-jtvph --grace-period=0 --force
+  killed payments after it had handled 165 orders
+  payments is back; every order finished 12s later
+  PASS  payments was killed mid-run (165 of 419 orders handled)
+drop check passed

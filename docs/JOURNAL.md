@@ -107,6 +107,8 @@ November 14, 2026: Took `replicas` out of fulfillment's Deployment. Same pod, no
 November 14, 2026: Gave KEDA its own placeholder Secret for goaws, so it never reads fulfillment's database password.
 November 15, 2026: Applied the ScaledObject on an empty queue and fulfillment went from 1 to 0 in 6s.
 November 15, 2026: 1500 orders through 8088. First pod Ready in 6s, 3 pods at the peak, back to 0 pods 61s after the queue emptied. Nothing pending, nothing in the DLQs.
+November 17, 2026: First drop-check against the cluster, with 60 orders. One check failed: payments had already finished every order when its pod was deleted. Too few orders, not a bug.
+November 17, 2026: Exit drop through the Gateway: 600 orders for 1000 tickets, 418 accepted, 182 sold out, 918 tickets issued. Deleted the payments pod mid-run and every order still finished 12s later. Fulfillment went 0 to 3 to 0 by itself. drop check passed.
 
 ### 1. The problem
 1. No kubernetes cluster to run the application.
@@ -129,6 +131,7 @@ November 15, 2026: 1500 orders through 8088. First pod Ready in 6s, 3 pods at th
 15. Added an autoscaling switch to the chart. With it on, the Deployment has no replicas line, so KEDA's HPA can own the count. Only fulfillment has it on.
 16. Added a TriggerAuthentication and a placeholder Secret to the chart, so KEDA can sign its calls to goaws. On EKS one value switches it to an IAM role.
 17. Added a ScaledObject to the chart: fulfillment scales from 0 to 5 on its queue, 100 messages per pod.
+18. drop-check now runs against the cluster with `TARGET=cluster`: orders through 8088, catalog and goaws through port-forwards, SQL through kubectl exec, and the kill is a pod delete. The script change was written for me.
 
 ### 3. Why this approach
 1. I put `enforce: restricted` on the ticketdrop namespace, so a pod has to be locked down before it can land there: `runAsNonRoot` and a `RuntimeDefault` seccomp profile on the pod, `allowPrivilegeEscalation: false` and all capabilities dropped on the container. A pod that breaks the rule is refused when it is created, not found later. The service images already run as non-root (UID 65532), so the rule costs them nothing, but Pod Security reads only the pod spec, so the four settings have to be written there even when the image is fine. The cost is that every pod in the namespace has to carry them, including throwaway test pods. data stays unenforced because the goaws image runs as root. See DECISIONS 27 and 34, and [the refused pod](evidence/phase-2/02-restricted-rejects-root-pod.txt).
@@ -148,6 +151,7 @@ November 15, 2026: 1500 orders through 8088. First pod Ready in 6s, 3 pods at th
 15. Left replicas out of the scaled Deployment, so a helm upgrade does not reset what the HPA set (DECISIONS 53).
 16. KEDA gets its own Secret instead of reading fulfillment's env, because reading the env would also hand it the database password (DECISIONS 54).
 17. Polling every 5s and a 60s cooldown, so a drop gets a pod in seconds and the pods go a minute after it, not five. On AWS that is a paid request every 5s (DECISIONS 55).
+18. The kill in the cluster is `kubectl delete pod --grace-period=0 --force`, the closest thing to a node dying. The Deployment brings a new pod, so nothing has to be restarted by hand.
 
 ### 4. What broke
 1. After restricting label to the ticketdrop namespace, the test pod with the nginx image was restricted from being scheduled on the node because the image run as a root user. So, only pods that run as nonroot are allowed to be placed within that namespace, as enforced by the Pod Security Admission Controller
@@ -162,6 +166,8 @@ November 15, 2026: 1500 orders through 8088. First pod Ready in 6s, 3 pods at th
 10. My first ScaledObject sat in the chart's templates with a fixed name and no triggers, so every release would have tried to create it. I also put autoscaling in KEDA's values, where it does nothing. Both were caught before any upgrade.
 11. A pod watch I left running in the background kept my capture script from finishing, until I killed it.
 12. A port-forward started in the background was not ready when the next curl ran, so it failed to connect. Waiting a few seconds fixed it.
+13. The 60-order drop-check failed one check because payments had no work left when it was deleted. 600 orders fixed it.
+14. My first rebuild left ticketdrop stuck in Terminating. KEDA's rights over the ScaledObject come from a RoleBinding inside ticketdrop, so deleting the namespace took them away and KEDA could not drop its finalizer. Everything I installed into ticketdrop after that was refused, and db-secrets.sh stopped after catalog (TROUBLESHOOTING 6 and 7).
 ### 5. What I changed
 1. The ConfigMap's Host was fixed to goaws.data.svc.cluster.local, and the ConfigMap needed a pod restart because of subPath.
 2. Ten queues listed.
@@ -171,8 +177,11 @@ November 15, 2026: 1500 orders through 8088. First pod Ready in 6s, 3 pods at th
 6. Dry runs of charts with big CRDs now use `kubectl apply --server-side --dry-run=server`.
 7. Every new call between services is now a values change, or it times out (DECISIONS 51).
 8. Check a port-forward is listening before using it.
+9. The exit run uses enough orders that the kill always lands mid-run.
+10. Teardown now uninstalls the services before deleting their namespace, and deletes data before CloudNativePG. The order and the reasons are in the Phase 2 workbook. The rebuild commands stop at the first failure.
 ### 6. At a different scale
 
 ### Evidence
 1. The screenshots and evidence texts in [evidence/phase-2/](evidence/phase-2/).
 2. The KEDA run, 0 to 3 to 0, in [PROOF.md](PROOF.md), [10-fulfillment-scale-0-n-0.txt](evidence/phase-2/10-fulfillment-scale-0-n-0.txt) and [10-fulfillment-scaled-up.png](evidence/phase-2/10-fulfillment-scaled-up.png).
+3. The exit drop in [exit-drop-through-gateway.txt](evidence/phase-2/exit-drop-through-gateway.txt), [exit-pod-deleted-mid-drop.txt](evidence/phase-2/exit-pod-deleted-mid-drop.txt) and [exit-fulfillment-scale-0-n-0.txt](evidence/phase-2/exit-fulfillment-scale-0-n-0.txt).

@@ -492,6 +492,48 @@ td code, th code { overflow-wrap: normal; white-space: nowrap; }
 </section>
 
 <section>
+  <span class="eyebrow">Starting again</span>
+  <h2>Tearing it down and building it back</h2>
+  <div class="note prose">
+    <p><strong>Know before you start.</strong></p>
+    <ul>
+      <li>Deleting <code>data</code> loses every database. The Postgres volume's reclaim policy is <code>Delete</code>, and entry 29's <code>retain</code> keeps only the CloudNativePG objects, not the data.</li>
+      <li>The passwords survive because they live outside git, in <code>ticketdrop-gitops/secrets/*.password</code>. Lose that folder and <code>scripts/db-secrets.sh</code> makes new ones.</li>
+      <li>Operators remove their own finalizers. An object whose operator has gone, or has lost its rights, keeps its namespace in <code>Terminating</code> forever, and nothing can then be created in it. Deletion order is how you avoid that.</li>
+      <li>Run the commands so they stop at the first failure. A script that runs on prints success over a broken stack (TROUBLESHOOTING entry 6).</li>
+    </ul>
+  </div>
+  <div class="prose">
+    <h3>Teardown, in this order</h3>
+    <ol>
+      <li><strong>Uninstall the nine service releases</strong> with <code>helm uninstall &lt;svc&gt; -n ticketdrop --wait</code>, and check that no ScaledObject or TriggerAuthentication is left. <em>Why:</em> KEDA watches only <code>ticketdrop</code>, so its right to edit ScaledObjects comes from a RoleBinding inside <code>ticketdrop</code>. Deleting the namespace first deletes that RoleBinding too, and KEDA can no longer remove <code>finalizer.keda.sh</code> (TROUBLESHOOTING entry 6).</li>
+      <li><strong>Delete the <code>ticketdrop</code> namespace.</strong> Only the Secrets, NetworkPolicies and HTTPRoute are left in it, and none of them has a finalizer.</li>
+      <li><strong>Delete the <code>data</code> namespace</strong> while CloudNativePG is still running. <em>Why:</em> each <code>Database</code> carries <code>cnpg.io/deleteDatabase</code>, which only the operator removes.</li>
+      <li><strong>Uninstall KEDA, Traefik and CloudNativePG</strong> with Helm, then delete their namespaces. <em>Why:</em> Helm also removes their cluster-wide objects (the GatewayClass, the webhooks, the metrics APIService and the ClusterRoles). Deleting only the namespace leaves those behind, and a webhook with no pod behind it can block later API calls.</li>
+      <li><strong>Check that nothing is left:</strong> <code>kubectl get ns</code> shows no <code>Terminating</code>, <code>helm list -A -a</code> is empty, and no webhook or GatewayClass names keda, cnpg or traefik. The CRDs stay on purpose. CloudNativePG keeps its CRDs by resource policy and the Gateway API CRDs are applied separately, so their two <code>Local</code> APIServices also stay.</li>
+    </ol>
+    <h3>Rebuild, in this order</h3>
+    <ol>
+      <li><strong>Namespaces</strong> (<code>platform/namespaces.yaml</code>). <em>Why:</em> everything else lands in one, and each carries its Pod Security level.</li>
+      <li><strong>Gateway API CRDs</strong> (<code>--server-side</code>). <em>Why:</em> Traefik's GatewayClass and the routes need the kinds to exist, and the HTTPRoute CRD is too big for a client-side apply (DECISIONS 42).</li>
+      <li><strong>CloudNativePG</strong>, with <code>--wait</code>. <em>Why:</em> the Cluster, roles and databases are its kinds and are refused until its webhook answers.</li>
+      <li><strong>goaws</strong>, waiting for the rollout. <em>Why:</em> it creates the topic and queues at start, and every consumer reads its queue at start.</li>
+      <li><strong><code>scripts/db-secrets.sh</code></strong>. <em>Why:</em> the Cluster's bootstrap reads <code>pg-catalog</code>, each DatabaseRole reads its <code>pg-&lt;svc&gt;</code>, and each service reads its <code>&lt;svc&gt;-db</code>. It needs both <code>data</code> and <code>ticketdrop</code> to exist and not be terminating (TROUBLESHOOTING entry 7).</li>
+      <li><strong>The Postgres Cluster</strong>, waiting for Ready, <strong>then roles and databases</strong>. <em>Why:</em> roles and databases are applied inside a running cluster. Check that every DatabaseRole shows <code>APPLIED true</code>.</li>
+      <li><strong>KEDA</strong>, with <code>--wait</code>. <em>Why:</em> fulfillment's chart renders a ScaledObject, which is refused until KEDA's CRDs and webhook are there. KEDA also needs <code>ticketdrop</code> to exist, to put its RoleBinding in it.</li>
+      <li><strong>Traefik</strong>, with <code>--wait</code>, <strong>then <code>platform/routes/</code></strong>. <em>Why:</em> the Gateway needs Traefik's GatewayClass.</li>
+      <li><strong>The DNS NetworkPolicy</strong>. <em>Why:</em> as in step 9, the allows go in before the deny, so nothing is cut off along the way.</li>
+      <li><strong>The nine services</strong>, in this order: catalog, inventory, orders, payments, fulfillment, notifications, scheduler, gateway, web. <em>Why:</em> each Helm release brings its own NetworkPolicy, so a service's allows exist before default-deny.</li>
+      <li><strong>default-deny</strong>, last. Then wait for every Deployment to be Available.</li>
+      <li><strong>Check:</strong> 14 pods in <code>ticketdrop</code> with fulfillment at 0, the ScaledObject <code>READY True</code>, the Gateway <code>PROGRAMMED True</code>, 11 NetworkPolicies, a JSON 404 from <code>localhost:8088/v1/drops/x/availability</code> and a 200 from <code>localhost:8088/</code>.</li>
+    </ol>
+  </div>
+  <div class="note prose">
+    <p><strong>If a namespace sticks in <code>Terminating</code>.</strong> Read the reason from <code>kubectl get ns &lt;ns&gt; -o yaml</code> (look at <code>status.conditions</code>) and capture it before changing anything. Remove a finalizer by hand only once you know what it would have cleaned up and that it is already gone. For the KEDA pair, that was the HPA.</p>
+  </div>
+</section>
+
+<section>
   <span class="eyebrow">Not yours</span>
   <h2>What Claude owes this phase</h2>
   <div class="prose">
