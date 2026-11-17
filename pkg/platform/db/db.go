@@ -15,11 +15,21 @@ import (
 // Connect opens a connection pool and waits up to a minute for the database to
 // accept connections. In Kubernetes the app and its database often start at
 // the same time, and waiting here is cheaper than a crash loop.
-func Connect(ctx context.Context, url string, log *slog.Logger) (*pgxpool.Pool, error) {
-	pool, err := pgxpool.New(ctx, url)
+//
+// maxConns caps the pool (DATABASE_MAX_CONNS). Several services share one
+// Postgres, and the sum of their pools across every replica must stay below
+// its max_connections. 0 keeps pgx's default, max(4, number of CPUs), or
+// pool_max_conns if the URL sets it.
+func Connect(ctx context.Context, url string, maxConns int, log *slog.Logger) (*pgxpool.Pool, error) {
+	cfg, err := poolConfig(url, maxConns)
 	if err != nil {
-		return nil, fmt.Errorf("parse DATABASE_URL: %w", err)
+		return nil, err
 	}
+	pool, err := pgxpool.NewWithConfig(ctx, cfg)
+	if err != nil {
+		return nil, fmt.Errorf("open pool: %w", err)
+	}
+	log.Info("postgres pool", "max_conns", cfg.MaxConns)
 
 	deadline := time.Now().Add(time.Minute)
 	delay := 500 * time.Millisecond
@@ -39,6 +49,21 @@ func Connect(ctx context.Context, url string, log *slog.Logger) (*pgxpool.Pool, 
 		}
 		delay = min(delay*2, 5*time.Second)
 	}
+}
+
+func poolConfig(url string, maxConns int) (*pgxpool.Config, error) {
+	if maxConns < 0 {
+		return nil, fmt.Errorf("DATABASE_MAX_CONNS: %d is negative", maxConns)
+	}
+	cfg, err := pgxpool.ParseConfig(url)
+	if err != nil {
+		return nil, fmt.Errorf("parse DATABASE_URL: %w", err)
+	}
+	if maxConns > 0 {
+		cfg.MaxConns = int32(maxConns)
+		cfg.MinConns = min(cfg.MinConns, cfg.MaxConns)
+	}
+	return cfg, nil
 }
 
 // Source is a named set of .sql files, applied in filename order.

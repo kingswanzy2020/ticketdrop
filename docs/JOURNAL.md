@@ -59,37 +59,63 @@ Dates: 3 October 2026 to 6 October 2026. Exit check: a simulated drop finishes w
 order ticketed or failed and tickets issued within capacity; killing a service
 mid-run causes redelivery without duplicates; a poison message lands in the
 dead-letter queue. It passed, and I reran it on my machine on 13 October.
+The load test was added on 17 November, after Phase 2: `make demo-drop` must
+pass with nothing oversold. It passes at 1,000, 2,000 and 4,000 customers on
+compose.
 
 The service code in this phase was written for me. My part was to read it, run
 it, break it and understand why it is built this way.
 
-The record for this phase: DECISIONS 1 to 24, TROUBLESHOOTING 1 to 3, and the
-runs in PROOF.md. The runs dated 6 October were made in a cloud container, not
-on my machine. I ran the checks myself on 13 October.
+The record for this phase: DECISIONS 1 to 24 and 56, TROUBLESHOOTING 1 to 3
+and 8, and the runs in PROOF.md. The runs dated 6 October were made in a cloud
+container, not on my machine. I ran the checks myself on 13 October. The load
+test runs on 17 November were made for me on my machine.
 
 ### Notes
 October 13, 2026: Explored all the built services, trying to understand how they all connect and work together.
+November 17, 2026: First k6 run on the cluster, 200 customers for 200 tickets. Passed.
+November 17, 2026: 1,000 customers on the cluster failed twice: 433 and then 679 customers were told the box office could not be reached while tickets were still left. Nothing was oversold.
+November 17, 2026: The cause was the one stock row per tier. Every hold waited for the previous one to commit, so about 120 holds a second at most, and orders gave up on inventory after 2s.
+November 17, 2026: Some of those holds still went through after orders had given up, so tickets were held with no order until the hold expired.
+November 17, 2026: Chose batching holds over moving stock to Valkey. On compose, 2,000 customers went from 1,456 refused to 0, and p95 buy time from 2,013 ms to 33 ms.
+November 17, 2026: 4,000 customers passed on compose. Orders now took up to 75s to finish, because fulfillment is throttled on purpose.
+November 17, 2026: Restarted inventory on the cluster to measure batching there, but the pod still ran the old image. The node keeps its own copy of `dev`.
+November 17, 2026: Loaded the new inventory image into the node by hand and restarted it. 1,000 customers on the cluster passed: 0 refused, p95 buy time 110 ms.
+November 17, 2026: 2,000 customers on the cluster failed. Postgres ran out of connections, so orders could not write 115 orders after their holds were granted.
+November 17, 2026: The same run lost most of its drop-page polls to port 8088, which closes connections above about 1,024 before they reach Traefik.
+November 17, 2026: Gave each service's database pool a fixed size, 83 connections at most out of 97. 1,000 customers passed again on the cluster and Postgres peaked at 65.
 
 ### 1. The problem
 1. Needed to understand how the services work together, and prove they survive failures, before packaging them for Kubernetes.
+2. Needed to know what happens when a real crowd hits a drop at once, not just 600 orders placed one after another.
 
 ### 2. What I built
 1. The service code was written for me. I read through it, then ran the local stack.
+2. The load test was written for me: a k6 crowd in `loadtest/drop.js` that waits on the shopfront for the drop to open, buys once each and watches its order, and `make demo-drop`, which then checks the databases for overselling, unfinished orders and tickets held with no order. It runs on compose or on the cluster.
+3. Inventory now grants holds in batches: every request that queued while the last batch committed goes into one transaction.
 
 ### 3. Why this approach
 1. The choices are in DECISIONS 1 to 24.
+2. Batching instead of Valkey, because the row lock and the `CHECK (available >= 0)` still decide who gets a ticket, and there is no second store to keep in step. The cost is that a batch fails together, and one goroutine per pod does all the granting (DECISIONS 56).
+3. DECISIONS 16 had predicted this bottleneck. It now has a superseded note saying the prediction held.
 
 ### 4. What broke
 1. Broke it on purpose with `make drop-check`: 600 orders for 1000 tickets, with payments killed mid-run. Every accepted order finished (370 ticketed, 40 failed), replayed events changed nothing, and the poison message reached the dead-letter queue.
 2. Broke it again with `make outage-check`: the payment provider down and the scheduler's leader killed. The standby took over 2s later, all 5 orders failed when their holds expired, the tickets went back to stock, and retrying the dead-lettered payments charged nobody.
+3. The load test broke it for real at 1,000 customers on the cluster. Sampling `pg_stat_activity` showed almost every session waiting on the stock row's lock, and the one holding it was flushing its commit to disk. Customers were turned away while tickets were left, and up to 32 tickets were held with no order.
+4. A rebuilt `inventory:dev` image never reached the cluster, even after a rollout restart. I found it because the new batch metric was missing and the pod's image digest did not match the one I built (TROUBLESHOOTING 8). So the before and after comparison was done on compose.
 
 ### 5. What I changed
-1. Nothing. Both checks passed.
+1. Nothing after the first two checks. Both passed.
+2. Inventory grants holds in batches. At 2,000 customers on compose, refused buys went from 1,456 to 0 and the p95 buy time from 2,013 ms to 33 ms. drop-check for every kill, outage-check and the 400-for-100 race still pass.
+3. On the cluster, 1,000 customers now pass with batching. The Postgres connections ran out at 2,000, so every pool now has a fixed size (TROUBLESHOOTING 9, DECISIONS 57). 2,000 has not been rerun, because port 8088 cannot carry more than about 1,024 customers from my machine (TROUBLESHOOTING 10).
 
 ### 6. At a different scale
 
 ### Evidence
-The screenshots in [evidence/phase-1/](evidence/phase-1/).
+1. The screenshots in [evidence/phase-1/](evidence/phase-1/).
+2. The load test runs, before and after batching, in [PROOF.md](PROOF.md).
+3. The lock waits in [4-hot-row-lock-waits.txt](evidence/phase-1/4-hot-row-lock-waits.txt), the failed cluster run in [5-demo-drop-1000-second-run.txt](evidence/phase-1/5-demo-drop-1000-second-run.txt), and the k6 summaries in [3](evidence/phase-1/3-k6-1000-customers-summary.json), [6](evidence/phase-1/6-k6-2000-one-hold-per-transaction.json), [7](evidence/phase-1/7-k6-2000-batched-holds.json) and [8](evidence/phase-1/8-k6-4000-batched-holds.json).
 
 ---
 

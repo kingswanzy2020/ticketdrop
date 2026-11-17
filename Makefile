@@ -38,3 +38,7 @@ drop-check: ## Run a drop and prove nothing is oversold, lost or duplicated (ORD
 .PHONY: outage-check
 outage-check: ## Take the payment provider down and prove no order or ticket is left stuck (about 2 minutes)
 	ORDERS=$(ORDERS) ./scripts/outage-check.sh
+
+.PHONY: demo-drop
+demo-drop: ## Send a k6 crowd at a drop and check nothing was oversold (CUSTOMERS=1000 CAPACITY=1000 ARRIVE=15 TARGET=compose|cluster)
+	CUSTOMERS=$(CUSTOMERS) CAPACITY=$(CAPACITY) ARRIVE=$(ARRIVE) TARGET=$(TARGET) ./scripts/demo-drop.sh

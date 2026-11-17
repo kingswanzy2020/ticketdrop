@@ -21,3 +21,6 @@ crash.log
 .idea/
 .vscode/
 .DS_Store
+
+# k6 output from make demo-drop; a run worth keeping goes to docs/evidence
+/loadtest/results/

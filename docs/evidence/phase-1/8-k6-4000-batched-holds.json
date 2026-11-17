@@ -1,0 +1,187 @@
+{
+    "metrics": {
+        "buy_accepted": {
+            "count": 1618,
+            "rate": 13.560090802949283
+        },
+        "http_req_sending": {
+            "p(99)": 0.12127256000000006,
+            "max": 14.106659,
+            "min": 0.005785,
+            "med": 0.01441,
+            "p(90)": 0.027823700000000014,
+            "p(95)": 0.03890935
+        },
+        "drop_never_opened": {
+            "count": 0,
+            "rate": 0,
+            "thresholds": {
+                "count==0": false
+            }
+        },
+        "http_req_duration{expected_response:true}": {
+            "min": 0.761253,
+            "med": 1.995317,
+            "p(90)": 6.7363228,
+            "p(95)": 39.152488400000095,
+            "p(99)": 270.01449668000004,
+            "max": 710.312447
+        },
+        "buy_time": {
+            "min": 6,
+            "med": 23,
+            "p(90)": 132.0999999999999,
+            "p(95)": 177,
+            "p(99)": 210.00999999999976,
+            "max": 309
+        },
+        "http_req_tls_handshaking": {
+            "p(95)": 0,
+            "p(99)": 0,
+            "max": 0,
+            "min": 0,
+            "med": 0,
+            "p(90)": 0
+        },
+        "data_received": {
+            "count": 104690781,
+            "rate": 877389.6765090714
+        },
+        "http_req_blocked": {
+            "min": 0.002274,
+            "med": 0.006135,
+            "p(90)": 0.010763,
+            "p(95)": 0.017478150000000053,
+            "p(99)": 0.31026344000000006,
+            "max": 22.68991
+        },
+        "http_req_waiting": {
+            "min": 0.720288,
+            "med": 1.9265075,
+            "p(90)": 6.649469100000001,
+            "p(95)": 39.03536620000011,
+            "p(99)": 269.76206848,
+            "max": 709.852977
+        },
+        "data_sent": {
+            "count": 18351917,
+            "rate": 153803.2515007346
+        },
+        "order_failed": {
+            "count": 156,
+            "rate": 1.3074005965760742
+        },
+        "settle_time": {
+            "min": 1003,
+            "med": 35094,
+            "p(90)": 67191.6,
+            "p(95)": 71196,
+            "p(99)": 74210,
+            "max": 75222
+        },
+        "iteration_duration": {
+            "min": 42769.940012,
+            "med": 44547.6880235,
+            "p(90)": 98168.0142153,
+            "p(95)": 108492.56070295001,
+            "p(99)": 116633.74596149,
+            "max": 119303.157341
+        },
+        "order_still_pending": {
+            "count": 0,
+            "rate": 0,
+            "thresholds": {
+                "count==0": false
+            }
+        },
+        "http_reqs": {
+            "count": 152154,
+            "rate": 1275.168143406641
+        },
+        "http_req_connecting": {
+            "min": 0,
+            "med": 0,
+            "p(90)": 0,
+            "p(95)": 0,
+            "p(99)": 0.22399811000000003,
+            "max": 14.586161
+        },
+        "http_req_duration": {
+            "p(95)": 39.152488400000095,
+            "p(99)": 270.01449668000004,
+            "max": 710.312447,
+            "min": 0.761253,
+            "med": 1.995317,
+            "p(90)": 6.7363228
+        },
+        "checks": {
+            "passes": 1618,
+            "fails": 0,
+            "value": 1
+        },
+        "iterations": {
+            "count": 4000,
+            "rate": 33.52309221989934
+        },
+        "buy_unanswered": {
+            "rate": 0,
+            "count": 0,
+            "thresholds": {
+                "count==0": false
+            }
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 152154,
+            "value": 0
+        },
+        "order_ticketed": {
+            "count": 1462,
+            "rate": 12.252690206373208
+        },
+        "vus": {
+            "min": 7,
+            "max": 4000,
+            "value": 7
+        },
+        "buy_refused_other": {
+            "count": 0,
+            "rate": 0,
+            "thresholds": {
+                "count==0": false
+            }
+        },
+        "buy_sold_out": {
+            "count": 2382,
+            "rate": 19.963001416950057
+        },
+        "http_req_receiving": {
+            "min": 0.012601,
+            "med": 0.042849,
+            "p(90)": 0.069521,
+            "p(95)": 0.08592720000000006,
+            "p(99)": 0.22523134000000003,
+            "max": 24.250452
+        },
+        "vus_max": {
+            "value": 4000,
+            "min": 4000,
+            "max": 4000
+        }
+    },
+    "root_group": {
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {},
+        "checks": {
+            "buy answered with an order": {
+                "name": "buy answered with an order",
+                "path": "::buy answered with an order",
+                "id": "fa9d8ff201e30b74c8724cc5f0fac548",
+                "passes": 1618,
+                "fails": 0
+            }
+        },
+        "name": ""
+    }
+}

@@ -1,0 +1,23 @@
+CUSTOMERS= CAPACITY= ARRIVE= TARGET=cluster ./scripts/demo-drop.sh
+demo drop: 1000 customers for 1000 tickets in drop load-1794905446 (cluster)
+
+  drop opens at 17:51:09; k6 log in loadtest/results/load-1794905446.log
+  the crowd was done 32s after it started arriving (k6 exit code 99)
+
+  buys:      321 accepted, 0 sold out, 679 refused otherwise, 0 unanswered
+  buy time:  median 2038 ms, p95 2149 ms, p99 2195 ms, max 2244 ms
+  settle:    median 9.3 s, p95 10.3 s, max 13.3 s from the answer to the order's end
+  requests:  12938 in all, 418 a second on average, 0.00% failed
+
+  FAIL  k6 thresholds (every customer answered, every order ended in view): got 99, want 0
+  FAIL  nothing sold out, so overselling was never at risk; lower CAPACITY or raise CUSTOMERS
+  PASS  orders in the database equal the buys k6 saw accepted (321)
+  PASS  orders still pending (0)
+  PASS  tickets issued within capacity (713 of 1000)
+  PASS  orders with the wrong number of tickets (0)
+  FAIL  tickets gone from stock equals tickets issued: got 743, want 713
+  PASS  holds released equals orders failed (ticketed 294, failed 27) (27)
+  PASS  messages dead-lettered during the run (0)
+
+demo drop FAILED: 3 check(s)
+make: *** [Makefile:44: demo-drop] Error 1

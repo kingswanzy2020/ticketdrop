@@ -116,6 +116,7 @@ services:
       # Catalog publishes and consumes nothing, so it has no EVENTS_QUEUE_URL.
       <<: *bus
       DATABASE_URL: postgres://postgres:local@postgres:5432/catalog
+      DATABASE_MAX_CONNS: 8  # the same pool as on the cluster (entry 57)
       LOG_LEVEL: ${LOG_LEVEL:-info}
     ports:
       # The internal API, reachable from this machine so that a drop can be
@@ -135,6 +136,7 @@ services:
     environment:
       <<: *bus
       DATABASE_URL: postgres://postgres:local@postgres:5432/orders
+      DATABASE_MAX_CONNS: 10  # the same pool as on the cluster (entry 57)
       EVENTS_QUEUE_URL: http://goaws:4100/000000000000/orders-events
       INVENTORY_URL: http://inventory:8080
       LOG_LEVEL: ${LOG_LEVEL:-info}
@@ -153,6 +155,7 @@ services:
     environment:
       <<: *bus
       DATABASE_URL: postgres://postgres:local@postgres:5432/inventory
+      DATABASE_MAX_CONNS: 8  # the same pool as on the cluster (entry 57)
       EVENTS_QUEUE_URL: http://goaws:4100/000000000000/inventory-events
       # How long tickets stay set aside with no payment outcome, and how long
       # after that before they return to stock. Shortened by outage-check.
@@ -174,6 +177,7 @@ services:
     environment:
       <<: *bus
       DATABASE_URL: postgres://postgres:local@postgres:5432/payments
+      DATABASE_MAX_CONNS: 5  # the same pool as on the cluster (entry 57)
       EVENTS_QUEUE_URL: http://goaws:4100/000000000000/payments-events
       # The simulated provider: 100-200ms a call, one charge in ten declined.
       # PAYMENT_ERROR_RATE simulates an outage and is off unless set.
@@ -196,6 +200,7 @@ services:
     environment:
       <<: *bus
       DATABASE_URL: postgres://postgres:local@postgres:5432/fulfillment
+      DATABASE_MAX_CONNS: 4  # the same pool as on the cluster (entry 57)
       EVENTS_QUEUE_URL: http://goaws:4100/000000000000/fulfillment-events
       # Slow and narrow on purpose: about 20 orders a second, so a burst of
       # orders leaves a backlog on the queue that can be watched draining.
@@ -239,6 +244,7 @@ services:
       replicas: 2
     environment:
       DATABASE_URL: postgres://postgres:local@postgres:5432/scheduler
+      DATABASE_MAX_CONNS: 2  # the same pool as on the cluster (entry 57)
       CATALOG_URL: http://catalog:8080
       INVENTORY_URL: http://inventory:8080
       LOG_LEVEL: ${LOG_LEVEL:-info}

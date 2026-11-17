@@ -1,0 +1,8 @@
+# 17 November 2026: connections held open through localhost:8088 (host.docker.internal from the k6 container)
+# each VU: GET / then sleep 1s, for 20s. Traefik count = traefik_entrypoint_requests_total{entrypoint=web} delta
+VUS=900  k6 requests 17064, failed 0 (EOF 0),     Traefik counted 17064
+VUS=1100 k6 requests 21002, failed 1520 (EOF 1520), Traefik counted 19482
+
+time="2026-11-17T12:42:18Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:8088/\": EOF"
+
+# the 2,000-customer run load-1794918941: k6 requests 188490, failed 162354, every failure a GET of /drops/<drop>/sale ending in EOF

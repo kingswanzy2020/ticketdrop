@@ -1,0 +1,246 @@
+# pg_stat_activity in the inventory database, sampled every 0.25 s during the second 1,000-customer run (drop load-1794905446), 17 November 2026.
+# Columns: time | database | state | wait_event_type/wait_event | query
+08:51:10.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:10.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:10.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:10.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:10.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:10.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:10.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:10.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:10.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:10.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:10.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:10.9|inventory|active|IO/WalSync|commit
+08:51:10.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:10.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:10.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:10.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:10.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:10.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:10.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:10.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:10.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:10.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|LWLock/WALWrite|commit
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.4|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:11.9|inventory|idle in transaction|Client/ClientRead| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:11.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|LWLock/WALWrite|commit
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:12.5|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid|UPDATE stock SET available = available +
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|LWLock/WALWrite|commit
+08:51:13.1|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.1|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|IO/WalSync|commit
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:13.7|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:14.6|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:14.6|inventory|active|Client/ClientRead| UPDATE stock SET available = available 
+08:51:14.6|inventory|idle in transaction|Client/ClientRead|begin
+08:51:14.6|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:14.6|inventory|active|-/-| UPDATE stock SET available = available 
+08:51:14.6|inventory|idle in transaction|Client/ClientRead| UPDATE stock SET available = available 
+08:51:14.6|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:14.6|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:14.6|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:14.6|inventory|active|-/-| UPDATE stock SET available = available 
+08:51:14.6|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:14.6|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:15.2|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:15.2|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:15.2|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:15.2|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:15.2|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:15.2|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:15.2|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:15.2|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:15.2|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:15.2|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:15.2|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:15.2|inventory|active|-/-| INSERT INTO holds (id, order_id, drop_i
+08:51:15.2|inventory|idle in transaction|Client/ClientRead|begin
+08:51:15.2|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:15.9|inventory|active|LWLock/WALWrite|commit
+08:51:15.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:15.9|inventory|idle in transaction|-/-|begin
+08:51:15.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:15.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:15.9|inventory|idle in transaction|-/-|INSERT INTO processed_events (event_id) 
+08:51:15.9|inventory|active|LWLock/WALWrite|commit
+08:51:15.9|inventory|active|Lock/tuple|UPDATE stock SET available = available +
+08:51:15.9|inventory|active|LWLock/WALWrite|commit
+08:51:15.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:15.9|inventory|idle in transaction|-/-|INSERT INTO processed_events (event_id) 
+08:51:15.9|inventory|active|Lock/transactionid| UPDATE stock SET available = available 
+08:51:15.9|inventory|idle in transaction|Client/ClientRead| UPDATE holds SET status = $2, settled_a
+08:51:15.9|inventory|active|Lock/tuple| UPDATE stock SET available = available 
+08:51:27.2|inventory|idle in transaction|-/-| SELECT id, payload FROM outbox WHERE pu
+
+# Counts by wait and query:
+    151 Lock/transactionid |  UPDATE stock SET available = available 
+     49 Lock/tuple |  UPDATE stock SET available = available 
+      6 LWLock/WALWrite | commit
+      3 Client/ClientRead |  UPDATE stock SET available = available 
+      2 -/- |  UPDATE stock SET available = available 
+      2 IO/WalSync | commit
+      2 -/- | INSERT INTO processed_events (event_id) 
+      2 Client/ClientRead | begin
+      1 -/- |  SELECT id, payload FROM outbox WHERE pu
+      1 Lock/tuple | UPDATE stock SET available = available +
+      1 Lock/transactionid | UPDATE stock SET available = available +
+      1 -/- |  INSERT INTO holds (id, order_id, drop_i
+      1 Client/ClientRead |  UPDATE holds SET status = $2, settled_a
+      1 -/- | begin
+
+# Holds granted per second, from holds.created_at:
+# load-1794905322 (200 customers): 12 72 8 1
+# load-1794905356 (1,000 customers): 38 126 111 93 19 9
+# load-1794905446 (1,000 customers): 47 112 99 44 30

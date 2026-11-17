@@ -10,9 +10,9 @@
   <p class="lede">A ticket-selling platform made of small Go services, built to run on Amazon EKS. It exists to practise, and to prove, the work of a DevOps engineer: packaging, deploying, scaling, securing and observing a real system.</p>
   <ul class="facts">
     <li><b>9 of 9</b> services built</li>
-    <li>Phase <b>1</b> in progress</li>
-    <li>Phase <b>2</b> is next, and it is yours</li>
-    <li><b>25</b> decisions recorded</li>
+    <li>Phases <b>1</b> and <b>2</b> done</li>
+    <li>Phase <b>3</b> is next, and it is yours</li>
+    <li><b>57</b> decisions recorded</li>
     <li>AWS spend so far: <b>none</b></li>
   </ul>
 </header>
@@ -40,7 +40,7 @@
       <li><b>The shopfront is what the customer sees.</b> It is a web page, and it asks the gateway for everything it shows, like any other client would.</li>
       <li><b>The gateway is the front door.</b> It lets in only the requests on its list and turns everything else away.</li>
       <li><b>Orders takes your order</b> and, while you wait, asks inventory to set your tickets aside. If none are left you hear "sold out" straight away.</li>
-      <li><b>Inventory guards the ticket rack.</b> Taking tickets is a single database update, and the database itself refuses to let the count go below zero.</li>
+      <li><b>Inventory guards the ticket rack.</b> Requests that arrive together are served together, in one database transaction, and the database itself refuses to let the count go below zero.</li>
       <li>From here nobody waits on anybody. Orders drops a note, <code>order.created</code>, in the pigeonhole. <b>Payments</b> picks it up and charges the card.</li>
       <li>If the card works, inventory makes the hold permanent and <b>fulfillment</b> issues the tickets. If the card is declined, inventory puts the tickets back and the order is marked failed.</li>
       <li>If no answer about the payment comes at all, the tickets are not kept for ever. A hold lasts ten minutes. When it runs out, inventory puts the tickets back, says so with <code>hold.expired</code>, and the order is marked failed. Payments will not charge an order whose hold has run out.</li>
@@ -135,17 +135,17 @@
       <p>Tools, accounts and a sanity check of AWS. Done so far: AWS access confirmed, the old cluster confirmed gone, the local messaging emulator chosen and tested.</p>
       <p class="check">Still open: turn on Kubernetes in Docker Desktop and raise its memory; install trivy and k6; the <code>kahmedt.com</code> hosted zone no longer exists and gets recreated in Phase 4.</p></div></div>
     <div class="stub"><div class="no"><b>1</b><span>Claude</span></div><div class="body">
-      <div class="head"><h3>The services, running locally</h3><span class="pill now">In progress</span></div>
-      <p>The Go services under docker compose with Postgres and an SNS/SQS emulator. All nine exist, and the journey above runs from a click in the shopfront to the confirmation message. One thing is left: a load test that sends a real crowd at a drop, where the checks so far send 16 customers at a time.</p>
-      <p class="check">Done when: <code>make drop-check</code> orders more tickets than exist, kills a service mid-run, and still finds no oversold ticket, no lost order and no duplicate; and <code>make outage-check</code> takes the payment provider down and finds no order or ticket left stuck. Both pass with all nine services running.</p>
-      <p class="capture"><b>Capture</b> The whole output of each <code>make drop-check</code> run, one per <code>KILL</code> value, and of <code>make outage-check</code>; the shopfront showing one order <code>ticketed</code> and one drop sold out. All of it can be taken again by running the checks. Folder: <code>docs/evidence/phase-1/</code>.</p></div></div>
-    <div class="stub now"><div class="no"><b>2</b><span>You</span></div><div class="body">
-      <div class="head"><h3>Kubernetes packaging on Docker Desktop</h3><span class="pill now">Next</span></div>
+      <div class="head"><h3>The services, running locally</h3><span class="pill done">Done</span></div>
+      <p>The Go services under docker compose with Postgres and an SNS/SQS emulator. All nine exist, and the journey above runs from a click in the shopfront to the confirmation message. A k6 load test sends a crowd of customers at a drop through the shopfront. Its first run found the limit: one ticket counter per tier let about 120 holds a second through, and at 1,000 customers about half were turned away. Holds are now granted in batches (decision 56), and 4,000 customers passed with no one turned away.</p>
+      <p class="check">Done when: <code>make drop-check</code> orders more tickets than exist, kills a service mid-run, and still finds no oversold ticket, no lost order and no duplicate; and <code>make outage-check</code> takes the payment provider down and finds no order or ticket left stuck. Both pass with all nine services running, and <code>make demo-drop</code> sends a crowd larger than the drop and finds nothing oversold.</p>
+      <p class="capture"><b>Capture</b> The whole output of each <code>make drop-check</code> run, one per <code>KILL</code> value, and of <code>make outage-check</code>; the shopfront showing one order <code>ticketed</code> and one drop sold out. The k6 summary of a <code>make demo-drop</code> run before and after a change to the hold path. All of it can be taken again by running the checks. Folder: <code>docs/evidence/phase-1/</code>.</p></div></div>
+    <div class="stub"><div class="no"><b>2</b><span>You</span></div><div class="body">
+      <div class="head"><h3>Kubernetes packaging on Docker Desktop</h3><span class="pill done">Done</span></div>
       <p>Move the same system from docker compose into a real Kubernetes cluster on your laptop: one Helm chart, a front door, a database operator, and autoscaling on queue depth.</p>
       <p class="check">Done when: the drop passes through the Gateway, and fulfillment scales from 0 to several pods and back on its own. The Phase 2 Workbook has the steps.</p>
       <p class="capture"><b>Capture</b> Every step in the Phase 2 Workbook has a Capture row naming its files. <span class="once">Only now</span> The shutdown log in step 6 and the scaling run in step 10 cannot be taken afterwards. Folder: <code>docs/evidence/phase-2/</code>.</p></div></div>
-    <div class="stub"><div class="no"><b>3</b><span>You</span></div><div class="body">
-      <div class="head"><h3>Continuous integration</h3><span class="pill">Later</span></div>
+    <div class="stub now"><div class="no"><b>3</b><span>You</span></div><div class="body">
+      <div class="head"><h3>Continuous integration</h3><span class="pill now">Next</span></div>
       <p>Every pull request is linted, tested, built and scanned, with no cloud credentials involved. Only the services that changed are rebuilt.</p>
       <p class="check">Done when: a failing test or a critical vulnerability blocks the merge.</p>
       <p class="capture"><b>Capture</b> A pull request blocked by a failing test, and one blocked by a critical vulnerability, each with the checks list and the disabled merge button in view; a run where only the changed services were rebuilt. Folder: <code>docs/evidence/phase-3/</code>.</p></div></div>

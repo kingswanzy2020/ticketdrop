@@ -25,6 +25,7 @@ func run(ctx context.Context, s *service.Service) error {
 	var (
 		// The database holds no tables. It is where the leader lock lives.
 		dbURL        = s.Config.Required("DATABASE_URL")
+		maxConns     = s.Config.Int("DATABASE_MAX_CONNS", 0)
 		catalogURL   = s.Config.Required("CATALOG_URL")
 		inventoryURL = s.Config.Required("INVENTORY_URL")
 
@@ -46,7 +47,7 @@ func run(ctx context.Context, s *service.Service) error {
 		}
 	}
 
-	pool, err := db.Connect(ctx, dbURL, s.Log)
+	pool, err := db.Connect(ctx, dbURL, maxConns, s.Log)
 	if err != nil {
 		return err
 	}

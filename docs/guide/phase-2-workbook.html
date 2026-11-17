@@ -504,6 +504,20 @@ td code, th code { overflow-wrap: normal; white-space: nowrap; }
     </ul>
   </div>
   <div class="prose">
+    <h3>The scripts</h3>
+    <p>Three scripts in <code>ticketdrop-gitops/scripts/</code> follow the orders below. Run them from the repo root:</p>
+  </div>
+  <pre><code>scripts/teardown.sh          # asks you to type yes; --yes skips the question
+scripts/rebuild.sh 2&gt;&amp;1 | tee ../ticketdrop/docs/evidence/phase-2/&lt;name&gt;.txt
+scripts/check.sh             # is the stack whole? Run it any time</code></pre>
+  <div class="prose">
+    <ul>
+      <li><strong><code>teardown.sh</code></strong> deletes in the order below. It fails if KEDA objects are still there after the uninstalls. If a namespace sticks in <code>Terminating</code>, it prints the reason and stops. At the end it fails if any Helm release, webhook or GatewayClass is left.</li>
+      <li><strong><code>rebuild.sh</code></strong> first checks that the Helm repos <code>cnpg</code>, <code>kedacore</code> and <code>traefik</code> are added, that the nine <code>ticketdrop/&lt;svc&gt;:dev</code> images exist, and that no namespace is terminating. It then installs in the order below and runs <code>check.sh</code> at the end. It uses <code>helm upgrade --install</code>, so it can safely run again over a stack that is already up.</li>
+      <li><strong><code>check.sh</code></strong> prints <code>ok</code> or <code>FAIL</code> for each check in step 12 below, and exits non-zero if any fail.</li>
+      <li>All three share <code>lib.sh</code>: the pinned chart versions, the service order, and the guards. Each command is printed as <code>$ …</code> before it runs, each step is timed, and the script stops at the first failure with a <code>FAILED</code> line. Nothing runs unless kubectl points at <code>docker-desktop</code> (set <code>KUBE_CONTEXT</code> to change that).</li>
+    </ul>
+    <p class="muted">Tested on 17 November 2026: the teardown took 37s from the full stack, the rebuild 112s with all 16 checks passing, and a second <code>rebuild.sh</code> over the running stack 19s.</p>
     <h3>Teardown, in this order</h3>
     <ol>
       <li><strong>Uninstall the nine service releases</strong> with <code>helm uninstall &lt;svc&gt; -n ticketdrop --wait</code>, and check that no ScaledObject or TriggerAuthentication is left. <em>Why:</em> KEDA watches only <code>ticketdrop</code>, so its right to edit ScaledObjects comes from a RoleBinding inside <code>ticketdrop</code>. Deleting the namespace first deletes that RoleBinding too, and KEDA can no longer remove <code>finalizer.keda.sh</code> (TROUBLESHOOTING entry 6).</li>
@@ -538,8 +552,6 @@ td code, th code { overflow-wrap: normal; white-space: nowrap; }
   <h2>What Claude owes this phase</h2>
   <div class="prose">
     <ul>
-      <li><code>scripts/drop-check.sh</code> currently talks to fixed localhost ports and kills containers with docker. It needs a mode that takes the Gateway's address and deletes a pod instead, so it can be the exit check above.</li>
-      <li>A load test with k6, which sends a real crowd at a drop. It is the last piece of Phase 1.</li>
       <li>Anything a step shows to be missing in the services themselves, such as a setting that should be configurable.</li>
     </ul>
   </div>

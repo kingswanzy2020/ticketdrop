@@ -4,12 +4,15 @@ What the system promises, what could break each promise, how it is broken on
 purpose, and what happened when it was. Unit tests cover the pieces; this page
 is about the system as a whole, running.
 
-Two scripts do the work, against the local stack started by `make up`:
+Three scripts do the work, against the local stack started by `make up`:
 
 - `make drop-check` (`scripts/drop-check.sh`), about two minutes. Run it once for
   each value of `KILL` after changing anything on the event path.
 - `make outage-check` (`scripts/outage-check.sh`), about two minutes. Run it after
   changing holds, payments or the scheduler.
+- `make demo-drop` (`scripts/demo-drop.sh` and `loadtest/drop.js`), under a
+  minute. A k6 crowd waits on the shopfront for a drop to open, then buys; the
+  script then checks the databases. It measures; it injects no faults.
 
 ---
 
@@ -41,9 +44,17 @@ Two scripts do the work, against the local stack started by `make up`:
 
 ### Not proven yet
 
-- **A real crowd.** The checks send 16 customers at a time. Behaviour at
-  thousands of concurrent buyers, and where the first bottleneck is, are
-  unmeasured.
+- **A crowd larger than 4,000** on compose, or larger than 1,000 on the
+  cluster. On the cluster 2,000 customers failed when Postgres ran out of
+  connections
+  ([TROUBLESHOOTING 9](TROUBLESHOOTING.md#9-orders-could-not-connect-to-postgres-at-2000-customers-on-the-cluster));
+  the pools now have fixed sizes (DECISIONS 57), but the run has not been
+  repeated, because port 8088 drops connections above about 1,024
+  ([TROUBLESHOOTING 10](TROUBLESHOOTING.md#10-port-8088-closes-connections-above-about-1024-before-they-reach-traefik))
+  and the cluster cannot be sent more than about 1,000 customers from this
+  machine. At 4,000 on compose the next limit showing is fulfillment,
+  throttled on purpose: orders took up to 75 s to end, against the 2 minutes a
+  k6 customer waits.
 - **Notifications under interruption.** "Told once" is asserted in runs where
   notifications itself is not killed; killing it may send a message twice, by
   design ([23](DECISIONS.md#23-notifications-keeps-no-record-so-a-message-can-be-sent-twice)).
@@ -71,6 +82,148 @@ Recorded in DECISIONS.md when each decision was made.
 ---
 
 ## Results
+
+### 17 November 2026: demo-drop on the cluster with batched holds
+
+Machine: the Docker Desktop cluster, as in the run below, after the rebuilt
+`inventory` image was loaded into the node and the Deployment restarted
+(TROUBLESHOOTING 8): both pods on image `sha256:50ad279e...`, serving
+`inventory_hold_batch_size`. Commits: `ticketdrop` `560b0f4` plus the load
+test and batched holds, not yet committed; `ticketdrop-gitops` `e6e174e`.
+
+| Run | Customers / tickets | Accepted | Sold out | Refused with an error | Buy time, median / p95 / max | Orders ended, p95 / max | Result |
+|---|---|---|---|---|---|---|---|
+| `load-1794918876` | 1,000 / 1,000 | 424 | 576 | 0 | 49 / 110 / 382 ms | 14.1 / 15.1 s | passed |
+| `load-1794918941` | 2,000 / 2,000 | 741 | 1,144 | **115** | 122 / 950 / 1,183 ms | 38.8 / 40.5 s | **failed** |
+| `load-1794921857` | 1,000 / 1,000, pools capped (entry 57) | 405 | 595 | 0 | 45 / 183 / 299 ms | 20.1 / 20.2 s | passed |
+
+The 1,000 run is the one that failed twice on this cluster with one hold per
+transaction (433 and 679 refused, below). With batches it passed: every check,
+928 tickets issued, nothing left held, nothing dead-lettered. Its 1,000 hold
+requests were answered in 342 transactions across the two pods
+(`inventory_hold_batch_size`).
+
+The 2,000 run failed two checks: 115 buys refused, and 2,000 tickets gone from
+stock against 1,686 issued, so 314 held with no order. Neither was
+`inventory`: `orders` logged 103 failures to connect to Postgres ("remaining
+connection slots are reserved", "too many clients already") and answered
+those buys with 503, after the hold had been granted
+([TROUBLESHOOTING 9](TROUBLESHOOTING.md#9-orders-could-not-connect-to-postgres-at-2000-customers-on-the-cluster)).
+The run was also not the crowd it was meant to be: 162,354 of k6's 188,490
+requests (86 %) were polls of the drop page closed with `EOF` before reaching
+Traefik, so many customers saw the drop open late and the crowd took 254 s
+instead of about 30 s
+([TROUBLESHOOTING 10](TROUBLESHOOTING.md#10-port-8088-closes-connections-above-about-1024-before-they-reach-traefik)).
+Nothing was oversold.
+
+The third run came after each service's pool was given a fixed size
+(`DATABASE_MAX_CONNS`, entry 57; six images rebuilt, loaded into the node and
+upgraded to Helm revision 3; `ticketdrop-gitops` values changed, not yet
+committed). Every pod logged its pool size at startup. Postgres peaked at 65
+client connections during the run (catalog 16, orders 18, inventory 16,
+fulfillment 8, payments 4, scheduler 3), against 94 held idle after the 2,000
+run. Catalog and inventory sat at their caps for most of it, and the p95 buy
+time was 183 ms against 110 ms in the first run. `make drop-check` on compose,
+with the same pool sizes, also passed.
+
+Evidence: [`9-k6-1000-batched-holds-cluster.json`](evidence/phase-1/9-k6-1000-batched-holds-cluster.json),
+[`10-k6-2000-batched-holds-cluster.json`](evidence/phase-1/10-k6-2000-batched-holds-cluster.json),
+[`11-postgres-connections-exhausted.txt`](evidence/phase-1/11-postgres-connections-exhausted.txt),
+[`12-port-8088-connection-ceiling.txt`](evidence/phase-1/12-port-8088-connection-ceiling.txt),
+[`13-k6-1000-capped-pools-cluster.json`](evidence/phase-1/13-k6-1000-capped-pools-cluster.json),
+[`14-postgres-connections-capped-pools.txt`](evidence/phase-1/14-postgres-connections-capped-pools.txt).
+
+### 17 November 2026: demo-drop on compose, before and after batching holds
+
+Machine: the compose stack on the same laptop, its own Postgres 18.6 (defaults:
+`synchronous_commit` on). Commit: `ticketdrop` `560b0f4` plus the load test and
+batched holds, not yet committed. "Before" is `inventory` built from `560b0f4`
+(one hold per transaction); "after" is entry 56 (batches). All other services
+and settings the same.
+
+| Run | `inventory` | Customers / tickets | Accepted | Sold out | Refused with an error | Buy time, median / p95 / max | Orders ended, p95 / max | Result |
+|---|---|---|---|---|---|---|---|---|
+| `load-1794906558` | before | 1,000 / 1,000 | 424 | 576 | 0 | 500 / 1,132 / 1,262 ms | 19.0 / 20.1 s | passed |
+| `load-1794906608` | before | 1,000 / 1,000 | 418 | 582 | 0 | 342 / 936 / 1,089 ms | 19.0 / 20.0 s | passed |
+| `load-1794906667` | before | 2,000 / 2,000 | 544 | **0** | **1,456** | 2,004 / 2,013 / 2,046 ms | 26.1 / 27.1 s | **failed** |
+| `load-1794906733` | after | 1,000 / 1,000 | 436 | 564 | 0 | 14 / 26 / 49 ms | 19.1 / 19.1 s | passed |
+| `load-1794906787` | after | 2,000 / 2,000 | 813 | 1,187 | 0 | 14 / 33 / 51 ms | 36.1 / 37.1 s | passed |
+| `load-1794906887` | after | 4,000 / 4,000 | 1,618 | 2,382 | 0 | 23 / 177 / 309 ms | 71.2 / 75.2 s | passed |
+
+The failed "before" run also left 64 tickets held with no order (1,309 gone
+from stock, 1,245 issued), as on the cluster. Batch sizes, from
+`inventory_hold_batch_size`: 3,000 hold requests in 946 transactions over the
+1,000 and 2,000 runs, and 4,000 in 374 over the 4,000 run. "Orders ended" grows
+with the crowd because fulfillment is held at about 20 orders a second
+(`SIMULATED_RENDER_TIME`, `CONSUMER_CONCURRENCY`), with one replica in compose.
+
+Also passed with batching, before the load runs: a race of 400 single-ticket
+orders for 100 tickets through the gateway (100 accepted, 300 sold out, 41
+transactions), `make drop-check` for each `KILL` value, and `make outage-check`.
+
+Evidence: [`6-k6-2000-one-hold-per-transaction.json`](evidence/phase-1/6-k6-2000-one-hold-per-transaction.json),
+[`7-k6-2000-batched-holds.json`](evidence/phase-1/7-k6-2000-batched-holds.json),
+[`8-k6-4000-batched-holds.json`](evidence/phase-1/8-k6-4000-batched-holds.json).
+
+### 17 November 2026: demo-drop on the cluster, one hold per transaction
+
+Machine: the Docker Desktop cluster, one node (16 CPUs), Postgres from
+CloudNativePG (`synchronous_commit` on, `fsync` on), two pods each of web,
+gateway, orders and inventory. Commits: `ticketdrop` `560b0f4` plus
+`loadtest/drop.js` and `scripts/demo-drop.sh`, not yet committed;
+`ticketdrop-gitops` `e6e174e`. k6 2.4.0 from its Docker image. Each customer
+arrives within `ARRIVE` seconds, waits on the drop page (asking every second),
+takes 0.5 to 3 s to fill the form after it opens, buys 1 to 4 tickets once,
+then watches the order every second until it ends.
+
+| Run | Customers / tickets | Accepted | Sold out | Refused with an error | Buy time, median / p95 | Holds granted per second, peak | Oversold | Result |
+|---|---|---|---|---|---|---|---|---|
+| `load-1794905322` | 200 / 200 | 93 | 107 | 0 | 6 ms / 23 ms | 72 | no (200 of 200) | passed |
+| `load-1794905356` | 1,000 / 1,000 | 389 | 178 | **433** | 1,962 ms / 2,116 ms | 126 | no (900 issued) | **failed** |
+| `load-1794905446` | 1,000 / 1,000 | 321 | **0** | **679** | 2,038 ms / 2,149 ms | 112 | no (713 issued) | **failed** |
+| `load-1794906384` | 1,000 / 1,000 | 404 | 13 | **583** | 2,020 ms / 2,096 ms | | no (869 issued) | **failed** |
+| `load-1794906444` | 1,000 / 1,000 | 406 | 272 | **322** | 1,098 ms / 1,916 ms | | no (938 issued) | **failed** |
+
+The last two were meant to measure batched holds, but the pods restarted for
+them still ran the old image
+([TROUBLESHOOTING 8](TROUBLESHOOTING.md#8-a-rebuilt-dev-image-is-not-what-the-cluster-runs-even-after-a-restart)),
+so they are two more runs of the old code. Each again left tickets held with
+no order (32 and 3).
+
+In both 1,000-customer runs every refused buy took about 2 s and ended with
+`orders` logging `ask inventory for a hold: ... Client.Timeout exceeded`: its
+hold call to `inventory` reached `INVENTORY_TIMEOUT` (2 s) and the customer was
+shown "We could not reach the box office". Inventory's own histogram shows most
+hold requests taking 1 to 2.5 s. No pod restarted and no request failed at the
+HTTP level (k6 `http_req_failed` 0.00 %): every customer got an answer, about
+half of them the wrong one.
+
+**Where the time went.** Sampling `pg_stat_activity` in the `inventory` database
+every 0.25 s during the second run
+([`evidence/phase-1/4-hot-row-lock-waits.txt`](evidence/phase-1/4-hot-row-lock-waits.txt)):
+up to 32 sessions active at once, which is both pods' whole connection pool,
+and 200 of 220 samples were `UPDATE stock` waiting on `Lock/transactionid` or
+`Lock/tuple`. The session holding the row was in `commit`
+(`LWLock/WALWrite`, `IO/WalSync`). Every hold for a tier, granted or refused,
+waits for the previous one to commit and flush. That caps one tier at about
+110 to 130 granted holds a second on this machine: the bottleneck predicted in
+the cost of [DECISIONS 16](DECISIONS.md#16-stock-is-one-counter-per-tier-taken-with-one-conditional-update).
+
+**Two consequences seen.**
+
+- Customers were turned away while tickets were left: the second run sold 713
+  of 1,000 and told nobody "sold out".
+- Holds with no order. In the first run 918 tickets left stock and 900 were
+  issued: 18 tickets were held for requests whose caller had already given up,
+  so no order exists for them. They return to stock when the hold expires, 10
+  minutes and 30 seconds later, as the cost of
+  [DECISIONS 15](DECISIONS.md#15-an-order-is-accepted-only-after-inventory-has-held-its-tickets)
+  says. The check *tickets gone from stock equals tickets issued* failed on this.
+
+Evidence: [`3-k6-1000-customers-summary.json`](evidence/phase-1/3-k6-1000-customers-summary.json)
+(k6's summary of the first 1,000 run),
+[`5-demo-drop-1000-second-run.txt`](evidence/phase-1/5-demo-drop-1000-second-run.txt)
+(the second run's output).
 
 ### 15 November 2026: KEDA scales fulfillment 0 → N → 0 on queue depth
 

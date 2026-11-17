@@ -240,6 +240,14 @@ front of Postgres for this. It has been left out until a load test shows the
 row is the bottleneck, because a second store brings its own consistency
 problems.
 
+**Superseded in part.** The prediction held. The first load test (17 November
+2026, `docs/PROOF.md`) found this row to be the bottleneck: about 110 to 130
+holds a second for one tier on the Docker Desktop cluster, with holds queueing
+on its lock. Valkey was not added. Holds are now granted in batches, many per
+transaction (entry 56). The single conditional `UPDATE` became a locked read
+and one `UPDATE` per batch. The row lock and the CHECK still decide, so the
+reason above still holds.
+
 ## 17. A declined payment and a provider outage are handled differently
 
 **Decision.** A decline is an answer: `payments` publishes `payment.failed`,
@@ -728,6 +736,17 @@ question left open in entry 26.
 running Deployment, because the pod spec does not change; the pod has to be
 deleted or the Deployment restarted. `Always` cannot be used locally. The
 policy is to be looked at again when images come from ECR in Phase 4.
+
+**Superseded in part.** The policy stands; the reason above was wrong. On 17
+November 2026 a rebuilt `inventory:dev` and a `rollout restart` still left the
+pods on the old code (TROUBLESHOOTING 8). The node, `desktop-control-plane`,
+has its own containerd image store, separate from the host's, and nothing
+copies a rebuild into it. So a restart is not enough: the image has to be
+loaded into the node first (`docker save ... | docker exec -i
+desktop-control-plane ctr -n k8s.io images import -`), and the restart after
+that is what picks it up. Why the orders pod ran the `make up` build when this
+entry was written is not known. `IfNotPresent` is still right, because there
+is no registry to pull from, and it is what lets a loaded image be used.
 
 ## 38. A service turns off the chart's `http` port with `http: null`
 
@@ -1252,3 +1271,82 @@ whether it starts a pod from 0, so if goaws cannot be read while fulfillment is 
 orders may wait with no pod to handle them. At 5 pods, fulfillment's connections to
 the one Postgres instance (`max_connections` 100) grow with them; this was not
 measured. The queue URL is written twice, in the env and in the trigger.
+
+## 56. Inventory grants holds in batches, many in one transaction
+
+**Decision.** Each `inventory` pod runs one batcher (`RunBatcher`, a worker).
+A hold request waits for it. The batcher takes every request that queued up
+while its previous transaction was committing, up to 500, and answers them all
+with one transaction: it locks each tier's stock row with `SELECT ... FOR
+UPDATE`, decides in arrival order which requests fit (`allocate`), inserts the
+granted holds in one statement, and subtracts their total in one `UPDATE`. A
+request whose caller has already given up is skipped before anything is
+taken. The HTTP API is unchanged, and so is an order asked for twice: it gets
+the hold it already has.
+
+**Why.** The load test showed the cause of the failures at 1,000 customers:
+each hold was its own transaction, and each one kept the tier's row locked
+until its commit had been flushed to disk, so holds went through one flush at
+a time (entry 16). Most customers' hold calls then passed `orders`' 2-second
+timeout and they were told the box office could not be reached while tickets
+were left. Batching makes one lock and one flush serve a whole batch. It keeps
+Postgres as the only store and keeps the guarantee where it was, in the row
+lock and the CHECK. The alternatives were Valkey in front of Postgres (a new
+component to run, and code to keep two stores agreeing after a crash),
+splitting each tier over several rows (a request can fail on one row while
+tickets remain on another), and accepting the ceiling. On compose, with 2,000
+customers, refused buys went from 1,456 to 0 and the p95 buy time from 2,013
+ms to 33 ms; 4,000 customers passed with a p95 of 177 ms
+(`docs/PROOF.md`, 17 November 2026).
+
+**Cost.** One batch is one transaction, so a database error fails every
+request in it, not just one. When it is quiet a batch is a single request and
+nothing waits; under load a request waits for the batch before it to commit.
+The batcher is one goroutine per pod, so a pod grants one batch at a time.
+More code sits between a request and the row than one `UPDATE` did, and most
+of it is only exercised against a real database by the checks, not by unit
+tests. Measured on compose only: the Docker Desktop cluster was still running
+the previous image (TROUBLESHOOTING 8).
+
+## 57. Each service's connection pool has a fixed size, set per pod
+
+**Decision.** `db.Connect` takes a pool size, read from `DATABASE_MAX_CONNS`
+by the six services with a database; 0 or unset keeps pgx's default. Each
+service's values file sets it, and compose sets the same numbers. With every
+pod at its most, the pools add up to 83 of the 97 connections Postgres allows
+(`max_connections` 100, 3 reserved for the superuser):
+
+| Service | Pool per pod | Pods at most | Connections |
+|---|---|---|---|
+| orders | 10 | 2 | 20 |
+| inventory | 8 | 2 | 16 |
+| catalog | 8 | 2 | 16 |
+| payments | 5 | 1 | 5 |
+| fulfillment | 4 | 5 (KEDA's maximum) | 20 |
+| scheduler | 2, plus the leader lock's connection | 2 | 6 |
+
+The 14 left over are for `psql`, the checks' SQL and a pod that is starting
+while the one it replaces has not yet closed its connections.
+
+**Why.** At 2,000 customers on the cluster the pools, each free to grow to 16
+on a 16-CPU node, filled the server and `orders` was refused connections after
+its holds were granted (TROUBLESHOOTING 9). The sizes follow what each pod does
+at once: `orders` serves the buy and runs eight consumer workers, inventory
+grants one batch at a time but also serves lookups, expiry and its consumer,
+catalog serves the drop page, payments and fulfillment call the provider and
+render outside their transactions, and the scheduler only ticks. The size is an
+env setting rather than `pool_max_conns` in the URL because the URL is in a
+Secret made by `db-secrets.sh`, and the size belongs with the replica count in
+the values file. Raising `max_connections` only moves the limit, since KEDA
+can add pods. A pooler (CloudNativePG's PgBouncer `Pooler`, or RDS Proxy on
+AWS) is the answer when the pods outgrow one server's connections, at the
+price of another component in the path.
+
+**Cost.** The budget is kept by hand. A change to a replica count, KEDA's
+`maxReplicaCount` or a new database service has to be checked against the
+table, and nothing fails until a load finds it. A request that finds its pool
+full waits for a connection instead of being refused, so a pool set too small
+shows up as slower answers: in the 1,000-customer run catalog and inventory
+sat at their caps (16 each over two pods) and the p95 buy time was 183 ms,
+against 110 ms with the default pools. On EKS the server and its limit will be
+different, so the numbers are to be done again in Phase 4.
