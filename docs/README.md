@@ -100,3 +100,5 @@ Machine: <where it ran>. Commit: <short hash>.
 
 Observations: anything surprising, even if the run passed.
 ```
+
+Proof PR: a change outside every image builds no image.
