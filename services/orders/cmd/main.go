@@ -102,4 +102,5 @@ func run(ctx context.Context, s *service.Service) error {
 		service.Worker{Name: "consumer", Run: consumer.Run},
 	)
 }
+
 // Proof PR: a change in one service builds only that service.
