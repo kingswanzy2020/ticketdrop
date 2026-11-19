@@ -62,7 +62,8 @@ Three scripts do the work, against the local stack started by `make up`:
   released. Known, documented, not exercised by a check.
 - **Kubernetes behaviour:** pod deletion mid-drop and rolling updates are not
   checked yet. Network policies (DECISIONS 49 to 51) and queue-depth scaling
-  (15 November, below) have been proven on the local cluster only.
+  (15 November, below) have been proven on the local cluster only, and a new
+  pod is not policed for about its first second (TROUBLESHOOTING 18).
 
 ---
 
@@ -82,6 +83,29 @@ Recorded in DECISIONS.md when each decision was made.
 ---
 
 ## Results
+
+### 19 November 2026: Phase 3 exit check, CI in both repos
+
+Not a run of the system but of the checks that guard it: each condition of the
+Phase 3 exit was shown by a pull request made to pass or to fail. App repo
+`main` at `d8b7e1e` (PR #4 merged), GitOps repo at `phase-3-ci` `061d040`.
+Both rulesets require `ci-ok` from GitHub Actions, with no bypass.
+
+| PR | Change | Expected | Result | Evidence |
+|---|---|---|---|---|
+| ticketdrop #5 | A comment in `services/orders/cmd/main.go` | Only `build (orders)`; mergeable | `changes`, `go`, `build (orders)`, `ci-ok` passed; `CLEAN`. The first run failed `make vet` on the comment's formatting (TROUBLESHOOTING 19) | [`06-one-service-built.txt`](evidence/phase-3/06-one-service-built.txt) |
+| ticketdrop #6 | A line in `docs/README.md` | No build; mergeable | `build` skipped, `ci-ok` passed; `CLEAN` | [`06-docs-only-ci-ok.txt`](evidence/phase-3/06-docs-only-ci-ok.txt) |
+| ticketdrop #7 | A test that calls `t.Fatal` | Blocked | `go` failed (`--- FAIL: TestProofFailingTestBlocksMerge`), `ci-ok` failed; `BLOCKED` | [`fail-6-test-blocks-merge.txt`](evidence/phase-3/fail-6-test-blocks-merge.txt) |
+| ticketdrop #8 | notifications' runtime base `alpine:3.16.0` | Blocked by Trivy | CVE-2022-37434 in zlib 1.2.12-r1 (CRITICAL, fixed in 1.2.12-r2); `build (notifications)` failed at the gate, `ci-ok` failed; `BLOCKED` | [`fail-6-critical-cve-blocks-merge.txt`](evidence/phase-3/fail-6-critical-cve-blocks-merge.txt) |
+| local, GitOps | `terminationGracePeriodSecond` in the chart, `parentRef` in the HTTPRoute | `validate.sh` fails | 10 of 10 refused by kubeconform; `helm lint` passed the same typo | [`fail-7-kubeconform-misspelled-field.txt`](evidence/phase-3/fail-7-kubeconform-misspelled-field.txt) |
+| ticketdrop-gitops #1 | The GitOps CI itself | Lint, install, check, policy probe pass | 16 of 16 `check.sh` checks, everything Available in 99 s, probe blocked from `ticketdrop`; `CLEAN` | [`08-kind-install-test.txt`](evidence/phase-3/08-kind-install-test.txt) |
+| ticketdrop-gitops #2 | orders' `DATABASE_MAX_CONNS: "10x"` | Lint passes, install fails, blocked | lint passed; orders in `CrashLoopBackOff` ("is not an integer"), `rebuild.sh` timed out, `ci-ok` failed; `BLOCKED` | [`fail-8-chart-blocks-merge.txt`](evidence/phase-3/fail-8-chart-blocks-merge.txt) |
+
+Every workflow's token is `contents: read`, every checkout keeps no
+credential, and every `uses:` is a full commit SHA, which both repos enforce
+([`00-actions-settings.txt`](evidence/phase-3/00-actions-settings.txt),
+[`01-actions-pinned.txt`](evidence/phase-3/01-actions-pinned.txt)).
+**Verdict: passed.**
 
 ### 17 November 2026: demo-drop on the cluster with batched holds
 

@@ -1,0 +1,36 @@
+Thu Nov 19 11:12:11 PM KST 2026
+$ gh pr view 5 --json number,title,headRefOid,mergeStateStatus,mergeable
+{"headRefOid":"083e18325165b3c8d2e949edc0d3c84533018f10","mergeStateStatus":"CLEAN","mergeable":"MERGEABLE","number":5,"title":"Proof: a change in one service builds only that service"}
+
+$ gh pr diff 5 --name-only
+services/orders/cmd/main.go
+
+$ gh pr checks 5
+build (orders)	pass	1m38s	https://github.com/kingswanzy2020/ticketdrop/actions/runs/44540700090/job/135618174469	
+changes	pass	5s	https://github.com/kingswanzy2020/ticketdrop/actions/runs/44540700090/job/135618085233	
+ci-ok	pass	5s	https://github.com/kingswanzy2020/ticketdrop/actions/runs/44540700090/job/135619217905	
+go	pass	40s	https://github.com/kingswanzy2020/ticketdrop/actions/runs/44540700090/job/135618085958	
+
+$ gh run view 44540700090
+
+✓ proof/one-service ci kingswanzy2020/ticketdrop#5 · 44540700090
+Triggered via pull_request about 2 minutes ago
+
+JOBS
+✓ changes in 5s (ID 135618085233)
+✓ go in 40s (ID 135618085958)
+✓ build (orders) in 1m38s (ID 135618174469)
+✓ ci-ok in 5s (ID 135619217905)
+
+For more information about a job, try: gh run view --job=<job-id>
+View this run on GitHub: https://github.com/kingswanzy2020/ticketdrop/actions/runs/44540700090
+
+== the changes job: what it decided
+  BASE: d8b7e1e0dd336688249bef724c6e1bb2a1caa747
+  HEAD: 083e18325165b3c8d2e949edc0d3c84533018f10
+
+== the ci-ok job
+' <<<"$NEEDS" >/dev/null || { echo "::error::a required job did not pass"; exit 1; }
+changes: success
+go: success
+build: success

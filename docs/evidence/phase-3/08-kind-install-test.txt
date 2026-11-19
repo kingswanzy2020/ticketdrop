@@ -1,0 +1,517 @@
+Thu Nov 19 11:13:34 PM KST 2026
+ticketdrop-gitops PR #1, run 44540158581, the third run, at 061d040af01e1ef02ac53e7fb8f281453af394c7.
+
+$ gh run view 44540158581 -R kingswanzy2020/ticketdrop-gitops
+
+✓ phase-3-ci ci kingswanzy2020/ticketdrop-gitops#1 · 44540158581
+Triggered via pull_request about 7 minutes ago
+
+JOBS
+✓ kind in 3m27s (ID 135616002259)
+✓ lint in 11s (ID 135616003053)
+✓ ci-ok in 3s (ID 135618170130)
+
+For more information about a job, try: gh run view --job=<job-id>
+View this run on GitHub: https://github.com/kingswanzy2020/ticketdrop-gitops/actions/runs/44540158581
+
+===== kind job, step: build the nine images from the app repo
+##[group]Run version=$(git -C app rev-parse --short HEAD)
+version=$(git -C app rev-parse --short HEAD)
+echo "app repo main at $version" >> "$GITHUB_STEP_SUMMARY"
+# One builder for all nine, so go mod download runs once and the
+# other eight reuse that layer.
+for s in catalog inventory orders payments fulfillment notifications scheduler gateway web; do
+  docker build -q -f "app/services/$s/Dockerfile" --build-arg "VERSION=$version" -t "ticketdrop/$s:dev" app
+done
+docker images 'ticketdrop/*'
+shell: /usr/bin/bash -e {0}
+env:
+  KUBE_CONTEXT: kind-ticketdrop
+  KIND_NODE: kindest/node:v1.36.4@sha256:099e049362a1526b2db71494e1947aae99bd16290d7c895f2b7ea312e3cbfaed
+  CLOUD_PROVIDER_KIND: registry.k8s.io/cloud-provider-kind/cloud-controller-manager:v0.12.0@sha256:1b97632e5dfec8f83c7e970cf18cedb9e6b707e272011d712cabf6ab59d323c9
+##[endgroup]
+sha256:1bbfd727ea5d00eb7aa6f76efc8422795b51e33e4d59226141bcc6d598334e4d
+sha256:bc20ceb74990224569f11a794386dce459e021ce757cf22d121a67bedda2e6fc
+sha256:aec12542bc8742f3250adbf9ac1a6d6bdcb9c5e1ec7874fb2ee29e46089f872c
+sha256:e6c36ca9ca0caf2776aa6eb224da540e1d7163fc5d1b4e85d28667de8c067646
+sha256:6ff9881a503a75787ab7a308abd80e8009f10220b011eeeebc0540c62caf25ed
+sha256:279313c39314b92dbef6d12b9c1a3ae209501e90cb05e7b8f616314c9c927ca3
+sha256:77f79e5c5a161e79ce5becaa63fdda4f163b26708ad7fbc2bed14b8c0c435bbb
+sha256:bbafd0ff926be9976fb248c304a3e1fa4ec24e216bd5411b723ffb8dbbb940e4
+sha256:92b185394734502127654bdd8aebcaaae8118aa42422d5ee6fdc2b24ee66b4c7
+REPOSITORY                 TAG       IMAGE ID       CREATED                  SIZE
+ticketdrop/web             dev       92b185394734   Less than a second ago   14.9MB
+ticketdrop/gateway         dev       bbafd0ff926b   1 second ago             14.2MB
+ticketdrop/scheduler       dev       77f79e5c5a16   2 seconds ago            18.3MB
+ticketdrop/notifications   dev       279313c39314   3 seconds ago            18.8MB
+ticketdrop/fulfillment     dev       6ff9881a503a   4 seconds ago            23.9MB
+ticketdrop/payments        dev       e6c36ca9ca0c   5 seconds ago            23.9MB
+ticketdrop/orders          dev       aec12542bc87   6 seconds ago            23.9MB
+ticketdrop/inventory       dev       bc20ceb74990   7 seconds ago            24MB
+ticketdrop/catalog         dev       1bbfd727ea5d   8 seconds ago            23.4MB
+
+===== kind job, step: kind cluster
+##[group]Run kind create cluster --name ticketdrop --image "$KIND_NODE" --wait 120s
+kind create cluster --name ticketdrop --image "$KIND_NODE" --wait 120s
+docker run -d --name cloud-provider-kind --network kind \
+  -v /var/run/docker.sock:/var/run/docker.sock "$CLOUD_PROVIDER_KIND" \
+  --gateway-channel disabled
+images=()
+for s in catalog inventory orders payments fulfillment notifications scheduler gateway web; do
+  images+=("ticketdrop/$s:dev")
+done
+kind load docker-image --name ticketdrop "${images[@]}"
+kubectl get nodes -o wide
+shell: /usr/bin/bash -e {0}
+env:
+  KUBE_CONTEXT: kind-ticketdrop
+  KIND_NODE: kindest/node:v1.36.4@sha256:099e049362a1526b2db71494e1947aae99bd16290d7c895f2b7ea312e3cbfaed
+  CLOUD_PROVIDER_KIND: registry.k8s.io/cloud-provider-kind/cloud-controller-manager:v0.12.0@sha256:1b97632e5dfec8f83c7e970cf18cedb9e6b707e272011d712cabf6ab59d323c9
+##[endgroup]
+Creating cluster "ticketdrop" ...
+ • Ensuring node image (kindest/node:v1.36.4) 🖼️  ...
+ ✓ Ensuring node image (kindest/node:v1.36.4) 🖼️
+ • Preparing nodes 📦   ...
+ ✓ Preparing nodes 📦 
+ • Writing configuration 📜  ...
+ ✓ Writing configuration 📜
+ • Starting control-plane 🕹️  ...
+ ✓ Starting control-plane 🕹️
+ • Installing CNI 🔌  ...
+ ✓ Installing CNI 🔌
+ • Installing StorageClass 💾  ...
+ ✓ Installing StorageClass 💾
+ • Waiting ≤ 2m0s for control-plane = Ready ⏳  ...
+ ✓ Waiting ≤ 2m0s for control-plane = Ready ⏳
+ • Ready after 16s 💚
+Set kubectl context to "kind-ticketdrop"
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-ticketdrop
+
+Not sure what to do next? 😅  Check out https://kind.sigs.k8s.io/docs/user/quick-start/
+Unable to find image 'registry.k8s.io/cloud-provider-kind/cloud-controller-manager:v0.12.0@sha256:1b97632e5dfec8f83c7e970cf18cedb9e6b707e272011d712cabf6ab59d323c9' locally
+registry.k8s.io/cloud-provider-kind/cloud-controller-manager@sha256:1b97632e5dfec8f83c7e970cf18cedb9e6b707e272011d712cabf6ab59d323c9: Pulling from cloud-provider-kind/cloud-controller-manager
+e2de96513ba9: Already exists
+Digest: sha256:1b97632e5dfec8f83c7e970cf18cedb9e6b707e272011d712cabf6ab59d323c9
+Status: Downloaded newer image for registry.k8s.io/cloud-provider-kind/cloud-controller-manager@sha256:1b97632e5dfec8f83c7e970cf18cedb9e6b707e272011d712cabf6ab59d323c9
+27301101fc1e36c8709761767ab2565fd0a32cdeb03aee56dac0f6254dad4802
+Image: "ticketdrop/catalog:dev" with ID "sha256:1bbfd727ea5d00eb7aa6f76efc8422795b51e33e4d59226141bcc6d598334e4d" not yet present on node "ticketdrop-control-plane", loading...
+Image: "ticketdrop/inventory:dev" with ID "sha256:bc20ceb74990224569f11a794386dce459e021ce757cf22d121a67bedda2e6fc" not yet present on node "ticketdrop-control-plane", loading...
+Image: "ticketdrop/orders:dev" with ID "sha256:aec12542bc8742f3250adbf9ac1a6d6bdcb9c5e1ec7874fb2ee29e46089f872c" not yet present on node "ticketdrop-control-plane", loading...
+Image: "ticketdrop/payments:dev" with ID "sha256:e6c36ca9ca0caf2776aa6eb224da540e1d7163fc5d1b4e85d28667de8c067646" not yet present on node "ticketdrop-control-plane", loading...
+Image: "ticketdrop/fulfillment:dev" with ID "sha256:6ff9881a503a75787ab7a308abd80e8009f10220b011eeeebc0540c62caf25ed" not yet present on node "ticketdrop-control-plane", loading...
+Image: "ticketdrop/notifications:dev" with ID "sha256:279313c39314b92dbef6d12b9c1a3ae209501e90cb05e7b8f616314c9c927ca3" not yet present on node "ticketdrop-control-plane", loading...
+Image: "ticketdrop/scheduler:dev" with ID "sha256:77f79e5c5a161e79ce5becaa63fdda4f163b26708ad7fbc2bed14b8c0c435bbb" not yet present on node "ticketdrop-control-plane", loading...
+Image: "ticketdrop/gateway:dev" with ID "sha256:bbafd0ff926be9976fb248c304a3e1fa4ec24e216bd5411b723ffb8dbbb940e4" not yet present on node "ticketdrop-control-plane", loading...
+Image: "ticketdrop/web:dev" with ID "sha256:92b185394734502127654bdd8aebcaaae8118aa42422d5ee6fdc2b24ee66b4c7" not yet present on node "ticketdrop-control-plane", loading...
+NAME                       STATUS   ROLES           AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                       KERNEL-VERSION           CONTAINER-RUNTIME
+ticketdrop-control-plane   Ready    control-plane   27s   v1.36.4   172.18.0.2    <none>        Debian GNU/Linux 13 (trixie)   7.0.0-1014-aws (amd64)   containerd://2.3.4
+
+===== kind job, step: rebuild.sh, ending with check.sh
+##[group]Run scripts/rebuild.sh
+scripts/rebuild.sh
+shell: /usr/bin/bash -e {0}
+env:
+  KUBE_CONTEXT: kind-ticketdrop
+  KIND_NODE: kindest/node:v1.36.4@sha256:099e049362a1526b2db71494e1947aae99bd16290d7c895f2b7ea312e3cbfaed
+  CLOUD_PROVIDER_KIND: registry.k8s.io/cloud-provider-kind/cloud-controller-manager:v0.12.0@sha256:1b97632e5dfec8f83c7e970cf18cedb9e6b707e272011d712cabf6ab59d323c9
+##[endgroup]
+Thu Nov 19 14:07:48 UTC 2026
+ticketdrop-gitops at 23be886
+
+14:07:48 rebuild starts (1s)
+
+$ kubectl apply -f platform/namespaces.yaml
+namespace/ticketdrop created
+namespace/data created
+namespace/cnpg-system created
+namespace/traefik created
+namespace/keda created
+
+$ kubectl apply --server-side -f platform/gateway-api/standard-install-v1.6.3.yaml
+customresourcedefinition.apiextensions.k8s.io/backendtlspolicies.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/gatewayclasses.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/gateways.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/grpcroutes.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/httproutes.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/listenersets.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/referencegrants.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/tcproutes.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/tlsroutes.gateway.networking.k8s.io serverside-applied
+customresourcedefinition.apiextensions.k8s.io/udproutes.gateway.networking.k8s.io serverside-applied
+validatingadmissionpolicy.admissionregistration.k8s.io/safe-upgrades.gateway.networking.k8s.io serverside-applied
+validatingadmissionpolicybinding.admissionregistration.k8s.io/safe-upgrades.gateway.networking.k8s.io serverside-applied
+
+$ helm upgrade --install cnpg cnpg/cloudnative-pg --version 0.29.1 -n cnpg-system -f platform/cnpg/values.yaml --wait
+Release "cnpg" does not exist. Installing it now.
+NAME: cnpg
+LAST DEPLOYED: Thu Nov 19 14:07:49 2026
+NAMESPACE: cnpg-system
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+CloudNativePG operator should be installed in namespace "cnpg-system".
+You can now create a PostgreSQL cluster with 3 nodes as follows:
+
+cat <<EOF | kubectl apply -f -
+# Example of PostgreSQL cluster
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cluster-example
+  
+spec:
+  instances: 3
+  storage:
+    size: 1Gi
+EOF
+
+kubectl get -A cluster
+
+$ kubectl apply -f platform/goaws/
+configmap/goaws created
+deployment.apps/goaws created
+service/goaws created
+
+$ kubectl rollout status deploy/goaws -n data --timeout=120s
+deployment "goaws" successfully rolled out
+
+$ scripts/db-secrets.sh
+secret/pg-catalog created
+secret/pg-catalog labeled
+secret/catalog-db created
+secret/pg-orders created
+secret/pg-orders labeled
+secret/orders-db created
+secret/pg-inventory created
+secret/pg-inventory labeled
+secret/inventory-db created
+secret/pg-payments created
+secret/pg-payments labeled
+secret/payments-db created
+secret/pg-fulfillment created
+secret/pg-fulfillment labeled
+secret/fulfillment-db created
+secret/pg-scheduler created
+secret/pg-scheduler labeled
+secret/scheduler-db created
+
+$ kubectl apply -f platform/postgres/cluster.yaml
+cluster.postgresql.cnpg.io/pg created
+
+$ until kubectl get cluster/pg -n data -o jsonpath='{.status.phase}' 2>/dev/null | grep -q .; do sleep 2; done
+
+$ kubectl wait cluster/pg -n data --for=condition=Ready --timeout=300s
+cluster.postgresql.cnpg.io/pg condition met
+
+$ kubectl apply -f platform/postgres/roles.yaml -f platform/postgres/databases.yaml
+databaserole.postgresql.cnpg.io/scheduler created
+databaserole.postgresql.cnpg.io/fulfillment created
+databaserole.postgresql.cnpg.io/orders created
+databaserole.postgresql.cnpg.io/payments created
+databaserole.postgresql.cnpg.io/inventory created
+database.postgresql.cnpg.io/scheduler created
+database.postgresql.cnpg.io/fulfillment created
+database.postgresql.cnpg.io/orders created
+database.postgresql.cnpg.io/payments created
+database.postgresql.cnpg.io/inventory created
+
+$ helm upgrade --install keda kedacore/keda --version 2.21.0 -n keda -f platform/keda/values.yaml --wait
+Release "keda" does not exist. Installing it now.
+NAME: keda
+LAST DEPLOYED: Thu Nov 19 14:08:35 2026
+NAMESPACE: keda
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+:::^.     .::::^:     :::::::::::::::    .:::::::::.                   .^.                  
+7???~   .^7????~.     7??????????????.   :?????????77!^.              .7?7.                 
+7???~  ^7???7~.       ~!!!!!!!!!!!!!!.   :????!!!!7????7~.           .7???7.                
+7???~^7????~.                            :????:    :~7???7.         :7?????7.               
+7???7????!.           ::::::::::::.      :????:      .7???!        :7??77???7.              
+7????????7:           7???????????~      :????:       :????:      :???7?5????7.             
+7????!~????^          !77777777777^      :????:       :????:     ^???7?#P7????7.            
+7???~  ^????~                            :????:      :7???!     ^???7J#@J7?????7.           
+7???~   :7???!.                          :????:   .:~7???!.    ~???7Y&@#7777????7.          
+7???~    .7???7:      !!!!!!!!!!!!!!!    :????7!!77????7^     ~??775@@@GJJYJ?????7.         
+7???~     .!????^     7?????????????7.   :?????????7!~:      !????G@@@@@@@@5??????7:        
+::::.       :::::     :::::::::::::::    .::::::::..        .::::JGGGB@@@&7:::::::::        
+                                                                      ?@@#~                  
+                                                                      P@B^                   
+                                                                    :&G:                    
+                                                                    !5.                     
+                                                                    .Kubernetes Event-driven Autoscaling (KEDA) - Application autoscaling made simple.
+
+Get started by deploying Scaled Objects to your cluster:
+    - Information about Scaled Objects : https://keda.sh/docs/latest/concepts/
+    - Samples: https://github.com/kedacore/samples
+
+Get information about the deployed ScaledObjects:
+  kubectl get scaledobject [--namespace <namespace>]
+
+Get details about a deployed ScaledObject:
+  kubectl describe scaledobject <scaled-object-name> [--namespace <namespace>]
+
+Get information about the deployed TriggerAuthentications:
+  kubectl get triggerauthentication [--namespace <namespace>]
+
+Get details about a deployed TriggerAuthentication:
+  kubectl describe triggerauthentication <trigger-authentication-name> [--namespace <namespace>]
+
+Get an overview of the Horizontal Pod Autoscalers (HPA) that KEDA is using behind the scenes:
+  kubectl get hpa [--all-namespaces] [--namespace <namespace>]
+
+Learn more about KEDA:
+- Documentation: https://keda.sh/
+- Support: https://keda.sh/support/
+- File an issue: https://github.com/kedacore/keda/issues/new/choose
+
+$ helm upgrade --install traefik traefik/traefik --version 42.1.3 -n traefik -f platform/traefik/values.yaml --wait
+Release "traefik" does not exist. Installing it now.
+NAME: traefik
+LAST DEPLOYED: Thu Nov 19 14:09:04 2026
+NAMESPACE: traefik
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+traefik with docker.io/traefik:v3.7.16 has been deployed successfully on traefik namespace!
+
+⚠️ DEPRECATION WARNING: Gateway API CRDs will no longer be shipped with this chart in a future major version.
+You will need to install them yourself before deploying Traefik v3.7:
+  kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/standard-install.yaml
+
+$ kubectl apply -f platform/routes/
+gateway.gateway.networking.k8s.io/ticketdrop created
+httproute.gateway.networking.k8s.io/ticketdrop created
+
+$ kubectl apply -f platform/network-policies/dns.yaml
+networkpolicy.networking.k8s.io/allow-dns created
+
+$ helm upgrade --install catalog charts/service -n ticketdrop -f charts/service/values/values-catalog.yaml
+Release "catalog" does not exist. Installing it now.
+NAME: catalog
+LAST DEPLOYED: Thu Nov 19 14:09:21 2026
+NAMESPACE: ticketdrop
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+
+$ helm upgrade --install inventory charts/service -n ticketdrop -f charts/service/values/values-inventory.yaml
+Release "inventory" does not exist. Installing it now.
+NAME: inventory
+LAST DEPLOYED: Thu Nov 19 14:09:21 2026
+NAMESPACE: ticketdrop
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+
+$ helm upgrade --install orders charts/service -n ticketdrop -f charts/service/values/values-orders.yaml
+Release "orders" does not exist. Installing it now.
+NAME: orders
+LAST DEPLOYED: Thu Nov 19 14:09:21 2026
+NAMESPACE: ticketdrop
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+
+$ helm upgrade --install payments charts/service -n ticketdrop -f charts/service/values/values-payments.yaml
+Release "payments" does not exist. Installing it now.
+NAME: payments
+LAST DEPLOYED: Thu Nov 19 14:09:21 2026
+NAMESPACE: ticketdrop
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+
+$ helm upgrade --install fulfillment charts/service -n ticketdrop -f charts/service/values/values-fulfillment.yaml
+Release "fulfillment" does not exist. Installing it now.
+NAME: fulfillment
+LAST DEPLOYED: Thu Nov 19 14:09:22 2026
+NAMESPACE: ticketdrop
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+
+$ helm upgrade --install notifications charts/service -n ticketdrop -f charts/service/values/values-notifications.yaml
+Release "notifications" does not exist. Installing it now.
+NAME: notifications
+LAST DEPLOYED: Thu Nov 19 14:09:22 2026
+NAMESPACE: ticketdrop
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+
+$ helm upgrade --install scheduler charts/service -n ticketdrop -f charts/service/values/values-scheduler.yaml
+Release "scheduler" does not exist. Installing it now.
+NAME: scheduler
+LAST DEPLOYED: Thu Nov 19 14:09:22 2026
+NAMESPACE: ticketdrop
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+
+$ helm upgrade --install gateway charts/service -n ticketdrop -f charts/service/values/values-gateway.yaml
+Release "gateway" does not exist. Installing it now.
+NAME: gateway
+LAST DEPLOYED: Thu Nov 19 14:09:23 2026
+NAMESPACE: ticketdrop
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+
+$ helm upgrade --install web charts/service -n ticketdrop -f charts/service/values/values-web.yaml
+Release "web" does not exist. Installing it now.
+NAME: web
+LAST DEPLOYED: Thu Nov 19 14:09:23 2026
+NAMESPACE: ticketdrop
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+
+$ kubectl apply -f platform/network-policies/default-deny.yaml
+networkpolicy.networking.k8s.io/default-deny created
+
+$ kubectl wait --for=condition=Available deploy --all -n ticketdrop --timeout=300s
+deployment.apps/catalog condition met
+deployment.apps/fulfillment condition met
+deployment.apps/gateway condition met
+deployment.apps/inventory condition met
+deployment.apps/notifications condition met
+deployment.apps/orders condition met
+deployment.apps/payments condition met
+deployment.apps/scheduler condition met
+deployment.apps/web condition met
+
+14:09:26 everything Available (99s)
+
+14:09:26 checks
+  ok    5 databaseroles applied
+  ok    5 databases applied
+  ok    catalog 2/2 available
+  ok    inventory 2/2 available
+  ok    orders 2/2 available
+  ok    payments 1/1 available
+  ok    notifications 1/1 available
+  ok    scheduler 2/2 available
+  ok    gateway 2/2 available
+  ok    web 2/2 available
+  ok    fulfillment ScaledObject Ready
+  ok    Gateway Programmed
+  ok    11 NetworkPolicies
+  ok    one scheduler leads
+  ok    gateway answers: no such drop on sale
+  ok    shopfront 200
+
+NAME                             READY   STATUS    RESTARTS   AGE
+catalog-5459d47d6-5mx4d          1/1     Running   0          6s
+catalog-5459d47d6-n9bg5          1/1     Running   0          6s
+gateway-5b4dd9c645-7lbwq         1/1     Running   0          4s
+gateway-5b4dd9c645-s4sb9         1/1     Running   0          4s
+inventory-8487d4ccbd-8gskt       1/1     Running   0          6s
+inventory-8487d4ccbd-978nb       1/1     Running   0          6s
+notifications-69d9fddccb-rhbm9   1/1     Running   0          5s
+orders-5698d58cfb-5hxqd          1/1     Running   0          6s
+orders-5698d58cfb-rzd22          1/1     Running   0          6s
+payments-7c4d8b4cd9-6vd8q        1/1     Running   0          6s
+scheduler-68f84d669b-bvbpw       1/1     Running   0          5s
+scheduler-68f84d669b-ppw7t       1/1     Running   0          5s
+web-c9b8d756f-cncmd              1/1     Running   0          4s
+web-c9b8d756f-zx79g              1/1     Running   0          4s
+
+all checks passed
+
+14:09:27 rebuild done (100s)
+
+===== kind job, step: NetworkPolicy is enforced
+##[group]Run # Prints reached, blocked, or the error when it is neither (a DNS
+# Prints reached, blocked, or the error when it is neither (a DNS
+# failure must not pass for a block).
+probe() { # namespace
+  kubectl apply -n "$1" -f - >/dev/null <<'EOF'
+apiVersion: v1
+kind: Pod
+metadata:
+  name: np-probe
+spec:
+  restartPolicy: Never
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65534
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - name: np-probe
+      image: busybox:1.37.0
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
+      command:
+        - sh
+        - -c
+        - |
+          sleep 5
+          out=$(wget -q -T 3 -O /dev/null http://goaws.data:4100/ 2>&1)
+          case $out in
+            "" | *"server returned"*) echo reached ;;
+            *"timed out"*) echo blocked ;;
+            *) echo "error: $out" ;;
+          esac
+EOF
+  kubectl wait -n "$1" pod/np-probe --for=jsonpath='{.status.phase}'=Succeeded --timeout=90s >/dev/null
+  kubectl logs -n "$1" np-probe
+  kubectl delete pod -n "$1" np-probe --wait=false >/dev/null
+}
+from_default=$(probe default)
+from_ticketdrop=$(probe ticketdrop)
+echo "from default: $from_default; from ticketdrop: $from_ticketdrop"
+[ "$from_default" = reached ] && [ "$from_ticketdrop" = blocked ]
+shell: /usr/bin/bash -e {0}
+env:
+  KUBE_CONTEXT: kind-ticketdrop
+  KIND_NODE: kindest/node:v1.36.4@sha256:099e049362a1526b2db71494e1947aae99bd16290d7c895f2b7ea312e3cbfaed
+  CLOUD_PROVIDER_KIND: registry.k8s.io/cloud-provider-kind/cloud-controller-manager:v0.12.0@sha256:1b97632e5dfec8f83c7e970cf18cedb9e6b707e272011d712cabf6ab59d323c9
+##[endgroup]
+from default: reached; from ticketdrop: blocked
+
+===== lint job, step: helm lint and kubeconform
+14:06:27 helm lint, each service's values (0s)
+==> Linting charts/service
+1 chart(s) linted, 0 chart(s) failed
+==> Linting charts/service
+1 chart(s) linted, 0 chart(s) failed
+==> Linting charts/service
+1 chart(s) linted, 0 chart(s) failed
+==> Linting charts/service
+1 chart(s) linted, 0 chart(s) failed
+==> Linting charts/service
+1 chart(s) linted, 0 chart(s) failed
+==> Linting charts/service
+1 chart(s) linted, 0 chart(s) failed
+==> Linting charts/service
+1 chart(s) linted, 0 chart(s) failed
+==> Linting charts/service
+1 chart(s) linted, 0 chart(s) failed
+==> Linting charts/service
+1 chart(s) linted, 0 chart(s) failed
+14:06:28 kubeconform, each service as rendered (1s)
+Summary: 4 resources found parsing stdin - Valid: 4, Invalid: 0, Errors: 0, Skipped: 0
+Summary: 4 resources found parsing stdin - Valid: 4, Invalid: 0, Errors: 0, Skipped: 0
+Summary: 4 resources found parsing stdin - Valid: 4, Invalid: 0, Errors: 0, Skipped: 0
+Summary: 3 resources found parsing stdin - Valid: 3, Invalid: 0, Errors: 0, Skipped: 0
+Summary: 6 resources found parsing stdin - Valid: 6, Invalid: 0, Errors: 0, Skipped: 0
+Summary: 3 resources found parsing stdin - Valid: 3, Invalid: 0, Errors: 0, Skipped: 0
+Summary: 4 resources found parsing stdin - Valid: 4, Invalid: 0, Errors: 0, Skipped: 0
+Summary: 4 resources found parsing stdin - Valid: 4, Invalid: 0, Errors: 0, Skipped: 0
+Summary: 4 resources found parsing stdin - Valid: 4, Invalid: 0, Errors: 0, Skipped: 0
+14:06:30 kubeconform, the platform manifests (3s)
+Summary: 23 resources found in 11 files - Valid: 23, Invalid: 0, Errors: 0, Skipped: 0
+14:06:30 kubeconform, the operators' charts with this repo's values (3s)
+Summary: 22 resources found parsing stdin - Valid: 11, Invalid: 0, Errors: 0, Skipped: 11
+Summary: 30 resources found parsing stdin - Valid: 24, Invalid: 0, Errors: 0, Skipped: 6
+Summary: 6 resources found parsing stdin - Valid: 6, Invalid: 0, Errors: 0, Skipped: 0
+14:06:32 all valid (5s)

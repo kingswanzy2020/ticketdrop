@@ -1,0 +1,41 @@
+Thu Nov 19 10:53:58 PM KST 2026
+ticketdrop-gitops PR #1, run 44537582384, first run, job kind. gh run view 44537582384 -R kingswanzy2020/ticketdrop-gitops --log, the kind job's rebuild.sh step:
+
+##[group]Run scripts/rebuild.sh
+scripts/rebuild.sh
+shell: /usr/bin/bash -e {0}
+env:
+  KUBE_CONTEXT: kind-ticketdrop
+  KIND_NODE: kindest/node:v1.36.4@sha256:099e049362a1526b2db71494e1947aae99bd16290d7c895f2b7ea312e3cbfaed
+  CLOUD_PROVIDER_KIND: registry.k8s.io/cloud-provider-kind/cloud-controller-manager:v0.12.0@sha256:1b97632e5dfec8f83c7e970cf18cedb9e6b707e272011d712cabf6ab59d323c9
+##[endgroup]
+Thu Nov 19 13:52:55 UTC 2026
+ticketdrop-gitops at d930057
+
+13:52:55 rebuild starts (0s)
+
+$ kubectl apply -f platform/namespaces.yaml
+namespace/ticketdrop created
+namespace/data created
+namespace/cnpg-system created
+namespace/traefik created
+namespace/keda created
+
+$ kubectl apply --server-side -f platform/gateway-api/standard-install-v1.6.3.yaml
+validatingadmissionpolicy.admissionregistration.k8s.io/safe-upgrades.gateway.networking.k8s.io serverside-applied
+validatingadmissionpolicybinding.admissionregistration.k8s.io/safe-upgrades.gateway.networking.k8s.io serverside-applied
+Apply failed with 1 conflict: conflict with "cloud-provider-kind" using apiextensions.k8s.io/v1: .metadata.annotations.gateway.networking.k8s.io/bundle-version
+Apply failed with 1 conflict: conflict with "cloud-provider-kind" using apiextensions.k8s.io/v1: .metadata.annotations.gateway.networking.k8s.io/bundle-version
+Apply failed with 1 conflict: conflict with "cloud-provider-kind" using apiextensions.k8s.io/v1: .metadata.annotations.gateway.networking.k8s.io/bundle-version
+Apply failed with 1 conflict: conflict with "cloud-provider-kind" using apiextensions.k8s.io/v1: .metadata.annotations.gateway.networking.k8s.io/bundle-version
+Apply failed with 2 conflicts: conflicts with "cloud-provider-kind" using apiextensions.k8s.io/v1:
+- .metadata.annotations.gateway.networking.k8s.io/bundle-version
+- .spec.versions
+Apply failed with 1 conflict: conflict with "cloud-provider-kind" using apiextensions.k8s.io/v1: .metadata.annotations.gateway.networking.k8s.io/bundle-version
+Apply failed with 1 conflict: conflict with "cloud-provider-kind" using apiextensions.k8s.io/v1: .metadata.annotations.gateway.networking.k8s.io/bundle-version
+Apply failed with 1 conflict: conflict with "cloud-provider-kind" using apiextensions.k8s.io/v1: .metadata.annotations.gateway.networking.k8s.io/bundle-version
+Apply failed with 1 conflict: conflict with "cloud-provider-kind" using apiextensions.k8s.io/v1: .metadata.annotations.gateway.networking.k8s.io/bundle-version
+Apply failed with 1 conflict: conflict with "cloud-provider-kind" using apiextensions.k8s.io/v1: .metadata.annotations.gateway.networking.k8s.io/bundle-version
+
+13:52:56 FAILED with status 1 after 1s. The last $ line above is the step that failed.
+##[error]Process completed with exit code 1.

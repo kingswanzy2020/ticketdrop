@@ -1,0 +1,41 @@
+Thu Nov 19 10:53:58 PM KST 2026
+ticketdrop-gitops PR #1, run 44537582384, first run, job lint. gh run view 44537582384 -R kingswanzy2020/ticketdrop-gitops --log, the shellcheck step:
+
+##[group]Run shellcheck -x -P SCRIPTDIR scripts/*.sh .github/scripts/*.sh
+shellcheck -x -P SCRIPTDIR scripts/*.sh .github/scripts/*.sh
+shell: /usr/bin/bash -e {0}
+##[endgroup]
+
+In scripts/lib.sh line 1:
+# Shared by teardown.sh, rebuild.sh and check.sh. Sourced, not run.
+^-- SC2148 (error): Tips depend on target shell and yours is unknown. Add a shebang or a 'shell' directive.
+
+
+In scripts/lib.sh line 12:
+CNPG_VERSION=0.29.1
+^----------^ SC2034 (warning): CNPG_VERSION appears unused. Verify use (or export if used externally).
+
+
+In scripts/lib.sh line 13:
+KEDA_VERSION=2.21.0
+^----------^ SC2034 (warning): KEDA_VERSION appears unused. Verify use (or export if used externally).
+
+
+In scripts/lib.sh line 14:
+TRAEFIK_VERSION=42.1.3
+^-------------^ SC2034 (warning): TRAEFIK_VERSION appears unused. Verify use (or export if used externally).
+
+
+In scripts/lib.sh line 17:
+SVCS="catalog inventory orders payments fulfillment notifications scheduler gateway web"
+^--^ SC2034 (warning): SVCS appears unused. Verify use (or export if used externally).
+
+
+In scripts/lib.sh line 57:
+  for i in $(seq 1 "${1:-60}"); do
+  ^-^ SC2034 (warning): i appears unused. Verify use (or export if used externally).
+
+For more information:
+  https://www.shellcheck.net/wiki/SC2148 -- Tips depend on target shell and y...
+  https://www.shellcheck.net/wiki/SC2034 -- CNPG_VERSION appears unused. Veri...
+##[error]Process completed with exit code 1.
