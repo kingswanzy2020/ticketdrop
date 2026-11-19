@@ -82,3 +82,8 @@ func TestExpired(t *testing.T) {
 		})
 	}
 }
+
+// Proof PR: a failing test must block the merge.
+func TestProofFailingTestBlocksMerge(t *testing.T) {
+	t.Fatal("this test fails on purpose")
+}
