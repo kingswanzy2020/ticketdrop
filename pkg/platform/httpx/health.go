@@ -45,7 +45,7 @@ func (h *Health) SetReady(ready bool) {
 }
 
 func (h *Health) livez(w http.ResponseWriter, _ *http.Request) {
-	io.WriteString(w, "ok\n")
+	_, _ = io.WriteString(w, "ok\n")
 }
 
 func (h *Health) readyz(w http.ResponseWriter, r *http.Request) {
@@ -65,7 +65,7 @@ func (h *Health) readyz(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	io.WriteString(w, "ready\n")
+	_, _ = io.WriteString(w, "ready\n")
 }
 
 // Admin returns the handler for the admin port: probes and Prometheus metrics.

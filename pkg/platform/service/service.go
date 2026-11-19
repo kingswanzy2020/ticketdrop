@@ -184,6 +184,6 @@ func (s *Service) Serve(ctx context.Context, app http.Handler, workers ...Worker
 		}
 	}
 
-	admin.Shutdown(shutCtx)
+	_ = admin.Shutdown(shutCtx)
 	return runErr
 }

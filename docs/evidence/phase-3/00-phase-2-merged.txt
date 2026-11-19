@@ -1,0 +1,8 @@
+Wed Nov 18 10:02:08 PM KST 2026
+$ git log --oneline -3 origin/main
+ad888ba Merge pull request #3 from kingswanzy2020/phase-2-kubernetes
+e1287c4 Batch inventory holds and cap each service's Postgres pool, add the k6 demo drop, and record the load runs
+560b0f4 Let drop-check run against the cluster, record the Phase 2 exit checks and the rebuild failures, and add the traffic and ports guide
+
+$ gh pr view 3 --json number,title,state,mergedAt,mergeCommit,baseRefName,headRefName
+{"baseRefName":"main","headRefName":"phase-2-kubernetes","mergeCommit":{"oid":"ad888ba2811718e7f16bfc9af491c6eafbcc9bf9"},"mergedAt":"2026-11-17T14:31:37Z","number":3,"state":"MERGED","title":"Phase 2 kubernetes"}

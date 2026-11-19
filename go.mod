@@ -1,6 +1,6 @@
 module github.com/kingswanzy2020/ticketdrop
 
-go 1.27.1
+go 1.27.4
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.47.1
@@ -37,6 +37,6 @@ require (
 	github.com/prometheus/procfs v0.21.1 // indirect
 	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
-	golang.org/x/text v0.40.0 // indirect
+	golang.org/x/text v0.41.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )

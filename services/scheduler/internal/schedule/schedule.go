@@ -50,7 +50,7 @@ func Post(client *http.Client, url string) func(ctx context.Context) error {
 		}
 		defer resp.Body.Close()
 		// Reading the body to the end lets the connection be reused.
-		io.Copy(io.Discard, resp.Body)
+		_, _ = io.Copy(io.Discard, resp.Body)
 		if resp.StatusCode < 200 || resp.StatusCode > 299 {
 			return fmt.Errorf("POST %s: status %d", url, resp.StatusCode)
 		}

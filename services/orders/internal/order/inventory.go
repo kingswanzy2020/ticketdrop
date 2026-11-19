@@ -52,7 +52,7 @@ func (i *Inventory) Hold(ctx context.Context, o Order) (expiresAt time.Time, err
 	}
 	defer resp.Body.Close()
 	// Reading the body to the end lets the connection be reused.
-	defer io.Copy(io.Discard, resp.Body)
+	defer func() { _, _ = io.Copy(io.Discard, resp.Body) }()
 
 	switch resp.StatusCode {
 	case http.StatusCreated, http.StatusOK:

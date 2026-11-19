@@ -361,7 +361,7 @@ func (s *Shop) render(w http.ResponseWriter, r *http.Request, status int, t *tem
 	// Every page shows live numbers or one customer's order.
 	w.Header().Set("Cache-Control", "no-store")
 	w.WriteHeader(status)
-	w.Write([]byte(out.String()))
+	_, _ = w.Write([]byte(out.String()))
 }
 
 // notice tells the customer something went differently than they asked. To

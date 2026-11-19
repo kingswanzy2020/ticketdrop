@@ -35,12 +35,12 @@ func TestInventoryHold(t *testing.T) {
 			var sentID string
 			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				sentID = r.Header.Get(correlation.Header)
-				json.NewDecoder(r.Body).Decode(&sent)
+				_ = json.NewDecoder(r.Body).Decode(&sent)
 				w.WriteHeader(tt.status)
 				if tt.status < 300 {
-					io.WriteString(w, `{"hold_id":"h1","expires_at":"2027-06-01T10:10:00Z"}`)
+					_, _ = io.WriteString(w, `{"hold_id":"h1","expires_at":"2027-06-01T10:10:00Z"}`)
 				} else {
-					io.WriteString(w, `{"error":"no"}`)
+					_, _ = io.WriteString(w, `{"error":"no"}`)
 				}
 			}))
 			defer srv.Close()

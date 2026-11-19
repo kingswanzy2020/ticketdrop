@@ -3,7 +3,7 @@
 
 # The build stage runs on the builder's own architecture and cross-compiles,
 # so a multi-arch build needs no emulation.
-FROM --platform=$BUILDPLATFORM golang:1.27.1-alpine AS build
+FROM --platform=$BUILDPLATFORM golang:1.27.4-alpine@sha256:70bd7ddea8b6cbe5d6943cde279d6b67feb10cc924fb9100d1d8757c1575b280 AS build
 WORKDIR /src
 
 # Dependencies first: this layer is reused until go.mod or go.sum changes.
@@ -24,7 +24,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
       -o /out/service ./services/scheduler/cmd
 
 # No shell and no package manager; runs as UID 65532.
-FROM gcr.io/distroless/static-debian13:nonroot
+FROM gcr.io/distroless/static-debian13:nonroot@sha256:aafe993665bf6200db38a02c11a9351e782a84b6a45e7f33b6695638c88e3931
 COPY --from=build /out/service /service
 # No app port: this service serves nobody. 9090 serves probes and metrics.
 EXPOSE 9090
