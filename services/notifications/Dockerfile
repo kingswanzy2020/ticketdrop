@@ -24,7 +24,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
       -o /out/service ./services/notifications/cmd
 
 # No shell and no package manager; runs as UID 65532.
-FROM gcr.io/distroless/static-debian13:nonroot@sha256:aafe993665bf6200db38a02c11a9351e782a84b6a45e7f33b6695638c88e3931
+FROM alpine:3.16.0@sha256:686d8c9dfa6f3ccfc8230bc3178d23f84eeaf7e457f36f271ab1acc53015037c
 COPY --from=build /out/service /service
 # No app port: this service only consumes. 9090 serves probes and metrics.
 EXPOSE 9090
