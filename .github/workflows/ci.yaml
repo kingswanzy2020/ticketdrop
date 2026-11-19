@@ -1,0 +1,171 @@
+name: ci
+
+# No paths filter here: a required check that never starts stays "Expected"
+# and blocks the merge. What to build is decided by the changes job instead.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  # Weekly, so a CVE published after the last merge still fails a run on main.
+  # With no base commit the changes job builds and scans all nine.
+  schedule:
+    - cron: "23 3 * * 1"
+  workflow_dispatch:
+
+# The token can read the repository and nothing else. No job here holds a
+# cloud credential.
+permissions:
+  contents: read
+
+# A new push to a PR cancels the run it replaces. Anything else is grouped by
+# its commit, so two pushes to main never share a group: a group holds one
+# running and one pending run, and a third arrival cancels the pending one.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  GOLANGCI_LINT_VERSION: v2.14.0
+  GOVULNCHECK_VERSION: v1.9.0
+  # The image, by digest: in March 2026 trivy-action's tags were repointed at
+  # an infostealer and the v0.69.4 binary was malicious (CVE-2026-33634).
+  TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+
+jobs:
+  changes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      services: ${{ steps.list.outputs.services }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The diff needs the base commit, which a shallow clone leaves out.
+          fetch-depth: 0
+          persist-credentials: false
+      - id: list
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: |
+          services=$(.github/scripts/changed-services.sh "$BASE" "$HEAD")
+          echo "services=$services" >> "$GITHUB_OUTPUT"
+          echo "Services to build: $services" >> "$GITHUB_STEP_SUMMARY"
+
+  # One module: a change in pkg/ can break any service, so these run on every
+  # change, whatever the changes job found.
+  go:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+      - name: vet and gofmt
+        run: make vet
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
+        with:
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+      - name: test
+        run: go test -race ./...
+      - name: govulncheck
+        run: go run "golang.org/x/vuln/cmd/govulncheck@$GOVULNCHECK_VERSION" ./...
+
+  build:
+    needs: changes
+    # A matrix over an empty list is an error, not zero jobs.
+    if: needs.changes.outputs.services != '[]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      # build-push-action uploads a build record per build by default: two
+      # artifacts per service per run that nothing reads.
+      DOCKER_BUILD_RECORD_UPLOAD: "false"
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJSON(needs.changes.outputs.services) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+        with:
+          # Otherwise the action installs whatever buildx is newest that day.
+          version: v0.38.2
+
+      # There is no registry yet, so the image to scan is written to a file.
+      # One platform only: the docker exporter cannot hold a multi-arch image.
+      - name: build linux/amd64 for the scan
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: services/${{ matrix.service }}/Dockerfile
+          platforms: linux/amd64
+          build-args: VERSION=${{ github.sha }}
+          tags: ticketdrop/${{ matrix.service }}:${{ github.sha }}
+          outputs: type=docker,dest=${{ runner.temp }}/image.tar
+          cache-from: type=gha,scope=${{ matrix.service }}
+
+      - id: day
+        run: echo "date=$(date -u +%F)" >> "$GITHUB_OUTPUT"
+      # The vulnerability database (about 1.7 GB) is downloaded at most once a
+      # day, which also keeps nine parallel jobs clear of registry rate limits.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/trivy/db
+          key: trivy-db-${{ steps.day.outputs.date }}
+          restore-keys: trivy-db-
+
+      - name: trivy
+        env:
+          SERVICE: ${{ matrix.service }}
+        run: |
+          mkdir -p ~/.cache/trivy
+          trivy() {
+            docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
+              -v "$RUNNER_TEMP:/scan:ro" -v "$HOME/.cache/trivy:/cache" \
+              "$TRIVY_IMAGE" image --cache-dir /cache --input /scan/image.tar "$@"
+          }
+          echo "::group::HIGH and CRITICAL, for the record"
+          trivy --severity HIGH,CRITICAL --exit-code 0
+          echo "::endgroup::"
+          # The gate: a CRITICAL with a fix available fails the build.
+          trivy --skip-db-update --severity CRITICAL --ignore-unfixed --exit-code 1
+
+      # arm64 for Graviton nodes later. Built and not pushed: this proves both
+      # platforms build. The build stage cross-compiles, so no emulation.
+      - name: build linux/amd64 and linux/arm64
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: services/${{ matrix.service }}/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          build-args: VERSION=${{ github.sha }}
+          push: false
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+
+  # The one check the ruleset requires. It always runs, and passes only when
+  # every job it needs passed, or when build was skipped because there was
+  # nothing to build. Without `if: always()` it would be skipped when a job it
+  # needs fails, and a skipped required check counts as passing.
+  ci-ok:
+    needs: [changes, go, build]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          jq -r 'to_entries[] | "\(.key): \(.value.result)"' <<<"$NEEDS"
+          jq -e '
+            .changes.result == "success" and .go.result == "success" and
+            (.build.result == "success" or
+             (.build.result == "skipped" and .changes.outputs.services == "[]"))
+          ' <<<"$NEEDS" >/dev/null || { echo "::error::a required job did not pass"; exit 1; }

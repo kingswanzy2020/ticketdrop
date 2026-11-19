@@ -28,7 +28,7 @@ func (b *box) handler() http.Handler {
 	write := func(w http.ResponseWriter, status int, v any) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(v)
+		_ = json.NewEncoder(w).Encode(v)
 	}
 	mux.HandleFunc("GET /v1/drops", func(w http.ResponseWriter, _ *http.Request) {
 		b.mu.Lock()
@@ -57,7 +57,7 @@ func (b *box) handler() http.Handler {
 		b.mu.Lock()
 		defer b.mu.Unlock()
 		var req OrderRequest
-		json.NewDecoder(r.Body).Decode(&req)
+		_ = json.NewDecoder(r.Body).Decode(&req)
 		b.received = append(b.received, req)
 		if b.answer != 201 {
 			write(w, b.answer, map[string]string{"error": "customer_email must be a valid email address"})

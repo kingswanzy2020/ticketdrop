@@ -1,0 +1,16 @@
+version: "2"
+
+linters:
+  # errcheck, govet, ineffassign, staticcheck, unused.
+  default: standard
+  settings:
+    errcheck:
+      exclude-functions:
+        # Deferred after Commit, where it is a no-op. A failed rollback
+        # before Commit already returns the error that caused it.
+        - (github.com/jackc/pgx/v5.Tx).Rollback
+  exclusions:
+    presets:
+      # Unchecked Close, Flush, os.Remove and print calls, which have nothing
+      # useful to do with an error.
+      - std-error-handling

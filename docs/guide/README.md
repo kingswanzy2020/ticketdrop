@@ -5,7 +5,7 @@ Two pages explain the project and are published as Claude artifacts.
 | Page | Source | Published at |
 |---|---|---|
 | TicketDrop Field Guide | `src/field-guide.html` | https://claude.ai/artifact/SXE3mjmuBPCnzeEr3witSY |
-| TicketDrop Phase 2 Workbook | `src/phase-2-workbook.html` | https://claude.ai/artifact/RD6kXt4bFr9hpiunekJ73J |
+| TicketDrop Workbook | `src/workbook.html` | https://claude.ai/artifact/RD6kXt4bFr9hpiunekJ73J |
 
 Edit the files in `src/`, never the built copies beside this file.
 

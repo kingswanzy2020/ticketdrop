@@ -158,7 +158,8 @@ func (a *API) PlaceOrder(ctx context.Context, req OrderRequest) (Order, error) {
 		var problem struct {
 			Error string `json:"error"`
 		}
-		json.Unmarshal(body, &problem)
+		// A body that is not the expected JSON leaves the message empty.
+		_ = json.Unmarshal(body, &problem)
 		return Order{}, &Rejected{Message: problem.Error}
 	default:
 		return Order{}, fmt.Errorf("place order: status %d", resp.StatusCode)

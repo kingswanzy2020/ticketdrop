@@ -1,0 +1,42 @@
+Thu Nov 19 05:37:58 PM KST 2026
+go version go1.27.4 linux/amd64
+golangci-lint has version 2.14.0 built with go1.27.1 from 114493f on 2026-09-24T10:54:53Z
++ make vet
+go vet ./...
++ golangci-lint run ./...
+0 issues.
++ go test -race -count=1 ./...
+?   	github.com/kingswanzy2020/ticketdrop/pkg/contracts	[no test files]
+?   	github.com/kingswanzy2020/ticketdrop/pkg/platform/config	[no test files]
+?   	github.com/kingswanzy2020/ticketdrop/pkg/platform/correlation	[no test files]
+ok  	github.com/kingswanzy2020/ticketdrop/pkg/platform/db	1.028s
+ok  	github.com/kingswanzy2020/ticketdrop/pkg/platform/events	1.027s
+ok  	github.com/kingswanzy2020/ticketdrop/pkg/platform/httpx	1.026s
+?   	github.com/kingswanzy2020/ticketdrop/pkg/platform/logging	[no test files]
+?   	github.com/kingswanzy2020/ticketdrop/pkg/platform/service	[no test files]
+?   	github.com/kingswanzy2020/ticketdrop/services/catalog/cmd	[no test files]
+ok  	github.com/kingswanzy2020/ticketdrop/services/catalog/internal/catalog	1.030s
+?   	github.com/kingswanzy2020/ticketdrop/services/catalog/migrations	[no test files]
+?   	github.com/kingswanzy2020/ticketdrop/services/fulfillment/cmd	[no test files]
+?   	github.com/kingswanzy2020/ticketdrop/services/fulfillment/internal/ticket	[no test files]
+?   	github.com/kingswanzy2020/ticketdrop/services/fulfillment/migrations	[no test files]
+?   	github.com/kingswanzy2020/ticketdrop/services/gateway/cmd	[no test files]
+ok  	github.com/kingswanzy2020/ticketdrop/services/gateway/internal/proxy	1.044s
+?   	github.com/kingswanzy2020/ticketdrop/services/inventory/cmd	[no test files]
+ok  	github.com/kingswanzy2020/ticketdrop/services/inventory/internal/stock	1.053s
+?   	github.com/kingswanzy2020/ticketdrop/services/inventory/migrations	[no test files]
+?   	github.com/kingswanzy2020/ticketdrop/services/notifications/cmd	[no test files]
+ok  	github.com/kingswanzy2020/ticketdrop/services/notifications/internal/notify	1.029s
+?   	github.com/kingswanzy2020/ticketdrop/services/orders/cmd	[no test files]
+ok  	github.com/kingswanzy2020/ticketdrop/services/orders/internal/order	1.088s
+?   	github.com/kingswanzy2020/ticketdrop/services/orders/migrations	[no test files]
+?   	github.com/kingswanzy2020/ticketdrop/services/payments/cmd	[no test files]
+ok  	github.com/kingswanzy2020/ticketdrop/services/payments/internal/payment	1.053s
+?   	github.com/kingswanzy2020/ticketdrop/services/payments/migrations	[no test files]
+?   	github.com/kingswanzy2020/ticketdrop/services/scheduler/cmd	[no test files]
+ok  	github.com/kingswanzy2020/ticketdrop/services/scheduler/internal/schedule	1.032s
+?   	github.com/kingswanzy2020/ticketdrop/services/web/cmd	[no test files]
+ok  	github.com/kingswanzy2020/ticketdrop/services/web/internal/shop	1.200s
++ go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
+No vulnerabilities found.
++ set +x

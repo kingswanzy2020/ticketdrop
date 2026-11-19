@@ -1,0 +1,1472 @@
+Thu Nov 19 07:33:30 PM KST 2026
+
+✓ phase-3-ci ci kingswanzy2020/ticketdrop#4 · 44500468675
+Triggered via pull_request about 40 minutes ago
+
+JOBS
+✓ go in 1m30s (ID 135478586621)
+✓ changes in 10s (ID 135478586914)
+✓ build (orders) in 1m54s (ID 135478700088)
+✓ build (notifications) in 1m35s (ID 135478700103)
+✓ build (gateway) in 1m49s (ID 135478700112)
+✓ build (fulfillment) in 1m22s (ID 135478700119)
+✓ build (catalog) in 1m43s (ID 135478700130)
+✓ build (web) in 1m30s (ID 135478700139)
+✓ build (inventory) in 1m25s (ID 135478700204)
+✓ build (scheduler) in 1m45s (ID 135478700214)
+✓ build (payments) in 1m45s (ID 135478700248)
+
+For more information about a job, try: gh run view --job=<job-id>
+View this run on GitHub: https://github.com/kingswanzy2020/ticketdrop/actions/runs/44500468675
+Full log: 02-changes-first-pr-run.log.gz (gh run view 44500468675 --log). Below: the changes and go jobs in full, and each build job's trivy step.
+
+===== job: changes
+2026-11-19T09:53:03.3223099Z Current runner version: '2.338.2'
+2026-11-19T09:53:03.3240641Z ##[group]Runner Image Provisioner
+2026-11-19T09:53:03.3241327Z Hosted Compute Agent
+2026-11-19T09:53:03.3241778Z Version: 20261103.629
+2026-11-19T09:53:03.3242214Z Commit: 15dbd9ccb5dbf34fae002b6ed1a2670f52df37bc
+2026-11-19T09:53:03.3243021Z Build Date: 2026-11-03T17:26:59Z
+2026-11-19T09:53:03.3243552Z Worker ID: {6674ad5e-3fa9-4ebe-8351-0c23ebf53667}
+2026-11-19T09:53:03.3244075Z Region: us-east-1
+2026-11-19T09:53:03.3244485Z Cloud: AWS
+2026-11-19T09:53:03.3244886Z ##[endgroup]
+2026-11-19T09:53:03.3246027Z ##[group]Operating System
+2026-11-19T09:53:03.3246494Z Ubuntu
+2026-11-19T09:53:03.3246865Z 24.04.5
+2026-11-19T09:53:03.3247244Z LTS
+2026-11-19T09:53:03.3247600Z ##[endgroup]
+2026-11-19T09:53:03.3247990Z ##[group]Runner Image
+2026-11-19T09:53:03.3248418Z Image: ubuntu-24.04
+2026-11-19T09:53:03.3248831Z Version: 20261111.127.1
+2026-11-19T09:53:03.3249640Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261111.127/images/ubuntu/Ubuntu2404-Readme.md
+2026-11-19T09:53:03.3250891Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261111.127
+2026-11-19T09:53:03.3251570Z ##[endgroup]
+2026-11-19T09:53:03.3252388Z ##[group]GITHUB_TOKEN Permissions
+2026-11-19T09:53:03.3254402Z Contents: read
+2026-11-19T09:53:03.3254860Z Metadata: read
+2026-11-19T09:53:03.3255249Z ##[endgroup]
+2026-11-19T09:53:03.3256727Z Secret source: Actions
+2026-11-19T09:53:03.3257394Z Cache mode: write
+2026-11-19T09:53:03.3258050Z Prepare workflow directory
+2026-11-19T09:53:03.3578927Z Prepare all required actions
+2026-11-19T09:53:03.3630190Z Getting action download info
+2026-11-19T09:53:03.5436201Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)
+2026-11-19T09:53:05.5300410Z Complete job name: changes
+2026-11-19T09:53:05.5941282Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+2026-11-19T09:53:05.5942167Z with:
+2026-11-19T09:53:05.5942888Z   fetch-depth: 0
+2026-11-19T09:53:05.5943396Z   persist-credentials: false
+2026-11-19T09:53:05.5943891Z   repository: kingswanzy2020/ticketdrop
+2026-11-19T09:53:05.5947422Z   token: ***
+2026-11-19T09:53:05.5947846Z   ssh-strict: true
+2026-11-19T09:53:05.5948262Z   ssh-user: git
+2026-11-19T09:53:05.5948680Z   clean: true
+2026-11-19T09:53:05.5949124Z   sparse-checkout-cone-mode: true
+2026-11-19T09:53:05.5949604Z   fetch-tags: false
+2026-11-19T09:53:05.5950051Z   show-progress: true
+2026-11-19T09:53:05.5950478Z   lfs: false
+2026-11-19T09:53:05.5950912Z   submodules: false
+2026-11-19T09:53:05.5951378Z   set-safe-directory: true
+2026-11-19T09:53:05.5951843Z   allow-unsafe-pr-checkout: false
+2026-11-19T09:53:05.5952711Z env:
+2026-11-19T09:53:05.5953211Z   GOLANGCI_LINT_VERSION: v2.14.0
+2026-11-19T09:53:05.5953716Z   GOVULNCHECK_VERSION: v1.9.0
+2026-11-19T09:53:05.5954521Z   TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:53:05.5955440Z ##[endgroup]
+2026-11-19T09:53:08.8345360Z Syncing repository: kingswanzy2020/ticketdrop
+2026-11-19T09:53:08.8347009Z ##[group]Getting Git version info
+2026-11-19T09:53:08.8347652Z Working directory is '/home/runner/work/ticketdrop/ticketdrop'
+2026-11-19T09:53:08.8348556Z [command]/usr/bin/git version
+2026-11-19T09:53:09.1285078Z git version 2.56.1
+2026-11-19T09:53:09.1301712Z ##[endgroup]
+2026-11-19T09:53:09.1308002Z Temporarily overriding HOME='/home/runner/work/_temp/b2d478b8-5c0e-42d0-b5b0-54214e799fd6' before making global git config changes
+2026-11-19T09:53:09.1309039Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-19T09:53:09.1312436Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/ticketdrop/ticketdrop
+2026-11-19T09:53:09.1719635Z Deleting the contents of '/home/runner/work/ticketdrop/ticketdrop'
+2026-11-19T09:53:09.1723707Z ##[group]Determining repository object format
+2026-11-19T09:53:09.1724786Z ##[endgroup]
+2026-11-19T09:53:09.1725864Z ##[group]Initializing the repository
+2026-11-19T09:53:09.1728630Z [command]/usr/bin/git init /home/runner/work/ticketdrop/ticketdrop
+2026-11-19T09:53:09.2933161Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-19T09:53:09.2934241Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-19T09:53:09.2934752Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-19T09:53:09.2935221Z hint: call:
+2026-11-19T09:53:09.2935473Z hint:
+2026-11-19T09:53:09.2935815Z hint: 	git config --global init.defaultBranch <name>
+2026-11-19T09:53:09.2936149Z hint:
+2026-11-19T09:53:09.2936494Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-19T09:53:09.2936937Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-19T09:53:09.2937428Z hint:
+2026-11-19T09:53:09.2937704Z hint: 	git branch -m <name>
+2026-11-19T09:53:09.2938060Z hint:
+2026-11-19T09:53:09.2938514Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-19T09:53:09.2939229Z Initialized empty Git repository in /home/runner/work/ticketdrop/ticketdrop/.git/
+2026-11-19T09:53:09.2948955Z [command]/usr/bin/git remote add origin https://github.com/kingswanzy2020/ticketdrop
+2026-11-19T09:53:09.2995840Z ##[endgroup]
+2026-11-19T09:53:09.2996852Z ##[group]Disabling automatic garbage collection
+2026-11-19T09:53:09.2998680Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-19T09:53:09.3022753Z ##[endgroup]
+2026-11-19T09:53:09.3023310Z ##[group]Setting up auth
+2026-11-19T09:53:09.3023674Z Removing SSH command configuration
+2026-11-19T09:53:09.3026796Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-19T09:53:09.3056219Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-19T09:53:09.6220281Z Removing HTTP extra header
+2026-11-19T09:53:09.6225816Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-19T09:53:09.6253183Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-19T09:53:09.6405764Z Removing includeIf entries pointing to credentials config files
+2026-11-19T09:53:09.6409125Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-19T09:53:09.6434604Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-19T09:53:09.6580942Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-fd45bfc5-a23f-49f9-a03e-db44950adf5c.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-19T09:53:09.6607989Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/ticketdrop/ticketdrop/.git.path /home/runner/work/_temp/git-credentials-fd45bfc5-a23f-49f9-a03e-db44950adf5c.config
+2026-11-19T09:53:09.6629396Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/ticketdrop/ticketdrop/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-fd45bfc5-a23f-49f9-a03e-db44950adf5c.config
+2026-11-19T09:53:09.6653292Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-fd45bfc5-a23f-49f9-a03e-db44950adf5c.config
+2026-11-19T09:53:09.6675162Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-fd45bfc5-a23f-49f9-a03e-db44950adf5c.config
+2026-11-19T09:53:09.6694591Z ##[endgroup]
+2026-11-19T09:53:09.6695007Z ##[group]Fetching the repository
+2026-11-19T09:53:09.6699397Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/* +4ecb0c76e67fb13e6b205d72562837177c4b096e:refs/remotes/pull/4/merge
+2026-11-19T09:53:10.4244843Z From https://github.com/kingswanzy2020/ticketdrop
+2026-11-19T09:53:10.4245676Z  * [new branch]      main                                     -> origin/main
+2026-11-19T09:53:10.4246255Z  * [new branch]      phase-2-kubernetes                       -> origin/phase-2-kubernetes
+2026-11-19T09:53:10.4246768Z  * [new branch]      phase-3-ci                               -> origin/phase-3-ci
+2026-11-19T09:53:10.4247348Z  * [new ref]         4ecb0c76e67fb13e6b205d72562837177c4b096e -> pull/4/merge
+2026-11-19T09:53:10.4258379Z ##[endgroup]
+2026-11-19T09:53:10.4258925Z ##[group]Determining the checkout info
+2026-11-19T09:53:10.4259376Z ##[endgroup]
+2026-11-19T09:53:10.4259668Z [command]/usr/bin/git sparse-checkout disable
+2026-11-19T09:53:10.4310635Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-19T09:53:10.4336147Z ##[group]Checking out the ref
+2026-11-19T09:53:10.4341199Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/4/merge
+2026-11-19T09:53:10.5277529Z Note: switching to 'refs/remotes/pull/4/merge'.
+2026-11-19T09:53:10.5277888Z 
+2026-11-19T09:53:10.5278113Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-11-19T09:53:10.5278887Z changes and commit them, and you can discard any commits you make in this
+2026-11-19T09:53:10.5279424Z state without impacting any branches by switching back to a branch.
+2026-11-19T09:53:10.5279702Z 
+2026-11-19T09:53:10.5279946Z If you want to create a new branch to retain commits you create, you may
+2026-11-19T09:53:10.5280382Z do so (now or later) by using -c with the switch command. Example:
+2026-11-19T09:53:10.5280594Z 
+2026-11-19T09:53:10.5280719Z   git switch -c <new-branch-name>
+2026-11-19T09:53:10.5280903Z 
+2026-11-19T09:53:10.5281274Z Or undo this operation with:
+2026-11-19T09:53:10.5281440Z 
+2026-11-19T09:53:10.5281526Z   git switch -
+2026-11-19T09:53:10.5281711Z 
+2026-11-19T09:53:10.5281926Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-11-19T09:53:10.5282159Z 
+2026-11-19T09:53:10.5282606Z HEAD is now at 4ecb0c7 Merge 95c6f1e97b180c025f7ae4ba1ff84664231bd540 into ad888ba2811718e7f16bfc9af491c6eafbcc9bf9
+2026-11-19T09:53:10.5289415Z ##[endgroup]
+2026-11-19T09:53:10.5325788Z [command]/usr/bin/git log -1 --format=%H
+2026-11-19T09:53:10.5346554Z 4ecb0c76e67fb13e6b205d72562837177c4b096e
+2026-11-19T09:53:10.5353805Z ##[group]Removing auth
+2026-11-19T09:53:10.5354210Z Removing SSH command configuration
+2026-11-19T09:53:10.5356181Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-19T09:53:10.5378547Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-19T09:53:10.5527703Z Removing HTTP extra header
+2026-11-19T09:53:10.5530183Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-19T09:53:10.5553000Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-19T09:53:10.5697228Z Removing includeIf entries pointing to credentials config files
+2026-11-19T09:53:10.5700171Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-19T09:53:10.5720323Z includeif.gitdir:/home/runner/work/ticketdrop/ticketdrop/.git.path
+2026-11-19T09:53:10.5721589Z includeif.gitdir:/home/runner/work/ticketdrop/ticketdrop/.git/worktrees/*.path
+2026-11-19T09:53:10.5722252Z includeif.gitdir:/github/workspace/.git.path
+2026-11-19T09:53:10.5723025Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-19T09:53:10.5726747Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/ticketdrop/ticketdrop/.git.path
+2026-11-19T09:53:10.5743870Z /home/runner/work/_temp/git-credentials-fd45bfc5-a23f-49f9-a03e-db44950adf5c.config
+2026-11-19T09:53:10.5750928Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/ticketdrop/ticketdrop/.git.path \/home\/runner\/work\/_temp\/git\-credentials\-fd45bfc5\-a23f\-49f9\-a03e\-db44950adf5c\.config
+2026-11-19T09:53:10.5779525Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/ticketdrop/ticketdrop/.git/worktrees/*.path
+2026-11-19T09:53:10.5796770Z /home/runner/work/_temp/git-credentials-fd45bfc5-a23f-49f9-a03e-db44950adf5c.config
+2026-11-19T09:53:10.5801806Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/ticketdrop/ticketdrop/.git/worktrees/*.path \/home\/runner\/work\/_temp\/git\-credentials\-fd45bfc5\-a23f\-49f9\-a03e\-db44950adf5c\.config
+2026-11-19T09:53:10.5826821Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-11-19T09:53:10.5844677Z /github/runner_temp/git-credentials-fd45bfc5-a23f-49f9-a03e-db44950adf5c.config
+2026-11-19T09:53:10.5850884Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path \/github\/runner_temp\/git\-credentials\-fd45bfc5\-a23f\-49f9\-a03e\-db44950adf5c\.config
+2026-11-19T09:53:10.5875100Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-19T09:53:10.5891759Z /github/runner_temp/git-credentials-fd45bfc5-a23f-49f9-a03e-db44950adf5c.config
+2026-11-19T09:53:10.5897063Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path \/github\/runner_temp\/git\-credentials\-fd45bfc5\-a23f\-49f9\-a03e\-db44950adf5c\.config
+2026-11-19T09:53:10.5920112Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-19T09:53:10.6063431Z Removing credentials config '/home/runner/work/_temp/git-credentials-fd45bfc5-a23f-49f9-a03e-db44950adf5c.config'
+2026-11-19T09:53:10.6068295Z ##[endgroup]
+2026-11-19T09:53:10.6237271Z ##[group]Run services=$(.github/scripts/changed-services.sh "$BASE" "$HEAD")
+2026-11-19T09:53:10.6237825Z services=$(.github/scripts/changed-services.sh "$BASE" "$HEAD")
+2026-11-19T09:53:10.6238297Z echo "services=$services" >> "$GITHUB_OUTPUT"
+2026-11-19T09:53:10.6238638Z echo "Services to build: $services" >> "$GITHUB_STEP_SUMMARY"
+2026-11-19T09:53:10.7835050Z shell: /usr/bin/bash -e {0}
+2026-11-19T09:53:10.7835527Z env:
+2026-11-19T09:53:10.7835771Z   GOLANGCI_LINT_VERSION: v2.14.0
+2026-11-19T09:53:10.7836024Z   GOVULNCHECK_VERSION: v1.9.0
+2026-11-19T09:53:10.7836498Z   TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:53:10.7836954Z   BASE: ad888ba2811718e7f16bfc9af491c6eafbcc9bf9
+2026-11-19T09:53:10.7837301Z   HEAD: 95c6f1e97b180c025f7ae4ba1ff84664231bd540
+2026-11-19T09:53:10.7837596Z ##[endgroup]
+2026-11-19T09:53:10.8072859Z .github/scripts/changed-services.sh changes every image: building all
+2026-11-19T09:53:10.8216211Z Post job cleanup.
+2026-11-19T09:53:10.8844483Z [command]/usr/bin/git version
+2026-11-19T09:53:10.8872810Z git version 2.56.1
+2026-11-19T09:53:10.8894964Z Temporarily overriding HOME='/home/runner/work/_temp/9471081b-c5da-467a-b7a1-9f28c9539fdb' before making global git config changes
+2026-11-19T09:53:10.8895998Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-19T09:53:10.8898026Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/ticketdrop/ticketdrop
+2026-11-19T09:53:10.8920354Z Removing SSH command configuration
+2026-11-19T09:53:10.8924696Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-19T09:53:10.8946765Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-19T09:53:10.9109271Z Removing HTTP extra header
+2026-11-19T09:53:10.9114440Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-19T09:53:10.9146639Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-19T09:53:10.9295889Z Removing includeIf entries pointing to credentials config files
+2026-11-19T09:53:10.9300463Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-19T09:53:10.9321750Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-19T09:53:10.9616019Z Evaluate and set job outputs
+2026-11-19T09:53:10.9621718Z Set output 'services'
+2026-11-19T09:53:10.9623789Z Cleaning up orphan processes
+
+===== job: go
+2026-11-19T09:53:04.3423954Z Current runner version: '2.338.2'
+2026-11-19T09:53:04.3440798Z ##[group]Runner Image Provisioner
+2026-11-19T09:53:04.3441696Z Hosted Compute Agent
+2026-11-19T09:53:04.3442125Z Version: 20261103.629
+2026-11-19T09:53:04.3442611Z Commit: 15dbd9ccb5dbf34fae002b6ed1a2670f52df37bc
+2026-11-19T09:53:04.3443385Z Build Date: 2026-11-03T17:26:59Z
+2026-11-19T09:53:04.3443905Z Worker ID: {d8efc6ea-a16f-4038-9add-d3e5d288599f}
+2026-11-19T09:53:04.3444427Z Region: us-west-2
+2026-11-19T09:53:04.3444812Z Cloud: AWS
+2026-11-19T09:53:04.3445166Z ##[endgroup]
+2026-11-19T09:53:04.3446202Z ##[group]Operating System
+2026-11-19T09:53:04.3446679Z Ubuntu
+2026-11-19T09:53:04.3447046Z 24.04.5
+2026-11-19T09:53:04.3447412Z LTS
+2026-11-19T09:53:04.3447764Z ##[endgroup]
+2026-11-19T09:53:04.3448195Z ##[group]Runner Image
+2026-11-19T09:53:04.3448611Z Image: ubuntu-24.04
+2026-11-19T09:53:04.3449005Z Version: 20261111.127.1
+2026-11-19T09:53:04.3449752Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261111.127/images/ubuntu/Ubuntu2404-Readme.md
+2026-11-19T09:53:04.3450994Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261111.127
+2026-11-19T09:53:04.3451712Z ##[endgroup]
+2026-11-19T09:53:04.3452486Z ##[group]GITHUB_TOKEN Permissions
+2026-11-19T09:53:04.3454202Z Contents: read
+2026-11-19T09:53:04.3454626Z Metadata: read
+2026-11-19T09:53:04.3455038Z ##[endgroup]
+2026-11-19T09:53:04.3456458Z Secret source: Actions
+2026-11-19T09:53:04.3457174Z Cache mode: write
+2026-11-19T09:53:04.3457642Z Prepare workflow directory
+2026-11-19T09:53:04.3718034Z Prepare all required actions
+2026-11-19T09:53:04.3754044Z Getting action download info
+2026-11-19T09:53:04.7292810Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)
+2026-11-19T09:53:06.3028649Z Download action repository 'actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e' (SHA:b7ad1dad31e06c5925ef5d2fc7ad053ef454303e)
+2026-11-19T09:53:06.7056434Z Download action repository 'golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a' (SHA:ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a)
+2026-11-19T09:53:07.2819103Z Complete job name: go
+2026-11-19T09:53:07.3404209Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+2026-11-19T09:53:07.3404860Z with:
+2026-11-19T09:53:07.3405194Z   persist-credentials: false
+2026-11-19T09:53:07.3405499Z   repository: kingswanzy2020/ticketdrop
+2026-11-19T09:53:07.3407615Z   token: ***
+2026-11-19T09:53:07.3407903Z   ssh-strict: true
+2026-11-19T09:53:07.3408159Z   ssh-user: git
+2026-11-19T09:53:07.3408415Z   clean: true
+2026-11-19T09:53:07.3408685Z   sparse-checkout-cone-mode: true
+2026-11-19T09:53:07.3408967Z   fetch-depth: 1
+2026-11-19T09:53:07.3409256Z   fetch-tags: false
+2026-11-19T09:53:07.3409521Z   show-progress: true
+2026-11-19T09:53:07.3409827Z   lfs: false
+2026-11-19T09:53:07.3410070Z   submodules: false
+2026-11-19T09:53:07.3410322Z   set-safe-directory: true
+2026-11-19T09:53:07.3410653Z   allow-unsafe-pr-checkout: false
+2026-11-19T09:53:07.3411068Z env:
+2026-11-19T09:53:07.3411324Z   GOLANGCI_LINT_VERSION: v2.14.0
+2026-11-19T09:53:07.3411627Z   GOVULNCHECK_VERSION: v1.9.0
+2026-11-19T09:53:07.3412080Z   TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:53:07.3412686Z ##[endgroup]
+2026-11-19T09:53:10.6706867Z Syncing repository: kingswanzy2020/ticketdrop
+2026-11-19T09:53:10.6708128Z ##[group]Getting Git version info
+2026-11-19T09:53:10.6708518Z Working directory is '/home/runner/work/ticketdrop/ticketdrop'
+2026-11-19T09:53:10.6709048Z [command]/usr/bin/git version
+2026-11-19T09:53:11.0637226Z git version 2.56.1
+2026-11-19T09:53:11.0651252Z ##[endgroup]
+2026-11-19T09:53:11.0660533Z Temporarily overriding HOME='/home/runner/work/_temp/a34a9b7e-217c-41d6-a2d1-2d86719f75aa' before making global git config changes
+2026-11-19T09:53:11.0661496Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-19T09:53:11.0665306Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/ticketdrop/ticketdrop
+2026-11-19T09:53:11.1075079Z Deleting the contents of '/home/runner/work/ticketdrop/ticketdrop'
+2026-11-19T09:53:11.1077289Z ##[group]Determining repository object format
+2026-11-19T09:53:11.1078346Z ##[endgroup]
+2026-11-19T09:53:11.1078754Z ##[group]Initializing the repository
+2026-11-19T09:53:11.1082150Z [command]/usr/bin/git init /home/runner/work/ticketdrop/ticketdrop
+2026-11-19T09:53:11.2030896Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-19T09:53:11.2031497Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-19T09:53:11.2031903Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-19T09:53:11.2032183Z hint: call:
+2026-11-19T09:53:11.2032361Z hint:
+2026-11-19T09:53:11.2032588Z hint: 	git config --global init.defaultBranch <name>
+2026-11-19T09:53:11.2032823Z hint:
+2026-11-19T09:53:11.2033274Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-19T09:53:11.2033696Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-19T09:53:11.2034009Z hint:
+2026-11-19T09:53:11.2034173Z hint: 	git branch -m <name>
+2026-11-19T09:53:11.2034362Z hint:
+2026-11-19T09:53:11.2034611Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-19T09:53:11.2048701Z Initialized empty Git repository in /home/runner/work/ticketdrop/ticketdrop/.git/
+2026-11-19T09:53:11.2062225Z [command]/usr/bin/git remote add origin https://github.com/kingswanzy2020/ticketdrop
+2026-11-19T09:53:11.2106158Z ##[endgroup]
+2026-11-19T09:53:11.2106690Z ##[group]Disabling automatic garbage collection
+2026-11-19T09:53:11.2108204Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-19T09:53:11.2130902Z ##[endgroup]
+2026-11-19T09:53:11.2131421Z ##[group]Setting up auth
+2026-11-19T09:53:11.2131764Z Removing SSH command configuration
+2026-11-19T09:53:11.2136096Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-19T09:53:11.2164829Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-19T09:53:11.6719104Z Removing HTTP extra header
+2026-11-19T09:53:11.6723452Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-19T09:53:11.6747566Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-19T09:53:11.6900203Z Removing includeIf entries pointing to credentials config files
+2026-11-19T09:53:11.6904331Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-19T09:53:11.6927379Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-19T09:53:11.7073665Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-21be8dc5-fe3f-46b3-acf1-c6b48544ddba.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-19T09:53:11.7101922Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/ticketdrop/ticketdrop/.git.path /home/runner/work/_temp/git-credentials-21be8dc5-fe3f-46b3-acf1-c6b48544ddba.config
+2026-11-19T09:53:11.7124078Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/ticketdrop/ticketdrop/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-21be8dc5-fe3f-46b3-acf1-c6b48544ddba.config
+2026-11-19T09:53:11.7146149Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-21be8dc5-fe3f-46b3-acf1-c6b48544ddba.config
+2026-11-19T09:53:11.7168005Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-21be8dc5-fe3f-46b3-acf1-c6b48544ddba.config
+2026-11-19T09:53:11.7188571Z ##[endgroup]
+2026-11-19T09:53:11.7188935Z ##[group]Fetching the repository
+2026-11-19T09:53:11.7192893Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +4ecb0c76e67fb13e6b205d72562837177c4b096e:refs/remotes/pull/4/merge
+2026-11-19T09:53:12.6043022Z From https://github.com/kingswanzy2020/ticketdrop
+2026-11-19T09:53:12.6043839Z  * [new ref]         4ecb0c76e67fb13e6b205d72562837177c4b096e -> pull/4/merge
+2026-11-19T09:53:12.6047133Z ##[endgroup]
+2026-11-19T09:53:12.6047635Z ##[group]Determining the checkout info
+2026-11-19T09:53:12.6048316Z ##[endgroup]
+2026-11-19T09:53:12.6052911Z [command]/usr/bin/git sparse-checkout disable
+2026-11-19T09:53:12.6122059Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-19T09:53:12.6144652Z ##[group]Checking out the ref
+2026-11-19T09:53:12.6148930Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/4/merge
+2026-11-19T09:53:12.7085313Z Note: switching to 'refs/remotes/pull/4/merge'.
+2026-11-19T09:53:12.7085563Z 
+2026-11-19T09:53:12.7085761Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-11-19T09:53:12.7086280Z changes and commit them, and you can discard any commits you make in this
+2026-11-19T09:53:12.7086692Z state without impacting any branches by switching back to a branch.
+2026-11-19T09:53:12.7086890Z 
+2026-11-19T09:53:12.7087260Z If you want to create a new branch to retain commits you create, you may
+2026-11-19T09:53:12.7087724Z do so (now or later) by using -c with the switch command. Example:
+2026-11-19T09:53:12.7087961Z 
+2026-11-19T09:53:12.7088079Z   git switch -c <new-branch-name>
+2026-11-19T09:53:12.7088277Z 
+2026-11-19T09:53:12.7088389Z Or undo this operation with:
+2026-11-19T09:53:12.7088552Z 
+2026-11-19T09:53:12.7088643Z   git switch -
+2026-11-19T09:53:12.7088782Z 
+2026-11-19T09:53:12.7089033Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-11-19T09:53:12.7089344Z 
+2026-11-19T09:53:12.7089726Z HEAD is now at 4ecb0c7 Merge 95c6f1e97b180c025f7ae4ba1ff84664231bd540 into ad888ba2811718e7f16bfc9af491c6eafbcc9bf9
+2026-11-19T09:53:12.7099777Z ##[endgroup]
+2026-11-19T09:53:12.7135266Z [command]/usr/bin/git log -1 --format=%H
+2026-11-19T09:53:12.7152495Z 4ecb0c76e67fb13e6b205d72562837177c4b096e
+2026-11-19T09:53:12.7159972Z ##[group]Removing auth
+2026-11-19T09:53:12.7160326Z Removing SSH command configuration
+2026-11-19T09:53:12.7163443Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-19T09:53:12.7185809Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-19T09:53:12.7335947Z Removing HTTP extra header
+2026-11-19T09:53:12.7338781Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-19T09:53:12.7360617Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-19T09:53:12.7503998Z Removing includeIf entries pointing to credentials config files
+2026-11-19T09:53:12.7506538Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-19T09:53:12.7530030Z includeif.gitdir:/home/runner/work/ticketdrop/ticketdrop/.git.path
+2026-11-19T09:53:12.7530691Z includeif.gitdir:/home/runner/work/ticketdrop/ticketdrop/.git/worktrees/*.path
+2026-11-19T09:53:12.7531201Z includeif.gitdir:/github/workspace/.git.path
+2026-11-19T09:53:12.7531544Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-19T09:53:12.7536277Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/ticketdrop/ticketdrop/.git.path
+2026-11-19T09:53:12.7554301Z /home/runner/work/_temp/git-credentials-21be8dc5-fe3f-46b3-acf1-c6b48544ddba.config
+2026-11-19T09:53:12.7562392Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/ticketdrop/ticketdrop/.git.path \/home\/runner\/work\/_temp\/git\-credentials\-21be8dc5\-fe3f\-46b3\-acf1\-c6b48544ddba\.config
+2026-11-19T09:53:12.7594304Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/ticketdrop/ticketdrop/.git/worktrees/*.path
+2026-11-19T09:53:12.7614809Z /home/runner/work/_temp/git-credentials-21be8dc5-fe3f-46b3-acf1-c6b48544ddba.config
+2026-11-19T09:53:12.7620500Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/ticketdrop/ticketdrop/.git/worktrees/*.path \/home\/runner\/work\/_temp\/git\-credentials\-21be8dc5\-fe3f\-46b3\-acf1\-c6b48544ddba\.config
+2026-11-19T09:53:12.7645202Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-11-19T09:53:12.7662312Z /github/runner_temp/git-credentials-21be8dc5-fe3f-46b3-acf1-c6b48544ddba.config
+2026-11-19T09:53:12.7667965Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path \/github\/runner_temp\/git\-credentials\-21be8dc5\-fe3f\-46b3\-acf1\-c6b48544ddba\.config
+2026-11-19T09:53:12.7697825Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-19T09:53:12.7714863Z /github/runner_temp/git-credentials-21be8dc5-fe3f-46b3-acf1-c6b48544ddba.config
+2026-11-19T09:53:12.7719389Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path \/github\/runner_temp\/git\-credentials\-21be8dc5\-fe3f\-46b3\-acf1\-c6b48544ddba\.config
+2026-11-19T09:53:12.7742130Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-19T09:53:12.7884494Z Removing credentials config '/home/runner/work/_temp/git-credentials-21be8dc5-fe3f-46b3-acf1-c6b48544ddba.config'
+2026-11-19T09:53:12.7890395Z ##[endgroup]
+2026-11-19T09:53:12.8071976Z ##[group]Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+2026-11-19T09:53:12.8072266Z with:
+2026-11-19T09:53:12.8072422Z   go-version-file: go.mod
+2026-11-19T09:53:12.8072600Z   check-latest: false
+2026-11-19T09:53:12.8074684Z   token: ***
+2026-11-19T09:53:12.8074838Z   cache: true
+2026-11-19T09:53:12.8074992Z env:
+2026-11-19T09:53:12.8075142Z   GOLANGCI_LINT_VERSION: v2.14.0
+2026-11-19T09:53:12.8075331Z   GOVULNCHECK_VERSION: v1.9.0
+2026-11-19T09:53:12.8075678Z   TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:53:12.8076029Z ##[endgroup]
+2026-11-19T09:53:12.8949163Z Setup go version spec 1.27.4
+2026-11-19T09:53:12.9664227Z Attempting to download 1.27.4...
+2026-11-19T09:53:13.6411323Z matching 1.27.4...
+2026-11-19T09:53:13.6429253Z Acquiring 1.27.4 from https://github.com/actions/go-versions/releases/download/1.27.4-42945153609/go-1.27.4-linux-x64.tar.gz
+2026-11-19T09:53:14.2841400Z Extracting Go...
+2026-11-19T09:53:14.2962266Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/c385ae3f-fdfd-4412-836d-535527342e76 -f /home/runner/work/_temp/c36e1abb-076a-4fad-ae4e-6bd6f521b19a
+2026-11-19T09:53:15.6113401Z Successfully extracted go to /home/runner/work/_temp/c385ae3f-fdfd-4412-836d-535527342e76
+2026-11-19T09:53:15.6113990Z Adding to the cache ...
+2026-11-19T09:53:18.1037680Z Successfully cached go to /opt/hostedtoolcache/go/1.27.4/x64
+2026-11-19T09:53:18.1038790Z Added go to the path
+2026-11-19T09:53:18.1040312Z Successfully set up Go version 1.27.4
+2026-11-19T09:53:18.1467203Z [command]/opt/hostedtoolcache/go/1.27.4/x64/bin/go env GOMODCACHE
+2026-11-19T09:53:18.1491302Z [command]/opt/hostedtoolcache/go/1.27.4/x64/bin/go env GOCACHE
+2026-11-19T09:53:18.1514352Z /home/runner/go/pkg/mod
+2026-11-19T09:53:18.1527772Z /home/runner/.cache/go-build
+2026-11-19T09:53:18.4019396Z Cache is not found
+2026-11-19T09:53:18.4039541Z go version go1.27.4 linux/amd64
+2026-11-19T09:53:18.4039757Z 
+2026-11-19T09:53:18.4040049Z ##[group]go env
+2026-11-19T09:53:19.6541275Z AR='ar'
+2026-11-19T09:53:19.6541602Z CC='gcc'
+2026-11-19T09:53:19.6541863Z CGO_CFLAGS='-O2 -g'
+2026-11-19T09:53:19.6542098Z CGO_CPPFLAGS=''
+2026-11-19T09:53:19.6542309Z CGO_CXXFLAGS='-O2 -g'
+2026-11-19T09:53:19.6542510Z CGO_ENABLED='1'
+2026-11-19T09:53:19.6542679Z CGO_FFLAGS='-O2 -g'
+2026-11-19T09:53:19.6542853Z CGO_LDFLAGS='-O2 -g'
+2026-11-19T09:53:19.6543008Z CXX='g++'
+2026-11-19T09:53:19.6543387Z GCCGO='gccgo'
+2026-11-19T09:53:19.6543641Z GO111MODULE=''
+2026-11-19T09:53:19.6543840Z GOAMD64='v1'
+2026-11-19T09:53:19.6544009Z GOARCH='amd64'
+2026-11-19T09:53:19.6544170Z GOAUTH='netrc'
+2026-11-19T09:53:19.6544328Z GOBIN='/home/runner/go/bin'
+2026-11-19T09:53:19.6544530Z GOCACHE='/home/runner/.cache/go-build'
+2026-11-19T09:53:19.6544725Z GOCACHEPROG=''
+2026-11-19T09:53:19.6544869Z GODEBUG=''
+2026-11-19T09:53:19.6545027Z GOENV='/home/runner/.config/go/env'
+2026-11-19T09:53:19.6545244Z GOEXE=''
+2026-11-19T09:53:19.6545391Z GOEXPERIMENT=''
+2026-11-19T09:53:19.6545558Z GOFIPS140='off'
+2026-11-19T09:53:19.6545714Z GOFLAGS=''
+2026-11-19T09:53:19.6546235Z GOGCCFLAGS='-fPIC -m64 -pthread -Wl,--no-gc-sections -fmessage-length=0 -ffile-prefix-map=/tmp/go-build887406861=/tmp/go-build -gno-record-gcc-switches'
+2026-11-19T09:53:19.6546727Z GOHOSTARCH='amd64'
+2026-11-19T09:53:19.6546896Z GOHOSTOS='linux'
+2026-11-19T09:53:19.6547058Z GOINSECURE=''
+2026-11-19T09:53:19.6547252Z GOMOD='/home/runner/work/ticketdrop/ticketdrop/go.mod'
+2026-11-19T09:53:19.6547509Z GOMODCACHE='/home/runner/go/pkg/mod'
+2026-11-19T09:53:19.6547712Z GONOPROXY=''
+2026-11-19T09:53:19.6547872Z GONOSUMDB=''
+2026-11-19T09:53:19.6548026Z GOOS='linux'
+2026-11-19T09:53:19.6548175Z GOPACKAGESDRIVER=''
+2026-11-19T09:53:19.6548346Z GOPATH='/home/runner/go'
+2026-11-19T09:53:19.6548516Z GOPRIVATE=''
+2026-11-19T09:53:19.6548743Z GOPROXY='https://proxy.golang.org,direct'
+2026-11-19T09:53:19.6548977Z GOROOT='/opt/hostedtoolcache/go/1.27.4/x64'
+2026-11-19T09:53:19.6549198Z GOSUMDB='sum.golang.org'
+2026-11-19T09:53:19.6549579Z GOTELEMETRY='local'
+2026-11-19T09:53:19.6549779Z GOTELEMETRYDIR='/home/runner/.config/go/telemetry'
+2026-11-19T09:53:19.6550000Z GOTMPDIR=''
+2026-11-19T09:53:19.6550149Z GOTOOLCHAIN='local'
+2026-11-19T09:53:19.6550378Z GOTOOLDIR='/opt/hostedtoolcache/go/1.27.4/x64/pkg/tool/linux_amd64'
+2026-11-19T09:53:19.6550635Z GOVCS=''
+2026-11-19T09:53:19.6550791Z GOVERSION='go1.27.4'
+2026-11-19T09:53:19.6550948Z GOWORK=''
+2026-11-19T09:53:19.6551107Z PKG_CONFIG='pkg-config'
+2026-11-19T09:53:19.6551208Z 
+2026-11-19T09:53:19.6551498Z ##[endgroup]
+2026-11-19T09:53:19.6675260Z ##[group]Run make vet
+2026-11-19T09:53:19.6675551Z make vet
+2026-11-19T09:53:19.8080521Z shell: /usr/bin/bash -e {0}
+2026-11-19T09:53:19.8080786Z env:
+2026-11-19T09:53:19.8080951Z   GOLANGCI_LINT_VERSION: v2.14.0
+2026-11-19T09:53:19.8081148Z   GOVULNCHECK_VERSION: v1.9.0
+2026-11-19T09:53:19.8081512Z   TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:53:19.8082045Z   GOTOOLCHAIN: local
+2026-11-19T09:53:19.8082212Z ##[endgroup]
+2026-11-19T09:53:19.8459420Z go vet ./...
+2026-11-19T09:53:19.8613927Z go: downloading github.com/jackc/pgx/v5 v5.11.0
+2026-11-19T09:53:19.8648159Z go: downloading github.com/aws/aws-sdk-go-v2 v1.47.1
+2026-11-19T09:53:19.8666823Z go: downloading github.com/prometheus/client_golang v1.24.1
+2026-11-19T09:53:19.8678413Z go: downloading github.com/google/uuid v1.6.0
+2026-11-19T09:53:19.9827701Z go: downloading github.com/aws/aws-sdk-go-v2/service/sns v1.47.2
+2026-11-19T09:53:20.0728233Z go: downloading github.com/aws/aws-sdk-go-v2/config v1.33.6
+2026-11-19T09:53:20.0729269Z go: downloading github.com/aws/aws-sdk-go-v2/service/sqs v1.52.1
+2026-11-19T09:53:20.1166196Z go: downloading github.com/cespare/xxhash/v2 v2.3.0
+2026-11-19T09:53:20.1172843Z go: downloading github.com/beorn7/perks v1.0.1
+2026-11-19T09:53:20.1175124Z go: downloading github.com/prometheus/client_model v0.6.2
+2026-11-19T09:53:20.1210160Z go: downloading github.com/prometheus/common v0.70.1
+2026-11-19T09:53:20.1433898Z go: downloading github.com/prometheus/procfs v0.21.1
+2026-11-19T09:53:20.1434326Z go: downloading google.golang.org/protobuf v1.36.11
+2026-11-19T09:53:20.1736847Z go: downloading github.com/aws/smithy-go v1.28.1
+2026-11-19T09:53:20.2647667Z go: downloading github.com/aws/aws-sdk-go-v2/internal/configsources v1.5.4
+2026-11-19T09:53:20.3019279Z go: downloading github.com/jackc/puddle/v2 v2.2.2
+2026-11-19T09:53:20.3121704Z go: downloading github.com/kylelemons/godebug v1.1.0
+2026-11-19T09:53:20.3280606Z go: downloading github.com/aws/aws-sdk-go-v2/credentials v1.20.6
+2026-11-19T09:53:20.3528358Z go: downloading github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.20.1
+2026-11-19T09:53:20.3528795Z go: downloading github.com/aws/aws-sdk-go-v2/service/signin v1.10.1
+2026-11-19T09:53:20.3696205Z go: downloading github.com/aws/aws-sdk-go-v2/service/sso v1.38.1
+2026-11-19T09:53:20.3696676Z go: downloading github.com/aws/aws-sdk-go-v2/service/ssooidc v1.43.1
+2026-11-19T09:53:20.3756552Z go: downloading github.com/aws/aws-sdk-go-v2/service/sts v1.51.1
+2026-11-19T09:53:20.3858356Z go: downloading github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822
+2026-11-19T09:53:20.4365302Z go: downloading golang.org/x/sys v0.47.0
+2026-11-19T09:53:20.4384158Z go: downloading github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.8.4
+2026-11-19T09:53:20.4394121Z go: downloading github.com/jackc/pgpassfile v1.0.0
+2026-11-19T09:53:20.4509488Z go: downloading github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761
+2026-11-19T09:53:20.4786603Z go: downloading golang.org/x/text v0.41.0
+2026-11-19T09:53:20.4809737Z go: downloading golang.org/x/sync v0.22.0
+2026-11-19T09:53:20.5072153Z go: downloading github.com/aws/aws-sdk-go-v2/internal/v4a v1.5.4
+2026-11-19T09:53:20.5370215Z go: downloading github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.19
+2026-11-19T09:53:20.5806847Z go: downloading github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.14.4
+2026-11-19T09:53:41.6333725Z ##[group]Run golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a
+2026-11-19T09:53:41.6334087Z with:
+2026-11-19T09:53:41.6334240Z   version: v2.14.0
+2026-11-19T09:53:41.6334406Z   install-mode: binary
+2026-11-19T09:53:41.6334571Z   install-only: false
+2026-11-19T09:53:41.6336430Z   github-token: ***
+2026-11-19T09:53:41.6336589Z   verify: true
+2026-11-19T09:53:41.6336747Z   only-new-issues: false
+2026-11-19T09:53:41.6336937Z   skip-cache: false
+2026-11-19T09:53:41.6337093Z   skip-save-cache: false
+2026-11-19T09:53:41.6337276Z   cache-invalidation-interval: 7
+2026-11-19T09:53:41.6337485Z   problem-matchers: false
+2026-11-19T09:53:41.6337647Z env:
+2026-11-19T09:53:41.6337799Z   GOLANGCI_LINT_VERSION: v2.14.0
+2026-11-19T09:53:41.6337989Z   GOVULNCHECK_VERSION: v1.9.0
+2026-11-19T09:53:41.6338329Z   TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:53:41.6338706Z   GOTOOLCHAIN: local
+2026-11-19T09:53:41.6338859Z ##[endgroup]
+2026-11-19T09:53:41.7370053Z ##[group]Restore cache
+2026-11-19T09:53:41.7372630Z Checking for go.mod: go.mod
+2026-11-19T09:53:41.9831217Z Cache not found for input keys: golangci-lint.cache-Linux-2968-bbff1879afa134b3e92513fba2b3d390af0ee8b9, golangci-lint.cache-Linux-2968-
+2026-11-19T09:53:41.9832146Z ##[endgroup]
+2026-11-19T09:53:41.9832530Z ##[group]Install
+2026-11-19T09:53:41.9832779Z Finding needed golangci-lint version...
+2026-11-19T09:53:41.9835300Z Installation mode: binary
+2026-11-19T09:53:41.9835762Z Installing golangci-lint binary v2.14.0...
+2026-11-19T09:53:41.9837680Z Downloading binary https://github.com/golangci/golangci-lint/releases/download/v2.14.0/golangci-lint-2.14.0-linux-amd64.tar.gz ...
+2026-11-19T09:53:42.1493258Z [command]/usr/bin/tar xz --overwrite --warning=no-unknown-keyword --overwrite -C /home/runner -f /home/runner/work/_temp/ee069188-82e1-4f00-ab77-84c1cfb89106
+2026-11-19T09:53:42.3864424Z Installed golangci-lint into /home/runner/golangci-lint-2.14.0-linux-amd64/golangci-lint in 403ms
+2026-11-19T09:53:42.3867176Z ##[endgroup]
+2026-11-19T09:53:42.3869784Z ##[group]run golangci-lint
+2026-11-19T09:53:42.3872636Z Running [/home/runner/golangci-lint-2.14.0-linux-amd64/golangci-lint config path] in [/home/runner/work/ticketdrop/ticketdrop] ...
+2026-11-19T09:53:42.4464498Z Running [/home/runner/golangci-lint-2.14.0-linux-amd64/golangci-lint config verify] in [/home/runner/work/ticketdrop/ticketdrop] ...
+2026-11-19T09:53:42.5139329Z Running [/home/runner/golangci-lint-2.14.0-linux-amd64/golangci-lint run] in [/home/runner/work/ticketdrop/ticketdrop] ...
+2026-11-19T09:53:47.3517335Z 0 issues.
+2026-11-19T09:53:47.3517596Z 
+2026-11-19T09:53:47.3517732Z golangci-lint found no issues
+2026-11-19T09:53:47.3518069Z Ran golangci-lint in 4838ms
+2026-11-19T09:53:47.3518627Z ##[endgroup]
+2026-11-19T09:53:47.3617319Z ##[group]Run go test -race ./...
+2026-11-19T09:53:47.3617686Z go test -race ./...
+2026-11-19T09:53:47.3651027Z shell: /usr/bin/bash -e {0}
+2026-11-19T09:53:47.3651329Z env:
+2026-11-19T09:53:47.3651546Z   GOLANGCI_LINT_VERSION: v2.14.0
+2026-11-19T09:53:47.3651827Z   GOVULNCHECK_VERSION: v1.9.0
+2026-11-19T09:53:47.3652367Z   TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:53:47.3652911Z   GOTOOLCHAIN: local
+2026-11-19T09:53:47.3653251Z ##[endgroup]
+2026-11-19T09:53:52.0177386Z ?   	github.com/kingswanzy2020/ticketdrop/pkg/contracts	[no test files]
+2026-11-19T09:53:53.4264544Z ?   	github.com/kingswanzy2020/ticketdrop/pkg/platform/config	[no test files]
+2026-11-19T09:53:55.4514913Z ?   	github.com/kingswanzy2020/ticketdrop/pkg/platform/correlation	[no test files]
+2026-11-19T09:54:07.6094957Z ok  	github.com/kingswanzy2020/ticketdrop/pkg/platform/db	1.015s
+2026-11-19T09:54:12.2483855Z ok  	github.com/kingswanzy2020/ticketdrop/pkg/platform/events	1.031s
+2026-11-19T09:54:12.2773599Z ok  	github.com/kingswanzy2020/ticketdrop/pkg/platform/httpx	1.018s
+2026-11-19T09:54:12.2774582Z ?   	github.com/kingswanzy2020/ticketdrop/pkg/platform/logging	[no test files]
+2026-11-19T09:54:12.2775460Z ?   	github.com/kingswanzy2020/ticketdrop/pkg/platform/service	[no test files]
+2026-11-19T09:54:13.8554242Z ?   	github.com/kingswanzy2020/ticketdrop/services/catalog/cmd	[no test files]
+2026-11-19T09:54:14.8805625Z ok  	github.com/kingswanzy2020/ticketdrop/services/catalog/internal/catalog	1.024s
+2026-11-19T09:54:14.8806351Z ?   	github.com/kingswanzy2020/ticketdrop/services/catalog/migrations	[no test files]
+2026-11-19T09:54:14.8806924Z ?   	github.com/kingswanzy2020/ticketdrop/services/fulfillment/cmd	[no test files]
+2026-11-19T09:54:14.8807482Z ?   	github.com/kingswanzy2020/ticketdrop/services/fulfillment/internal/ticket	[no test files]
+2026-11-19T09:54:14.8808083Z ?   	github.com/kingswanzy2020/ticketdrop/services/fulfillment/migrations	[no test files]
+2026-11-19T09:54:14.8808654Z ?   	github.com/kingswanzy2020/ticketdrop/services/gateway/cmd	[no test files]
+2026-11-19T09:54:14.9570387Z ok  	github.com/kingswanzy2020/ticketdrop/services/gateway/internal/proxy	1.030s
+2026-11-19T09:54:14.9571393Z ?   	github.com/kingswanzy2020/ticketdrop/services/inventory/cmd	[no test files]
+2026-11-19T09:54:15.4081456Z ok  	github.com/kingswanzy2020/ticketdrop/services/inventory/internal/stock	1.034s
+2026-11-19T09:54:15.4094425Z ?   	github.com/kingswanzy2020/ticketdrop/services/inventory/migrations	[no test files]
+2026-11-19T09:54:15.4095492Z ?   	github.com/kingswanzy2020/ticketdrop/services/notifications/cmd	[no test files]
+2026-11-19T09:54:15.5824737Z ok  	github.com/kingswanzy2020/ticketdrop/services/notifications/internal/notify	1.016s
+2026-11-19T09:54:15.5851297Z ?   	github.com/kingswanzy2020/ticketdrop/services/orders/cmd	[no test files]
+2026-11-19T09:54:17.2499530Z ok  	github.com/kingswanzy2020/ticketdrop/services/orders/internal/order	1.081s
+2026-11-19T09:54:17.2500084Z ?   	github.com/kingswanzy2020/ticketdrop/services/orders/migrations	[no test files]
+2026-11-19T09:54:17.2500669Z ?   	github.com/kingswanzy2020/ticketdrop/services/payments/cmd	[no test files]
+2026-11-19T09:54:17.2501063Z ok  	github.com/kingswanzy2020/ticketdrop/services/payments/internal/payment	1.047s
+2026-11-19T09:54:17.2501473Z ?   	github.com/kingswanzy2020/ticketdrop/services/payments/migrations	[no test files]
+2026-11-19T09:54:17.2501921Z ?   	github.com/kingswanzy2020/ticketdrop/services/scheduler/cmd	[no test files]
+2026-11-19T09:54:17.4662236Z ok  	github.com/kingswanzy2020/ticketdrop/services/scheduler/internal/schedule	1.019s
+2026-11-19T09:54:17.4662982Z ?   	github.com/kingswanzy2020/ticketdrop/services/web/cmd	[no test files]
+2026-11-19T09:54:18.6129652Z ok  	github.com/kingswanzy2020/ticketdrop/services/web/internal/shop	1.153s
+2026-11-19T09:54:18.6688626Z ##[group]Run go run "golang.org/x/vuln/cmd/govulncheck@$GOVULNCHECK_VERSION" ./...
+2026-11-19T09:54:18.6689437Z go run "golang.org/x/vuln/cmd/govulncheck@$GOVULNCHECK_VERSION" ./...
+2026-11-19T09:54:18.6727774Z shell: /usr/bin/bash -e {0}
+2026-11-19T09:54:18.6728324Z env:
+2026-11-19T09:54:18.6728617Z   GOLANGCI_LINT_VERSION: v2.14.0
+2026-11-19T09:54:18.6728980Z   GOVULNCHECK_VERSION: v1.9.0
+2026-11-19T09:54:18.6729566Z   TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:54:18.6730184Z   GOTOOLCHAIN: local
+2026-11-19T09:54:18.6730549Z ##[endgroup]
+2026-11-19T09:54:18.7296814Z go: downloading golang.org/x/vuln v1.9.0
+2026-11-19T09:54:18.9616989Z go: downloading golang.org/x/telemetry v0.0.0-20261010193011-f71dc92da45e
+2026-11-19T09:54:18.9655139Z go: downloading golang.org/x/mod v0.42.0
+2026-11-19T09:54:18.9655614Z go: downloading golang.org/x/tools v0.52.0
+2026-11-19T09:54:19.0777839Z go: downloading golang.org/x/sync v0.24.0
+2026-11-19T09:54:24.4964832Z No vulnerabilities found.
+2026-11-19T09:54:24.5539241Z Post job cleanup.
+2026-11-19T09:54:24.6712744Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/ticketdrop/ticketdrop --files-from manifest.txt --use-compress-program zstdmt
+2026-11-19T09:54:25.7289773Z Sent 430348 of 430348 (100.0%), 0.6 MBs/sec
+2026-11-19T09:54:26.0426389Z Saved cache for golangci-lint from paths '/home/runner/.cache/golangci-lint' in 1387ms
+2026-11-19T09:54:26.0539657Z Post job cleanup.
+2026-11-19T09:54:26.1436555Z [command]/opt/hostedtoolcache/go/1.27.4/x64/bin/go env GOMODCACHE
+2026-11-19T09:54:26.1480883Z [command]/opt/hostedtoolcache/go/1.27.4/x64/bin/go env GOCACHE
+2026-11-19T09:54:26.1504977Z /home/runner/go/pkg/mod
+2026-11-19T09:54:26.1527591Z /home/runner/.cache/go-build
+2026-11-19T09:54:26.1757924Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/ticketdrop/ticketdrop --files-from manifest.txt --use-compress-program zstdmt
+2026-11-19T09:54:28.7400868Z Sent 0 of 178239191 (0.0%), 0.0 MBs/sec
+2026-11-19T09:54:29.7396390Z Sent 44021463 of 178239191 (24.7%), 21.0 MBs/sec
+2026-11-19T09:54:30.2236889Z Sent 178239191 of 178239191 (100.0%), 68.4 MBs/sec
+2026-11-19T09:54:30.4984619Z Cache saved with the key: setup-go-Linux-x64-ubuntu24-go-1.27.4-3aa9e55915403838fd4db12bd80157f18ee7189eb912adc049add46fc6d19bc4
+2026-11-19T09:54:30.5112524Z Post job cleanup.
+2026-11-19T09:54:30.5779593Z [command]/usr/bin/git version
+2026-11-19T09:54:30.5809991Z git version 2.56.1
+2026-11-19T09:54:30.5832294Z Temporarily overriding HOME='/home/runner/work/_temp/188d7089-acf4-472c-8969-7cfbec4f318d' before making global git config changes
+2026-11-19T09:54:30.5833708Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-19T09:54:30.5835819Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/ticketdrop/ticketdrop
+2026-11-19T09:54:30.5859521Z Removing SSH command configuration
+2026-11-19T09:54:30.5864388Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-19T09:54:30.5887528Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-19T09:54:30.6051200Z Removing HTTP extra header
+2026-11-19T09:54:30.6052073Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-19T09:54:30.6085547Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-19T09:54:30.6288966Z Removing includeIf entries pointing to credentials config files
+2026-11-19T09:54:30.6294127Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-19T09:54:30.6319832Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-19T09:54:30.6601738Z Cleaning up orphan processes
+
+===== job: build (catalog), step: trivy
+2026-11-19T09:54:00.1609543Z ##[group]Run mkdir -p ~/.cache/trivy
+2026-11-19T09:54:00.1609838Z mkdir -p ~/.cache/trivy
+2026-11-19T09:54:00.1610024Z trivy() {
+2026-11-19T09:54:00.1610255Z   docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
+2026-11-19T09:54:00.1610593Z     -v "$RUNNER_TEMP:/scan:ro" -v "$HOME/.cache/trivy:/cache" \
+2026-11-19T09:54:00.1611438Z     "$TRIVY_IMAGE" image --cache-dir /cache --input /scan/image.tar "$@"
+2026-11-19T09:54:00.1611718Z }
+2026-11-19T09:54:00.1611911Z echo "::group::HIGH and CRITICAL, for the record"
+2026-11-19T09:54:00.1612188Z trivy --severity HIGH,CRITICAL --exit-code 0
+2026-11-19T09:54:00.1612431Z echo "::endgroup::"
+2026-11-19T09:54:00.1612677Z # The gate: a CRITICAL with a fix available fails the build.
+2026-11-19T09:54:00.1613037Z trivy --skip-db-update --severity CRITICAL --ignore-unfixed --exit-code 1
+2026-11-19T09:54:00.1639790Z shell: /usr/bin/bash -e {0}
+2026-11-19T09:54:00.1640054Z env:
+2026-11-19T09:54:00.1640211Z   GOLANGCI_LINT_VERSION: v2.14.0
+2026-11-19T09:54:00.1640401Z   GOVULNCHECK_VERSION: v1.9.0
+2026-11-19T09:54:00.1641074Z   TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:54:00.1641458Z   SERVICE: catalog
+2026-11-19T09:54:00.1641615Z ##[endgroup]
+2026-11-19T09:54:00.1693020Z ##[group]HIGH and CRITICAL, for the record
+2026-11-19T09:54:00.1836819Z Unable to find image 'aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb' locally
+2026-11-19T09:54:00.7484704Z docker.io/aquasec/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb: Pulling from aquasec/trivy
+2026-11-19T09:54:00.9882402Z 7b229517ed22: Pulling fs layer
+2026-11-19T09:54:00.9882770Z 9f087194f4fe: Pulling fs layer
+2026-11-19T09:54:00.9883036Z d7953b8bb0ca: Pulling fs layer
+2026-11-19T09:54:00.9883302Z ac09fd37397a: Pulling fs layer
+2026-11-19T09:54:00.9883554Z ac09fd37397a: Waiting
+2026-11-19T09:54:01.2403599Z 7b229517ed22: Verifying Checksum
+2026-11-19T09:54:01.2403937Z 7b229517ed22: Download complete
+2026-11-19T09:54:01.2469841Z 9f087194f4fe: Verifying Checksum
+2026-11-19T09:54:01.2470642Z 9f087194f4fe: Download complete
+2026-11-19T09:54:01.3184459Z 7b229517ed22: Pull complete
+2026-11-19T09:54:01.3832963Z d7953b8bb0ca: Verifying Checksum
+2026-11-19T09:54:01.3833245Z d7953b8bb0ca: Download complete
+2026-11-19T09:54:01.4302439Z 9f087194f4fe: Pull complete
+2026-11-19T09:54:01.4590570Z ac09fd37397a: Verifying Checksum
+2026-11-19T09:54:01.4591030Z ac09fd37397a: Download complete
+2026-11-19T09:54:02.0098339Z d7953b8bb0ca: Pull complete
+2026-11-19T09:54:02.0135866Z ac09fd37397a: Pull complete
+2026-11-19T09:54:02.0157380Z Digest: sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:54:02.0159609Z Status: Downloaded newer image for aquasec/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:54:02.2186763Z 2026-11-19T09:54:02Z	INFO	[vulndb] Need to update DB
+2026-11-19T09:54:02.2187372Z 2026-11-19T09:54:02Z	INFO	[vulndb] Downloading vulnerability DB...
+2026-11-19T09:54:02.2188115Z 2026-11-19T09:54:02Z	INFO	[vulndb] Downloading artifact...	repo="mirror.gcr.io/aquasec/trivy-db:2"
+2026-11-19T09:54:06.6483107Z 31.66 MiB / 134.68 MiB [-------------->_____________________________________________] 23.51% ? p/s ?80.53 MiB / 134.68 MiB [----------------------------------->________________________] 59.79% ? p/s ?134.68 MiB / 134.68 MiB [--------------------------------------------------------->] 100.00% ? p/s ?134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 171.62 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 171.62 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 171.62 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 160.55 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 160.55 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 160.55 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 150.19 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 150.19 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 150.19 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 140.50 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 140.50 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 140.50 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 131.44 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-----------------------------------------------] 100.00% 43.97 MiB p/s 3.3s2026-11-19T09:54:06Z	INFO	[vulndb] Artifact successfully downloaded	repo="mirror.gcr.io/aquasec/trivy-db:2"
+2026-11-19T09:54:06.6508404Z 2026-11-19T09:54:06Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-11-19T09:54:06.6509001Z 2026-11-19T09:54:06Z	INFO	[secret] Secret scanning is enabled
+2026-11-19T09:54:06.6510086Z 2026-11-19T09:54:06Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-11-19T09:54:06.6510969Z 2026-11-19T09:54:06Z	INFO	[secret] Please see https://trivy.dev/docs/v0.76/guide/scanner/secret#recommendation for faster secret detection
+2026-11-19T09:54:07.0970129Z 2026-11-19T09:54:07Z	INFO	Detected OS	family="debian" version="13.7"
+2026-11-19T09:54:07.0970659Z 2026-11-19T09:54:07Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=6
+2026-11-19T09:54:07.0971230Z 2026-11-19T09:54:07Z	INFO	Number of language-specific files	num=1
+2026-11-19T09:54:07.0971554Z 2026-11-19T09:54:07Z	INFO	[gobinary] Detecting vulnerabilities...
+2026-11-19T09:54:07.1002383Z 
+2026-11-19T09:54:07.1002708Z Report Summary
+2026-11-19T09:54:07.1002859Z 
+2026-11-19T09:54:07.1003275Z ┌───────────────────────────────┬──────────┬─────────────────┬─────────┐
+2026-11-19T09:54:07.1003617Z │            Target             │   Type   │ Vulnerabilities │ Secrets │
+2026-11-19T09:54:07.1003969Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:07.1004616Z │ /scan/image.tar (debian 13.7) │  debian  │        0        │    -    │
+2026-11-19T09:54:07.1005082Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:07.1005489Z │ service                       │ gobinary │        0        │    -    │
+2026-11-19T09:54:07.1005904Z └───────────────────────────────┴──────────┴─────────────────┴─────────┘
+2026-11-19T09:54:07.1006194Z Legend:
+2026-11-19T09:54:07.1006382Z - '-': Not scanned
+2026-11-19T09:54:07.1006621Z - '0': Clean (no security findings detected)
+2026-11-19T09:54:07.1006817Z 
+2026-11-19T09:54:13.0358471Z ##[endgroup]
+2026-11-19T09:54:13.1665937Z 2026-11-19T09:54:13Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-11-19T09:54:13.1667174Z 2026-11-19T09:54:13Z	INFO	[secret] Secret scanning is enabled
+2026-11-19T09:54:13.1668302Z 2026-11-19T09:54:13Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-11-19T09:54:13.1670155Z 2026-11-19T09:54:13Z	INFO	[secret] Please see https://trivy.dev/docs/v0.76/guide/scanner/secret#recommendation for faster secret detection
+2026-11-19T09:54:13.1730196Z 2026-11-19T09:54:13Z	INFO	Detected OS	family="debian" version="13.7"
+2026-11-19T09:54:13.1731178Z 2026-11-19T09:54:13Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=6
+2026-11-19T09:54:13.1734501Z 2026-11-19T09:54:13Z	INFO	Number of language-specific files	num=1
+2026-11-19T09:54:13.1735187Z 2026-11-19T09:54:13Z	INFO	[gobinary] Detecting vulnerabilities...
+2026-11-19T09:54:13.1791776Z 
+2026-11-19T09:54:13.1792022Z Report Summary
+2026-11-19T09:54:13.1792145Z 
+2026-11-19T09:54:13.1792565Z ┌───────────────────────────────┬──────────┬─────────────────┬─────────┐
+2026-11-19T09:54:13.1793130Z │            Target             │   Type   │ Vulnerabilities │ Secrets │
+2026-11-19T09:54:13.1793474Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:13.1793892Z │ /scan/image.tar (debian 13.7) │  debian  │        0        │    -    │
+2026-11-19T09:54:13.1794255Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:13.1794564Z │ service                       │ gobinary │        0        │    -    │
+2026-11-19T09:54:13.1794901Z └───────────────────────────────┴──────────┴─────────────────┴─────────┘
+2026-11-19T09:54:13.1795130Z Legend:
+2026-11-19T09:54:13.1795283Z - '-': Not scanned
+2026-11-19T09:54:13.1795473Z - '0': Clean (no security findings detected)
+2026-11-19T09:54:13.1795625Z 
+
+===== job: build (fulfillment), step: trivy
+2026-11-19T09:53:52.2636766Z ##[group]Run mkdir -p ~/.cache/trivy
+2026-11-19T09:53:52.2637239Z mkdir -p ~/.cache/trivy
+2026-11-19T09:53:52.2637609Z trivy() {
+2026-11-19T09:53:52.2638042Z   docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
+2026-11-19T09:53:52.2638537Z     -v "$RUNNER_TEMP:/scan:ro" -v "$HOME/.cache/trivy:/cache" \
+2026-11-19T09:53:52.2639081Z     "$TRIVY_IMAGE" image --cache-dir /cache --input /scan/image.tar "$@"
+2026-11-19T09:53:52.2639568Z }
+2026-11-19T09:53:52.2639956Z echo "::group::HIGH and CRITICAL, for the record"
+2026-11-19T09:53:52.2640421Z trivy --severity HIGH,CRITICAL --exit-code 0
+2026-11-19T09:53:52.2640831Z echo "::endgroup::"
+2026-11-19T09:53:52.2641246Z # The gate: a CRITICAL with a fix available fails the build.
+2026-11-19T09:53:52.2641795Z trivy --skip-db-update --severity CRITICAL --ignore-unfixed --exit-code 1
+2026-11-19T09:53:52.2675033Z shell: /usr/bin/bash -e {0}
+2026-11-19T09:53:52.2675678Z env:
+2026-11-19T09:53:52.2675994Z   GOLANGCI_LINT_VERSION: v2.14.0
+2026-11-19T09:53:52.2676721Z   GOVULNCHECK_VERSION: v1.9.0
+2026-11-19T09:53:52.2677380Z   TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:53:52.2678206Z   SERVICE: fulfillment
+2026-11-19T09:53:52.2678751Z ##[endgroup]
+2026-11-19T09:53:52.2739625Z ##[group]HIGH and CRITICAL, for the record
+2026-11-19T09:53:52.2887182Z Unable to find image 'aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb' locally
+2026-11-19T09:53:52.4268642Z docker.io/aquasec/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb: Pulling from aquasec/trivy
+2026-11-19T09:53:52.4995729Z 7b229517ed22: Pulling fs layer
+2026-11-19T09:53:52.4996298Z 9f087194f4fe: Pulling fs layer
+2026-11-19T09:53:52.4996617Z d7953b8bb0ca: Pulling fs layer
+2026-11-19T09:53:52.4997010Z ac09fd37397a: Pulling fs layer
+2026-11-19T09:53:52.4997300Z ac09fd37397a: Waiting
+2026-11-19T09:53:52.5621980Z 7b229517ed22: Download complete
+2026-11-19T09:53:52.6029595Z ac09fd37397a: Verifying Checksum
+2026-11-19T09:53:52.6030152Z ac09fd37397a: Download complete
+2026-11-19T09:53:52.6211850Z 9f087194f4fe: Verifying Checksum
+2026-11-19T09:53:52.6213630Z 9f087194f4fe: Download complete
+2026-11-19T09:53:52.6311869Z 7b229517ed22: Pull complete
+2026-11-19T09:53:52.7385512Z 9f087194f4fe: Pull complete
+2026-11-19T09:53:53.0521492Z d7953b8bb0ca: Verifying Checksum
+2026-11-19T09:53:53.0521841Z d7953b8bb0ca: Download complete
+2026-11-19T09:53:53.6343786Z d7953b8bb0ca: Pull complete
+2026-11-19T09:53:53.6385648Z ac09fd37397a: Pull complete
+2026-11-19T09:53:53.6404859Z Digest: sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:53:53.6407582Z Status: Downloaded newer image for aquasec/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:53:53.8355077Z 2026-11-19T09:53:53Z	INFO	[vulndb] Need to update DB
+2026-11-19T09:53:53.8355609Z 2026-11-19T09:53:53Z	INFO	[vulndb] Downloading vulnerability DB...
+2026-11-19T09:53:57.8241521Z 2026-11-19T09:53:53Z	INFO	[vulndb] Downloading artifact...	repo="mirror.gcr.io/aquasec/trivy-db:2"
+2026-11-19T09:53:57.8244742Z 60.45 MiB / 134.68 MiB [-------------------------->_________________________________] 44.89% ? p/s ?126.90 MiB / 134.68 MiB [------------------------------------------------------->___] 94.22% ? p/s ?134.68 MiB / 134.68 MiB [--------------------------------------------------------->] 100.00% ? p/s ?134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 123.56 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 123.56 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 123.56 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 115.59 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 115.59 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 115.59 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 108.13 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 108.13 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 108.13 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 101.15 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 101.15 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 101.15 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-----------------------------------------------] 100.00% 46.34 MiB p/s 3.1s2026-11-19T09:53:57Z	INFO	[vulndb] Artifact successfully downloaded	repo="mirror.gcr.io/aquasec/trivy-db:2"
+2026-11-19T09:53:57.8252651Z 2026-11-19T09:53:57Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-11-19T09:53:57.8253423Z 2026-11-19T09:53:57Z	INFO	[secret] Secret scanning is enabled
+2026-11-19T09:53:57.8254237Z 2026-11-19T09:53:57Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-11-19T09:53:57.8255260Z 2026-11-19T09:53:57Z	INFO	[secret] Please see https://trivy.dev/docs/v0.76/guide/scanner/secret#recommendation for faster secret detection
+2026-11-19T09:53:58.3841112Z 2026-11-19T09:53:58Z	INFO	Detected OS	family="debian" version="13.7"
+2026-11-19T09:53:58.3842091Z 2026-11-19T09:53:58Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=6
+2026-11-19T09:53:58.3842726Z 2026-11-19T09:53:58Z	INFO	Number of language-specific files	num=1
+2026-11-19T09:53:58.3843316Z 2026-11-19T09:53:58Z	INFO	[gobinary] Detecting vulnerabilities...
+2026-11-19T09:53:58.3875617Z 
+2026-11-19T09:53:58.3876089Z Report Summary
+2026-11-19T09:53:58.3876402Z 
+2026-11-19T09:53:58.3876863Z ┌───────────────────────────────┬──────────┬─────────────────┬─────────┐
+2026-11-19T09:53:58.3877412Z │            Target             │   Type   │ Vulnerabilities │ Secrets │
+2026-11-19T09:53:58.3877924Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:53:58.3878691Z │ /scan/image.tar (debian 13.7) │  debian  │        0        │    -    │
+2026-11-19T09:53:58.3879207Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:53:58.3879578Z │ service                       │ gobinary │        0        │    -    │
+2026-11-19T09:53:58.3879986Z └───────────────────────────────┴──────────┴─────────────────┴─────────┘
+2026-11-19T09:53:58.3880283Z Legend:
+2026-11-19T09:53:58.3880485Z - '-': Not scanned
+2026-11-19T09:53:58.3880799Z - '0': Clean (no security findings detected)
+2026-11-19T09:53:58.3880992Z 
+2026-11-19T09:54:03.9013977Z ##[endgroup]
+2026-11-19T09:54:04.0457997Z 2026-11-19T09:54:04Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-11-19T09:54:04.0458893Z 2026-11-19T09:54:04Z	INFO	[secret] Secret scanning is enabled
+2026-11-19T09:54:04.0459592Z 2026-11-19T09:54:04Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-11-19T09:54:04.0460426Z 2026-11-19T09:54:04Z	INFO	[secret] Please see https://trivy.dev/docs/v0.76/guide/scanner/secret#recommendation for faster secret detection
+2026-11-19T09:54:04.0570296Z 2026-11-19T09:54:04Z	INFO	Detected OS	family="debian" version="13.7"
+2026-11-19T09:54:04.0570858Z 2026-11-19T09:54:04Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=6
+2026-11-19T09:54:04.0572803Z 2026-11-19T09:54:04Z	INFO	Number of language-specific files	num=1
+2026-11-19T09:54:04.0573215Z 2026-11-19T09:54:04Z	INFO	[gobinary] Detecting vulnerabilities...
+2026-11-19T09:54:04.0611519Z 
+2026-11-19T09:54:04.0612089Z Report Summary
+2026-11-19T09:54:04.0612620Z 
+2026-11-19T09:54:04.0613059Z ┌───────────────────────────────┬──────────┬─────────────────┬─────────┐
+2026-11-19T09:54:04.0613555Z │            Target             │   Type   │ Vulnerabilities │ Secrets │
+2026-11-19T09:54:04.0614214Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:04.0614684Z │ /scan/image.tar (debian 13.7) │  debian  │        0        │    -    │
+2026-11-19T09:54:04.0615138Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:04.0615511Z │ service                       │ gobinary │        0        │    -    │
+2026-11-19T09:54:04.0615907Z └───────────────────────────────┴──────────┴─────────────────┴─────────┘
+2026-11-19T09:54:04.0616488Z Legend:
+2026-11-19T09:54:04.0616768Z - '-': Not scanned
+2026-11-19T09:54:04.0617094Z - '0': Clean (no security findings detected)
+2026-11-19T09:54:04.0617286Z 
+
+===== job: build (gateway), step: trivy
+2026-11-19T09:53:53.7004195Z ##[group]Run mkdir -p ~/.cache/trivy
+2026-11-19T09:53:53.7004609Z mkdir -p ~/.cache/trivy
+2026-11-19T09:53:53.7004885Z trivy() {
+2026-11-19T09:53:53.7005187Z   docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
+2026-11-19T09:53:53.7005568Z     -v "$RUNNER_TEMP:/scan:ro" -v "$HOME/.cache/trivy:/cache" \
+2026-11-19T09:53:53.7005967Z     "$TRIVY_IMAGE" image --cache-dir /cache --input /scan/image.tar "$@"
+2026-11-19T09:53:53.7006359Z }
+2026-11-19T09:53:53.7006636Z echo "::group::HIGH and CRITICAL, for the record"
+2026-11-19T09:53:53.7007189Z trivy --severity HIGH,CRITICAL --exit-code 0
+2026-11-19T09:53:53.7007506Z echo "::endgroup::"
+2026-11-19T09:53:53.7007805Z # The gate: a CRITICAL with a fix available fails the build.
+2026-11-19T09:53:53.7008326Z trivy --skip-db-update --severity CRITICAL --ignore-unfixed --exit-code 1
+2026-11-19T09:53:53.7034473Z shell: /usr/bin/bash -e {0}
+2026-11-19T09:53:53.7034819Z env:
+2026-11-19T09:53:53.7035077Z   GOLANGCI_LINT_VERSION: v2.14.0
+2026-11-19T09:53:53.7035367Z   GOVULNCHECK_VERSION: v1.9.0
+2026-11-19T09:53:53.7035850Z   TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:53:53.7036281Z   SERVICE: gateway
+2026-11-19T09:53:53.7036505Z ##[endgroup]
+2026-11-19T09:53:53.7087148Z ##[group]HIGH and CRITICAL, for the record
+2026-11-19T09:53:53.7242023Z Unable to find image 'aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb' locally
+2026-11-19T09:53:54.2847829Z docker.io/aquasec/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb: Pulling from aquasec/trivy
+2026-11-19T09:53:54.5285026Z 7b229517ed22: Pulling fs layer
+2026-11-19T09:53:54.5285520Z 9f087194f4fe: Pulling fs layer
+2026-11-19T09:53:54.5285896Z d7953b8bb0ca: Pulling fs layer
+2026-11-19T09:53:54.5286227Z ac09fd37397a: Pulling fs layer
+2026-11-19T09:53:54.7776450Z 7b229517ed22: Verifying Checksum
+2026-11-19T09:53:54.7777132Z 7b229517ed22: Download complete
+2026-11-19T09:53:54.7831262Z 9f087194f4fe: Verifying Checksum
+2026-11-19T09:53:54.7831847Z 9f087194f4fe: Download complete
+2026-11-19T09:53:54.8430760Z 7b229517ed22: Pull complete
+2026-11-19T09:53:54.9449310Z 9f087194f4fe: Pull complete
+2026-11-19T09:53:55.0107638Z ac09fd37397a: Download complete
+2026-11-19T09:54:13.9691902Z d7953b8bb0ca: Verifying Checksum
+2026-11-19T09:54:13.9692535Z d7953b8bb0ca: Download complete
+2026-11-19T09:54:14.5415941Z d7953b8bb0ca: Pull complete
+2026-11-19T09:54:14.5473695Z ac09fd37397a: Pull complete
+2026-11-19T09:54:14.5494625Z Digest: sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:54:14.5498909Z Status: Downloaded newer image for aquasec/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:54:14.7339437Z 2026-11-19T09:54:14Z	INFO	[vulndb] Need to update DB
+2026-11-19T09:54:14.7340018Z 2026-11-19T09:54:14Z	INFO	[vulndb] Downloading vulnerability DB...
+2026-11-19T09:54:14.7340690Z 2026-11-19T09:54:14Z	INFO	[vulndb] Downloading artifact...	repo="mirror.gcr.io/aquasec/trivy-db:2"
+2026-11-19T09:54:19.2352794Z 26.14 MiB / 134.68 MiB [----------->________________________________________________] 19.41% ? p/s ?79.62 MiB / 134.68 MiB [----------------------------------->________________________] 59.12% ? p/s ?126.48 MiB / 134.68 MiB [------------------------------------------------------->___] 93.91% ? p/s ?134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 180.91 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 180.91 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 180.91 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 169.24 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 169.24 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 169.24 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 158.32 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 158.32 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 158.32 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 148.10 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 148.10 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 148.10 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 138.55 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-----------------------------------------------] 100.00% 43.49 MiB p/s 3.3s2026-11-19T09:54:19Z	INFO	[vulndb] Artifact successfully downloaded	repo="mirror.gcr.io/aquasec/trivy-db:2"
+2026-11-19T09:54:19.2376309Z 2026-11-19T09:54:19Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-11-19T09:54:19.2377571Z 2026-11-19T09:54:19Z	INFO	[secret] Secret scanning is enabled
+2026-11-19T09:54:19.2378902Z 2026-11-19T09:54:19Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-11-19T09:54:19.2380299Z 2026-11-19T09:54:19Z	INFO	[secret] Please see https://trivy.dev/docs/v0.76/guide/scanner/secret#recommendation for faster secret detection
+2026-11-19T09:54:19.9115481Z 2026-11-19T09:54:19Z	INFO	Detected OS	family="debian" version="13.7"
+2026-11-19T09:54:19.9116192Z 2026-11-19T09:54:19Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=6
+2026-11-19T09:54:19.9116927Z 2026-11-19T09:54:19Z	INFO	Number of language-specific files	num=1
+2026-11-19T09:54:19.9117361Z 2026-11-19T09:54:19Z	INFO	[gobinary] Detecting vulnerabilities...
+2026-11-19T09:54:19.9148793Z 
+2026-11-19T09:54:19.9149042Z Report Summary
+2026-11-19T09:54:19.9149279Z 
+2026-11-19T09:54:19.9149792Z ┌───────────────────────────────┬──────────┬─────────────────┬─────────┐
+2026-11-19T09:54:19.9150283Z │            Target             │   Type   │ Vulnerabilities │ Secrets │
+2026-11-19T09:54:19.9150877Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:19.9151847Z │ /scan/image.tar (debian 13.7) │  debian  │        0        │    -    │
+2026-11-19T09:54:19.9152377Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:19.9152846Z │ service                       │ gobinary │        0        │    -    │
+2026-11-19T09:54:19.9153245Z └───────────────────────────────┴──────────┴─────────────────┴─────────┘
+2026-11-19T09:54:19.9153604Z Legend:
+2026-11-19T09:54:19.9153838Z - '-': Not scanned
+2026-11-19T09:54:19.9154095Z - '0': Clean (no security findings detected)
+2026-11-19T09:54:19.9154294Z 
+2026-11-19T09:54:26.0095607Z ##[endgroup]
+2026-11-19T09:54:26.1399585Z 2026-11-19T09:54:26Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-11-19T09:54:26.1400271Z 2026-11-19T09:54:26Z	INFO	[secret] Secret scanning is enabled
+2026-11-19T09:54:26.1404043Z 2026-11-19T09:54:26Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-11-19T09:54:26.1404846Z 2026-11-19T09:54:26Z	INFO	[secret] Please see https://trivy.dev/docs/v0.76/guide/scanner/secret#recommendation for faster secret detection
+2026-11-19T09:54:26.1494992Z 2026-11-19T09:54:26Z	INFO	Detected OS	family="debian" version="13.7"
+2026-11-19T09:54:26.1496205Z 2026-11-19T09:54:26Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=6
+2026-11-19T09:54:26.1496982Z 2026-11-19T09:54:26Z	INFO	Number of language-specific files	num=1
+2026-11-19T09:54:26.1497910Z 2026-11-19T09:54:26Z	INFO	[gobinary] Detecting vulnerabilities...
+2026-11-19T09:54:26.1530209Z 
+2026-11-19T09:54:26.1530576Z Report Summary
+2026-11-19T09:54:26.1530899Z 
+2026-11-19T09:54:26.1531457Z ┌───────────────────────────────┬──────────┬─────────────────┬─────────┐
+2026-11-19T09:54:26.1531957Z │            Target             │   Type   │ Vulnerabilities │ Secrets │
+2026-11-19T09:54:26.1532710Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:26.1533305Z │ /scan/image.tar (debian 13.7) │  debian  │        0        │    -    │
+2026-11-19T09:54:26.1533783Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:26.1534318Z │ service                       │ gobinary │        0        │    -    │
+2026-11-19T09:54:26.1534805Z └───────────────────────────────┴──────────┴─────────────────┴─────────┘
+2026-11-19T09:54:26.1535144Z Legend:
+2026-11-19T09:54:26.1535454Z - '-': Not scanned
+2026-11-19T09:54:26.1535727Z - '0': Clean (no security findings detected)
+2026-11-19T09:54:26.1535941Z 
+
+===== job: build (inventory), step: trivy
+2026-11-19T09:53:53.8712676Z ##[group]Run mkdir -p ~/.cache/trivy
+2026-11-19T09:53:53.8712977Z mkdir -p ~/.cache/trivy
+2026-11-19T09:53:53.8713170Z trivy() {
+2026-11-19T09:53:53.8713393Z   docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
+2026-11-19T09:53:53.8713718Z     -v "$RUNNER_TEMP:/scan:ro" -v "$HOME/.cache/trivy:/cache" \
+2026-11-19T09:53:53.8714054Z     "$TRIVY_IMAGE" image --cache-dir /cache --input /scan/image.tar "$@"
+2026-11-19T09:53:53.8714320Z }
+2026-11-19T09:53:53.8714510Z echo "::group::HIGH and CRITICAL, for the record"
+2026-11-19T09:53:53.8714782Z trivy --severity HIGH,CRITICAL --exit-code 0
+2026-11-19T09:53:53.8715025Z echo "::endgroup::"
+2026-11-19T09:53:53.8715277Z # The gate: a CRITICAL with a fix available fails the build.
+2026-11-19T09:53:53.8715632Z trivy --skip-db-update --severity CRITICAL --ignore-unfixed --exit-code 1
+2026-11-19T09:53:53.8744049Z shell: /usr/bin/bash -e {0}
+2026-11-19T09:53:53.8744324Z env:
+2026-11-19T09:53:53.8744485Z   GOLANGCI_LINT_VERSION: v2.14.0
+2026-11-19T09:53:53.8744681Z   GOVULNCHECK_VERSION: v1.9.0
+2026-11-19T09:53:53.8745024Z   TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:53:53.8745372Z   SERVICE: inventory
+2026-11-19T09:53:53.8745532Z ##[endgroup]
+2026-11-19T09:53:53.8800339Z ##[group]HIGH and CRITICAL, for the record
+2026-11-19T09:53:53.8948977Z Unable to find image 'aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb' locally
+2026-11-19T09:53:54.0218840Z docker.io/aquasec/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb: Pulling from aquasec/trivy
+2026-11-19T09:53:54.0904422Z 7b229517ed22: Pulling fs layer
+2026-11-19T09:53:54.0904764Z 9f087194f4fe: Pulling fs layer
+2026-11-19T09:53:54.0904954Z d7953b8bb0ca: Pulling fs layer
+2026-11-19T09:53:54.0905139Z ac09fd37397a: Pulling fs layer
+2026-11-19T09:53:54.0905327Z ac09fd37397a: Waiting
+2026-11-19T09:53:54.1697767Z 7b229517ed22: Download complete
+2026-11-19T09:53:54.1786737Z 9f087194f4fe: Verifying Checksum
+2026-11-19T09:53:54.1787319Z 9f087194f4fe: Download complete
+2026-11-19T09:53:54.2247582Z ac09fd37397a: Verifying Checksum
+2026-11-19T09:53:54.2248340Z ac09fd37397a: Download complete
+2026-11-19T09:53:54.2408697Z 7b229517ed22: Pull complete
+2026-11-19T09:53:54.3569828Z 9f087194f4fe: Pull complete
+2026-11-19T09:53:54.6407728Z d7953b8bb0ca: Verifying Checksum
+2026-11-19T09:53:54.6408121Z d7953b8bb0ca: Download complete
+2026-11-19T09:53:55.2238938Z d7953b8bb0ca: Pull complete
+2026-11-19T09:53:55.2332440Z ac09fd37397a: Pull complete
+2026-11-19T09:53:55.2354066Z Digest: sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:53:55.2356957Z Status: Downloaded newer image for aquasec/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:53:55.4660502Z 2026-11-19T09:53:55Z	INFO	[vulndb] Need to update DB
+2026-11-19T09:53:55.4661169Z 2026-11-19T09:53:55Z	INFO	[vulndb] Downloading vulnerability DB...
+2026-11-19T09:53:55.4661611Z 2026-11-19T09:53:55Z	INFO	[vulndb] Downloading artifact...	repo="mirror.gcr.io/aquasec/trivy-db:2"
+2026-11-19T09:53:59.8945949Z 65.79 MiB / 134.68 MiB [----------------------------->______________________________] 48.85% ? p/s ?134.68 MiB / 134.68 MiB [--------------------------------------------------------->] 100.00% ? p/s ?134.68 MiB / 134.68 MiB [--------------------------------------------------------->] 100.00% ? p/s ?134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 114.78 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 114.78 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 114.78 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 107.38 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 107.38 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 107.38 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 100.45 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 100.45 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 100.45 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-------------------------------------------->] 100.00% 93.97 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-------------------------------------------->] 100.00% 93.97 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-------------------------------------------->] 100.00% 93.97 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-----------------------------------------------] 100.00% 46.89 MiB p/s 3.1s2026-11-19T09:53:59Z	INFO	[vulndb] Artifact successfully downloaded	repo="mirror.gcr.io/aquasec/trivy-db:2"
+2026-11-19T09:53:59.8976397Z 2026-11-19T09:53:59Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-11-19T09:53:59.8976932Z 2026-11-19T09:53:59Z	INFO	[secret] Secret scanning is enabled
+2026-11-19T09:53:59.8977449Z 2026-11-19T09:53:59Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-11-19T09:53:59.8978201Z 2026-11-19T09:53:59Z	INFO	[secret] Please see https://trivy.dev/docs/v0.76/guide/scanner/secret#recommendation for faster secret detection
+2026-11-19T09:54:00.4852604Z 2026-11-19T09:54:00Z	INFO	Detected OS	family="debian" version="13.7"
+2026-11-19T09:54:00.4853297Z 2026-11-19T09:54:00Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=6
+2026-11-19T09:54:00.4854843Z 2026-11-19T09:54:00Z	INFO	Number of language-specific files	num=1
+2026-11-19T09:54:00.4855405Z 2026-11-19T09:54:00Z	INFO	[gobinary] Detecting vulnerabilities...
+2026-11-19T09:54:00.4889786Z 
+2026-11-19T09:54:00.4890395Z Report Summary
+2026-11-19T09:54:00.4890583Z 
+2026-11-19T09:54:00.4891173Z ┌───────────────────────────────┬──────────┬─────────────────┬─────────┐
+2026-11-19T09:54:00.4891556Z │            Target             │   Type   │ Vulnerabilities │ Secrets │
+2026-11-19T09:54:00.4891957Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:00.4892738Z │ /scan/image.tar (debian 13.7) │  debian  │        0        │    -    │
+2026-11-19T09:54:00.4893103Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:00.4893413Z │ service                       │ gobinary │        0        │    -    │
+2026-11-19T09:54:00.4893739Z └───────────────────────────────┴──────────┴─────────────────┴─────────┘
+2026-11-19T09:54:00.4893966Z Legend:
+2026-11-19T09:54:00.4894143Z - '-': Not scanned
+2026-11-19T09:54:00.4894323Z - '0': Clean (no security findings detected)
+2026-11-19T09:54:00.4894464Z 
+2026-11-19T09:54:06.6624679Z ##[endgroup]
+2026-11-19T09:54:06.8062296Z 2026-11-19T09:54:06Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-11-19T09:54:06.8062990Z 2026-11-19T09:54:06Z	INFO	[secret] Secret scanning is enabled
+2026-11-19T09:54:06.8063551Z 2026-11-19T09:54:06Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-11-19T09:54:06.8064185Z 2026-11-19T09:54:06Z	INFO	[secret] Please see https://trivy.dev/docs/v0.76/guide/scanner/secret#recommendation for faster secret detection
+2026-11-19T09:54:06.8113838Z 2026-11-19T09:54:06Z	INFO	Detected OS	family="debian" version="13.7"
+2026-11-19T09:54:06.8134463Z 2026-11-19T09:54:06Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=6
+2026-11-19T09:54:06.8141769Z 2026-11-19T09:54:06Z	INFO	Number of language-specific files	num=1
+2026-11-19T09:54:06.8161895Z 2026-11-19T09:54:06Z	INFO	[gobinary] Detecting vulnerabilities...
+2026-11-19T09:54:06.8210333Z 
+2026-11-19T09:54:06.8210558Z Report Summary
+2026-11-19T09:54:06.8210678Z 
+2026-11-19T09:54:06.8211330Z ┌───────────────────────────────┬──────────┬─────────────────┬─────────┐
+2026-11-19T09:54:06.8211810Z │            Target             │   Type   │ Vulnerabilities │ Secrets │
+2026-11-19T09:54:06.8212656Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:06.8213279Z │ /scan/image.tar (debian 13.7) │  debian  │        0        │    -    │
+2026-11-19T09:54:06.8213756Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:06.8214072Z │ service                       │ gobinary │        0        │    -    │
+2026-11-19T09:54:06.8214547Z └───────────────────────────────┴──────────┴─────────────────┴─────────┘
+2026-11-19T09:54:06.8214809Z Legend:
+2026-11-19T09:54:06.8214973Z - '-': Not scanned
+2026-11-19T09:54:06.8215190Z - '0': Clean (no security findings detected)
+2026-11-19T09:54:06.8215391Z 
+
+===== job: build (notifications), step: trivy
+2026-11-19T09:53:56.0798397Z ##[group]Run mkdir -p ~/.cache/trivy
+2026-11-19T09:53:56.0798648Z mkdir -p ~/.cache/trivy
+2026-11-19T09:53:56.0798797Z trivy() {
+2026-11-19T09:53:56.0798979Z   docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
+2026-11-19T09:53:56.0799696Z     -v "$RUNNER_TEMP:/scan:ro" -v "$HOME/.cache/trivy:/cache" \
+2026-11-19T09:53:56.0800008Z     "$TRIVY_IMAGE" image --cache-dir /cache --input /scan/image.tar "$@"
+2026-11-19T09:53:56.0800216Z }
+2026-11-19T09:53:56.0800363Z echo "::group::HIGH and CRITICAL, for the record"
+2026-11-19T09:53:56.0800573Z trivy --severity HIGH,CRITICAL --exit-code 0
+2026-11-19T09:53:56.0800750Z echo "::endgroup::"
+2026-11-19T09:53:56.0800937Z # The gate: a CRITICAL with a fix available fails the build.
+2026-11-19T09:53:56.0801206Z trivy --skip-db-update --severity CRITICAL --ignore-unfixed --exit-code 1
+2026-11-19T09:53:56.0827339Z shell: /usr/bin/bash -e {0}
+2026-11-19T09:53:56.0827500Z env:
+2026-11-19T09:53:56.0827626Z   GOLANGCI_LINT_VERSION: v2.14.0
+2026-11-19T09:53:56.0827774Z   GOVULNCHECK_VERSION: v1.9.0
+2026-11-19T09:53:56.0828040Z   TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:53:56.0828337Z   SERVICE: notifications
+2026-11-19T09:53:56.0828503Z ##[endgroup]
+2026-11-19T09:53:56.0882485Z ##[group]HIGH and CRITICAL, for the record
+2026-11-19T09:53:56.1119968Z Unable to find image 'aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb' locally
+2026-11-19T09:53:56.4734390Z docker.io/aquasec/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb: Pulling from aquasec/trivy
+2026-11-19T09:53:56.6476893Z 7b229517ed22: Pulling fs layer
+2026-11-19T09:53:56.6477262Z 9f087194f4fe: Pulling fs layer
+2026-11-19T09:53:56.6477475Z d7953b8bb0ca: Pulling fs layer
+2026-11-19T09:53:56.6477685Z ac09fd37397a: Pulling fs layer
+2026-11-19T09:53:56.6477911Z ac09fd37397a: Waiting
+2026-11-19T09:53:56.8498236Z 9f087194f4fe: Verifying Checksum
+2026-11-19T09:53:56.8498822Z 9f087194f4fe: Download complete
+2026-11-19T09:53:56.9055437Z 7b229517ed22: Verifying Checksum
+2026-11-19T09:53:56.9055800Z 7b229517ed22: Download complete
+2026-11-19T09:53:56.9846434Z ac09fd37397a: Download complete
+2026-11-19T09:53:56.9918671Z 7b229517ed22: Pull complete
+2026-11-19T09:53:56.9965882Z d7953b8bb0ca: Verifying Checksum
+2026-11-19T09:53:56.9966180Z d7953b8bb0ca: Download complete
+2026-11-19T09:53:57.5208656Z 9f087194f4fe: Pull complete
+2026-11-19T09:53:58.9020173Z d7953b8bb0ca: Pull complete
+2026-11-19T09:53:58.9108227Z ac09fd37397a: Pull complete
+2026-11-19T09:53:58.9135243Z Digest: sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:53:58.9141370Z Status: Downloaded newer image for aquasec/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:53:59.0427248Z 2026-11-19T09:53:59Z	INFO	[vulndb] Need to update DB
+2026-11-19T09:53:59.0427882Z 2026-11-19T09:53:59Z	INFO	[vulndb] Downloading vulnerability DB...
+2026-11-19T09:53:59.0428837Z 2026-11-19T09:53:59Z	INFO	[vulndb] Downloading artifact...	repo="mirror.gcr.io/aquasec/trivy-db:2"
+2026-11-19T09:54:03.1969491Z 8.52 MiB / 134.68 MiB [--->__________________________________________________________] 6.32% ? p/s ?38.28 MiB / 134.68 MiB [----------------->__________________________________________] 28.42% ? p/s ?67.30 MiB / 134.68 MiB [----------------------------->______________________________] 49.97% ? p/s ?99.82 MiB / 134.68 MiB [---------------------------------->___________] 74.11% 152.17 MiB p/s ETA 0s133.17 MiB / 134.68 MiB [-------------------------------------------->] 98.88% 152.17 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 152.17 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 146.09 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 146.09 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 146.09 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 136.67 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 136.67 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 136.67 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 127.85 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 127.85 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 127.85 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 119.60 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 119.60 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 119.60 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-----------------------------------------------] 100.00% 38.53 MiB p/s 3.7s2026-11-19T09:54:03Z	INFO	[vulndb] Artifact successfully downloaded	repo="mirror.gcr.io/aquasec/trivy-db:2"
+2026-11-19T09:54:03.2816402Z 2026-11-19T09:54:03Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-11-19T09:54:03.2816910Z 2026-11-19T09:54:03Z	INFO	[secret] Secret scanning is enabled
+2026-11-19T09:54:03.2817429Z 2026-11-19T09:54:03Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-11-19T09:54:03.2818157Z 2026-11-19T09:54:03Z	INFO	[secret] Please see https://trivy.dev/docs/v0.76/guide/scanner/secret#recommendation for faster secret detection
+2026-11-19T09:54:05.0320950Z 2026-11-19T09:54:05Z	INFO	Detected OS	family="debian" version="13.7"
+2026-11-19T09:54:05.0321506Z 2026-11-19T09:54:05Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=6
+2026-11-19T09:54:05.0321949Z 2026-11-19T09:54:05Z	INFO	Number of language-specific files	num=1
+2026-11-19T09:54:05.0322377Z 2026-11-19T09:54:05Z	INFO	[gobinary] Detecting vulnerabilities...
+2026-11-19T09:54:05.0350842Z 
+2026-11-19T09:54:05.0351856Z Report Summary
+2026-11-19T09:54:05.0352050Z 
+2026-11-19T09:54:05.0352550Z ┌───────────────────────────────┬──────────┬─────────────────┬─────────┐
+2026-11-19T09:54:05.0352964Z │            Target             │   Type   │ Vulnerabilities │ Secrets │
+2026-11-19T09:54:05.0353387Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:05.0354322Z │ /scan/image.tar (debian 13.7) │  debian  │        0        │    -    │
+2026-11-19T09:54:05.0354764Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:05.0355146Z │ service                       │ gobinary │        0        │    -    │
+2026-11-19T09:54:05.0355554Z └───────────────────────────────┴──────────┴─────────────────┴─────────┘
+2026-11-19T09:54:05.0355827Z Legend:
+2026-11-19T09:54:05.0356016Z - '-': Not scanned
+2026-11-19T09:54:05.0356254Z - '0': Clean (no security findings detected)
+2026-11-19T09:54:05.0356682Z 
+2026-11-19T09:54:11.7451088Z ##[endgroup]
+2026-11-19T09:54:11.9321323Z 2026-11-19T09:54:11Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-11-19T09:54:11.9339792Z 2026-11-19T09:54:11Z	INFO	[secret] Secret scanning is enabled
+2026-11-19T09:54:11.9340527Z 2026-11-19T09:54:11Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-11-19T09:54:11.9341462Z 2026-11-19T09:54:11Z	INFO	[secret] Please see https://trivy.dev/docs/v0.76/guide/scanner/secret#recommendation for faster secret detection
+2026-11-19T09:54:11.9371355Z 2026-11-19T09:54:11Z	INFO	Detected OS	family="debian" version="13.7"
+2026-11-19T09:54:11.9372275Z 2026-11-19T09:54:11Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=6
+2026-11-19T09:54:11.9375263Z 2026-11-19T09:54:11Z	INFO	Number of language-specific files	num=1
+2026-11-19T09:54:11.9375665Z 2026-11-19T09:54:11Z	INFO	[gobinary] Detecting vulnerabilities...
+2026-11-19T09:54:11.9420576Z 
+2026-11-19T09:54:11.9420807Z Report Summary
+2026-11-19T09:54:11.9420946Z 
+2026-11-19T09:54:11.9421475Z ┌───────────────────────────────┬──────────┬─────────────────┬─────────┐
+2026-11-19T09:54:11.9421910Z │            Target             │   Type   │ Vulnerabilities │ Secrets │
+2026-11-19T09:54:11.9422322Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:11.9422791Z │ /scan/image.tar (debian 13.7) │  debian  │        0        │    -    │
+2026-11-19T09:54:11.9423212Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:11.9423577Z │ service                       │ gobinary │        0        │    -    │
+2026-11-19T09:54:11.9423970Z └───────────────────────────────┴──────────┴─────────────────┴─────────┘
+2026-11-19T09:54:11.9424232Z Legend:
+2026-11-19T09:54:11.9424392Z - '-': Not scanned
+2026-11-19T09:54:11.9424596Z - '0': Clean (no security findings detected)
+2026-11-19T09:54:11.9424766Z 
+
+===== job: build (orders), step: trivy
+2026-11-19T09:54:04.1271405Z ##[group]Run mkdir -p ~/.cache/trivy
+2026-11-19T09:54:04.1271798Z mkdir -p ~/.cache/trivy
+2026-11-19T09:54:04.1272063Z trivy() {
+2026-11-19T09:54:04.1272374Z   docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
+2026-11-19T09:54:04.1272816Z     -v "$RUNNER_TEMP:/scan:ro" -v "$HOME/.cache/trivy:/cache" \
+2026-11-19T09:54:04.1273281Z     "$TRIVY_IMAGE" image --cache-dir /cache --input /scan/image.tar "$@"
+2026-11-19T09:54:04.1273649Z }
+2026-11-19T09:54:04.1274356Z echo "::group::HIGH and CRITICAL, for the record"
+2026-11-19T09:54:04.1274747Z trivy --severity HIGH,CRITICAL --exit-code 0
+2026-11-19T09:54:04.1275060Z echo "::endgroup::"
+2026-11-19T09:54:04.1275399Z # The gate: a CRITICAL with a fix available fails the build.
+2026-11-19T09:54:04.1275881Z trivy --skip-db-update --severity CRITICAL --ignore-unfixed --exit-code 1
+2026-11-19T09:54:04.1296657Z shell: /usr/bin/bash -e {0}
+2026-11-19T09:54:04.1296942Z env:
+2026-11-19T09:54:04.1297136Z   GOLANGCI_LINT_VERSION: v2.14.0
+2026-11-19T09:54:04.1297396Z   GOVULNCHECK_VERSION: v1.9.0
+2026-11-19T09:54:04.1297863Z   TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:54:04.1298361Z   SERVICE: orders
+2026-11-19T09:54:04.1298563Z ##[endgroup]
+2026-11-19T09:54:04.1355057Z ##[group]HIGH and CRITICAL, for the record
+2026-11-19T09:54:04.1541553Z Unable to find image 'aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb' locally
+2026-11-19T09:54:04.6220243Z docker.io/aquasec/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb: Pulling from aquasec/trivy
+2026-11-19T09:54:04.8381548Z 7b229517ed22: Pulling fs layer
+2026-11-19T09:54:04.8382286Z 9f087194f4fe: Pulling fs layer
+2026-11-19T09:54:04.8382769Z d7953b8bb0ca: Pulling fs layer
+2026-11-19T09:54:04.8383514Z ac09fd37397a: Pulling fs layer
+2026-11-19T09:54:04.8384371Z ac09fd37397a: Waiting
+2026-11-19T09:54:05.1486058Z 7b229517ed22: Verifying Checksum
+2026-11-19T09:54:05.1487144Z 7b229517ed22: Download complete
+2026-11-19T09:54:05.1706080Z 9f087194f4fe: Verifying Checksum
+2026-11-19T09:54:05.1706666Z 9f087194f4fe: Download complete
+2026-11-19T09:54:05.2876203Z 7b229517ed22: Pull complete
+2026-11-19T09:54:05.3131951Z d7953b8bb0ca: Verifying Checksum
+2026-11-19T09:54:05.3132516Z d7953b8bb0ca: Download complete
+2026-11-19T09:54:05.3471729Z ac09fd37397a: Verifying Checksum
+2026-11-19T09:54:05.3472724Z ac09fd37397a: Download complete
+2026-11-19T09:54:05.4924084Z 9f087194f4fe: Pull complete
+2026-11-19T09:54:06.3269401Z d7953b8bb0ca: Pull complete
+2026-11-19T09:54:06.3393183Z ac09fd37397a: Pull complete
+2026-11-19T09:54:06.3425577Z Digest: sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:54:06.3430892Z Status: Downloaded newer image for aquasec/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:54:06.5264126Z 2026-11-19T09:54:06Z	INFO	[vulndb] Need to update DB
+2026-11-19T09:54:06.5264922Z 2026-11-19T09:54:06Z	INFO	[vulndb] Downloading vulnerability DB...
+2026-11-19T09:54:06.5265806Z 2026-11-19T09:54:06Z	INFO	[vulndb] Downloading artifact...	repo="mirror.gcr.io/aquasec/trivy-db:2"
+2026-11-19T09:54:13.1117670Z 7.84 MiB / 134.68 MiB [--->__________________________________________________________] 5.82% ? p/s ?35.41 MiB / 134.68 MiB [--------------->____________________________________________] 26.29% ? p/s ?62.80 MiB / 134.68 MiB [--------------------------->________________________________] 46.63% ? p/s ?93.82 MiB / 134.68 MiB [-------------------------------->_____________] 69.66% 143.46 MiB p/s ETA 0s122.17 MiB / 134.68 MiB [---------------------------------------->____] 90.71% 143.46 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 143.46 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 138.59 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 138.59 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 138.59 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 129.65 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 129.65 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 129.65 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 121.28 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 121.28 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 121.28 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 113.46 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 113.46 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 113.46 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 106.14 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 106.14 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 106.14 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-------------------------------------------->] 100.00% 99.29 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-------------------------------------------->] 100.00% 99.29 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-------------------------------------------->] 100.00% 99.29 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-----------------------------------------------] 100.00% 28.99 MiB p/s 4.8s2026-11-19T09:54:13Z	INFO	[vulndb] Artifact successfully downloaded	repo="mirror.gcr.io/aquasec/trivy-db:2"
+2026-11-19T09:54:13.1135532Z 2026-11-19T09:54:13Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-11-19T09:54:13.1136304Z 2026-11-19T09:54:13Z	INFO	[secret] Secret scanning is enabled
+2026-11-19T09:54:13.1137316Z 2026-11-19T09:54:13Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-11-19T09:54:13.1138789Z 2026-11-19T09:54:13Z	INFO	[secret] Please see https://trivy.dev/docs/v0.76/guide/scanner/secret#recommendation for faster secret detection
+2026-11-19T09:54:13.3267004Z 2026-11-19T09:54:13Z	INFO	Detected OS	family="debian" version="13.7"
+2026-11-19T09:54:13.3268046Z 2026-11-19T09:54:13Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=6
+2026-11-19T09:54:13.3268950Z 2026-11-19T09:54:13Z	INFO	Number of language-specific files	num=1
+2026-11-19T09:54:13.3269712Z 2026-11-19T09:54:13Z	INFO	[gobinary] Detecting vulnerabilities...
+2026-11-19T09:54:13.3322316Z 
+2026-11-19T09:54:13.3324929Z Report Summary
+2026-11-19T09:54:13.3325265Z 
+2026-11-19T09:54:13.3326008Z ┌───────────────────────────────┬──────────┬─────────────────┬─────────┐
+2026-11-19T09:54:13.3327006Z │            Target             │   Type   │ Vulnerabilities │ Secrets │
+2026-11-19T09:54:13.3328094Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:13.3329322Z │ /scan/image.tar (debian 13.7) │  debian  │        0        │    -    │
+2026-11-19T09:54:13.3329907Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:13.3330376Z │ service                       │ gobinary │        0        │    -    │
+2026-11-19T09:54:13.3330889Z └───────────────────────────────┴──────────┴─────────────────┴─────────┘
+2026-11-19T09:54:13.3331241Z Legend:
+2026-11-19T09:54:13.3331453Z - '-': Not scanned
+2026-11-19T09:54:13.3331708Z - '0': Clean (no security findings detected)
+2026-11-19T09:54:13.3331927Z 
+2026-11-19T09:54:16.7815179Z ##[endgroup]
+2026-11-19T09:54:16.9862030Z 2026-11-19T09:54:16Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-11-19T09:54:16.9862916Z 2026-11-19T09:54:16Z	INFO	[secret] Secret scanning is enabled
+2026-11-19T09:54:16.9864191Z 2026-11-19T09:54:16Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-11-19T09:54:16.9865716Z 2026-11-19T09:54:16Z	INFO	[secret] Please see https://trivy.dev/docs/v0.76/guide/scanner/secret#recommendation for faster secret detection
+2026-11-19T09:54:16.9991088Z 2026-11-19T09:54:16Z	INFO	Detected OS	family="debian" version="13.7"
+2026-11-19T09:54:16.9992096Z 2026-11-19T09:54:16Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=6
+2026-11-19T09:54:16.9994615Z 2026-11-19T09:54:16Z	INFO	Number of language-specific files	num=1
+2026-11-19T09:54:16.9995484Z 2026-11-19T09:54:16Z	INFO	[gobinary] Detecting vulnerabilities...
+2026-11-19T09:54:17.0058226Z 
+2026-11-19T09:54:17.0058584Z Report Summary
+2026-11-19T09:54:17.0058768Z 
+2026-11-19T09:54:17.0059221Z ┌───────────────────────────────┬──────────┬─────────────────┬─────────┐
+2026-11-19T09:54:17.0059710Z │            Target             │   Type   │ Vulnerabilities │ Secrets │
+2026-11-19T09:54:17.0060199Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:17.0060725Z │ /scan/image.tar (debian 13.7) │  debian  │        0        │    -    │
+2026-11-19T09:54:17.0061208Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:17.0061622Z │ service                       │ gobinary │        0        │    -    │
+2026-11-19T09:54:17.0062060Z └───────────────────────────────┴──────────┴─────────────────┴─────────┘
+2026-11-19T09:54:17.0062366Z Legend:
+2026-11-19T09:54:17.0062553Z - '-': Not scanned
+2026-11-19T09:54:17.0062793Z - '0': Clean (no security findings detected)
+2026-11-19T09:54:17.0062993Z 
+
+===== job: build (payments), step: trivy
+2026-11-19T09:54:04.4026073Z ##[group]Run mkdir -p ~/.cache/trivy
+2026-11-19T09:54:04.4026471Z mkdir -p ~/.cache/trivy
+2026-11-19T09:54:04.4026725Z trivy() {
+2026-11-19T09:54:04.4027027Z   docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
+2026-11-19T09:54:04.4027476Z     -v "$RUNNER_TEMP:/scan:ro" -v "$HOME/.cache/trivy:/cache" \
+2026-11-19T09:54:04.4027956Z     "$TRIVY_IMAGE" image --cache-dir /cache --input /scan/image.tar "$@"
+2026-11-19T09:54:04.4028352Z }
+2026-11-19T09:54:04.4028602Z echo "::group::HIGH and CRITICAL, for the record"
+2026-11-19T09:54:04.4028966Z trivy --severity HIGH,CRITICAL --exit-code 0
+2026-11-19T09:54:04.4029277Z echo "::endgroup::"
+2026-11-19T09:54:04.4029599Z # The gate: a CRITICAL with a fix available fails the build.
+2026-11-19T09:54:04.4030082Z trivy --skip-db-update --severity CRITICAL --ignore-unfixed --exit-code 1
+2026-11-19T09:54:04.4050367Z shell: /usr/bin/bash -e {0}
+2026-11-19T09:54:04.4050654Z env:
+2026-11-19T09:54:04.4050854Z   GOLANGCI_LINT_VERSION: v2.14.0
+2026-11-19T09:54:04.4051118Z   GOVULNCHECK_VERSION: v1.9.0
+2026-11-19T09:54:04.4051593Z   TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:54:04.4052416Z   SERVICE: payments
+2026-11-19T09:54:04.4052637Z ##[endgroup]
+2026-11-19T09:54:04.4106319Z ##[group]HIGH and CRITICAL, for the record
+2026-11-19T09:54:04.4296803Z Unable to find image 'aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb' locally
+2026-11-19T09:54:04.5952413Z docker.io/aquasec/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb: Pulling from aquasec/trivy
+2026-11-19T09:54:04.6847845Z 7b229517ed22: Pulling fs layer
+2026-11-19T09:54:04.6848365Z 9f087194f4fe: Pulling fs layer
+2026-11-19T09:54:04.6848805Z d7953b8bb0ca: Pulling fs layer
+2026-11-19T09:54:04.6849247Z ac09fd37397a: Pulling fs layer
+2026-11-19T09:54:04.6849653Z ac09fd37397a: Waiting
+2026-11-19T09:54:04.7786560Z 7b229517ed22: Verifying Checksum
+2026-11-19T09:54:04.7787365Z 7b229517ed22: Download complete
+2026-11-19T09:54:04.7886743Z 9f087194f4fe: Verifying Checksum
+2026-11-19T09:54:04.7888258Z 9f087194f4fe: Download complete
+2026-11-19T09:54:04.8335051Z ac09fd37397a: Download complete
+2026-11-19T09:54:04.9169995Z 7b229517ed22: Pull complete
+2026-11-19T09:54:04.9403886Z d7953b8bb0ca: Verifying Checksum
+2026-11-19T09:54:04.9404472Z d7953b8bb0ca: Download complete
+2026-11-19T09:54:05.1173155Z 9f087194f4fe: Pull complete
+2026-11-19T09:54:06.0055970Z d7953b8bb0ca: Pull complete
+2026-11-19T09:54:06.0141958Z ac09fd37397a: Pull complete
+2026-11-19T09:54:06.0176476Z Digest: sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:54:06.0183863Z Status: Downloaded newer image for aquasec/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:54:06.1983328Z 2026-11-19T09:54:06Z	INFO	[vulndb] Need to update DB
+2026-11-19T09:54:06.1983882Z 2026-11-19T09:54:06Z	INFO	[vulndb] Downloading vulnerability DB...
+2026-11-19T09:54:06.1984444Z 2026-11-19T09:54:06Z	INFO	[vulndb] Downloading artifact...	repo="mirror.gcr.io/aquasec/trivy-db:2"
+2026-11-19T09:54:11.4022213Z 55.40 MiB / 134.68 MiB [------------------------>___________________________________] 41.13% ? p/s ?115.79 MiB / 134.68 MiB [-------------------------------------------------->________] 85.98% ? p/s ?134.68 MiB / 134.68 MiB [--------------------------------------------------------->] 100.00% ? p/s ?134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 132.18 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 132.18 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 132.18 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 123.65 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 123.65 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 123.65 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 115.67 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 115.67 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 115.67 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 108.21 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 108.21 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 108.21 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 101.23 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 101.23 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 101.23 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-------------------------------------------->] 100.00% 94.70 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-------------------------------------------->] 100.00% 94.70 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-----------------------------------------------] 100.00% 33.81 MiB p/s 4.2s2026-11-19T09:54:11Z	INFO	[vulndb] Artifact successfully downloaded	repo="mirror.gcr.io/aquasec/trivy-db:2"
+2026-11-19T09:54:11.4029254Z 2026-11-19T09:54:11Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-11-19T09:54:11.4029834Z 2026-11-19T09:54:11Z	INFO	[secret] Secret scanning is enabled
+2026-11-19T09:54:11.4030414Z 2026-11-19T09:54:11Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-11-19T09:54:11.4031393Z 2026-11-19T09:54:11Z	INFO	[secret] Please see https://trivy.dev/docs/v0.76/guide/scanner/secret#recommendation for faster secret detection
+2026-11-19T09:54:11.6284144Z 2026-11-19T09:54:11Z	INFO	Detected OS	family="debian" version="13.7"
+2026-11-19T09:54:11.6303325Z 2026-11-19T09:54:11Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=6
+2026-11-19T09:54:11.6304237Z 2026-11-19T09:54:11Z	INFO	Number of language-specific files	num=1
+2026-11-19T09:54:11.6304977Z 2026-11-19T09:54:11Z	INFO	[gobinary] Detecting vulnerabilities...
+2026-11-19T09:54:11.6315324Z 
+2026-11-19T09:54:11.6315744Z Report Summary
+2026-11-19T09:54:11.6315979Z 
+2026-11-19T09:54:11.6316665Z ┌───────────────────────────────┬──────────┬─────────────────┬─────────┐
+2026-11-19T09:54:11.6317445Z │            Target             │   Type   │ Vulnerabilities │ Secrets │
+2026-11-19T09:54:11.6318259Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:11.6319414Z │ /scan/image.tar (debian 13.7) │  debian  │        0        │    -    │
+2026-11-19T09:54:11.6319945Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:11.6320377Z │ service                       │ gobinary │        0        │    -    │
+2026-11-19T09:54:11.6320860Z └───────────────────────────────┴──────────┴─────────────────┴─────────┘
+2026-11-19T09:54:11.6321167Z Legend:
+2026-11-19T09:54:11.6321345Z - '-': Not scanned
+2026-11-19T09:54:11.6321577Z - '0': Clean (no security findings detected)
+2026-11-19T09:54:11.6321774Z 
+2026-11-19T09:54:11.7444349Z ##[endgroup]
+2026-11-19T09:54:15.1553731Z 2026-11-19T09:54:15Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-11-19T09:54:15.1571535Z 2026-11-19T09:54:15Z	INFO	[secret] Secret scanning is enabled
+2026-11-19T09:54:15.1596437Z 2026-11-19T09:54:15Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-11-19T09:54:15.1598424Z 2026-11-19T09:54:15Z	INFO	[secret] Please see https://trivy.dev/docs/v0.76/guide/scanner/secret#recommendation for faster secret detection
+2026-11-19T09:54:15.1632887Z 2026-11-19T09:54:15Z	INFO	Detected OS	family="debian" version="13.7"
+2026-11-19T09:54:15.1662689Z 2026-11-19T09:54:15Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=6
+2026-11-19T09:54:15.1683773Z 2026-11-19T09:54:15Z	INFO	Number of language-specific files	num=1
+2026-11-19T09:54:15.1684526Z 2026-11-19T09:54:15Z	INFO	[gobinary] Detecting vulnerabilities...
+2026-11-19T09:54:15.1701593Z 
+2026-11-19T09:54:15.1722677Z Report Summary
+2026-11-19T09:54:15.1752672Z 
+2026-11-19T09:54:15.1783307Z ┌───────────────────────────────┬──────────┬─────────────────┬─────────┐
+2026-11-19T09:54:15.1803842Z │            Target             │   Type   │ Vulnerabilities │ Secrets │
+2026-11-19T09:54:15.1831628Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:15.1833634Z │ /scan/image.tar (debian 13.7) │  debian  │        0        │    -    │
+2026-11-19T09:54:15.1835142Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:15.1836404Z │ service                       │ gobinary │        0        │    -    │
+2026-11-19T09:54:15.1837784Z └───────────────────────────────┴──────────┴─────────────────┴─────────┘
+2026-11-19T09:54:15.1838759Z Legend:
+2026-11-19T09:54:15.1839068Z - '-': Not scanned
+2026-11-19T09:54:15.1839515Z - '0': Clean (no security findings detected)
+2026-11-19T09:54:15.1839808Z 
+
+===== job: build (scheduler), step: trivy
+2026-11-19T09:53:57.7264003Z ##[group]Run mkdir -p ~/.cache/trivy
+2026-11-19T09:53:57.7264382Z mkdir -p ~/.cache/trivy
+2026-11-19T09:53:57.7264639Z trivy() {
+2026-11-19T09:53:57.7264948Z   docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
+2026-11-19T09:53:57.7265387Z     -v "$RUNNER_TEMP:/scan:ro" -v "$HOME/.cache/trivy:/cache" \
+2026-11-19T09:53:57.7265853Z     "$TRIVY_IMAGE" image --cache-dir /cache --input /scan/image.tar "$@"
+2026-11-19T09:53:57.7266223Z }
+2026-11-19T09:53:57.7266472Z echo "::group::HIGH and CRITICAL, for the record"
+2026-11-19T09:53:57.7266834Z trivy --severity HIGH,CRITICAL --exit-code 0
+2026-11-19T09:53:57.7267165Z echo "::endgroup::"
+2026-11-19T09:53:57.7267487Z # The gate: a CRITICAL with a fix available fails the build.
+2026-11-19T09:53:57.7267985Z trivy --skip-db-update --severity CRITICAL --ignore-unfixed --exit-code 1
+2026-11-19T09:53:57.7288113Z shell: /usr/bin/bash -e {0}
+2026-11-19T09:53:57.7288683Z env:
+2026-11-19T09:53:57.7288898Z   GOLANGCI_LINT_VERSION: v2.14.0
+2026-11-19T09:53:57.7289171Z   GOVULNCHECK_VERSION: v1.9.0
+2026-11-19T09:53:57.7289642Z   TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:53:57.7290133Z   SERVICE: scheduler
+2026-11-19T09:53:57.7290352Z ##[endgroup]
+2026-11-19T09:53:57.7344752Z ##[group]HIGH and CRITICAL, for the record
+2026-11-19T09:53:57.7540661Z Unable to find image 'aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb' locally
+2026-11-19T09:53:58.3485127Z docker.io/aquasec/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb: Pulling from aquasec/trivy
+2026-11-19T09:53:58.6214716Z 7b229517ed22: Pulling fs layer
+2026-11-19T09:53:58.6215247Z 9f087194f4fe: Pulling fs layer
+2026-11-19T09:53:58.6215707Z d7953b8bb0ca: Pulling fs layer
+2026-11-19T09:53:58.6216129Z ac09fd37397a: Pulling fs layer
+2026-11-19T09:53:58.6216574Z ac09fd37397a: Waiting
+2026-11-19T09:53:58.8448855Z 7b229517ed22: Verifying Checksum
+2026-11-19T09:53:58.8449384Z 7b229517ed22: Download complete
+2026-11-19T09:53:58.8610871Z 9f087194f4fe: Verifying Checksum
+2026-11-19T09:53:58.8611614Z 9f087194f4fe: Download complete
+2026-11-19T09:53:58.9861449Z 7b229517ed22: Pull complete
+2026-11-19T09:53:59.0132427Z d7953b8bb0ca: Verifying Checksum
+2026-11-19T09:53:59.0132999Z d7953b8bb0ca: Download complete
+2026-11-19T09:53:59.0694908Z ac09fd37397a: Verifying Checksum
+2026-11-19T09:53:59.0695436Z ac09fd37397a: Download complete
+2026-11-19T09:53:59.1990686Z 9f087194f4fe: Pull complete
+2026-11-19T09:54:00.0675209Z d7953b8bb0ca: Pull complete
+2026-11-19T09:54:00.0794962Z ac09fd37397a: Pull complete
+2026-11-19T09:54:00.0832320Z Digest: sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:54:00.0838570Z Status: Downloaded newer image for aquasec/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:54:00.2754163Z 2026-11-19T09:54:00Z	INFO	[vulndb] Need to update DB
+2026-11-19T09:54:00.2754661Z 2026-11-19T09:54:00Z	INFO	[vulndb] Downloading vulnerability DB...
+2026-11-19T09:54:00.2755273Z 2026-11-19T09:54:00Z	INFO	[vulndb] Downloading artifact...	repo="mirror.gcr.io/aquasec/trivy-db:2"
+2026-11-19T09:54:07.4783613Z 4.09 MiB / 134.68 MiB [->____________________________________________________________] 3.04% ? p/s ?26.92 MiB / 134.68 MiB [----------->________________________________________________] 19.99% ? p/s ?49.47 MiB / 134.68 MiB [---------------------->_____________________________________] 36.73% ? p/s ?76.14 MiB / 134.68 MiB [-------------------------->___________________] 56.53% 119.89 MiB p/s ETA 0s104.23 MiB / 134.68 MiB [---------------------------------->__________] 77.39% 119.89 MiB p/s ETA 0s132.63 MiB / 134.68 MiB [-------------------------------------------->] 98.48% 119.89 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 118.45 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 118.45 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 118.45 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 110.81 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 110.81 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 110.81 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 103.66 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 103.66 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 103.66 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-------------------------------------------->] 100.00% 96.97 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-------------------------------------------->] 100.00% 96.97 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-------------------------------------------->] 100.00% 96.97 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-------------------------------------------->] 100.00% 90.72 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-------------------------------------------->] 100.00% 90.72 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-------------------------------------------->] 100.00% 90.72 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-------------------------------------------->] 100.00% 84.86 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-------------------------------------------->] 100.00% 84.86 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-------------------------------------------->] 100.00% 84.86 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-------------------------------------------->] 100.00% 79.39 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-------------------------------------------->] 100.00% 79.39 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-----------------------------------------------] 100.00% 26.63 MiB p/s 5.3s2026-11-19T09:54:07Z	INFO	[vulndb] Artifact successfully downloaded	repo="mirror.gcr.io/aquasec/trivy-db:2"
+2026-11-19T09:54:07.4799868Z 2026-11-19T09:54:07Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-11-19T09:54:07.4800607Z 2026-11-19T09:54:07Z	INFO	[secret] Secret scanning is enabled
+2026-11-19T09:54:07.4801545Z 2026-11-19T09:54:07Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-11-19T09:54:07.4803035Z 2026-11-19T09:54:07Z	INFO	[secret] Please see https://trivy.dev/docs/v0.76/guide/scanner/secret#recommendation for faster secret detection
+2026-11-19T09:54:07.6456151Z 2026-11-19T09:54:07Z	INFO	Detected OS	family="debian" version="13.7"
+2026-11-19T09:54:07.6457531Z 2026-11-19T09:54:07Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=6
+2026-11-19T09:54:07.6458705Z 2026-11-19T09:54:07Z	INFO	Number of language-specific files	num=1
+2026-11-19T09:54:07.6459475Z 2026-11-19T09:54:07Z	INFO	[gobinary] Detecting vulnerabilities...
+2026-11-19T09:54:07.6505102Z 
+2026-11-19T09:54:07.6505647Z Report Summary
+2026-11-19T09:54:07.6506173Z 
+2026-11-19T09:54:07.6507232Z ┌───────────────────────────────┬──────────┬─────────────────┬─────────┐
+2026-11-19T09:54:07.6508702Z │            Target             │   Type   │ Vulnerabilities │ Secrets │
+2026-11-19T09:54:07.6509988Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:07.6511319Z │ /scan/image.tar (debian 13.7) │  debian  │        0        │    -    │
+2026-11-19T09:54:07.6511968Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:07.6512499Z │ service                       │ gobinary │        0        │    -    │
+2026-11-19T09:54:07.6513092Z └───────────────────────────────┴──────────┴─────────────────┴─────────┘
+2026-11-19T09:54:07.6513774Z Legend:
+2026-11-19T09:54:07.6514018Z - '-': Not scanned
+2026-11-19T09:54:07.6514304Z - '0': Clean (no security findings detected)
+2026-11-19T09:54:07.6514563Z 
+2026-11-19T09:54:10.6624328Z ##[endgroup]
+2026-11-19T09:54:10.8719326Z 2026-11-19T09:54:10Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-11-19T09:54:10.8729502Z 2026-11-19T09:54:10Z	INFO	[secret] Secret scanning is enabled
+2026-11-19T09:54:10.8737091Z 2026-11-19T09:54:10Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-11-19T09:54:10.8738778Z 2026-11-19T09:54:10Z	INFO	[secret] Please see https://trivy.dev/docs/v0.76/guide/scanner/secret#recommendation for faster secret detection
+2026-11-19T09:54:10.8816589Z 2026-11-19T09:54:10Z	INFO	Detected OS	family="debian" version="13.7"
+2026-11-19T09:54:10.8817195Z 2026-11-19T09:54:10Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=6
+2026-11-19T09:54:10.8817756Z 2026-11-19T09:54:10Z	INFO	Number of language-specific files	num=1
+2026-11-19T09:54:10.8818468Z 2026-11-19T09:54:10Z	INFO	[gobinary] Detecting vulnerabilities...
+2026-11-19T09:54:10.8864750Z 
+2026-11-19T09:54:10.8869219Z Report Summary
+2026-11-19T09:54:10.8869677Z 
+2026-11-19T09:54:10.8870452Z ┌───────────────────────────────┬──────────┬─────────────────┬─────────┐
+2026-11-19T09:54:10.8871383Z │            Target             │   Type   │ Vulnerabilities │ Secrets │
+2026-11-19T09:54:10.8872308Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:10.8873241Z │ /scan/image.tar (debian 13.7) │  debian  │        0        │    -    │
+2026-11-19T09:54:10.8874158Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:10.8874975Z │ service                       │ gobinary │        0        │    -    │
+2026-11-19T09:54:10.8875844Z └───────────────────────────────┴──────────┴─────────────────┴─────────┘
+2026-11-19T09:54:10.8876857Z Legend:
+2026-11-19T09:54:10.8877287Z - '-': Not scanned
+2026-11-19T09:54:10.8877788Z - '0': Clean (no security findings detected)
+2026-11-19T09:54:10.8878453Z 
+
+===== job: build (web), step: trivy
+2026-11-19T09:53:49.3223401Z ##[group]Run mkdir -p ~/.cache/trivy
+2026-11-19T09:53:49.3223791Z mkdir -p ~/.cache/trivy
+2026-11-19T09:53:49.3224044Z trivy() {
+2026-11-19T09:53:49.3224358Z   docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
+2026-11-19T09:53:49.3224731Z     -v "$RUNNER_TEMP:/scan:ro" -v "$HOME/.cache/trivy:/cache" \
+2026-11-19T09:53:49.3225164Z     "$TRIVY_IMAGE" image --cache-dir /cache --input /scan/image.tar "$@"
+2026-11-19T09:53:49.3225488Z }
+2026-11-19T09:53:49.3225757Z echo "::group::HIGH and CRITICAL, for the record"
+2026-11-19T09:53:49.3226087Z trivy --severity HIGH,CRITICAL --exit-code 0
+2026-11-19T09:53:49.3226371Z echo "::endgroup::"
+2026-11-19T09:53:49.3226722Z # The gate: a CRITICAL with a fix available fails the build.
+2026-11-19T09:53:49.3227123Z trivy --skip-db-update --severity CRITICAL --ignore-unfixed --exit-code 1
+2026-11-19T09:53:49.3254474Z shell: /usr/bin/bash -e {0}
+2026-11-19T09:53:49.3254885Z env:
+2026-11-19T09:53:49.3255114Z   GOLANGCI_LINT_VERSION: v2.14.0
+2026-11-19T09:53:49.3255384Z   GOVULNCHECK_VERSION: v1.9.0
+2026-11-19T09:53:49.3255811Z   TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:53:49.3256242Z   SERVICE: web
+2026-11-19T09:53:49.3256471Z ##[endgroup]
+2026-11-19T09:53:49.3309871Z ##[group]HIGH and CRITICAL, for the record
+2026-11-19T09:53:49.3460137Z Unable to find image 'aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb' locally
+2026-11-19T09:53:50.0449542Z docker.io/aquasec/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb: Pulling from aquasec/trivy
+2026-11-19T09:53:50.3011794Z 7b229517ed22: Pulling fs layer
+2026-11-19T09:53:50.3012278Z 9f087194f4fe: Pulling fs layer
+2026-11-19T09:53:50.3012655Z d7953b8bb0ca: Pulling fs layer
+2026-11-19T09:53:50.3013174Z ac09fd37397a: Pulling fs layer
+2026-11-19T09:53:50.3013530Z ac09fd37397a: Waiting
+2026-11-19T09:53:50.5515427Z 9f087194f4fe: Verifying Checksum
+2026-11-19T09:53:50.5516693Z 9f087194f4fe: Download complete
+2026-11-19T09:53:50.5532073Z 7b229517ed22: Verifying Checksum
+2026-11-19T09:53:50.5532513Z 7b229517ed22: Download complete
+2026-11-19T09:53:50.6299251Z 7b229517ed22: Pull complete
+2026-11-19T09:53:50.6736835Z d7953b8bb0ca: Verifying Checksum
+2026-11-19T09:53:50.6737266Z d7953b8bb0ca: Download complete
+2026-11-19T09:53:50.7435031Z 9f087194f4fe: Pull complete
+2026-11-19T09:53:50.7617685Z ac09fd37397a: Download complete
+2026-11-19T09:53:51.3188329Z d7953b8bb0ca: Pull complete
+2026-11-19T09:53:51.3233596Z ac09fd37397a: Pull complete
+2026-11-19T09:53:51.3273037Z Digest: sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:53:51.3275747Z Status: Downloaded newer image for aquasec/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-19T09:53:51.5294485Z 2026-11-19T09:53:51Z	INFO	[vulndb] Need to update DB
+2026-11-19T09:53:51.5295659Z 2026-11-19T09:53:51Z	INFO	[vulndb] Downloading vulnerability DB...
+2026-11-19T09:53:51.5296437Z 2026-11-19T09:53:51Z	INFO	[vulndb] Downloading artifact...	repo="mirror.gcr.io/aquasec/trivy-db:2"
+2026-11-19T09:53:56.0628609Z 21.06 MiB / 134.68 MiB [--------->__________________________________________________] 15.64% ? p/s ?65.66 MiB / 134.68 MiB [----------------------------->______________________________] 48.75% ? p/s ?115.59 MiB / 134.68 MiB [-------------------------------------------------->________] 85.83% ? p/s ?134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 189.15 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 189.15 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 189.15 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 176.95 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 176.95 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 176.95 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 165.53 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 165.53 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 165.53 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 154.85 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 154.85 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 154.85 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [------------------------------------------->] 100.00% 144.86 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-----------------------------------------------] 100.00% 42.30 MiB p/s 3.4s2026-11-19T09:53:56Z	INFO	[vulndb] Artifact successfully downloaded	repo="mirror.gcr.io/aquasec/trivy-db:2"
+2026-11-19T09:53:56.0642219Z 2026-11-19T09:53:56Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-11-19T09:53:56.0643198Z 2026-11-19T09:53:56Z	INFO	[secret] Secret scanning is enabled
+2026-11-19T09:53:56.0644093Z 2026-11-19T09:53:56Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-11-19T09:53:56.0645023Z 2026-11-19T09:53:56Z	INFO	[secret] Please see https://trivy.dev/docs/v0.76/guide/scanner/secret#recommendation for faster secret detection
+2026-11-19T09:53:56.5634782Z 2026-11-19T09:53:56Z	INFO	Detected OS	family="debian" version="13.7"
+2026-11-19T09:53:56.5635714Z 2026-11-19T09:53:56Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=6
+2026-11-19T09:53:56.5636260Z 2026-11-19T09:53:56Z	INFO	Number of language-specific files	num=1
+2026-11-19T09:53:56.5636618Z 2026-11-19T09:53:56Z	INFO	[gobinary] Detecting vulnerabilities...
+2026-11-19T09:53:56.5666061Z 
+2026-11-19T09:53:56.5666506Z Report Summary
+2026-11-19T09:53:56.5666683Z 
+2026-11-19T09:53:56.5667158Z ┌───────────────────────────────┬──────────┬─────────────────┬─────────┐
+2026-11-19T09:53:56.5667697Z │            Target             │   Type   │ Vulnerabilities │ Secrets │
+2026-11-19T09:53:56.5668199Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:53:56.5670466Z │ /scan/image.tar (debian 13.7) │  debian  │        0        │    -    │
+2026-11-19T09:53:56.5670976Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:53:56.5671344Z │ service                       │ gobinary │        0        │    -    │
+2026-11-19T09:53:56.5671738Z └───────────────────────────────┴──────────┴─────────────────┴─────────┘
+2026-11-19T09:53:56.5672091Z Legend:
+2026-11-19T09:53:56.5672312Z - '-': Not scanned
+2026-11-19T09:53:56.5672582Z - '0': Clean (no security findings detected)
+2026-11-19T09:53:56.5672768Z 
+2026-11-19T09:53:56.7275911Z ##[endgroup]
+2026-11-19T09:54:02.0741631Z 2026-11-19T09:54:02Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-11-19T09:54:02.0742662Z 2026-11-19T09:54:02Z	INFO	[secret] Secret scanning is enabled
+2026-11-19T09:54:02.0743708Z 2026-11-19T09:54:02Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-11-19T09:54:02.0744765Z 2026-11-19T09:54:02Z	INFO	[secret] Please see https://trivy.dev/docs/v0.76/guide/scanner/secret#recommendation for faster secret detection
+2026-11-19T09:54:02.0785964Z 2026-11-19T09:54:02Z	INFO	Detected OS	family="debian" version="13.7"
+2026-11-19T09:54:02.0787586Z 2026-11-19T09:54:02Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=6
+2026-11-19T09:54:02.0788681Z 2026-11-19T09:54:02Z	INFO	Number of language-specific files	num=1
+2026-11-19T09:54:02.0789777Z 2026-11-19T09:54:02Z	INFO	[gobinary] Detecting vulnerabilities...
+2026-11-19T09:54:02.0873722Z 
+2026-11-19T09:54:02.0884626Z Report Summary
+2026-11-19T09:54:02.0884869Z 
+2026-11-19T09:54:02.0885332Z ┌───────────────────────────────┬──────────┬─────────────────┬─────────┐
+2026-11-19T09:54:02.0886109Z │            Target             │   Type   │ Vulnerabilities │ Secrets │
+2026-11-19T09:54:02.0886517Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:02.0886976Z │ /scan/image.tar (debian 13.7) │  debian  │        0        │    -    │
+2026-11-19T09:54:02.0887426Z ├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+2026-11-19T09:54:02.0887786Z │ service                       │ gobinary │        0        │    -    │
+2026-11-19T09:54:02.0889287Z └───────────────────────────────┴──────────┴─────────────────┴─────────┘
+2026-11-19T09:54:02.0889631Z Legend:
+2026-11-19T09:54:02.0889878Z - '-': Not scanned
+2026-11-19T09:54:02.0890212Z - '0': Clean (no security findings detected)
+2026-11-19T09:54:02.0890463Z 
+
+===== the trivy-db cache in each build job (restore, then save)
+build (orders)	2026-11-19T09:54:04.1165661Z Cache not found for input keys: trivy-db-2026-11-19, trivy-db-
+build (orders)	2026-11-19T09:55:02.3300957Z Failed to save: Unable to reserve cache with key trivy-db-2026-11-19, another job may be creating this cache.
+build (notifications)	2026-11-19T09:53:56.0710380Z Cache not found for input keys: trivy-db-2026-11-19, trivy-db-
+build (notifications)	2026-11-19T09:54:42.3296056Z Failed to save: Unable to reserve cache with key trivy-db-2026-11-19, another job may be creating this cache.
+build (gateway)	2026-11-19T09:53:53.6936450Z Cache not found for input keys: trivy-db-2026-11-19, trivy-db-
+build (gateway)	2026-11-19T09:54:58.3485245Z Failed to save: Unable to reserve cache with key trivy-db-2026-11-19, another job may be creating this cache.
+build (fulfillment)	2026-11-19T09:53:52.2580673Z Cache not found for input keys: trivy-db-2026-11-19, trivy-db-
+build (fulfillment)	2026-11-19T09:54:34.6582881Z Failed to save: Unable to reserve cache with key trivy-db-2026-11-19, another job may be creating this cache.
+build (catalog)	2026-11-19T09:54:00.1544739Z Cache not found for input keys: trivy-db-2026-11-19, trivy-db-
+build (catalog)	2026-11-19T09:54:51.7893616Z Failed to save: Unable to reserve cache with key trivy-db-2026-11-19, another job may be creating this cache.
+build (web)	2026-11-19T09:53:49.3157450Z Cache not found for input keys: trivy-db-2026-11-19, trivy-db-
+build (web)	2026-11-19T09:54:39.6509289Z Failed to save: Unable to reserve cache with key trivy-db-2026-11-19, another job may be creating this cache.
+build (inventory)	2026-11-19T09:53:53.8643613Z Cache not found for input keys: trivy-db-2026-11-19, trivy-db-
+build (inventory)	2026-11-19T09:54:36.3394489Z Cache saved with key: trivy-db-2026-11-19
+build (scheduler)	2026-11-19T09:53:57.7155056Z Cache not found for input keys: trivy-db-2026-11-19, trivy-db-
+build (scheduler)	2026-11-19T09:54:52.9730904Z Failed to save: Unable to reserve cache with key trivy-db-2026-11-19, another job may be creating this cache.
+build (payments)	2026-11-19T09:54:04.3902391Z Cache not found for input keys: trivy-db-2026-11-19, trivy-db-
+build (payments)	2026-11-19T09:54:53.5217041Z Failed to save: Unable to reserve cache with key trivy-db-2026-11-19, another job may be creating this cache.

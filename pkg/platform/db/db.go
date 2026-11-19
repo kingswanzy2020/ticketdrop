@@ -91,7 +91,7 @@ func Migrate(ctx context.Context, pool *pgxpool.Pool, log *slog.Logger, sources 
 		return fmt.Errorf("take migration lock: %w", err)
 	}
 	defer func() {
-		conn.Exec(context.WithoutCancel(ctx), `SELECT pg_advisory_unlock($1)`, migrationLock)
+		_, _ = conn.Exec(context.WithoutCancel(ctx), `SELECT pg_advisory_unlock($1)`, migrationLock)
 	}()
 
 	_, err = conn.Exec(ctx, `

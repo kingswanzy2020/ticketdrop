@@ -1,0 +1,12 @@
+Thu Nov 19 05:36:12 PM KST 2026
++ grep -rn uses: .github
++ grep -v '@[0-9a-f]\{40\}'
++ echo 'every uses: is pinned to a full SHA'
+every uses: is pinned to a full SHA
++ set +x
+actions/cache v6.1.0 pinned=55cc8345863c7cc4c66a329aec7e433d2d1c52a9 tag=55cc8345863c7cc4c66a329aec7e433d2d1c52a9 MATCH
+actions/checkout v7.0.1 pinned=3d3c42e5aac5ba805825da76410c181273ba90b1 tag=3d3c42e5aac5ba805825da76410c181273ba90b1 MATCH
+actions/setup-go v7.0.0 pinned=b7ad1dad31e06c5925ef5d2fc7ad053ef454303e tag=b7ad1dad31e06c5925ef5d2fc7ad053ef454303e MATCH
+docker/build-push-action v7.4.0 pinned=c3c9e263c25d99ce0380d002d59b67737d91b0dc tag=c3c9e263c25d99ce0380d002d59b67737d91b0dc MATCH
+docker/setup-buildx-action v4.4.1 pinned=f87e5991a6d7451dcb8d9637bfbc97413f497069 tag=f87e5991a6d7451dcb8d9637bfbc97413f497069 MATCH
+golangci/golangci-lint-action v9.3.0 pinned=ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a tag=ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a MATCH

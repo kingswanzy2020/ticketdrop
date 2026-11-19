@@ -262,10 +262,7 @@ func (s *Service) grantTier(ctx context.Context, tx pgx.Tx, k tierKey, live []ho
 	}
 	granted, _ := allocate(available, quantities)
 
-	var (
-		holds    []Hold
-		orderIDs []string
-	)
+	var holds []Hold
 	for n, i := range group {
 		if !granted[n] {
 			results[i] = holdResult{err: ErrSoldOut}
@@ -274,7 +271,6 @@ func (s *Service) grantTier(ctx context.Context, tx pgx.Tx, k tierKey, live []ho
 		r := live[i].req
 		h := Hold{ID: uuid.NewString(), OrderID: r.OrderID, DropID: r.DropID, Tier: r.Tier, Quantity: r.Quantity, ExpiresAt: expires}
 		holds = append(holds, h)
-		orderIDs = append(orderIDs, h.OrderID)
 		results[i] = holdResult{hold: h, created: true}
 	}
 	if len(holds) == 0 {

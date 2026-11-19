@@ -1,0 +1,24 @@
+Thu Nov 19 09:05:42 PM KST 2026
+== before
+$ gh api repos/kingswanzy2020/ticketdrop/rulesets/27520282 --jq ...
+{"name":"protect-app-main","updated_at":"2026-11-18T13:10:32.365+09:00","enforcement":"active","bypass_actors":[],"conditions":{"ref_name":{"exclude":[],"include":["~DEFAULT_BRANCH"]}},"rules":[{"type":"pull_request"},{"type":"required_status_checks","checks":["ci-ok"],"strict":true}]}
+$ gh api repos/kingswanzy2020/ticketdrop-gitops/rulesets/27520269 --jq ...
+{"name":"protect-infra-main","updated_at":"2026-11-18T13:10:20.131+09:00","enforcement":"active","bypass_actors":[],"conditions":{"ref_name":{"exclude":[],"include":["~DEFAULT_BRANCH"]}},"rules":[{"type":"required_status_checks","checks":["ci-ok"],"strict":true},{"type":"pull_request"}]}
+
+== change: add non_fast_forward (block force pushes) and deletion (restrict deletions) to each ruleset
+$ gh api -X PUT repos/kingswanzy2020/ticketdrop/rulesets/27520282 --input <ruleset with the two rules added>
+updated protect-app-main at 2026-11-19T21:05:42.968+09:00
+$ gh api -X PUT repos/kingswanzy2020/ticketdrop-gitops/rulesets/27520269 --input <ruleset with the two rules added>
+updated protect-infra-main at 2026-11-19T21:05:43.816+09:00
+
+== after
+$ gh api repos/kingswanzy2020/ticketdrop/rulesets/27520282 --jq ...
+{"bypass_actors":[],"conditions":{"ref_name":{"exclude":[],"include":["~DEFAULT_BRANCH"]}},"enforcement":"active","name":"protect-app-main","rules":[{"type":"pull_request"},{"checks":["ci-ok"],"strict":true,"type":"required_status_checks"},{"type":"non_fast_forward"},{"type":"deletion"}],"updated_at":"2026-11-19T21:05:42.968+09:00"}
+$ gh api repos/kingswanzy2020/ticketdrop-gitops/rulesets/27520269 --jq ...
+{"bypass_actors":[],"conditions":{"ref_name":{"exclude":[],"include":["~DEFAULT_BRANCH"]}},"enforcement":"active","name":"protect-infra-main","rules":[{"checks":["ci-ok"],"strict":true,"type":"required_status_checks"},{"type":"pull_request"},{"type":"non_fast_forward"},{"type":"deletion"}],"updated_at":"2026-11-19T21:05:43.816+09:00"}
+
+== rules GitHub applies to main
+$ gh api repos/kingswanzy2020/ticketdrop/rules/branches/main --jq '[.[].type]'
+["pull_request","required_status_checks","non_fast_forward","deletion"]
+$ gh api repos/kingswanzy2020/ticketdrop-gitops/rules/branches/main --jq '[.[].type]'
+["required_status_checks","pull_request","non_fast_forward","deletion"]
