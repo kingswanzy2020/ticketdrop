@@ -1,0 +1,36 @@
+Thu Nov 19 11:12:22 PM KST 2026
+$ gh pr view 6 --json number,title,headRefOid,mergeStateStatus,mergeable
+{"headRefOid":"97750309c6374f1ef17ece2dbe90e0055f857ba2","mergeStateStatus":"CLEAN","mergeable":"MERGEABLE","number":6,"title":"Proof: a docs-only change builds no image"}
+
+$ gh pr diff 6 --name-only
+docs/README.md
+
+$ gh pr checks 6
+ci-ok	pass	2s	https://github.com/kingswanzy2020/ticketdrop/actions/runs/44540390923/job/135617148468	
+build	skipping	0	https://github.com/kingswanzy2020/ticketdrop/actions/runs/44540390923/job/135616934826	
+changes	pass	6s	https://github.com/kingswanzy2020/ticketdrop/actions/runs/44540390923/job/135616825390	
+go	pass	28s	https://github.com/kingswanzy2020/ticketdrop/actions/runs/44540390923/job/135616825659	
+
+$ gh run view 44540390923
+
+✓ proof/docs-only ci kingswanzy2020/ticketdrop#6 · 44540390923
+Triggered via pull_request about 4 minutes ago
+
+JOBS
+✓ changes in 6s (ID 135616825390)
+✓ go in 28s (ID 135616825659)
+- build in 0s (ID 135616934826)
+✓ ci-ok in 2s (ID 135617148468)
+
+For more information about a job, try: gh run view --job=<job-id>
+View this run on GitHub: https://github.com/kingswanzy2020/ticketdrop/actions/runs/44540390923
+
+== the changes job: what it decided
+  BASE: d8b7e1e0dd336688249bef724c6e1bb2a1caa747
+  HEAD: 97750309c6374f1ef17ece2dbe90e0055f857ba2
+
+== the ci-ok job
+' <<<"$NEEDS" >/dev/null || { echo "::error::a required job did not pass"; exit 1; }
+changes: success
+go: success
+build: skipped

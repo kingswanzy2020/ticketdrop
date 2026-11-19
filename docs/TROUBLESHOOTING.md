@@ -339,3 +339,110 @@ it is on the default branch or has run at least once, so until then it does
 not exist by name.
 
 **Fix.** Open the pull request; its first run registers the workflow.
+
+## 16. In the kind job, the Gateway API CRDs were already there, owned by cloud-provider-kind
+
+**Seen.** The first run of the GitOps workflow stopped at `rebuild.sh` step 2,
+`kubectl apply --server-side -f platform/gateway-api/standard-install-v1.6.3.yaml`,
+with one error per CRD:
+
+```
+Apply failed with 1 conflict: conflict with "cloud-provider-kind" using apiextensions.k8s.io/v1: .metadata.annotations.gateway.networking.k8s.io/bundle-version
+```
+
+**Cause.** cloud-provider-kind, started so that Traefik's LoadBalancer Service
+gets an address, also runs its own Gateway API controller by default
+("enabled by default using the standard channel", its README), and it
+installs the Gateway API CRDs when it starts. A server-side apply that sets a
+field another manager owns is refused unless it takes the field over, so our
+CRDs could not be applied over its.
+
+**Fix.** cloud-provider-kind is started with `--gateway-channel disabled`, so
+the only Gateway API implementation in the kind cluster is Traefik, as on
+Docker Desktop. `--force-conflicts` in `rebuild.sh` was not used: it would
+change the script used at home to suit the runner, and two controllers would
+still be watching Gateways. Evidence:
+[`fail-8-cloud-provider-kind-gateway-crds.txt`](evidence/phase-3/fail-8-cloud-provider-kind-gateway-crds.txt).
+
+## 17. shellcheck in CI failed on `lib.sh`, which passes locally
+
+**Seen.** The same run's lint job failed with SC2148 ("Add a shebang") and
+five SC2034 warnings ("appears unused") on `scripts/lib.sh`.
+
+**Cause.** The step ran `shellcheck -x scripts/*.sh`, and the glob includes
+`lib.sh`. Checked on its own, `lib.sh` has no shebang because it is sourced,
+and its variables are used only by the scripts that source it. Checked
+locally, only the scripts that are run had been listed.
+
+**Fix.** The step now checks every `.sh` except `lib.sh`, with `-x -P
+SCRIPTDIR`, so `lib.sh` is checked as part of each script that sources it.
+Evidence: [`fail-7-shellcheck-lib-alone.txt`](evidence/phase-3/fail-7-shellcheck-lib-alone.txt).
+
+## 18. A new pod is not policed for its first moments, so the NetworkPolicy probe got through
+
+**Seen.** In the kind job, a busybox pod with no labels in `ticketdrop`, where
+`default-deny` and `allow-dns` are the only policies that select it, reached
+goaws in `data` (`from default: reached; from ticketdrop: reached`). The same
+pod did the same on Docker Desktop, the cluster where enforcement was proven
+(DECISIONS 49). In a scratch namespace with `default-deny` alone, a pod that
+called goaws the moment it started got an answer in 3 of 3 tries; one that
+waited 1, 2, 3 or 5 seconds first could not even look the name up (`bad
+address`), in 6 of 6.
+
+**Cause.** kindnet's kube-network-policies applies a pod's policies only once
+it has seen the pod and its IP, and its log shows it syncing its nftables rules
+about once a second. Until then the pod's traffic is not checked. That the
+delay is this sync is inferred from the log, not traced. DECISIONS 49's proof
+missed it because its pods were left running and the calls were made later,
+with `kubectl exec`.
+
+**Fix.** The probe in CI waits 5 seconds before it calls. The window itself is
+still there, on Docker Desktop and in kind: anything a pod sends in roughly its
+first second, from an init container or from a service at startup, is not
+checked against any policy. Evidence:
+[`fail-8-networkpolicy-new-pod-window.txt`](evidence/phase-3/fail-8-networkpolicy-new-pod-window.txt).
+On EKS the policies are enforced by the VPC CNI's policy agent instead, so a
+new pod's first moments have to be tested there in Phase 4, not assumed from
+here.
+
+## 19. The one-service proof PR failed `make vet` on its own comment
+
+**Seen.** PR #5, meant to show that a comment in `services/orders/` builds only
+orders, failed the go job: `not gofmt-formatted: services/orders/cmd/main.go`.
+
+**Cause.** The comment was appended with `echo >>` straight after the file's
+closing brace, and gofmt wants a blank line before it.
+
+**Fix.** `gofmt -w` on the file, in a second commit on the same PR; the next
+run passed with only `build (orders)`. The check did its job: a formatting
+slip in a one-line change was refused. Evidence:
+[`fail-6-gofmt-proof-comment.txt`](evidence/phase-3/fail-6-gofmt-proof-comment.txt).
+
+## 20. With one service crashing, `rebuild.sh` said four had timed out
+
+**Seen.** On GitOps PR #2, where only orders was broken on purpose
+(`DATABASE_MAX_CONNS: "10x"`), the last step of `rebuild.sh` printed
+
+```
+timed out waiting for the condition on deployments/orders
+timed out waiting for the condition on deployments/payments
+timed out waiting for the condition on deployments/scheduler
+timed out waiting for the condition on deployments/web
+```
+
+while the pod list taken straight after showed payments, scheduler and web
+`Running` and `1/1`, and only orders in `CrashLoopBackOff`, logging
+`DATABASE_MAX_CONNS: "10x" is not an integer`.
+
+**Cause.** `kubectl wait --for=condition=Available deploy --all --timeout=300s`
+checks the Deployments one after another against a single deadline. Orders
+used it all up, so every Deployment checked after it was reported as timed out
+without being waited for. That the order and the shared deadline explain the
+list is inferred from the output (orders first, then the rest in name order),
+not read in kubectl's source.
+
+**Fix.** None in the scripts yet. The pod list and each pod's log, which the
+CI job prints on failure, name the real one. `rebuild.sh` could wait for each
+Deployment on its own, or run `check.sh` before failing, so its message names
+only what is down. Evidence:
+[`fail-8-chart-blocks-merge.txt`](evidence/phase-3/fail-8-chart-blocks-merge.txt).

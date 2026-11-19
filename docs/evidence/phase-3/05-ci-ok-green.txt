@@ -1,0 +1,67 @@
+Thu Nov 19 10:48:42 PM KST 2026
+++ gh pr checks 4
+build (catalog)	pass	1m40s	https://github.com/kingswanzy2020/ticketdrop/actions/runs/44536693727/job/135603982332	
+build (fulfillment)	pass	1m41s	https://github.com/kingswanzy2020/ticketdrop/actions/runs/44536693727/job/135603982276	
+build (gateway)	pass	1m59s	https://github.com/kingswanzy2020/ticketdrop/actions/runs/44536693727/job/135603982342	
+build (inventory)	pass	1m31s	https://github.com/kingswanzy2020/ticketdrop/actions/runs/44536693727/job/135603982490	
+build (notifications)	pass	1m53s	https://github.com/kingswanzy2020/ticketdrop/actions/runs/44536693727/job/135603982416	
+build (orders)	pass	1m47s	https://github.com/kingswanzy2020/ticketdrop/actions/runs/44536693727/job/135603982462	
+build (payments)	pass	1m19s	https://github.com/kingswanzy2020/ticketdrop/actions/runs/44536693727/job/135603982652	
+build (scheduler)	pass	1m36s	https://github.com/kingswanzy2020/ticketdrop/actions/runs/44536693727/job/135603982423	
+build (web)	pass	1m5s	https://github.com/kingswanzy2020/ticketdrop/actions/runs/44536693727/job/135603982282	
+changes	pass	7s	https://github.com/kingswanzy2020/ticketdrop/actions/runs/44536693727/job/135603882391	
+ci-ok	pass	2s	https://github.com/kingswanzy2020/ticketdrop/actions/runs/44536693727/job/135605178068	
+go	pass	18s	https://github.com/kingswanzy2020/ticketdrop/actions/runs/44536693727/job/135603881966	
+++ gh pr view 4 --json headRefOid,mergeStateStatus,mergeable --jq .
+{"headRefOid":"f33d02909095cc44218234bdc477ae7f4863816c","mergeStateStatus":"CLEAN","mergeable":"MERGEABLE"}
+++ gh run view 44536693727 --job 135605178068 --log
+++ cut -f3-
+++ sed -E 's/\^\[\[[0-9;]*m//g; s/^\xef\xbb\xbf//'
+++ grep -v -E '^\S+Z (##\[|Runner|Operating|  |Image|Included|Version|Current|GITHUB_TOKEN|Secret source|Prepare|Download|Complete|Cleaning|Getting|Contents|Metadata|Actions|Issues|Packages|Pages|PullRequests|Repository|Security|Statuses|Checks|Deployments|Discussions|Id|Models|Attestations)'
+++ local _cc_a
+++ for _cc_a in ${1+"$@"}
+++ case "$_cc_a" in
+++ for _cc_a in ${1+"$@"}
+++ case "$_cc_a" in
+++ for _cc_a in ${1+"$@"}
+++ case "$_cc_a" in
+++ [[ -x /home/king/.vscode/extensions/anthropic.claude-code-2.1.325-linux-x64/resources/native-binary/claude ]]
+++ [[ -n '' ]]
+++ [[ linux-gnu == \m\s\y\s ]]
+++ [[ linux-gnu == \c\y\g\w\i\n ]]
+++ [[ linux-gnu == \w\i\n\3\2 ]]
+++ exec -a ugrep /home/king/.vscode/extensions/anthropic.claude-code-2.1.325-linux-x64/resources/native-binary/claude -G --ignore-files --hidden -I --exclude-dir=.git --exclude-dir=.svn --exclude-dir=.hg --exclude-dir=.bzr --exclude-dir=.jj --exclude-dir=.sl -v -E '^\S+Z (##\[|Runner|Operating|  |Image|Included|Version|Current|GITHUB_TOKEN|Secret source|Prepare|Download|Complete|Cleaning|Getting|Contents|Metadata|Actions|Issues|Packages|Pages|PullRequests|Repository|Security|Statuses|Checks|Deployments|Discussions|Id|Models|Attestations)'
+2026-11-19T13:48:09.7294353Z Hosted Compute Agent
+2026-11-19T13:48:09.7295468Z Commit: 15dbd9ccb5dbf34fae002b6ed1a2670f52df37bc
+2026-11-19T13:48:09.7296100Z Build Date: 2026-11-03T17:26:59Z
+2026-11-19T13:48:09.7296709Z Worker ID: {fa1b0b4e-76e2-403f-b3d6-8d2f958ba2bb}
+2026-11-19T13:48:09.7297341Z Region: eastus
+2026-11-19T13:48:09.7297812Z Cloud: Azure
+2026-11-19T13:48:09.7300351Z Ubuntu
+2026-11-19T13:48:09.7300868Z 24.04.5
+2026-11-19T13:48:09.7301373Z LTS
+2026-11-19T13:48:09.7313635Z Cache mode: write
+2026-11-19T13:48:09.8607850Z jq -r 'to_entries[] | "\(.key): \(.value.result)"' <<<"$NEEDS"
+2026-11-19T13:48:09.8608442Z jq -e '
+2026-11-19T13:48:09.8611283Z ' <<<"$NEEDS" >/dev/null || { echo "::error::a required job did not pass"; exit 1; }
+2026-11-19T13:48:09.8837564Z shell: /usr/bin/bash -e {0}
+2026-11-19T13:48:09.8838438Z env:
+  "changes": {
+    "result": "success",
+    "outputs": {
+      "services": "[\"catalog\",\"fulfillment\",\"gateway\",\"inventory\",\"notifications\",\"orders\",\"payments\",\"scheduler\",\"web\"]"
+    }
+  },
+  "go": {
+    "result": "success",
+    "outputs": {}
+  },
+  "build": {
+    "result": "success",
+    "outputs": {}
+  }
+}
+2026-11-19T13:48:09.9072177Z changes: success
+2026-11-19T13:48:09.9074105Z go: success
+2026-11-19T13:48:09.9074947Z build: success
+++ set +x

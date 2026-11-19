@@ -1,0 +1,19 @@
+Thu Nov 19 10:49:02 PM KST 2026
+$ gh api repos/kingswanzy2020/ticketdrop/check-runs/135605178068 --jq '{name, conclusion, app_id: .app.id, app: .app.slug}'
+{"app":"github-actions","app_id":15368,"conclusion":"success","name":"ci-ok"}
+
+== ticketdrop before
+$ gh api repos/kingswanzy2020/ticketdrop/rulesets/27520282 --jq ...
+{"name":"protect-app-main","updated_at":"2026-11-19T21:05:42.968+09:00","rules":[{"strict_required_status_checks_policy":true,"do_not_enforce_on_create":false,"required_status_checks":[{"context":"ci-ok"}]}]}
+$ gh api -X PUT repos/kingswanzy2020/ticketdrop/rulesets/27520282 --input <ruleset with ci-ok tied to integration 15368>
+{"name":"protect-app-main","rules":[{"do_not_enforce_on_create":false,"required_status_checks":[{"context":"ci-ok","integration_id":15368}],"strict_required_status_checks_policy":true}],"updated_at":"2026-11-19T22:49:03.769+09:00"}
+$ gh api repos/kingswanzy2020/ticketdrop/rules/branches/main --jq '[.[].type]'
+["pull_request","required_status_checks","non_fast_forward","deletion"]
+
+== ticketdrop-gitops before
+$ gh api repos/kingswanzy2020/ticketdrop-gitops/rulesets/27520269 --jq ...
+{"name":"protect-infra-main","updated_at":"2026-11-19T21:05:43.816+09:00","rules":[{"strict_required_status_checks_policy":true,"do_not_enforce_on_create":false,"required_status_checks":[{"context":"ci-ok"}]}]}
+$ gh api -X PUT repos/kingswanzy2020/ticketdrop-gitops/rulesets/27520269 --input <ruleset with ci-ok tied to integration 15368>
+{"name":"protect-infra-main","rules":[{"do_not_enforce_on_create":false,"required_status_checks":[{"context":"ci-ok","integration_id":15368}],"strict_required_status_checks_policy":true}],"updated_at":"2026-11-19T22:49:05.697+09:00"}
+$ gh api repos/kingswanzy2020/ticketdrop-gitops/rules/branches/main --jq '[.[].type]'
+["required_status_checks","pull_request","non_fast_forward","deletion"]

@@ -1038,7 +1038,9 @@ before a policy survives it was not, so after a policy change the pods are resta
 before anything is called proven. A blocked call fails by timing out, so a missing
 rule shows up as a slow failure rather than a fast refusal. The `kubectl describe`
 output of the two test policies was not captured; the policy files themselves were
-throwaway files in the GitOps repo's ignored `scratch/`.
+throwaway files in the GitOps repo's ignored `scratch/`. A pod's first moments
+were not tested either, and are not policed: a pod that calls out the moment it
+starts gets through (TROUBLESHOOTING 18).
 
 ## 50. Each service's NetworkPolicy comes from the chart; default-deny and DNS are plain manifests
 
@@ -1380,9 +1382,8 @@ so neither repo can merge until it does (step 5). "Up to date" means every
 merge first takes `main`'s latest commit and waits for CI again. With no
 bypass actors, a bad commit on `main` can only be undone by a revert through
 a PR, never by a force push, and changing that means editing the ruleset
-first. The check is not tied to GitHub Actions as its source, so any app with
-status access could report `ci-ok`. A PR can change the workflow that judges
-it.
+first. A PR can change the workflow that judges it: the run uses the PR's own
+copy of `ci.yaml`.
 
 ## 59. Which images to build is worked out by our own script, from what each Dockerfile copies
 
@@ -1450,7 +1451,9 @@ slice was removed from `stock/batch.go`.
 
 **Decision.** Each `uses:` is a full commit SHA with its tag in a comment,
 and each was checked against its tag
-([`01-actions-pinned.txt`](evidence/phase-3/01-actions-pinned.txt)).
+([`01-actions-pinned.txt`](evidence/phase-3/01-actions-pinned.txt)); actionlint,
+which also runs shellcheck on each `run:` block, finds nothing
+([`01-actionlint-clean.txt`](evidence/phase-3/01-actionlint-clean.txt)).
 golangci-lint is v2.14.0, govulncheck v1.9.0, setup-go v7.0.0, and the runner
 `ubuntu-24.04`, not `ubuntu-latest`. A release less than about a week old is
 not taken. The workflow's token can only read the repository, checkout keeps
@@ -1465,8 +1468,7 @@ fixed runner image changes only when the label does.
 
 **Cost.** Fixes in the newest releases arrive later, and every bump is a
 manual edit of SHA and comment. The runner label has to be moved before
-GitHub retires it. setup-buildx installs whatever buildx is current, which is
-not pinned yet.
+GitHub retires it. buildx is pinned too (v0.38.2, entry 65).
 
 ## 63. Trivy runs from its image by digest and fails the build only on a fixable CRITICAL
 
@@ -1494,7 +1496,133 @@ scanned, so a finding only in its base layer would be missed. The database in
 CI can be a day old. The first run of a day still downloads it in every job:
 on PR #4 all nine missed the cache, one saved it and eight logged "Unable to
 reserve cache"; the next run restored it in every job
-([`02-changes-first-pr-run.txt`](evidence/phase-3/02-changes-first-pr-run.txt)).
+([`02-changes-first-pr-run.txt`](evidence/phase-3/02-changes-first-pr-run.txt),
+full log in [`02-changes-first-pr-run.log.gz`](evidence/phase-3/02-changes-first-pr-run.log.gz)).
 The cache takes about 1.7 GB of the repo's 10 GB. There
 is no `.trivyignore` yet; when one is needed, each line gets a reason and a
-review date. Nothing re-scans `main` when a new CVE is published.
+review date. A CVE published after the last merge is found by the weekly run
+on `main` (entry 65), so it can be up to a week late.
+
+## 64. `ci-ok` passes only when every job it needs passed, and only GitHub Actions may report it
+
+**Decision.** Each workflow ends with a `ci-ok` job that `needs` every other
+job and runs with `if: always()`. It reads the results through `env:` as
+`toJSON(needs)` and passes only when each is `success`; in the app repo,
+`build` may also be `skipped` when `changes` printed `[]`. Both rulesets
+require `ci-ok` with `integration_id` 15368, the GitHub Actions app that
+reported it on PR #4, where it first passed and the PR became mergeable
+([`05-ci-ok-green.txt`](evidence/phase-3/05-ci-ok-green.txt),
+[`05-ci-ok-source-github-actions.txt`](evidence/phase-3/05-ci-ok-source-github-actions.txt)).
+
+**Why.** The ruleset needs one name that reports on every PR, and the matrix
+job names change from PR to PR. Without `if: always()`, `ci-ok` is skipped
+when a job it needs fails, and a skipped required check counts as passing.
+Checking each result, rather than letting `needs` decide, also fails it on
+`cancelled`, and stops a skipped `build` from passing when there was
+something to build. The seven combinations were run through the same `jq`
+before the job was trusted. A status check can be set by any app with access
+to commit statuses; tying it to GitHub Actions means only a workflow run can
+satisfy it.
+
+**Cost.** One more job and a few seconds per run. The rule for `build` is
+written out by hand, so a new job has to be added to `needs` and to the `jq`
+in the same change, or it is not required. If the workflows ever move to
+another CI system, the rulesets have to change with them.
+
+## 65. Runs on `main` are grouped by commit, and `main` is rebuilt and scanned every Monday
+
+**Decision.** The concurrency group is the PR number for a PR and the commit
+SHA for anything else. A schedule (`23 3 * * 1`, Mondays 03:23 UTC) and
+`workflow_dispatch` run the app workflow on `main`; with no base commit, the
+changes job builds and scans all nine. setup-buildx installs buildx v0.38.2,
+and build-push-action no longer uploads build records
+(`DOCKER_BUILD_RECORD_UPLOAD: false`). The GitOps workflow uses the same
+grouping and has `workflow_dispatch`.
+
+**Why.** A group holds one running and one pending run, and a third arrival
+cancels the pending one, whatever `cancel-in-progress` says. Grouped by
+`github.ref`, three quick merges to `main` would have left the middle one
+untested; the old comment claimed every run on `main` finished, which was
+not true. A CVE published after the last merge would otherwise be found only
+when someone next changes a service. A buildx left to the action changes on
+the day a new release appears. The build records were 18 artifacts on the
+first run, two per service, that nothing reads.
+
+**Cost.** Two runs on the same `main` commit (a push and the schedule) can
+run side by side. The weekly run uses runner minutes on a public repo, which
+are free, and opens no issue when it fails: someone has to look at the
+Actions tab or the notification email. A build record is no longer there to
+download when a build needs debugging.
+
+## 66. The GitOps repo is checked without a cluster by `scripts/validate.sh`, against schemas pinned to a commit
+
+**Decision.** `scripts/validate.sh` runs `helm lint --strict` on the service
+chart with each of the nine values files, then pipes each `helm template` into
+kubeconform with `-strict` and Kubernetes 1.36.4, and does the same for the
+manifests under `platform/` and for the CloudNativePG, KEDA and Traefik charts
+rendered with this repo's values. The Kubernetes schemas come from
+`yannh/kubernetes-json-schema` and the CRD schemas from `datreeio/CRDs-catalog`,
+each at a fixed commit. CustomResourceDefinitions are skipped. Every check
+runs even after one fails, and the script fails at the end if any did. CI's
+lint job runs it, after shellcheck on every script that is run. helm v3.20.2
+(the laptop's), kubeconform v0.8.0 and shellcheck 0.11.0 are downloaded by
+`.github/scripts/install-tools.sh` and checked against a fixed SHA-256.
+
+**Why.** A misspelled field is valid YAML: `helm lint` passed a chart with
+`terminationGracePeriodSecond`, and kubeconform refused it in all nine
+services, along with a misspelled `parentRefs` in the HTTPRoute, in one run
+([`fail-7-kubeconform-misspelled-field.txt`](evidence/phase-3/fail-7-kubeconform-misspelled-field.txt)).
+The clean run checks 117 resources in about 10 seconds
+([`07-validate-helm-lint-kubeconform.txt`](evidence/phase-3/07-validate-helm-lint-kubeconform.txt)).
+kubeconform's own default reads the Kubernetes schemas from `master`, so the
+same commit could pass one day and fail the next. The CRD kind itself has no
+schema, and the CRDs are upstream's files. Keeping the checks in `scripts/`
+means the same command runs at home. The runner's own helm and kubectl move
+with its image each week.
+
+**Cost.** Only rendered output is checked. The chart has no
+`values.schema.json`, so a misspelled values key is ignored without a word:
+`--set replicaCont=3` still lints and renders `replicas: 2`. The CRD schemas
+are the catalog's, not generated from the exact CRD versions this repo
+installs, so a field that exists in one and not the other is caught only by
+the kind job (entry 67). The schemas are fetched at run time, so the job needs
+`raw.githubusercontent.com`. shellcheck publishes no checksum, so its hash was
+taken from the release file on the day it was pinned.
+
+## 67. Every GitOps PR installs the whole stack on a kind cluster in the runner, with the scripts used at home
+
+**Decision.** The GitOps workflow's `kind` job checks out the app repo's
+`main`, builds the nine `ticketdrop/<service>:dev` images, creates a kind
+cluster from `kindest/node:v1.36.4@sha256:099e049…` (kind v0.33.0), loads the
+images, and runs `scripts/rebuild.sh` unchanged with
+`KUBE_CONTEXT=kind-ticketdrop`; `rebuild.sh` ends with `check.sh`.
+cloud-provider-kind v0.12.0 (by digest, its Gateway API controller off) gives
+Traefik's LoadBalancer Service an address, and a `kubectl port-forward` loop
+gives `check.sh` the `localhost:8088` it calls. A last step starts a busybox
+pod in `default` and one in `ticketdrop`, each waiting 5 s before calling
+goaws: the first must get through and the second must not. The job has a
+30-minute limit and, on failure, prints every pod, the latest events and each
+service's last log lines.
+
+**Why.** Lint and schemas (entry 66) cannot see a service that starts and then
+crashes, a Secret that is missing, or an install order that only works on a
+cluster that already has something in it. This proves an empty cluster comes
+up from the two repos alone, using the same scripts as Docker Desktop, so a
+fix in one place is a fix in both. Kubernetes 1.36.4 is what Docker Desktop
+runs. Without a load-balancer controller `helm upgrade --wait` never returns
+for Traefik, and a port-forward keeps `check.sh` unchanged where a
+`GATEWAY_URL` setting would have changed it. NetworkPolicy enforcement was
+checked rather than assumed (DECISIONS 49), and the check found the moment a
+new pod is not policed (TROUBLESHOOTING 18). The third run passed: everything
+Available in 99 s, 16 of 16 checks, the job in 3 min 27 s
+([`08-kind-install-test.txt`](evidence/phase-3/08-kind-install-test.txt)).
+
+**Cost.** About three and a half minutes on every GitOps PR. The images come
+from whatever the app repo's `main` is at that moment, so a GitOps run can
+pass today and fail tomorrow with no GitOps change, and an app PR never runs
+this install test. `localhost:8088` reaches Traefik through the API server,
+not through the LoadBalancer as on Docker Desktop, so the load-balancer path
+is not tested. The nine images are built from scratch on each run, with no
+cache shared with the app repo. The test cluster has one node and no
+persistence beyond the run, so nothing about upgrades, data surviving a
+restart or more than one node is shown.

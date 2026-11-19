@@ -1,0 +1,144 @@
+Thu Nov 19 11:12:33 PM KST 2026
+$ gh pr view 7 --json number,title,headRefOid,mergeStateStatus,mergeable
+{"headRefOid":"5096db3b7f8e6bd7bb7913550cfd262a7f0b981c","mergeStateStatus":"BLOCKED","mergeable":"MERGEABLE","number":7,"title":"Proof: a failing test blocks the merge"}
+
+$ gh pr diff 7 --name-only
+services/payments/internal/payment/payment_test.go
+
+$ gh pr checks 7
+ci-ok	fail	5s	https://github.com/kingswanzy2020/ticketdrop/actions/runs/44540396690/job/135618105305	
+go	fail	19s	https://github.com/kingswanzy2020/ticketdrop/actions/runs/44540396690/job/135616846028	
+build (payments)	pass	1m50s	https://github.com/kingswanzy2020/ticketdrop/actions/runs/44540396690/job/135616944203	
+changes	pass	6s	https://github.com/kingswanzy2020/ticketdrop/actions/runs/44540396690/job/135616846614	
+
+$ gh run view 44540396690
+
+X proof/failing-test ci kingswanzy2020/ticketdrop#7 · 44540396690
+Triggered via pull_request about 4 minutes ago
+
+JOBS
+X go in 19s (ID 135616846028)
+  ✓ Set up job
+  ✓ Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+  ✓ Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+  ✓ vet and gofmt
+  ✓ golangci-lint
+  X test
+  - govulncheck
+  ✓ Post golangci-lint
+  - Post Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+  ✓ Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+  ✓ Complete job
+✓ changes in 6s (ID 135616846614)
+✓ build (payments) in 1m50s (ID 135616944203)
+X ci-ok in 5s (ID 135618105305)
+  ✓ Set up job
+  X Run jq -r 'to_entries[] | "\(.key): \(.value.result)"' <<<"$NEEDS"
+  ✓ Complete job
+
+ANNOTATIONS
+X Process completed with exit code 1.
+go: .github#45
+
+X Process completed with exit code 1.
+ci-ok: .github#34
+
+X a required job did not pass
+ci-ok: .github#33
+
+
+To see what failed, try: gh run view 44540396690 --log-failed
+View this run on GitHub: https://github.com/kingswanzy2020/ticketdrop/actions/runs/44540396690
+
+== the changes job: what it decided
+  BASE: d8b7e1e0dd336688249bef724c6e1bb2a1caa747
+  HEAD: 5096db3b7f8e6bd7bb7913550cfd262a7f0b981c
+
+== the ci-ok job
+' <<<"$NEEDS" >/dev/null || { echo "::error::a required job did not pass"; exit 1; }
+changes: success
+go: failure
+build: success
+##[error]a required job did not pass
+##[error]Process completed with exit code 1.
+
+$ gh run view 44540396690 --log-failed (job, step and output)
+go	﻿2026-11-19T14:07:59.9943822Z ##[group]Run go test -race ./...
+go	2026-11-19T14:07:59.9944094Z go test -race ./...
+go	2026-11-19T14:07:59.9970173Z shell: /usr/bin/bash -e {0}
+go	2026-11-19T14:07:59.9970398Z env:
+go	2026-11-19T14:07:59.9970566Z   GOLANGCI_LINT_VERSION: v2.14.0
+go	2026-11-19T14:07:59.9970784Z   GOVULNCHECK_VERSION: v1.9.0
+go	2026-11-19T14:07:59.9971167Z   TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+go	2026-11-19T14:07:59.9971541Z   GOTOOLCHAIN: local
+go	2026-11-19T14:07:59.9971713Z ##[endgroup]
+go	2026-11-19T14:08:00.0770451Z ?   	github.com/kingswanzy2020/ticketdrop/pkg/contracts	[no test files]
+go	2026-11-19T14:08:00.0811652Z ?   	github.com/kingswanzy2020/ticketdrop/pkg/platform/config	[no test files]
+go	2026-11-19T14:08:00.0904659Z ?   	github.com/kingswanzy2020/ticketdrop/pkg/platform/correlation	[no test files]
+go	2026-11-19T14:08:00.0999337Z ok  	github.com/kingswanzy2020/ticketdrop/pkg/platform/db	(cached)
+go	2026-11-19T14:08:00.1151016Z ok  	github.com/kingswanzy2020/ticketdrop/pkg/platform/events	(cached)
+go	2026-11-19T14:08:00.1151910Z ok  	github.com/kingswanzy2020/ticketdrop/pkg/platform/httpx	(cached)
+go	2026-11-19T14:08:00.1155065Z ?   	github.com/kingswanzy2020/ticketdrop/pkg/platform/logging	[no test files]
+go	2026-11-19T14:08:00.1155687Z ?   	github.com/kingswanzy2020/ticketdrop/pkg/platform/service	[no test files]
+go	2026-11-19T14:08:00.1216749Z ?   	github.com/kingswanzy2020/ticketdrop/services/catalog/cmd	[no test files]
+go	2026-11-19T14:08:00.1217809Z ok  	github.com/kingswanzy2020/ticketdrop/services/catalog/internal/catalog	(cached)
+go	2026-11-19T14:08:00.1218626Z ?   	github.com/kingswanzy2020/ticketdrop/services/catalog/migrations	[no test files]
+go	2026-11-19T14:08:00.1219378Z ?   	github.com/kingswanzy2020/ticketdrop/services/fulfillment/cmd	[no test files]
+go	2026-11-19T14:08:00.1220145Z ?   	github.com/kingswanzy2020/ticketdrop/services/fulfillment/internal/ticket	[no test files]
+go	2026-11-19T14:08:00.1221163Z ?   	github.com/kingswanzy2020/ticketdrop/services/fulfillment/migrations	[no test files]
+go	2026-11-19T14:08:00.1221895Z ?   	github.com/kingswanzy2020/ticketdrop/services/gateway/cmd	[no test files]
+go	2026-11-19T14:08:00.1223146Z ok  	github.com/kingswanzy2020/ticketdrop/services/gateway/internal/proxy	(cached)
+go	2026-11-19T14:08:00.1223869Z ?   	github.com/kingswanzy2020/ticketdrop/services/inventory/cmd	[no test files]
+go	2026-11-19T14:08:00.1224534Z ok  	github.com/kingswanzy2020/ticketdrop/services/inventory/internal/stock	(cached)
+go	2026-11-19T14:08:00.1225228Z ?   	github.com/kingswanzy2020/ticketdrop/services/inventory/migrations	[no test files]
+go	2026-11-19T14:08:00.1225942Z ?   	github.com/kingswanzy2020/ticketdrop/services/notifications/cmd	[no test files]
+go	2026-11-19T14:08:00.1226651Z ok  	github.com/kingswanzy2020/ticketdrop/services/notifications/internal/notify	(cached)
+go	2026-11-19T14:08:00.1227358Z ?   	github.com/kingswanzy2020/ticketdrop/services/orders/cmd	[no test files]
+go	2026-11-19T14:08:00.1228332Z ok  	github.com/kingswanzy2020/ticketdrop/services/orders/internal/order	(cached)
+go	2026-11-19T14:08:00.1229342Z ?   	github.com/kingswanzy2020/ticketdrop/services/orders/migrations	[no test files]
+go	2026-11-19T14:08:00.1230027Z ?   	github.com/kingswanzy2020/ticketdrop/services/payments/cmd	[no test files]
+go	2026-11-19T14:08:00.7564729Z --- FAIL: TestProofFailingTestBlocksMerge (0.00s)
+go	2026-11-19T14:08:00.7565299Z     payment_test.go:88: this test fails on purpose
+go	2026-11-19T14:08:00.7565536Z FAIL
+go	2026-11-19T14:08:00.7565831Z FAIL	github.com/kingswanzy2020/ticketdrop/services/payments/internal/payment	0.041s
+go	2026-11-19T14:08:00.7566262Z ?   	github.com/kingswanzy2020/ticketdrop/services/payments/migrations	[no test files]
+go	2026-11-19T14:08:00.7566667Z ?   	github.com/kingswanzy2020/ticketdrop/services/scheduler/cmd	[no test files]
+go	2026-11-19T14:08:00.7567081Z ok  	github.com/kingswanzy2020/ticketdrop/services/scheduler/internal/schedule	(cached)
+go	2026-11-19T14:08:00.7567527Z ?   	github.com/kingswanzy2020/ticketdrop/services/web/cmd	[no test files]
+go	2026-11-19T14:08:00.7567897Z ok  	github.com/kingswanzy2020/ticketdrop/services/web/internal/shop	(cached)
+go	2026-11-19T14:08:00.7568386Z FAIL
+go	2026-11-19T14:08:00.7648339Z ##[error]Process completed with exit code 1.
+ci-ok	﻿2026-11-19T14:09:47.8380926Z ##[group]Run jq -r 'to_entries[] | "\(.key): \(.value.result)"' <<<"$NEEDS"
+ci-ok	2026-11-19T14:09:47.8381753Z jq -r 'to_entries[] | "\(.key): \(.value.result)"' <<<"$NEEDS"
+ci-ok	2026-11-19T14:09:47.8382334Z jq -e '
+ci-ok	2026-11-19T14:09:47.8382926Z   .changes.result == "success" and .go.result == "success" and
+ci-ok	2026-11-19T14:09:47.8383570Z   (.build.result == "success" or
+ci-ok	2026-11-19T14:09:47.8384165Z    (.build.result == "skipped" and .changes.outputs.services == "[]"))
+ci-ok	2026-11-19T14:09:47.8384925Z ' <<<"$NEEDS" >/dev/null || { echo "::error::a required job did not pass"; exit 1; }
+ci-ok	2026-11-19T14:09:49.9863844Z shell: /usr/bin/bash -e {0}
+ci-ok	2026-11-19T14:09:49.9864737Z env:
+ci-ok	2026-11-19T14:09:49.9865100Z   GOLANGCI_LINT_VERSION: v2.14.0
+ci-ok	2026-11-19T14:09:49.9865409Z   GOVULNCHECK_VERSION: v1.9.0
+ci-ok	2026-11-19T14:09:49.9865899Z   TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+ci-ok	2026-11-19T14:09:49.9866669Z   NEEDS: {
+ci-ok	  "changes": {
+ci-ok	    "result": "success",
+ci-ok	    "outputs": {
+ci-ok	      "services": "[\"payments\"]"
+ci-ok	    }
+ci-ok	  },
+ci-ok	  "go": {
+ci-ok	    "result": "failure",
+ci-ok	    "outputs": {}
+ci-ok	  },
+ci-ok	  "build": {
+ci-ok	    "result": "success",
+ci-ok	    "outputs": {}
+ci-ok	  }
+ci-ok	}
+ci-ok	2026-11-19T14:09:49.9867453Z ##[endgroup]
+ci-ok	2026-11-19T14:09:50.0031305Z changes: success
+ci-ok	2026-11-19T14:09:50.0031904Z go: failure
+ci-ok	2026-11-19T14:09:50.0032236Z build: success
+ci-ok	2026-11-19T14:09:50.0055989Z ##[error]a required job did not pass
+ci-ok	2026-11-19T14:09:50.0066774Z ##[error]Process completed with exit code 1.
