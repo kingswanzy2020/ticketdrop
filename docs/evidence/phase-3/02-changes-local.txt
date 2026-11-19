@@ -1,0 +1,48 @@
+Thu Nov 19 05:37:39 PM KST 2026
++ shellcheck .github/scripts/changed-services.sh
++ echo 'shellcheck exit 0'
+shellcheck exit 0
++ : docs only
++ .github/scripts/changed-services.sh 'd85b804^' d85b804
+[]
++ : pkg
++ .github/scripts/changed-services.sh 'e1287c4^' e1287c4
+pkg/platform/db/db.go changes every image: building all
+["catalog","fulfillment","gateway","inventory","notifications","orders","payments","scheduler","web"]
++ : new branch
++ .github/scripts/changed-services.sh 0000000000000000000000000000000000000000 HEAD
+no usable base commit '0000000000000000000000000000000000000000': building all
+["catalog","fulfillment","gateway","inventory","notifications","orders","payments","scheduler","web"]
++ : missing
++ .github/scripts/changed-services.sh deadbeefdeadbeefdeadbeefdeadbeefdeadbeef HEAD
+no usable base commit 'deadbeefdeadbeefdeadbeefdeadbeefdeadbeef': building all
+["catalog","fulfillment","gateway","inventory","notifications","orders","payments","scheduler","web"]
++ git worktree add -q -b tmp-changes /home/king/Desktop/Personal-Lab/DevOps/ticketdrop/../tc HEAD
++ cd /home/king/Desktop/Personal-Lab/DevOps/ticketdrop/../tc
++ echo '// x'
++ git commit -qam one
++ : one service
++ /home/king/Desktop/Personal-Lab/DevOps/ticketdrop/.github/scripts/changed-services.sh 'HEAD^' HEAD
+["orders"]
++ git mv services/orders/internal/order/inventory_test.go services/payments/moved_test.go
++ git commit -qm mv
++ : rename
++ /home/king/Desktop/Personal-Lab/DevOps/ticketdrop/.github/scripts/changed-services.sh 'HEAD^' HEAD
+["orders","payments"]
++ mkdir services/tickets
++ cp services/orders/Dockerfile services/tickets/
++ git add services/tickets
++ git commit -qm new
++ : new service
++ /home/king/Desktop/Personal-Lab/DevOps/ticketdrop/.github/scripts/changed-services.sh 'HEAD^' HEAD
+["tickets"]
++ git rm -rq services/tickets
++ git commit -qm del
++ : deleted
++ /home/king/Desktop/Personal-Lab/DevOps/ticketdrop/.github/scripts/changed-services.sh 'HEAD^' HEAD
+[]
++ cd /home/king/Desktop/Personal-Lab/DevOps/ticketdrop
++ git worktree remove --force /home/king/Desktop/Personal-Lab/DevOps/ticketdrop/../tc
++ git branch -D tmp-changes
+Deleted branch tmp-changes (was 1a2acb4).
++ set +x

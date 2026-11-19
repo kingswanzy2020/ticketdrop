@@ -1,0 +1,63 @@
+Thu Nov 19 05:38:24 PM KST 2026
+ad888ba Merge pull request #3 from kingswanzy2020/phase-2-kubernetes
++ go version
+go version go1.27.1 linux/amd64
++ golangci-lint run ./...
++ tail -4
+		           ^
+21 issues:
+* errcheck: 20
+* staticcheck: 1
++ go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
++ grep -E '^(Vulnerability #|    (Found|Fixed) in|Your code)'
+exit status 3
+Vulnerability #1: GO-2026-6859
+    Found in: net/http@go1.27.1
+    Fixed in: net/http@go1.27.4
+Vulnerability #2: GO-2026-6809
+    Found in: crypto/x509@go1.27.1
+    Fixed in: crypto/x509@go1.27.3
+Vulnerability #3: GO-2026-6629
+    Found in: golang.org/x/text@v0.40.0
+    Fixed in: golang.org/x/text@v0.41.0
+Vulnerability #4: GO-2026-6617
+    Found in: net/http/internal/http2@go1.27.1
+    Fixed in: net/http/internal/http2@go1.27.2
+Vulnerability #5: GO-2026-6613
+    Found in: net/http@go1.27.1
+    Fixed in: net/http@go1.27.2
+Vulnerability #6: GO-2026-6612
+    Found in: net/http/internal/http2@go1.27.1
+    Fixed in: net/http/internal/http2@go1.27.2
+Vulnerability #7: GO-2026-6611
+    Found in: net/http/internal/http2@go1.27.1
+    Fixed in: net/http/internal/http2@go1.27.2
+Vulnerability #8: GO-2026-6610
+    Found in: net/http/internal/http2@go1.27.1
+    Fixed in: net/http/internal/http2@go1.27.2
+Vulnerability #9: GO-2026-6609
+    Found in: net/http@go1.27.1
+    Fixed in: net/http@go1.27.2
+Vulnerability #10: GO-2026-6608
+    Found in: net/textproto@go1.27.1
+    Fixed in: net/textproto@go1.27.2
+Vulnerability #11: GO-2026-6607
+    Found in: crypto/tls@go1.27.1
+    Fixed in: crypto/tls@go1.27.2
+Vulnerability #12: GO-2026-6605
+    Found in: net/http/httputil@go1.27.1
+    Fixed in: net/http/httputil@go1.27.2
+Vulnerability #13: GO-2026-6603
+    Found in: net/http/internal/http2@go1.27.1
+    Fixed in: net/http/internal/http2@go1.27.2
+Vulnerability #14: GO-2026-6600
+    Found in: html/template@go1.27.1
+    Fixed in: html/template@go1.27.2
+Vulnerability #15: GO-2026-6599
+    Found in: html/template@go1.27.1
+    Fixed in: html/template@go1.27.2
+Your code is affected by 15 vulnerabilities from 1 module and the Go standard library.
++ go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...
++ head -1
+panic: unexpected expr: *ast.KeyValueExpr
++ set +x

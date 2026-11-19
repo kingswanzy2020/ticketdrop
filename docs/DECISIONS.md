@@ -1350,3 +1350,151 @@ shows up as slower answers: in the 1,000-customer run catalog and inventory
 sat at their caps (16 each over two pods) and the p95 buy time was 183 ms,
 against 110 ms with the default pools. On EKS the server and its limit will be
 different, so the numbers are to be done again in Phase 4.
+
+## 58. Both repos require one check, `ci-ok`, on a PR into `main`, and CI starts on every PR
+
+**Decision.** Each repo has one ruleset on its default branch
+(`protect-app-main` and `protect-infra-main`, made on 18 November 2026): a
+change reaches `main` only through a pull request, with no approvals needed
+and no bypass actors, and the status check `ci-ok` must pass with the branch
+up to date with `main`. Since 19 November both also block force pushes to
+`main` and its deletion
+([`00-rulesets-push-delete-blocked.txt`](evidence/phase-3/00-rulesets-push-delete-blocked.txt)).
+Actions is limited to read-only tokens and SHA-pinned
+actions in both repos. The app repo's workflow is `.github/workflows/ci.yaml`;
+it starts on every pull request and every push to `main`, with no `paths:`
+filter. The gitops repo gets its own workflow and its own `ci-ok` (steps 7
+and 8).
+
+**Why.** One required name per repo means a job can be added, renamed or
+split without editing the ruleset. A required check whose workflow is skipped
+by a `paths:` filter never reports and stays "Expected", which blocks the
+merge, so the workflow always starts and decides what to build itself (entry
+59). There is one reviewer, so an approval rule would only be clicked
+through. Without the last two rules, anyone with write access could rewrite
+or delete `main`, including commits that had passed CI, and the required
+check would never see it.
+
+**Cost.** The rulesets required `ci-ok` before any job of that name existed,
+so neither repo can merge until it does (step 5). "Up to date" means every
+merge first takes `main`'s latest commit and waits for CI again. With no
+bypass actors, a bad commit on `main` can only be undone by a revert through
+a PR, never by a force push, and changing that means editing the ruleset
+first. The check is not tied to GitHub Actions as its source, so any app with
+status access could report `ci-ok`. A PR can change the workflow that judges
+it.
+
+## 59. Which images to build is worked out by our own script, from what each Dockerfile copies
+
+**Decision.** `.github/scripts/changed-services.sh <base> <head>` prints the
+services to build as a JSON list, and the `build` job runs a matrix over it.
+A change under `services/<name>/` builds that service; a change to `pkg/`,
+`go.mod`, `go.sum`, `.dockerignore` or `.github/` builds all nine; anything
+else builds none. With no usable base (an all-zero `before` on a new branch,
+or a commit the clone does not have) it builds all nine. The services are
+read from `services/*/Dockerfile` at `head`, so a new service is picked up and
+a deleted one drops out. The Go checks (vet, gofmt, golangci-lint, tests with
+`-race`, govulncheck) run on every change, whatever the list says.
+
+**Why.** Each Dockerfile copies only `go.mod`, `go.sum`, `pkg/` and its own
+`services/<name>/`, so those are the only paths that change an image. A
+change to CI is proven on every image. A wrong "nothing changed" would let an
+unscanned image through, while a wrong "everything changed" only costs
+minutes, so doubt builds all. The script can be read and tested locally,
+which `dorny/paths-filter` cannot, and it is one less third-party action
+holding the token. One module means a change anywhere can break any service,
+so the Go checks are not filtered. The cases were run on real and throwaway
+commits ([`02-changes-local.txt`](evidence/phase-3/02-changes-local.txt)).
+
+**Cost.** About 70 lines of shell to maintain, and a new kind of build input
+means editing its `case`. A CI change, a new branch or a force push takes the
+longest run. A docs-only PR still spends a few minutes on the Go checks.
+
+## 60. Go 1.27.4 everywhere, and base images pinned by tag and digest
+
+**Decision.** `go.mod` and all nine Dockerfiles moved from Go 1.27.1 to
+1.27.4, and `golang.org/x/text` from v0.40.0 to v0.41.0. The build stage is
+`golang:1.27.4-alpine@sha256:70bd7dd…` and the final stage
+`gcr.io/distroless/static-debian13:nonroot@sha256:aafe993…`, each by tag and
+digest. CI's setup-go reads the version from `go.mod`.
+
+**Why.** govulncheck found 15 reachable vulnerabilities on 1.27.1, the newest
+fixed in 1.27.4 (TROUBLESHOOTING 12). Moving `go.mod` and the images together
+keeps CI's checks and the shipped binaries on the same Go. A tag can be
+repointed, as Trivy's were in March 2026; a digest is exactly what was
+scanned.
+
+**Cost.** Each Go patch release touches 10 files, by hand until something
+like Dependabot opens those PRs. Security fixes in a base image arrive only
+when someone bumps its digest.
+
+## 61. golangci-lint v2.14.0 with the standard linters, and ignored errors written out
+
+**Decision.** `.golangci.yml` turns on the `standard` set (errcheck, govet,
+ineffassign, staticcheck, unused) and the `std-error-handling` exclusion
+preset, and excludes pgx's `Tx.Rollback` from errcheck. Any other error the
+code ignores is ignored explicitly with `_ =`. CI runs the same version as
+the laptop.
+
+**Why.** The first run found 21 issues (TROUBLESHOOTING 13). Unchecked
+`Close`, `Flush` and print calls, and a `Rollback` deferred after `Commit`,
+have nothing useful to do with the error, so they are excluded once instead
+of at every call. Everywhere else an ignored error is visible where it
+happens. The same version means a clean run locally is a clean run in CI.
+
+**Cost.** Stricter linters (gosec, revive) are not on. Fourteen calls in
+`pkg/platform` and the services' code and tests now say `_ =`, and one unused
+slice was removed from `stock/batch.go`.
+
+## 62. Every action is pinned by SHA, and every tool by an exact version a little behind the newest
+
+**Decision.** Each `uses:` is a full commit SHA with its tag in a comment,
+and each was checked against its tag
+([`01-actions-pinned.txt`](evidence/phase-3/01-actions-pinned.txt)).
+golangci-lint is v2.14.0, govulncheck v1.9.0, setup-go v7.0.0, and the runner
+`ubuntu-24.04`, not `ubuntu-latest`. A release less than about a week old is
+not taken. The workflow's token can only read the repository, checkout keeps
+no credential (`persist-credentials: false`), and no job holds a cloud
+credential.
+
+**Why.** A tag can be moved to other code; a SHA cannot, and the repo setting
+`sha_pinning_required` refuses anything else. govulncheck v1.1.4 panics on Go
+1.27 code (TROUBLESHOOTING 11). v1.10.0 and setup-go v7.1.0 were a day old
+when chosen, and waiting lets a bad release be found and pulled first. A
+fixed runner image changes only when the label does.
+
+**Cost.** Fixes in the newest releases arrive later, and every bump is a
+manual edit of SHA and comment. The runner label has to be moved before
+GitHub retires it. setup-buildx installs whatever buildx is current, which is
+not pinned yet.
+
+## 63. Trivy runs from its image by digest and fails the build only on a fixable CRITICAL
+
+**Decision.** Each built service's linux/amd64 image is written to a tar and
+scanned with `aquasec/trivy:0.76.2@sha256:8f6bb94…`, run with `docker run`
+rather than `aquasecurity/trivy-action`. HIGH and CRITICAL findings are
+printed; the build fails only on a CRITICAL that has a fix
+(`--ignore-unfixed`). The image is then built for linux/amd64 and linux/arm64
+without pushing. The vulnerability database is cached once a day, and the
+build cache is scoped per service.
+
+**Why.** In March 2026 trivy-action's tags were repointed at an infostealer,
+and the v0.69.4 binary was malicious (CVE-2026-33634); an image by digest is
+exactly what was chosen. A gate that fails on findings nobody can fix only
+teaches people to get around it. There is no registry yet, so the scan reads
+a file, and the docker exporter can hold one platform only. arm64 is built
+for Graviton nodes later; the Dockerfiles cross-compile, so no emulation is
+needed. The database is about 1.7 GB and nine jobs would download it at once;
+without separate scopes nine builds overwrite each other's cache. The orders
+image scanned clean locally
+([`04-build-scan-local.txt`](evidence/phase-3/04-build-scan-local.txt)).
+
+**Cost.** A HIGH, or a CRITICAL with no fix, can ship. The arm64 image is not
+scanned, so a finding only in its base layer would be missed. The database in
+CI can be a day old. The first run of a day still downloads it in every job:
+on PR #4 all nine missed the cache, one saved it and eight logged "Unable to
+reserve cache"; the next run restored it in every job
+([`02-changes-first-pr-run.txt`](evidence/phase-3/02-changes-first-pr-run.txt)).
+The cache takes about 1.7 GB of the repo's 10 GB. There
+is no `.trivyignore` yet; when one is needed, each line gets a reason and a
+review date. Nothing re-scans `main` when a new CVE is published.

@@ -1,0 +1,11 @@
+Thu Nov 19 07:29:42 PM KST 2026
+++ journalctl -k --since '2026-11-19 16:40:40' --until '2026-11-19 16:40:52' --no-pager
+++ /usr/bin/grep -E 'invoked oom-killer|oom-kill:|Out of memory'
+Nov 19 16:40:45 king-TFG5577XG kernel: code invoked oom-killer: gfp_mask=0xcc0(GFP_KERNEL), order=0, oom_score_adj=100
+Nov 19 16:40:45 king-TFG5577XG kernel: oom-kill:constraint=CONSTRAINT_NONE,nodemask=(null),cpuset=user.slice,mems_allowed=0,global_oom,task_memcg=/user.slice/user-1000.slice/user@1000.service/app.slice/docker-desktop.service,task=qemu-system-x86,pid=134135,uid=1000
+Nov 19 16:40:45 king-TFG5577XG kernel: Out of memory: Killed process 134135 (qemu-system-x86) total-vm:20887348kB, anon-rss:2038764kB, file-rss:1396kB, shmem-rss:5441208kB, UID:1000 pgtables:29552kB oom_score_adj:200
+++ systemctl --user show docker-desktop -p ActiveState -p Result -p ActiveEnterTimestamp
+Result=success
+ActiveState=active
+ActiveEnterTimestamp=Thu 2026-11-19 19:07:46 KST
+++ set +x

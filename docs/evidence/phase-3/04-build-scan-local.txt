@@ -1,0 +1,217 @@
+Thu Nov 19 07:26:05 PM KST 2026
++ docker buildx build -f services/orders/Dockerfile --platform linux/amd64 --build-arg VERSION=local --output type=docker,dest=/home/king/.cache/td-scan/image.tar .
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.35kB done
+#1 DONE 0.0s
+
+#2 resolve image config for docker-image://docker.io/docker/dockerfile:1
+#2 ...
+
+#3 [auth] docker/dockerfile:pull token for registry-1.docker.io
+#3 DONE 0.0s
+
+#2 resolve image config for docker-image://docker.io/docker/dockerfile:1
+#2 DONE 5.9s
+
+#4 docker-image://docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e
+#4 resolve docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e 0.1s done
+#4 CACHED
+
+#5 [internal] load metadata for gcr.io/distroless/static-debian13:nonroot@sha256:aafe993665bf6200db38a02c11a9351e782a84b6a45e7f33b6695638c88e3931
+#5 DONE 1.6s
+
+#6 [internal] load metadata for docker.io/library/golang:1.27.4-alpine@sha256:70bd7ddea8b6cbe5d6943cde279d6b67feb10cc924fb9100d1d8757c1575b280
+#6 ...
+
+#7 [auth] library/golang:pull token for registry-1.docker.io
+#7 DONE 0.0s
+
+#6 [internal] load metadata for docker.io/library/golang:1.27.4-alpine@sha256:70bd7ddea8b6cbe5d6943cde279d6b67feb10cc924fb9100d1d8757c1575b280
+#6 DONE 5.1s
+
+#8 [internal] load .dockerignore
+#8 transferring context: 225B done
+#8 DONE 0.0s
+
+#9 [internal] load build context
+#9 DONE 0.0s
+
+#10 [build 1/7] FROM docker.io/library/golang:1.27.4-alpine@sha256:70bd7ddea8b6cbe5d6943cde279d6b67feb10cc924fb9100d1d8757c1575b280
+#10 resolve docker.io/library/golang:1.27.4-alpine@sha256:70bd7ddea8b6cbe5d6943cde279d6b67feb10cc924fb9100d1d8757c1575b280 0.1s done
+#10 DONE 0.1s
+
+#11 [stage-1 1/2] FROM gcr.io/distroless/static-debian13:nonroot@sha256:aafe993665bf6200db38a02c11a9351e782a84b6a45e7f33b6695638c88e3931
+#11 resolve gcr.io/distroless/static-debian13:nonroot@sha256:aafe993665bf6200db38a02c11a9351e782a84b6a45e7f33b6695638c88e3931
+#11 resolve gcr.io/distroless/static-debian13:nonroot@sha256:aafe993665bf6200db38a02c11a9351e782a84b6a45e7f33b6695638c88e3931 0.1s done
+#11 DONE 0.1s
+
+#9 [internal] load build context
+#9 transferring context: 1.89kB 0.0s done
+#9 DONE 0.0s
+
+#12 [build 2/7] WORKDIR /src
+#12 CACHED
+
+#13 [build 3/7] COPY go.mod go.sum ./
+#13 CACHED
+
+#14 [build 4/7] RUN --mount=type=cache,target=/go/pkg/mod go mod download
+#14 CACHED
+
+#15 [build 5/7] COPY pkg ./pkg
+#15 CACHED
+
+#16 [build 6/7] COPY services/orders ./services/orders
+#16 CACHED
+
+#17 [build 7/7] RUN --mount=type=cache,target=/go/pkg/mod     --mount=type=cache,target=/root/.cache/go-build     CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath       -ldflags "-s -w -X github.com/kingswanzy2020/ticketdrop/pkg/platform/service.Version=local"       -o /out/service ./services/orders/cmd
+#17 DONE 2.0s
+
+#11 [stage-1 1/2] FROM gcr.io/distroless/static-debian13:nonroot@sha256:aafe993665bf6200db38a02c11a9351e782a84b6a45e7f33b6695638c88e3931
+#11 CACHED
+
+#18 [stage-1 2/2] COPY --from=build /out/service /service
+#18 DONE 0.2s
+
+#19 exporting to docker image format
+#19 exporting layers
+#19 exporting layers 1.1s done
+#19 exporting manifest sha256:ddc3770c9a0401151c64588be1d639754a19ebfaf0c93a5acfa9316a2efc9bb7 0.1s done
+#19 exporting config sha256:56fbe95fbd25cfbb6be9d2c964a9bdb36ead454331224f2e847636682fff6ce3 0.1s done
+#19 sending tarball
+#19 sending tarball 0.3s done
+#19 DONE 1.5s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/pum9pqtgnnxk103c6mkl50qn7
+++ id -u
+++ id -g
++ docker run --rm --user 1000:1000 -e HOME=/tmp -v /home/king/.cache/td-scan:/scan aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb image --cache-dir /scan/cache --input /scan/image.tar --severity CRITICAL --ignore-unfixed --exit-code 1
+2026-11-19T10:26:22Z	INFO	[vulndb] Need to update DB
+2026-11-19T10:26:22Z	INFO	[vulndb] Downloading vulnerability DB...
+2026-11-19T10:26:22Z	INFO	[vulndb] Downloading artifact...	repo="mirror.gcr.io/aquasec/trivy-db:2"
+255.24 KiB / 134.68 MiB [>___________________________________________________________] 0.19% ? p/s ?730.90 KiB / 134.68 MiB [>___________________________________________________________] 0.53% ? p/s ?1.80 MiB / 134.68 MiB [>_____________________________________________________________] 1.34% ? p/s ?3.27 MiB / 134.68 MiB [->_______________________________________________] 2.43% 5.03 MiB p/s ETA 26s4.62 MiB / 134.68 MiB [->_______________________________________________] 3.43% 5.03 MiB p/s ETA 25s5.94 MiB / 134.68 MiB [-->______________________________________________] 4.41% 5.03 MiB p/s ETA 25s7.26 MiB / 134.68 MiB [-->______________________________________________] 5.39% 5.14 MiB p/s ETA 24s8.56 MiB / 134.68 MiB [--->_____________________________________________] 6.35% 5.14 MiB p/s ETA 24s9.89 MiB / 134.68 MiB [--->_____________________________________________] 7.34% 5.14 MiB p/s ETA 24s11.02 MiB / 134.68 MiB [--->____________________________________________] 8.18% 5.21 MiB p/s ETA 23s12.47 MiB / 134.68 MiB [---->___________________________________________] 9.26% 5.21 MiB p/s ETA 23s13.76 MiB / 134.68 MiB [---->__________________________________________] 10.22% 5.21 MiB p/s ETA 23s15.06 MiB / 134.68 MiB [----->_________________________________________] 11.18% 5.31 MiB p/s ETA 22s16.35 MiB / 134.68 MiB [----->_________________________________________] 12.14% 5.31 MiB p/s ETA 22s17.56 MiB / 134.68 MiB [------>________________________________________] 13.04% 5.31 MiB p/s ETA 22s18.95 MiB / 134.68 MiB [------>________________________________________] 14.07% 5.38 MiB p/s ETA 21s20.50 MiB / 134.68 MiB [------->_______________________________________] 15.22% 5.38 MiB p/s ETA 21s21.89 MiB / 134.68 MiB [------->_______________________________________] 16.25% 5.38 MiB p/s ETA 20s23.37 MiB / 134.68 MiB [-------->______________________________________] 17.35% 5.51 MiB p/s ETA 20s25.13 MiB / 134.68 MiB [-------->______________________________________] 18.66% 5.51 MiB p/s ETA 19s27.24 MiB / 134.68 MiB [--------->_____________________________________] 20.22% 5.51 MiB p/s ETA 19s29.31 MiB / 134.68 MiB [---------->____________________________________] 21.76% 5.80 MiB p/s ETA 18s30.89 MiB / 134.68 MiB [---------->____________________________________] 22.93% 5.80 MiB p/s ETA 17s33.38 MiB / 134.68 MiB [----------->___________________________________] 24.79% 5.80 MiB p/s ETA 17s35.45 MiB / 134.68 MiB [------------>__________________________________] 26.32% 6.08 MiB p/s ETA 16s37.48 MiB / 134.68 MiB [------------->_________________________________] 27.83% 6.08 MiB p/s ETA 15s39.52 MiB / 134.68 MiB [------------->_________________________________] 29.35% 6.08 MiB p/s ETA 15s41.43 MiB / 134.68 MiB [-------------->________________________________] 30.76% 6.33 MiB p/s ETA 14s43.47 MiB / 134.68 MiB [--------------->_______________________________] 32.27% 6.33 MiB p/s ETA 14s45.46 MiB / 134.68 MiB [--------------->_______________________________] 33.75% 6.33 MiB p/s ETA 14s47.46 MiB / 134.68 MiB [---------------->______________________________] 35.24% 6.57 MiB p/s ETA 13s49.46 MiB / 134.68 MiB [----------------->_____________________________] 36.72% 6.57 MiB p/s ETA 12s51.09 MiB / 134.68 MiB [----------------->_____________________________] 37.93% 6.57 MiB p/s ETA 12s53.45 MiB / 134.68 MiB [------------------>____________________________] 39.69% 6.79 MiB p/s ETA 11s55.20 MiB / 134.68 MiB [------------------->___________________________] 40.99% 6.79 MiB p/s ETA 11s57.70 MiB / 134.68 MiB [-------------------->__________________________] 42.84% 6.79 MiB p/s ETA 11s59.29 MiB / 134.68 MiB [-------------------->__________________________] 44.03% 6.98 MiB p/s ETA 10s61.29 MiB / 134.68 MiB [--------------------->_________________________] 45.51% 6.98 MiB p/s ETA 10s63.76 MiB / 134.68 MiB [---------------------->________________________] 47.34% 6.98 MiB p/s ETA 10s65.28 MiB / 134.68 MiB [----------------------->________________________] 48.47% 7.18 MiB p/s ETA 9s67.74 MiB / 134.68 MiB [------------------------>_______________________] 50.30% 7.18 MiB p/s ETA 9s69.48 MiB / 134.68 MiB [------------------------>_______________________] 51.59% 7.18 MiB p/s ETA 9s71.21 MiB / 134.68 MiB [------------------------->______________________] 52.87% 7.35 MiB p/s ETA 8s73.57 MiB / 134.68 MiB [-------------------------->_____________________] 54.62% 7.35 MiB p/s ETA 8s75.50 MiB / 134.68 MiB [-------------------------->_____________________] 56.06% 7.35 MiB p/s ETA 8s77.43 MiB / 134.68 MiB [--------------------------->____________________] 57.49% 7.55 MiB p/s ETA 7s79.26 MiB / 134.68 MiB [---------------------------->___________________] 58.85% 7.55 MiB p/s ETA 7s81.07 MiB / 134.68 MiB [---------------------------->___________________] 60.20% 7.55 MiB p/s ETA 7s82.07 MiB / 134.68 MiB [----------------------------->__________________] 60.94% 7.56 MiB p/s ETA 6s83.66 MiB / 134.68 MiB [----------------------------->__________________] 62.12% 7.56 MiB p/s ETA 6s85.56 MiB / 134.68 MiB [------------------------------>_________________] 63.52% 7.56 MiB p/s ETA 6s86.84 MiB / 134.68 MiB [------------------------------>_________________] 64.48% 7.58 MiB p/s ETA 6s88.75 MiB / 134.68 MiB [------------------------------->________________] 65.90% 7.58 MiB p/s ETA 6s90.59 MiB / 134.68 MiB [-------------------------------->_______________] 67.26% 7.58 MiB p/s ETA 5s92.23 MiB / 134.68 MiB [-------------------------------->_______________] 68.48% 7.67 MiB p/s ETA 5s93.89 MiB / 134.68 MiB [--------------------------------->______________] 69.71% 7.67 MiB p/s ETA 5s95.52 MiB / 134.68 MiB [---------------------------------->_____________] 70.93% 7.67 MiB p/s ETA 5s97.14 MiB / 134.68 MiB [---------------------------------->_____________] 72.13% 7.71 MiB p/s ETA 4s98.73 MiB / 134.68 MiB [----------------------------------->____________] 73.31% 7.71 MiB p/s ETA 4s100.04 MiB / 134.68 MiB [---------------------------------->____________] 74.28% 7.71 MiB p/s ETA 4s101.80 MiB / 134.68 MiB [----------------------------------->___________] 75.59% 7.71 MiB p/s ETA 4s102.94 MiB / 134.68 MiB [----------------------------------->___________] 76.43% 7.71 MiB p/s ETA 4s104.73 MiB / 134.68 MiB [------------------------------------>__________] 77.76% 7.71 MiB p/s ETA 3s106.34 MiB / 134.68 MiB [------------------------------------->_________] 78.96% 7.70 MiB p/s ETA 3s109.02 MiB / 134.68 MiB [-------------------------------------->________] 80.95% 7.70 MiB p/s ETA 3s111.19 MiB / 134.68 MiB [-------------------------------------->________] 82.55% 7.70 MiB p/s ETA 3s113.37 MiB / 134.68 MiB [--------------------------------------->_______] 84.17% 7.96 MiB p/s ETA 2s115.39 MiB / 134.68 MiB [---------------------------------------->______] 85.67% 7.96 MiB p/s ETA 2s117.29 MiB / 134.68 MiB [---------------------------------------->______] 87.09% 7.96 MiB p/s ETA 2s119.32 MiB / 134.68 MiB [----------------------------------------->_____] 88.60% 8.09 MiB p/s ETA 1s121.62 MiB / 134.68 MiB [------------------------------------------>____] 90.30% 8.09 MiB p/s ETA 1s123.70 MiB / 134.68 MiB [------------------------------------------->___] 91.84% 8.09 MiB p/s ETA 1s125.77 MiB / 134.68 MiB [------------------------------------------->___] 93.39% 8.26 MiB p/s ETA 1s127.87 MiB / 134.68 MiB [-------------------------------------------->__] 94.94% 8.26 MiB p/s ETA 0s129.47 MiB / 134.68 MiB [--------------------------------------------->_] 96.13% 8.26 MiB p/s ETA 0s131.54 MiB / 134.68 MiB [--------------------------------------------->_] 97.67% 8.34 MiB p/s ETA 0s133.85 MiB / 134.68 MiB [---------------------------------------------->] 99.38% 8.34 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 8.34 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 8.14 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 8.14 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 8.14 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 7.62 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 7.62 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 7.62 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 7.13 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 7.13 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 7.13 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 6.67 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 6.67 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 6.67 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 6.24 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 6.24 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 6.24 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 5.83 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 5.83 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 5.83 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 5.46 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 5.46 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 5.46 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 5.11 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 5.11 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 5.11 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 4.78 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 4.78 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 4.78 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 4.47 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 4.47 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 4.47 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 4.18 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 4.18 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 4.18 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 3.91 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 3.91 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 3.91 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 3.66 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 3.66 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 3.66 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 3.42 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 3.42 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 3.42 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 3.20 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 3.20 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 3.20 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 2.99 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 2.99 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 2.99 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 2.80 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 2.80 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 2.80 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 2.62 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 2.62 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 2.62 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 2.45 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 2.45 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 2.45 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 2.29 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 2.29 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 2.29 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 2.15 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 2.15 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 2.15 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 2.01 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 2.01 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 2.01 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 1.88 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 1.88 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 1.88 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 1.76 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 1.76 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 1.76 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 1.64 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 1.64 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 1.64 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 1.54 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 1.54 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 1.54 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 1.44 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [--------------------------------------------->] 100.00% 1.44 MiB p/s ETA 0s134.68 MiB / 134.68 MiB [-------------------------------------------------] 100.00% 4.29 MiB p/s 32s2026-11-19T10:27:02Z	INFO	[vulndb] Artifact successfully downloaded	repo="mirror.gcr.io/aquasec/trivy-db:2"
+2026-11-19T10:27:02Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-11-19T10:27:02Z	INFO	[secret] Secret scanning is enabled
+2026-11-19T10:27:02Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-11-19T10:27:02Z	INFO	[secret] Please see https://trivy.dev/docs/v0.76/guide/scanner/secret#recommendation for faster secret detection
+2026-11-19T10:27:02Z	INFO	Detected OS	family="debian" version="13.7"
+2026-11-19T10:27:02Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=6
+2026-11-19T10:27:02Z	INFO	Number of language-specific files	num=1
+2026-11-19T10:27:02Z	INFO	[gobinary] Detecting vulnerabilities...
+
+Report Summary
+
+┌───────────────────────────────┬──────────┬─────────────────┬─────────┐
+│            Target             │   Type   │ Vulnerabilities │ Secrets │
+├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+│ /scan/image.tar (debian 13.7) │  debian  │        0        │    -    │
+├───────────────────────────────┼──────────┼─────────────────┼─────────┤
+│ service                       │ gobinary │        0        │    -    │
+└───────────────────────────────┴──────────┴─────────────────┴─────────┘
+Legend:
+- '-': Not scanned
+- '0': Clean (no security findings detected)
+
++ echo 'gate exit 0'
+gate exit 0
++ docker buildx build -f services/orders/Dockerfile --platform linux/amd64,linux/arm64 --build-arg VERSION=local .
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.35kB done
+#1 DONE 0.0s
+
+#2 resolve image config for docker-image://docker.io/docker/dockerfile:1
+#2 DONE 1.3s
+
+#3 docker-image://docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e
+#3 resolve docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e 0.1s done
+#3 CACHED
+
+#4 [linux/amd64 internal] load metadata for gcr.io/distroless/static-debian13:nonroot@sha256:aafe993665bf6200db38a02c11a9351e782a84b6a45e7f33b6695638c88e3931
+#4 ...
+
+#5 [linux/amd64 internal] load metadata for docker.io/library/golang:1.27.4-alpine@sha256:70bd7ddea8b6cbe5d6943cde279d6b67feb10cc924fb9100d1d8757c1575b280
+#5 DONE 0.1s
+
+#4 [linux/amd64 internal] load metadata for gcr.io/distroless/static-debian13:nonroot@sha256:aafe993665bf6200db38a02c11a9351e782a84b6a45e7f33b6695638c88e3931
+#4 DONE 0.1s
+
+#6 [linux/arm64 internal] load metadata for gcr.io/distroless/static-debian13:nonroot@sha256:aafe993665bf6200db38a02c11a9351e782a84b6a45e7f33b6695638c88e3931
+#6 DONE 0.1s
+
+#7 [internal] load .dockerignore
+#7 transferring context: 225B done
+#7 DONE 0.0s
+
+#8 [internal] load build context
+#8 DONE 0.0s
+
+#9 [linux/arm64 stage-1 1/2] FROM gcr.io/distroless/static-debian13:nonroot@sha256:aafe993665bf6200db38a02c11a9351e782a84b6a45e7f33b6695638c88e3931
+#9 resolve gcr.io/distroless/static-debian13:nonroot@sha256:aafe993665bf6200db38a02c11a9351e782a84b6a45e7f33b6695638c88e3931
+#9 resolve gcr.io/distroless/static-debian13:nonroot@sha256:aafe993665bf6200db38a02c11a9351e782a84b6a45e7f33b6695638c88e3931 0.1s done
+#9 DONE 0.1s
+
+#10 [linux/amd64 build 1/7] FROM docker.io/library/golang:1.27.4-alpine@sha256:70bd7ddea8b6cbe5d6943cde279d6b67feb10cc924fb9100d1d8757c1575b280
+#10 resolve docker.io/library/golang:1.27.4-alpine@sha256:70bd7ddea8b6cbe5d6943cde279d6b67feb10cc924fb9100d1d8757c1575b280
+#10 resolve docker.io/library/golang:1.27.4-alpine@sha256:70bd7ddea8b6cbe5d6943cde279d6b67feb10cc924fb9100d1d8757c1575b280 0.1s done
+#10 DONE 0.2s
+
+#11 [linux/amd64 stage-1 1/2] FROM gcr.io/distroless/static-debian13:nonroot@sha256:aafe993665bf6200db38a02c11a9351e782a84b6a45e7f33b6695638c88e3931
+#11 resolve gcr.io/distroless/static-debian13:nonroot@sha256:aafe993665bf6200db38a02c11a9351e782a84b6a45e7f33b6695638c88e3931 0.1s done
+#11 DONE 0.1s
+
+#8 [internal] load build context
+#8 transferring context: 1.89kB 0.0s done
+#8 DONE 0.1s
+
+#12 [linux/amd64 build 3/7] COPY go.mod go.sum ./
+#12 CACHED
+
+#13 [linux/amd64 build 2/7] WORKDIR /src
+#13 CACHED
+
+#14 [linux/amd64 build 4/7] RUN --mount=type=cache,target=/go/pkg/mod go mod download
+#14 CACHED
+
+#15 [linux/amd64 build 5/7] COPY pkg ./pkg
+#15 CACHED
+
+#16 [linux/amd64 build 6/7] COPY services/orders ./services/orders
+#16 CACHED
+
+#17 [linux/amd64 build 7/7] RUN --mount=type=cache,target=/go/pkg/mod     --mount=type=cache,target=/root/.cache/go-build     CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath       -ldflags "-s -w -X github.com/kingswanzy2020/ticketdrop/pkg/platform/service.Version=local"       -o /out/service ./services/orders/cmd
+#17 CACHED
+
+#18 [linux/amd64 stage-1 2/2] COPY --from=build /out/service /service
+#18 CACHED
+
+#19 [linux/amd64->arm64 build 7/7] RUN --mount=type=cache,target=/go/pkg/mod     --mount=type=cache,target=/root/.cache/go-build     CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -trimpath       -ldflags "-s -w -X github.com/kingswanzy2020/ticketdrop/pkg/platform/service.Version=local"       -o /out/service ./services/orders/cmd
+#19 DONE 1.5s
+
+#9 [linux/arm64 stage-1 1/2] FROM gcr.io/distroless/static-debian13:nonroot@sha256:aafe993665bf6200db38a02c11a9351e782a84b6a45e7f33b6695638c88e3931
+#9 CACHED
+
+#20 [linux/arm64 stage-1 2/2] COPY --from=build /out/service /service
+#20 DONE 0.2s
+
+#21 exporting to image
+#21 exporting layers
+#21 exporting layers 0.9s done
+#21 exporting manifest sha256:ddc3770c9a0401151c64588be1d639754a19ebfaf0c93a5acfa9316a2efc9bb7 0.0s done
+#21 exporting config sha256:56fbe95fbd25cfbb6be9d2c964a9bdb36ead454331224f2e847636682fff6ce3 0.0s done
+#21 exporting attestation manifest sha256:1a1a223db5f1e3593ee1a1cedf3116df8331e862ba0427198a3b5b892c4ff1c4 0.1s done
+#21 exporting manifest sha256:217c9caa596f38bc7829f0ca7117d087d0e93a3d8cfa93bf6b49ba6a1714b8f0 0.0s done
+#21 exporting config sha256:dab846f39a1b6343a2bc79251bb8cba92acb62a4bffcac815d208f88279e007b 0.0s done
+#21 exporting attestation manifest sha256:df4b876be78cb32d7326b281c0934f6d8bb8181a5e2487abdccbf457f48e75e7
+#21 exporting attestation manifest sha256:df4b876be78cb32d7326b281c0934f6d8bb8181a5e2487abdccbf457f48e75e7 0.0s done
+#21 exporting manifest list sha256:ad088418644b5a5f3a4785a0f88b6a9e16161ba6dca0503f59a07f2a5b13a8ce 0.0s done
+#21 naming to moby-dangling@sha256:ad088418644b5a5f3a4785a0f88b6a9e16161ba6dca0503f59a07f2a5b13a8ce done
+#21 unpacking to moby-dangling@sha256:ad088418644b5a5f3a4785a0f88b6a9e16161ba6dca0503f59a07f2a5b13a8ce
+#21 unpacking to moby-dangling@sha256:ad088418644b5a5f3a4785a0f88b6a9e16161ba6dca0503f59a07f2a5b13a8ce 0.1s done
+#21 DONE 1.5s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/w64gu8bkit14s9pu6p9hn05ey
++ set +x

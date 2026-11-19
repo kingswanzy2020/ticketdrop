@@ -1,0 +1,17 @@
+Thu Nov 19 05:36:15 PM KST 2026
+1.7.12
+installed from Homebrew
+built with go1.26.3 compiler for linux/amd64
+ShellCheck - shell script analysis tool
+version: 0.11.0
++ actionlint -verbose
+verbose: Linting all workflow files in repository: /home/king/Desktop/Personal-Lab/DevOps/ticketdrop
+verbose: Detected project: /home/king/Desktop/Personal-Lab/DevOps/ticketdrop
+verbose: Collected 1 YAML files
+verbose: Linting .github/workflows/ci.yaml
+verbose: Using project at /home/king/Desktop/Personal-Lab/DevOps/ticketdrop
+verbose: Found 0 parse errors in 1 ms for .github/workflows/ci.yaml
+verbose: Rule "pyflakes" was disabled: exec: "pyflakes": executable file not found in $PATH
+verbose: Found total 0 errors in 32 ms for .github/workflows/ci.yaml
++ echo 'exit 0'
+exit 0

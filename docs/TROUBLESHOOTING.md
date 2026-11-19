@@ -19,6 +19,9 @@ only some host directories with it. The home directory is shared by default;
 which is under the home directory (`deploy/local/`). The alternative is to add
 the path under Settings → Resources → File Sharing.
 
+It happened again in Phase 3, mounting the local Trivy scan's folder from
+`/tmp`. That scan now uses `~/.cache/td-scan` and deletes it afterwards.
+
 ## 2. goaws ignores its configuration file
 
 **Seen.** The emulator started with none of the configured queues or topics.
@@ -237,3 +240,102 @@ Traefik itself has no low file limit.
 customers or fewer, or has to start k6 somewhere that reaches Traefik without
 going through port 8088. Evidence:
 [`12-port-8088-connection-ceiling.txt`](evidence/phase-1/12-port-8088-connection-ceiling.txt).
+
+## 11. govulncheck v1.1.4 panics on this module
+
+**Seen.** `go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...` stopped
+before reporting anything:
+
+```
+panic: unexpected expr: *ast.KeyValueExpr
+```
+
+**Cause.** v1.1.4 is an old release, picked from an unsorted list of tags. It
+is built on an old `golang.org/x/tools` (v0.29.0), and the panic comes from
+its source analysis meeting code it does not expect. That the newer Go is what
+it cannot handle is inferred, not traced.
+
+**Fix.** govulncheck v1.9.0, chosen from `go list -m -versions`; v1.10.0 was a
+day old (DECISIONS 62). Evidence:
+[`fail-3-go-checks-on-main.txt`](evidence/phase-3/fail-3-go-checks-on-main.txt).
+
+## 12. govulncheck found 15 vulnerabilities the code reaches
+
+**Seen.** On `main` at Go 1.27.1, govulncheck v1.9.0 exited 3 with "Your code
+is affected by 15 vulnerabilities from 1 module and the Go standard library":
+14 in the standard library (`net/http`, its HTTP/2 code, `crypto/tls`,
+`crypto/x509`, `net/textproto`, `net/http/httputil` and `html/template`),
+fixed in 1.27.2, 1.27.3 or 1.27.4, and GO-2026-6629 in
+`golang.org/x/text@v0.40.0`, fixed in v0.41.0.
+
+**Cause.** Phase 2 was built on Go 1.27.1, and three patch releases had come
+out since. Nothing checked for vulnerabilities before this phase.
+
+**Fix.** Go 1.27.4 in `go.mod` and all nine Dockerfiles, and `x/text` v0.41.0
+(DECISIONS 60). govulncheck now reports "No vulnerabilities found". Evidence:
+[`fail-3-go-checks-on-main.txt`](evidence/phase-3/fail-3-go-checks-on-main.txt),
+[`03-go-checks-local.txt`](evidence/phase-3/03-go-checks-local.txt).
+
+## 13. golangci-lint found 21 issues on its first run
+
+**Seen.** golangci-lint v2.14.0 on `main`, with no config, reported 21
+issues: 20 errcheck and 1 staticcheck.
+
+**Cause.** The errcheck ones were return values nobody checked: three of
+pgx's deferred `tx.Rollback`, four `Close` calls (three response bodies in the
+gateway's tests, one connection in the scheduler), and thirteen others:
+`io.WriteString`, `io.Copy`, `w.Write`, JSON `Encode`, `Decode` and
+`Unmarshal`, the advisory unlock's `conn.Exec` and the admin server's
+`Shutdown`, in `pkg/platform` and in the orders, scheduler and web code and
+tests. The staticcheck one (SA4010) was an `orderIDs`
+slice in `services/inventory/internal/stock/batch.go` that was appended to and
+never read.
+
+**Fix.** `.golangci.yml` excludes the common idioms and pgx's `Rollback`, and
+the remaining calls ignore the error explicitly with `_ =` (DECISIONS 61). The
+unused slice was removed. The run now reports `0 issues.` Evidence:
+[`fail-3-go-checks-on-main.txt`](evidence/phase-3/fail-3-go-checks-on-main.txt),
+[`03-go-checks-local.txt`](evidence/phase-3/03-go-checks-local.txt).
+
+## 14. Docker Desktop was killed for memory, and a capture ran against it
+
+**Seen.** The local build-and-scan capture (`04`) failed on every Docker
+command:
+
+```
+failed to connect to the docker API at unix:///home/king/.docker/desktop/docker.sock;
+... dial unix /home/king/.docker/desktop/docker.sock: connect: no such file or directory
+```
+
+`systemctl --user status docker-desktop` showed `failed (Result: oom-kill)
+since Thu 2026-11-19 16:40:50 KST`, an hour before the capture ran.
+
+**Cause.** At 16:40:45 the laptop ran out of memory (`global_oom`, 30 GB of RAM
+and 8 GB of swap). The allocation that triggered it came from `code`
+(VS Code), and the kernel killed the largest process it could, Docker
+Desktop's virtual machine (`qemu-system-x86`, 2.0 GB anonymous and 5.4 GB
+shared memory resident). What was using the rest of the memory was not
+captured.
+
+**Fix.** Docker Desktop was started again (19:07) and the capture rerun at
+19:26, which passed. The capture script does not check that Docker is running
+first, so a stopped daemon leaves a file full of errors that looks like a
+capture. Evidence:
+[`fail-3-docker-desktop-oom.txt`](evidence/phase-3/fail-3-docker-desktop-oom.txt).
+
+## 15. `gh run list --workflow ci` cannot find the workflow
+
+**Seen.** After `phase-3-ci` was pushed:
+
+```
+could not find any workflows named ci
+```
+
+`gh workflow list` and `gh run list` were both empty.
+
+**Cause.** `ci.yaml` starts only on a pull request or a push to `main`, so
+pushing a feature branch started nothing. GitHub lists a workflow only once
+it is on the default branch or has run at least once, so until then it does
+not exist by name.
+
+**Fix.** Open the pull request; its first run registers the workflow.
