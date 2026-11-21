@@ -1,0 +1,68 @@
+Thu Nov 19 11:13:11 PM KST 2026
+PR #5 (proof/one-service), first run 1c437e3, before the comment was formatted.
+
+$ git show 1c437e3 -- services/orders/cmd/main.go | tail -4
+ 		service.Worker{Name: "consumer", Run: consumer.Run},
+ 	)
+ }
++// Proof PR: a change in one service builds only that service.
+
+$ gh run view 44540385348
+
+X proof/one-service ci kingswanzy2020/ticketdrop#5 · 44540385348
+Triggered via pull_request about 5 minutes ago
+
+JOBS
+✓ changes in 14s (ID 135616803926)
+X go in 19s (ID 135616804574)
+  ✓ Set up job
+  ✓ Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+  ✓ Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+  X vet and gofmt
+  - golangci-lint
+  - test
+  - govulncheck
+  - Post Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+  ✓ Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+  ✓ Complete job
+X build (orders) in 1m34s (ID 135616988570)
+X ci-ok in 6s (ID 135617982427)
+  ✓ Set up job
+  X Run jq -r 'to_entries[] | "\(.key): \(.value.result)"' <<<"$NEEDS"
+  ✓ Complete job
+
+ANNOTATIONS
+X Process completed with exit code 2.
+go: .github#14
+
+X Canceling since a higher priority waiting request for ci-5 exists
+build (orders): .github#1
+
+X The operation was canceled.
+build (orders): .github#289
+
+X Process completed with exit code 1.
+ci-ok: .github#34
+
+X a required job did not pass
+ci-ok: .github#33
+
+
+For more information about a job, try: gh run view --job=<job-id>
+View this run on GitHub: https://github.com/kingswanzy2020/ticketdrop/actions/runs/44540385348
+
+$ gh run view 44540385348 --log-failed (the go job)
+##[group]Run make vet
+make vet
+shell: /usr/bin/bash -e {0}
+env:
+  GOLANGCI_LINT_VERSION: v2.14.0
+  GOVULNCHECK_VERSION: v1.9.0
+  TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+  GOTOOLCHAIN: local
+##[endgroup]
+go vet ./...
+not gofmt-formatted:
+services/orders/cmd/main.go
+make: *** [Makefile:16: vet] Error 1
+##[error]Process completed with exit code 2.

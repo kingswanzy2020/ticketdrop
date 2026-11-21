@@ -34,7 +34,7 @@ details.phase > summary .progress { font: 600 0.8rem var(--mono); color: var(--m
     <li>Repos: <b>ticketdrop/</b> and <b>ticketdrop-gitops/</b></li>
     <li>Evidence goes in <b>docs/evidence/phase-N/</b></li>
     <li><span class="pill done">Phase 2 finished 17 November</span></li>
-    <li><span class="pill now">Phase 3 now</span></li>
+    <li><span class="pill now">Phase 3: both CIs running, exit checks passed 19 November</span></li>
   </ul>
 </header>
 
@@ -362,23 +362,23 @@ scripts/check.sh             # is the stack whole? Run it any time</code></pre>
 <section>
   <span class="eyebrow">How it works</span>
   <h2>What happens when you open a pull request</h2>
-  <div class="flow" role="img" aria-label="A pull request starts two jobs at once: go, which checks the whole module, and changes, which lists the services to build. The build job then runs once per listed service. A ci-ok job, added in step 5, waits for all three and is the check the ruleset requires.">
+  <div class="flow" role="img" aria-label="A pull request starts two jobs at once: go, which checks the whole module, and changes, which lists the services to build. The build job then runs once per listed service. A ci-ok job waits for all three and is the check the ruleset requires.">
     <svg viewBox="0 0 720 250" width="720" height="250">
       <g class="box"><rect x="10" y="100" width="150" height="50" rx="6"/><text x="85" y="122" text-anchor="middle">pull_request</text><text x="85" y="139" text-anchor="middle" class="sub">or push to main</text></g>
       <g class="box"><rect x="210" y="30" width="170" height="54" rx="6"/><text x="295" y="52" text-anchor="middle">go</text><text x="295" y="70" text-anchor="middle" class="sub">vet · lint · test · vuln</text></g>
       <g class="box"><rect x="210" y="166" width="170" height="54" rx="6"/><text x="295" y="188" text-anchor="middle">changes</text><text x="295" y="206" text-anchor="middle" class="sub">which images changed?</text></g>
       <g class="box"><rect x="430" y="150" width="140" height="40" rx="6"/><text x="500" y="175" text-anchor="middle">build (orders)</text></g>
       <g class="box"><rect x="438" y="196" width="140" height="40" rx="6"/><text x="508" y="221" text-anchor="middle">build (…)</text></g>
-      <g class="box later"><rect x="610" y="100" width="100" height="50" rx="6"/><text x="660" y="122" text-anchor="middle">ci-ok</text><text x="660" y="139" text-anchor="middle" class="sub">step 5</text></g>
+      <g class="box"><rect x="610" y="100" width="100" height="50" rx="6"/><text x="660" y="122" text-anchor="middle">ci-ok</text><text x="660" y="139" text-anchor="middle" class="sub">required</text></g>
       <path d="M160 118 C185 118 185 57 210 57"/>
       <path d="M160 132 C185 132 185 193 210 193"/>
       <path d="M380 193 L430 172"/>
       <path d="M380 197 L438 214"/>
-      <path class="dash" d="M380 57 C560 57 590 110 610 115"/>
-      <path class="dash" d="M570 170 C595 165 595 140 610 135"/>
+      <path d="M380 57 C560 57 590 110 610 115"/>
+      <path d="M570 170 C595 165 595 140 610 135"/>
     </svg>
   </div>
-  <p class="muted prose">The go job and the changes job start together. The build job starts after changes, once for each service in its list, and is skipped when the list is empty. The ci-ok job (step 5) is the one check the ruleset requires, because the matrix job names change from one PR to the next.</p>
+  <p class="muted prose">The go job and the changes job start together. The build job starts after changes, once for each service in its list, and is skipped when the list is empty. The ci-ok job is the one check the ruleset requires, because the matrix job names change from one PR to the next. It runs even when a job before it failed, and passes only if each one passed, or if build was skipped because there was nothing to build.</p>
 
   <div class="table"><table>
     <thead><tr><th>The PR changes</th><th>changes prints</th><th>Jobs that run</th></tr></thead>
@@ -394,9 +394,9 @@ scripts/check.sh             # is the stack whole? Run it any time</code></pre>
   <div class="prose">
     <h3>The workflow, block by block</h3>
     <ol>
-      <li><strong><code>on:</code></strong> runs on every pull request and on every push to <code>main</code>. It has no <code>paths:</code> filter. A filtered workflow does not start at all, and a required check that never starts stays "Expected" and blocks the merge for good. Deciding what to build belongs to the changes job.</li>
+      <li><strong><code>on:</code></strong> runs on every pull request, on every push to <code>main</code>, every Monday at 03:23 UTC (a full rebuild and scan of <code>main</code>, so a CVE published after the last merge is found), and by hand. It has no <code>paths:</code> filter. A filtered workflow does not start at all, and a required check that never starts stays "Expected" and blocks the merge for good. Deciding what to build belongs to the changes job.</li>
       <li><strong><code>permissions: contents: read</code></strong> gives the token the right to read the code and nothing else. Every checkout also sets <code>persist-credentials: false</code>, so the token is not left in <code>.git/config</code> where a later step could use it.</li>
-      <li><strong><code>concurrency</code></strong> groups runs by PR number. A new push to a PR cancels the run it replaces. Runs on <code>main</code> are never cancelled.</li>
+      <li><strong><code>concurrency</code></strong> groups a PR's runs by its number, so a new push cancels the run it replaces. Everything else is grouped by commit SHA. A group holds one running and one pending run and a third arrival cancels the pending one, so grouping <code>main</code> by branch would have let a quick third merge cancel the second one's run (DECISIONS 65).</li>
       <li><strong><code>env:</code></strong> holds the tool versions in one place: golangci-lint, govulncheck, and the Trivy image by digest. Every <code>uses:</code> is pinned to a full commit SHA with the tag beside it as a comment. The repo setting <code>sha_pinning_required</code> refuses any other form.</li>
       <li><strong><code>changes</code></strong> checks out with <code>fetch-depth: 0</code>, because a shallow clone has no base commit to diff against. On a PR it compares the PR's base with its head. On a push it compares <code>github.event.before</code> with the new commit. The <code>a &amp;&amp; b || c</code> expression is the workflow's way of writing "if PR then b else c". Both commits reach the script through <code>env:</code>, never pasted into the shell line, so text from GitHub cannot become a command. The script's one line of JSON becomes the job's <code>services</code> output and is written to the run's summary.</li>
       <li><strong><code>go</code></strong> reads the Go version from <code>go.mod</code> (so CI and your laptop agree), then runs:
@@ -412,9 +412,10 @@ scripts/check.sh             # is the stack whole? Run it any time</code></pre>
           <li>builds <code>linux/amd64</code> into a file, <code>image.tar</code>. There is no registry yet, and the docker exporter can hold only one platform.</li>
           <li>restores the Trivy database (about 1.7 GB), cached once a day.</li>
           <li>runs Trivy twice: first a HIGH and CRITICAL table for the record, which never fails, then the gate: a CRITICAL with a fix available fails the job.</li>
-          <li>builds <code>linux/amd64,linux/arm64</code> without pushing, to prove both platforms build. The Dockerfiles compile on the runner's own platform and cross-compile, so no emulator is needed.</li>
+          <li>builds <code>linux/amd64,linux/arm64</code> without pushing, to prove both platforms build. The Dockerfiles compile on the runner's own platform and cross-compile, so no emulator is needed. buildx is pinned to v0.38.2, and build records are not uploaded.</li>
         </ul>
         Each service has its own build cache (<code>scope=&lt;service&gt;</code>), so nine parallel jobs don't overwrite each other's cache.</li>
+      <li><strong><code>ci-ok</code></strong> needs the other three and has <code>if: always()</code>. It reads their results as <code>toJSON(needs)</code> through <code>env:</code> and checks them with <code>jq</code>: changes and go must be <code>success</code>, and build <code>success</code>, or <code>skipped</code> only when the list was <code>[]</code>. Both rulesets require it from GitHub Actions (app 15368), so no other app can report it.</li>
     </ol>
 
     <h3>The script, <code>.github/scripts/changed-services.sh</code></h3>
@@ -436,12 +437,46 @@ scripts/check.sh             # is the stack whole? Run it any time</code></pre>
   </div>
 </section>
 
+<section id="p3-two-repos">
+  <span class="eyebrow">Two repos, two workflows</span>
+  <h2>What each CI checks, and how they meet</h2>
+  <p class="prose">Each repo has its own <code>.github/workflows/ci.yaml</code> and its own required <code>ci-ok</code>. They answer different questions. The app repo asks whether the code builds, passes its tests and ships no fixable CRITICAL. The GitOps repo asks whether its manifests install a working stack.</p>
+
+  <div class="table"><table>
+    <thead><tr><th></th><th><code>ticketdrop</code> (the app)</th><th><code>ticketdrop-gitops</code> (the manifests)</th></tr></thead>
+    <tbody>
+      <tr><th>The question</th><td>Does this commit compile, lint, pass <code>-race</code> tests, reach no known vulnerability, and build images with no fixable CRITICAL, for both CPUs?</td><td>Is every manifest valid for Kubernetes 1.36.4 and its CRDs, and does the whole stack come up from these files on an empty cluster?</td></tr>
+      <tr><th>Starts on</th><td>every PR, every push to <code>main</code>, Mondays 03:23 UTC, and by hand</td><td>every PR, every push to <code>main</code>, and by hand</td></tr>
+      <tr><th>Jobs</th><td><code>changes</code> → <code>build (&lt;service&gt;)</code> × the changed ones; <code>go</code> alongside; <code>ci-ok</code> last</td><td><code>lint</code> and <code>kind</code> side by side; <code>ci-ok</code> last</td></tr>
+      <tr><th>Filtered?</th><td>The builds are, by <code>changed-services.sh</code>. The Go checks are not: one module.</td><td>No. Every run lints everything and installs everything.</td></tr>
+      <tr><th>What fails it</th><td>vet, gofmt, golangci-lint, a test, govulncheck, a build, or a fixable CRITICAL from Trivy</td><td>shellcheck, <code>helm lint --strict</code>, a kubeconform schema error, <code>rebuild.sh</code> or <code>check.sh</code>, or NetworkPolicy not enforced</td></tr>
+      <tr><th>Tools, pinned</th><td>actions by SHA; Go from <code>go.mod</code>; golangci-lint v2.14.0; govulncheck v1.9.0; buildx v0.38.2; Trivy 0.76.2 by image digest</td><td>actions by SHA; helm v3.20.2, kubeconform v0.8.0, shellcheck 0.11.0, kind v0.33.0, kubectl v1.36.4, each checked against a SHA-256; <code>kindest/node:v1.36.4</code> and cloud-provider-kind by digest; both schema sets by commit</td></tr>
+      <tr><th>Credentials</th><td>a read-only token; nothing else</td><td>a read-only token, which also reads the public app repo; the cluster is born and dies in the runner</td></tr>
+      <tr><th>Keeps</th><td>nothing: images are built and thrown away (no registry yet)</td><td>nothing: the kind cluster goes with the runner</td></tr>
+      <tr><th>Required by</th><td><code>protect-app-main</code>: <code>ci-ok</code> from GitHub Actions</td><td><code>protect-infra-main</code>: <code>ci-ok</code> from GitHub Actions</td></tr>
+      <tr><th>Takes</th><td>about 3 minutes with all nine images; under a minute for a docs-only PR</td><td>about 3½ minutes: lint 11 s, kind 3 min 27 s</td></tr>
+      <tr><th>Run it on the laptop</th><td><code>make vet</code>, <code>golangci-lint run</code>, <code>go test -race ./...</code></td><td><code>scripts/validate.sh</code>; <code>scripts/rebuild.sh</code> on Docker Desktop</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="prose">
+    <h3>How they connect</h3>
+    <div class="table"><table>
+      <thead><tr><th>When</th><th>The link</th><th>What it means</th></tr></thead>
+      <tbody>
+        <tr><td>Now (Phase 3)</td><td>The GitOps <code>kind</code> job checks out the app repo's <code>main</code>, builds the nine <code>ticketdrop/&lt;service&gt;:dev</code> images and loads them into kind.</td><td>One way only. An app PR never runs the GitOps install test, so an app change that breaks the stack (a new required setting, say) is first seen on the next GitOps run, or on <code>rebuild.sh</code> at home. A GitOps run can also pass today and fail tomorrow with no GitOps change, because app <code>main</code> moved.</td></tr>
+        <tr><td>Phase 6 (CD)</td><td>On merge the app CI pushes each image to ECR tagged with its commit SHA and commits the new tag into the GitOps repo. Argo CD syncs that.</td><td>The GitOps repo then says exactly which app commit runs. The tag bump arrives as a GitOps change, so it goes through the GitOps <code>ci-ok</code> like any other.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
 <section>
   <span class="eyebrow">The work</span>
   <h2>Ten steps, in order</h2>
   <p class="muted prose">Steps 1 to 4 are written and pass locally, but have not run on GitHub yet. Tick each one when its first PR run shows it working.</p>
 
-  <div class="step"><div class="head"><label><input type="checkbox" id="p3-s0"><h3>0. Settings, merge and branch</h3></label></div><dl>
+  <div class="step"><div class="head"><label><input type="checkbox" id="p3-s0" checked><h3>0. Settings, merge and branch</h3></label></div><dl>
     <dt>Do</dt><dd>Merge Phase 2 into <code>main</code>, create <code>phase-3-ci</code> from it, and check the Actions settings in both repos.</dd>
     <dt>Why</dt><dd>The workflow on a PR is the one in the PR's branch, so <code>main</code> has to hold everything Phase 3 builds on.</dd>
     <dt>Found</dt><dd><ul>
@@ -455,7 +490,7 @@ scripts/check.sh             # is the stack whole? Run it any time</code></pre>
     </ul></dd>
   </dl></div>
 
-  <div class="step"><div class="head"><label><input type="checkbox" id="p3-s1"><h3>1. The workflow skeleton</h3></label></div><dl>
+  <div class="step"><div class="head"><label><input type="checkbox" id="p3-s1" checked><h3>1. The workflow skeleton</h3></label></div><dl>
     <dt>Do</dt><dd>Write <code>.github/workflows/ci.yaml</code> in the <b>app</b> repo. It needs triggers, read-only permissions, concurrency, one <code>env:</code> block for versions, and actions pinned by SHA.</dd>
     <dt>Why</dt><dd>Every later job hangs on this frame, and the "no credentials" rule is set here once, for all of them.</dd>
     <dt>Watch for</dt><dd><ul>
@@ -470,7 +505,7 @@ scripts/check.sh             # is the stack whole? Run it any time</code></pre>
     </ul></dd>
   </dl></div>
 
-  <div class="step"><div class="head"><label><input type="checkbox" id="p3-s2"><h3>2. Change detection</h3></label></div><dl>
+  <div class="step"><div class="head"><label><input type="checkbox" id="p3-s2" checked><h3>2. Change detection</h3></label></div><dl>
     <dt>Do</dt><dd>Add the changes job and <code>.github/scripts/changed-services.sh</code>, which prints the services to build as JSON.</dd>
     <dt>Why</dt><dd>The rules come straight from what each Dockerfile copies. A script of about 70 lines that you can read is one less third-party action, and its cases can be tested locally.</dd>
     <dt>Watch for</dt><dd><ul>
@@ -493,7 +528,7 @@ scripts/check.sh             # is the stack whole? Run it any time</code></pre>
     </ul></dd>
   </dl></div>
 
-  <div class="step"><div class="head"><label><input type="checkbox" id="p3-s3"><h3>3. Go checks</h3></label></div><dl>
+  <div class="step"><div class="head"><label><input type="checkbox" id="p3-s3" checked><h3>3. Go checks</h3></label></div><dl>
     <dt>Do</dt><dd>The go job runs vet and gofmt, golangci-lint, the race tests and govulncheck on every PR.</dd>
     <dt>Why</dt><dd>One module: a <code>pkg/</code> change can break any service, and the change filter only decides images.</dd>
     <dt>Watch for</dt><dd><ul>
@@ -508,7 +543,7 @@ scripts/check.sh             # is the stack whole? Run it any time</code></pre>
     </ul></dd>
   </dl></div>
 
-  <div class="step"><div class="head"><label><input type="checkbox" id="p3-s4"><h3>4. Build matrix and Trivy gate</h3></label></div><dl>
+  <div class="step"><div class="head"><label><input type="checkbox" id="p3-s4" checked><h3>4. Build matrix and Trivy gate</h3></label></div><dl>
     <dt>Do</dt><dd>One job per listed service: an amd64 image to a file, two Trivy passes, then an amd64 and arm64 build without pushing.</dd>
     <dt>Why</dt><dd>The scan has to look at the exact image that would ship. arm64 is for cheaper Graviton nodes from Karpenter in Phase 5.</dd>
     <dt>Watch for</dt><dd><ul>
@@ -524,7 +559,7 @@ scripts/check.sh             # is the stack whole? Run it any time</code></pre>
     </ul></dd>
   </dl></div>
 
-  <div class="step"><div class="head"><label><input type="checkbox" id="p3-s5"><h3>5. The ci-ok job</h3></label></div><dl>
+  <div class="step"><div class="head"><label><input type="checkbox" id="p3-s5" checked><h3>5. The ci-ok job</h3></label></div><dl>
     <dt>Do</dt><dd>Add one job with <code>needs: [changes, go, build]</code> and <code>if: always()</code>. It fails when any of them ended <code>failure</code> or <code>cancelled</code>; <code>skipped</code> passes.</dd>
     <dt>Why</dt><dd>The ruleset can require only a check name that always reports. <code>build (orders)</code> exists on some PRs and not others.</dd>
     <dt>Watch for</dt><dd><ul>
@@ -532,10 +567,11 @@ scripts/check.sh             # is the stack whole? Run it any time</code></pre>
       <li>Check the results through <code>env:</code> with <code>toJSON(needs)</code> and <code>jq</code>, not by pasting them into the shell line.</li>
     </ul></dd>
     <dt>Done when</dt><dd>The <code>phase-3-ci</code> PR shows ci-ok green and the merge button enabled.</dd>
-    <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>05-ci-ok-green.png</code>: the PR's checks with ci-ok passing.</li></ul></dd>
+    <dt>Done</dt><dd>PR #4: ci-ok green, merge state <code>CLEAN</code>. Both rulesets now require <code>ci-ok</code> from GitHub Actions only (DECISIONS 64). The concurrency, buildx and schedule changes went in with it (DECISIONS 65).</dd>
+    <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>05-ci-ok-green.txt</code> and <code>05-ci-ok-source-github-actions.txt</code> (saved). <code>05-ci-ok-green.png</code> is yours: PR #4's checks, from its page.</li></ul></dd>
   </dl></div>
 
-  <div class="step"><div class="head"><label><input type="checkbox" id="p3-s6"><h3>6. Proof PRs (the exit check)</h3></label></div><dl>
+  <div class="step"><div class="head"><label><input type="checkbox" id="p3-s6" checked><h3>6. Proof PRs (the exit check)</h3></label></div><dl>
     <dt>Do</dt><dd>After merging <code>phase-3-ci</code>, open four short-lived PRs from <code>main</code>:
       <ul>
         <li>a comment in <code>services/orders/</code>;</li>
@@ -556,9 +592,16 @@ scripts/check.sh             # is the stack whole? Run it any time</code></pre>
       <li><code>06-one-service-built.txt</code>, <code>06-docs-only-ci-ok.txt</code>: each run's log.</li>
       <li><span class="once">Only now</span> <code>fail-6-test-blocks-merge.txt</code> plus <code>.png</code>, and <code>fail-6-critical-cve-blocks-merge.txt</code> plus <code>.png</code>. Take the screenshot while the PR is open, with the failed check and the disabled merge button both in view.</li>
     </ul></dd>
+    <dt>Done</dt><dd><ul>
+      <li>#5, a comment in orders: only <code>build (orders)</code>, ci-ok passed. Its first run failed <code>make vet</code> on the comment's formatting (TROUBLESHOOTING 19).</li>
+      <li>#6, a line in docs: build skipped, ci-ok passed, <code>CLEAN</code>.</li>
+      <li>#7, a failing test: go failed, ci-ok failed, <code>BLOCKED</code>.</li>
+      <li>#8, notifications on <code>alpine:3.16.0</code>: Trivy found zlib CVE-2022-37434 (CRITICAL, fixed in 1.2.12-r2), build failed, ci-ok failed, <code>BLOCKED</code>.</li>
+      <li>#5 and #6 are closed. #7 and #8 are left open for your screenshots; close them afterwards.</li>
+    </ul></dd>
   </dl></div>
 
-  <div class="step"><div class="head"><label><input type="checkbox" id="p3-s7"><h3>7. GitOps repo: lint and schemas</h3></label></div><dl>
+  <div class="step"><div class="head"><label><input type="checkbox" id="p3-s7" checked><h3>7. GitOps repo: lint and schemas</h3></label></div><dl>
     <dt>Do</dt><dd>In <code>ticketdrop-gitops/.github/workflows/ci.yaml</code>:
       <ul>
         <li><code>helm lint charts/service -f values/values-&lt;svc&gt;.yaml</code> for each of the nine;</li>
@@ -572,10 +615,11 @@ scripts/check.sh             # is the stack whole? Run it any time</code></pre>
       <li>The 17 MB Gateway API <code>standard-install</code> file may be slow. It is upstream's file, so leaving it out is fair.</li>
     </ul></dd>
     <dt>Done when</dt><dd>It passes, and a misspelled field fails it.</dd>
-    <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>07-helm-lint-nine.txt</code>, <code>07-kubeconform.txt</code>, <code>fail-7-kubeconform-&lt;what&gt;.txt</code>.</li></ul></dd>
+    <dt>Done</dt><dd><code>scripts/validate.sh</code> in the GitOps repo, run by CI's lint job after shellcheck. Both schema sets are pinned to a commit (kubeconform's own default reads <code>master</code>), CRDs are skipped, and every check runs before it fails, so one run lists every problem. 117 resources in about 10 s. A misspelled field failed it in all nine services and the HTTPRoute; <code>helm lint</code> passed the same typo. A misspelled <em>values key</em> is not caught: the chart has no <code>values.schema.json</code> (DECISIONS 66).</dd>
+    <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>07-validate-helm-lint-kubeconform.txt</code>, <code>fail-7-kubeconform-misspelled-field.txt</code>, <code>fail-7-shellcheck-lib-alone.txt</code> (saved).</li></ul></dd>
   </dl></div>
 
-  <div class="step"><div class="head"><label><input type="checkbox" id="p3-s8"><h3>8. GitOps repo: kind install test</h3></label></div><dl>
+  <div class="step"><div class="head"><label><input type="checkbox" id="p3-s8" checked><h3>8. GitOps repo: kind install test</h3></label></div><dl>
     <dt>Do</dt><dd>
       <ul>
         <li>Create a kind cluster from <code>kindest/node:v1.36.4@sha256:…</code>.</li>
@@ -589,15 +633,17 @@ scripts/check.sh             # is the stack whole? Run it any time</code></pre>
       <li><code>rebuild.sh</code> needs the <code>cnpg</code>, <code>kedacore</code> and <code>traefik</code> Helm repos, <code>jq</code> and <code>curl</code>. It also runs <code>db-secrets.sh</code>, which writes to <code>secrets/</code>.</li>
       <li>Check whether kind's kindnet enforces NetworkPolicy, as Docker Desktop does (DECISIONS 49), rather than assuming it.</li>
       <li>Expect several minutes per run. Give the job a timeout.</li>
+      <li>Found on the way: cloud-provider-kind installs Gateway API CRDs of its own unless started with <code>--gateway-channel disabled</code> (TROUBLESHOOTING 16), and a new pod is not policed for its first second, so a probe must wait before it calls (TROUBLESHOOTING 18). The same window is on Docker Desktop.</li>
     </ul></dd>
     <dt>Done when</dt><dd><code>check.sh</code> passes in the runner, and a chart change that breaks a pod blocks the gitops PR.</dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul>
-      <li><code>08-kind-install-test.txt</code>: the run log.</li>
+      <li><code>08-kind-install-test.txt</code>, <code>fail-8-cloud-provider-kind-gateway-crds.txt</code>, <code>fail-8-networkpolicy-new-pod-window.txt</code>, <code>fail-8-chart-blocks-merge.txt</code> (saved).</li>
       <li><span class="once">Only now</span> <code>fail-8-chart-blocks-merge.png</code>, while that PR is open.</li>
     </ul></dd>
+    <dt>Done</dt><dd>cloud-provider-kind gives Traefik its address and a port-forward loop gives <code>check.sh</code> its <code>localhost:8088</code>, so the scripts run unchanged. Third run: everything Available in 99 s, 16 of 16 checks, NetworkPolicy blocked from <code>ticketdrop</code> and open from <code>default</code>, the job in 3 min 27 s (DECISIONS 67). Proof PR: GitOps #2 sets orders' <code>DATABASE_MAX_CONNS</code> to <code>"10x"</code>. It lints and validates, orders goes into <code>CrashLoopBackOff</code> ("is not an integer"), the kind job fails and the PR is <code>BLOCKED</code>. <code>rebuild.sh</code> also reported payments, scheduler and web as timed out although they were up (TROUBLESHOOTING 20).</dd>
   </dl></div>
 
-  <div class="step"><div class="head"><label><input type="checkbox" id="p3-s9"><h3>9. Record it</h3></label></div><dl>
+  <div class="step"><div class="head"><label><input type="checkbox" id="p3-s9" checked><h3>9. Record it</h3></label></div><dl>
     <dt>Do</dt><dd>
       <ul>
         <li>DECISIONS entries from 58, from the list below.</li>
@@ -711,11 +757,15 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
 # 06 later, for each proof PR: the same three lines with its own branch and file name
 #   id=$(gh run list --branch &lt;branch&gt; --workflow ci --limit 1 --json databaseId --jq '.[0].databaseId')
 #   { date; gh run view "$id"; gh run view "$id" --log; } 2&gt;&amp;1 | tee $E/06-&lt;what&gt;.txt</code></pre>
+  <div class="note prose">
+    <p>Steps 5 to 8 were captured for you on 19 November. Each file starts with <code>date</code> and the commands that produced it. The full build logs are left out for size; <code>gh run view &lt;id&gt; --log</code> gives them while GitHub keeps them.</p>
+    <p>Step 7 runs at home too: <code>cd ../ticketdrop-gitops &amp;&amp; scripts/validate.sh</code>. It needs helm, kubeconform and the three Helm repos. Step 8 at home is <code>scripts/rebuild.sh</code> on Docker Desktop, as before.</p>
+  </div>
 </section>
 
 <section>
   <span class="eyebrow">For DECISIONS</span>
-  <h2>Choices made in steps 1 to 4</h2>
+  <h2>Choices made in Phase 3: DECISIONS 58 to 67</h2>
   <div class="table"><table>
     <thead><tr><th>Decision</th><th>Why</th><th>Cost</th></tr></thead>
     <tbody>
@@ -731,31 +781,44 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
       <tr><td>Scan the amd64 image; build arm64 without scanning it</td><td>The same binary for another CPU, on the same base digest.</td><td>A finding only in the arm64 base layer would be missed.</td></tr>
       <tr><td>Trivy database cached once a day; build cache scoped per service</td><td>The database is 1.7 GB and nine jobs download it at once. Without separate scopes, nine builds overwrite each other's cache.</td><td>Up to a day old in CI. About 1.7 GB of the repo's 10 GB cache allowance.</td></tr>
       <tr><td>Runner pinned to <code>ubuntu-24.04</code>, not <code>ubuntu-latest</code></td><td>The image moves only when the label is changed.</td><td>The label has to be bumped by hand before it is retired.</td></tr>
-      <tr><td>Rulesets require <code>ci-ok</code> before it exists, with "up to date" on</td><td>Your choice, made 18 November.</td><td>No merges in either repo until step 5. Every merge first needs <code>main</code>'s latest commit.</td></tr>
+      <tr><td>Rulesets require <code>ci-ok</code> before it exists, with "up to date" on; since 19 November they also block force pushes and deletion of <code>main</code></td><td>Your choice, made 18 November. Without the last two, write access could rewrite <code>main</code> past CI.</td><td>Every merge first needs <code>main</code>'s latest commit. A bad commit on <code>main</code> is undone by a revert PR (58).</td></tr>
+      <tr><td><code>ci-ok</code> with <code>if: always()</code> checks each result; only GitHub Actions may report it</td><td>A skipped required check counts as passing. Any app with status access could otherwise set it.</td><td>A new job must be added to <code>needs</code> and the <code>jq</code> together (64).</td></tr>
+      <tr><td>Concurrency by commit outside PRs; a Monday scan of <code>main</code>; buildx v0.38.2; no build records</td><td>A third arrival cancels a pending run in the same group. New CVEs appear after merges.</td><td>A CVE can be found up to a week late, and a failed weekly run opens no issue (65).</td></tr>
+      <tr><td><code>scripts/validate.sh</code>: helm lint, kubeconform against schemas pinned by commit, CRDs skipped; tools checked against SHA-256</td><td>A typo is valid YAML. kubeconform's default reads <code>master</code>. The same command runs at home.</td><td>A misspelled values key is not caught (no values schema). The CRD schemas are the catalog's, not the installed versions (66).</td></tr>
+      <tr><td>A kind install test on every GitOps PR, with <code>rebuild.sh</code> unchanged</td><td>Only an install shows a pod that starts and then crashes. Same scripts as home, same Kubernetes as Docker Desktop.</td><td>About 3½ minutes per PR. Images come from app <code>main</code> as it is that day. The LoadBalancer path is not tested (67).</td></tr>
     </tbody>
   </table></div>
   <div class="prose">
-    <p class="muted">Failures that really happened in steps 1 to 4, for TROUBLESHOOTING:</p>
+    <p class="muted">Failures that really happened in Phase 3, in TROUBLESHOOTING:</p>
     <ul>
-      <li>govulncheck v1.1.4 panicked on Go 1.27 code.</li>
-      <li>govulncheck found 15 vulnerabilities on Go 1.27.1.</li>
-      <li>golangci-lint found 21 issues on its first run.</li>
-      <li>Docker Desktop refused to mount a <code>/tmp</code> folder for the local Trivy scan.</li>
+      <li>1 (again): Docker Desktop refused to mount a <code>/tmp</code> folder for the local Trivy scan.</li>
+      <li>11: govulncheck v1.1.4 panicked on this module.</li>
+      <li>12: govulncheck found 15 reachable vulnerabilities on Go 1.27.1.</li>
+      <li>13: golangci-lint found 21 issues on its first run.</li>
+      <li>14: Docker Desktop was killed for memory, and a capture ran against it.</li>
+      <li>15: <code>gh run list --workflow ci</code> could not find a workflow that had never run.</li>
+      <li>16: cloud-provider-kind owned the Gateway API CRDs before <code>rebuild.sh</code> applied them.</li>
+      <li>17: shellcheck checked <code>lib.sh</code> on its own.</li>
+      <li>18: a new pod is not policed for its first second, on kind and on Docker Desktop.</li>
+      <li>19: the one-service proof PR failed <code>make vet</code> on its own comment.</li>
+      <li>20: with only orders crashing, <code>rebuild.sh</code> said four Deployments had timed out.</li>
     </ul>
-    <p class="muted">The first and the last of these were seen by Claude, not by you. The capture commands above reproduce the first three.</p>
   </div>
 </section>
 
 <section>
   <span class="eyebrow">The exit</span>
   <h2>Phase 3 is finished when</h2>
-  <div class="prose"><ol>
-    <li>A PR touching one service builds only that service.</li>
-    <li>A failing test blocks the merge.</li>
-    <li>A critical CVE blocks the merge.</li>
-    <li>In the gitops repo, a chart that fails lint, kubeconform or the kind install blocks the merge.</li>
-    <li>No workflow in either repo has a cloud credential, and every action is pinned by SHA.</li>
-  </ol></div>
+  <div class="table"><table>
+    <thead><tr><th>Exit condition</th><th>Result, 19 November</th><th>Evidence</th></tr></thead>
+    <tbody>
+      <tr><td>A PR touching one service builds only that service.</td><td>Passed: #5 built only orders.</td><td><code>06-one-service-built.txt</code></td></tr>
+      <tr><td>A failing test blocks the merge.</td><td>Passed: #7 <code>BLOCKED</code>.</td><td><code>fail-6-test-blocks-merge.txt</code></td></tr>
+      <tr><td>A critical CVE blocks the merge.</td><td>Passed: #8 <code>BLOCKED</code> on CVE-2022-37434.</td><td><code>fail-6-critical-cve-blocks-merge.txt</code></td></tr>
+      <tr><td>In the GitOps repo, a chart that fails lint, kubeconform or the kind install blocks the merge.</td><td>Passed: a misspelled field fails <code>validate.sh</code> (10 of 10), and GitOps #2, which lints clean, is <code>BLOCKED</code> by the kind install.</td><td><code>fail-7-kubeconform-misspelled-field.txt</code>, <code>fail-8-chart-blocks-merge.txt</code></td></tr>
+      <tr><td>No workflow in either repo has a cloud credential, and every action is pinned by SHA.</td><td>Passed: <code>contents: read</code> only, <code>persist-credentials: false</code>, every <code>uses:</code> a full SHA, and <code>sha_pinning_required</code> on in both repos.</td><td><code>00-actions-settings.txt</code>, <code>01-actions-pinned.txt</code></td></tr>
+    </tbody>
+  </table></div>
 </section>
 </details>
 

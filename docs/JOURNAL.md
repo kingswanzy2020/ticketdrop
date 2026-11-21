@@ -211,3 +211,64 @@ November 17, 2026: Exit drop through the Gateway: 600 orders for 1000 tickets, 4
 1. The screenshots and evidence texts in [evidence/phase-2/](evidence/phase-2/).
 2. The KEDA run, 0 to 3 to 0, in [PROOF.md](PROOF.md), [10-fulfillment-scale-0-n-0.txt](evidence/phase-2/10-fulfillment-scale-0-n-0.txt) and [10-fulfillment-scaled-up.png](evidence/phase-2/10-fulfillment-scaled-up.png).
 3. The exit drop in [exit-drop-through-gateway.txt](evidence/phase-2/exit-drop-through-gateway.txt), [exit-pod-deleted-mid-drop.txt](evidence/phase-2/exit-pod-deleted-mid-drop.txt) and [exit-fulfillment-scale-0-n-0.txt](evidence/phase-2/exit-fulfillment-scale-0-n-0.txt).
+
+---
+
+## Phase 3: CI
+
+Dates: to . Exit check: a PR touching one service builds only that service; a
+failing test or a critical CVE blocks the merge; in the GitOps repo a chart
+that fails lint, kubeconform or the kind install blocks the merge.
+
+I set up the settings and the rulesets and merged the PRs. The workflows, the
+scripts and the proof PRs were written for me on 19 November, and I read them
+and asked why.
+
+### Notes
+November 18, 2026: Turned on SHA pinning and read-only tokens in both repos, and made the two rulesets require `ci-ok` before it existed.
+November 19, 2026: The first local checks found 15 reachable vulnerabilities on Go 1.27.1 and 21 lint issues. Moved to Go 1.27.4 everywhere.
+November 19, 2026: Docker Desktop was killed for memory and my build-and-scan capture ran against nothing. Reran it after starting Docker again.
+November 19, 2026: `gh run list --workflow ci` found no workflow, because nothing had run it yet. Opening the PR fixed that.
+November 19, 2026: Added block force pushes and restrict deletions to both rulesets, then tied `ci-ok` to GitHub Actions.
+November 19, 2026: First PR run built all nine images, because `.github/` changed. 1m22s to 1m54s per image. All nine missed the Trivy cache on the first run of the day.
+November 19, 2026: Merged PR #4. Proof PRs: orders comment built only orders, docs built nothing, a failing test and an old alpine base were both blocked.
+November 19, 2026: The GitOps kind test failed twice before it passed: cloud-provider-kind had its own Gateway API CRDs, and shellcheck checked lib.sh alone.
+November 19, 2026: The NetworkPolicy probe got through from `ticketdrop`. A new pod is not policed for its first second, on kind and on Docker Desktop.
+November 19, 2026: Third kind run passed: everything Available in 99s, 16 of 16 checks, 3m27s for the job.
+November 19, 2026: GitOps proof PR set orders' pool size to "10x". Lint passed, orders crashed on start, the kind test failed and the PR was blocked. rebuild.sh also blamed three services that were fine.
+
+### 1. The problem
+1. "It works" meant I ran the checks on my laptop. Nothing stopped a broken commit reaching `main`.
+2. The GitOps repo had nothing checking that the manifests are valid or that the stack comes up from them.
+
+### 2. What I built
+1. The repo settings and the two rulesets, by hand.
+2. The app CI was written for me: `changes` works out which images to build, `go` runs vet, lint, `-race` tests and govulncheck, `build` builds and scans each changed image for both CPUs, and `ci-ok` is the one required check.
+3. The GitOps CI was written for me: `lint` runs shellcheck and `scripts/validate.sh`, and `kind` installs the whole stack on a kind cluster with my own `rebuild.sh` and `check.sh`.
+
+### 3. Why this approach
+1. Our own change-detection script, because each Dockerfile copies only `go.mod`, `go.sum`, `pkg/` and its own service, and doubt builds all nine (DECISIONS 59).
+2. One required `ci-ok` per repo that checks each job's result, and only GitHub Actions may report it (DECISIONS 58, 64).
+3. Trivy from its image by digest, failing only on a fixable CRITICAL, after its action's tags were hijacked in March (DECISIONS 63).
+4. The kind test runs my scripts unchanged, so a fix at home is a fix in CI (DECISIONS 67).
+
+### 4. What broke
+1. Go 1.27.1 had 15 reachable vulnerabilities and the first lint run found 21 issues (TROUBLESHOOTING 12, 13).
+2. Docker Desktop was killed for memory while I captured evidence (TROUBLESHOOTING 14).
+3. cloud-provider-kind installed Gateway API CRDs of its own, and `rebuild.sh` could not apply ours over them (TROUBLESHOOTING 16).
+4. The NetworkPolicy probe was let through. A new pod has about a second before its policies apply, which DECISIONS 49 had missed (TROUBLESHOOTING 18).
+5. My one-service proof PR failed `make vet` on its own comment. The check worked (TROUBLESHOOTING 19).
+6. With only orders crashing, `rebuild.sh` said four services had timed out. The pod list showed the real one (TROUBLESHOOTING 20).
+
+### 5. What I changed
+1. Go 1.27.4 and `x/text` v0.41.0 in `go.mod` and all nine Dockerfiles, base images pinned by digest.
+2. Runs on `main` are grouped by commit so none is cancelled, and `main` is rebuilt and scanned every Monday (DECISIONS 65).
+3. cloud-provider-kind runs with `--gateway-channel disabled`, and the probe waits 5s before it calls.
+
+### 6. At a different scale
+
+### Evidence
+1. Phase 2 merged before this phase started, in [00-phase-2-merged.txt](evidence/phase-3/00-phase-2-merged.txt), and the repo settings in [00-actions-settings.txt](evidence/phase-3/00-actions-settings.txt).
+2. The local checks, the first PR run and the proof PRs in [evidence/phase-3/](evidence/phase-3/).
+3. The exit check in [PROOF.md](PROOF.md).
+4. The kind install test in [08-kind-install-test.txt](evidence/phase-3/08-kind-install-test.txt) and the new-pod window in [fail-8-networkpolicy-new-pod-window.txt](evidence/phase-3/fail-8-networkpolicy-new-pod-window.txt).

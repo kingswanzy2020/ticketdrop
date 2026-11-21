@@ -1,0 +1,162 @@
+Thu Nov 19 11:24:12 PM KST 2026
+$ gh pr view 2 -R kingswanzy2020/ticketdrop-gitops --json number,title,headRefOid,mergeStateStatus,mergeable
+{"headRefOid":"973aee53e2b67c7b9e80746545077a2049860f87","mergeStateStatus":"BLOCKED","mergeable":"MERGEABLE","number":2,"title":"Proof: a chart change that breaks a pod blocks the merge"}
+
+$ gh pr diff 2 -R kingswanzy2020/ticketdrop-gitops   (the change, once PR #1 is merged; until then the diff also holds PR #1's CI files)
+diff --git a/charts/service/values/values-orders.yaml b/charts/service/values/values-orders.yaml
+index 7a8b326..699eb48 100644
+--- a/charts/service/values/values-orders.yaml
++++ b/charts/service/values/values-orders.yaml
+@@ -19,7 +19,7 @@ env:
+   # Inventory is in the same namespace; not deployed yet.
+   INVENTORY_URL: http://inventory:8080
+   # Pool size: this pod's share of the one shared Postgres (DECISIONS 57).
+-  DATABASE_MAX_CONNS: "10"
++  DATABASE_MAX_CONNS: "10x"
+ 
+ replicaCount: 2
+ 
+
+$ gh pr checks 2 -R kingswanzy2020/ticketdrop-gitops
+ci-ok	fail	6s	https://github.com/kingswanzy2020/ticketdrop-gitops/actions/runs/44541631807/job/135626371010	
+kind	fail	8m7s	https://github.com/kingswanzy2020/ticketdrop-gitops/actions/runs/44541631807/job/135621198467	
+lint	pass	16s	https://github.com/kingswanzy2020/ticketdrop-gitops/actions/runs/44541631807/job/135621197993	
+
+$ gh run view 44541631807 -R kingswanzy2020/ticketdrop-gitops
+
+X proof/broken-chart ci kingswanzy2020/ticketdrop-gitops#2 · 44541631807
+Triggered via pull_request about 9 minutes ago
+
+JOBS
+✓ lint in 16s (ID 135621197993)
+X kind in 8m7s (ID 135621198467)
+  ✓ Set up job
+  ✓ Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+  ✓ Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+  ✓ tools
+  ✓ build the nine images from the app repo
+  ✓ kind cluster
+  ✓ helm repos
+  ✓ localhost:8088 to Traefik
+  X rebuild.sh, ending with check.sh
+  - NetworkPolicy is enforced
+  ✓ on failure, what was running
+  ✓ Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+  ✓ Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+  ✓ Complete job
+X ci-ok in 6s (ID 135626371010)
+  ✓ Set up job
+  X Run jq -r 'to_entries[] | "\(.key): \(.value.result)"' <<<"$NEEDS"
+  ✓ Complete job
+
+ANNOTATIONS
+X Process completed with exit code 1.
+kind: .github#280
+
+X Process completed with exit code 1.
+ci-ok: .github#21
+
+X a required job did not pass
+ci-ok: .github#20
+
+
+To see what failed, try: gh run view 44541631807 --log-failed
+View this run on GitHub: https://github.com/kingswanzy2020/ticketdrop-gitops/actions/runs/44541631807
+
+== lint passed: the value is a valid string
+14:14:53 helm lint, each service's values (0s)
+14:14:53 kubeconform, each service as rendered (0s)
+14:14:55 kubeconform, the platform manifests (2s)
+14:14:55 kubeconform, the operators' charts with this repo's values (2s)
+14:14:56 all valid (3s)
+
+== kind, rebuild.sh: the last lines
+
+$ kubectl wait --for=condition=Available deploy --all -n ticketdrop --timeout=300s
+deployment.apps/catalog condition met
+deployment.apps/fulfillment condition met
+deployment.apps/gateway condition met
+deployment.apps/inventory condition met
+deployment.apps/notifications condition met
+timed out waiting for the condition on deployments/orders
+timed out waiting for the condition on deployments/payments
+timed out waiting for the condition on deployments/scheduler
+timed out waiting for the condition on deployments/web
+
+14:22:45 FAILED with status 1 after 392s. The last $ line above is the step that failed.
+##[error]Process completed with exit code 1.
+
+== kind, on failure: the pods in ticketdrop
+NAMESPACE            NAME                                               READY   STATUS             RESTARTS        AGE     IP            NODE                       NOMINATED NODE   READINESS GATES
+ticketdrop           catalog-5459d47d6-rswch                            1/1     Running            0               5m2s    10.244.0.15   ticketdrop-control-plane   <none>           <none>
+ticketdrop           catalog-5459d47d6-tql45                            1/1     Running            0               5m2s    10.244.0.14   ticketdrop-control-plane   <none>           <none>
+ticketdrop           gateway-5b4dd9c645-49jqd                           1/1     Running            0               5m      10.244.0.26   ticketdrop-control-plane   <none>           <none>
+ticketdrop           gateway-5b4dd9c645-z4nn5                           1/1     Running            0               5m      10.244.0.25   ticketdrop-control-plane   <none>           <none>
+ticketdrop           inventory-8487d4ccbd-6wzsd                         1/1     Running            0               5m2s    10.244.0.16   ticketdrop-control-plane   <none>           <none>
+ticketdrop           inventory-8487d4ccbd-pmp22                         1/1     Running            0               5m2s    10.244.0.17   ticketdrop-control-plane   <none>           <none>
+ticketdrop           notifications-69d9fddccb-sv9q4                     1/1     Running            0               5m1s    10.244.0.22   ticketdrop-control-plane   <none>           <none>
+ticketdrop           orders-779858c5b8-2bnxr                            0/1     CrashLoopBackOff   5 (2m7s ago)    5m2s    10.244.0.18   ticketdrop-control-plane   <none>           <none>
+ticketdrop           orders-779858c5b8-9p85s                            0/1     CrashLoopBackOff   5 (2m16s ago)   5m2s    10.244.0.19   ticketdrop-control-plane   <none>           <none>
+ticketdrop           payments-7c4d8b4cd9-b7hwk                          1/1     Running            0               5m2s    10.244.0.20   ticketdrop-control-plane   <none>           <none>
+ticketdrop           scheduler-68f84d669b-4wzgz                         1/1     Running            0               5m1s    10.244.0.24   ticketdrop-control-plane   <none>           <none>
+ticketdrop           scheduler-68f84d669b-lgxnl                         1/1     Running            0               5m1s    10.244.0.23   ticketdrop-control-plane   <none>           <none>
+ticketdrop           web-c9b8d756f-jqmbr                                1/1     Running            0               5m      10.244.0.28   ticketdrop-control-plane   <none>           <none>
+ticketdrop           web-c9b8d756f-t27gv                                1/1     Running            0               5m      10.244.0.27   ticketdrop-control-plane   <none>           <none>
+ticketdrop           5m1s        Normal    Started                       pod/payments-7c4d8b4cd9-b7hwk                                    Container started
+ticketdrop           5m1s        Normal    Scheduled                     pod/scheduler-68f84d669b-4wzgz                                   Successfully assigned ticketdrop/scheduler-68f84d669b-4wzgz to ticketdrop-control-plane
+ticketdrop           5m1s        Normal    Scheduled                     pod/notifications-69d9fddccb-sv9q4                               Successfully assigned ticketdrop/notifications-69d9fddccb-sv9q4 to ticketdrop-control-plane
+ticketdrop           5m1s        Normal    Created                       pod/fulfillment-84978584dc-2dr95                                 Container created
+ticketdrop           5m1s        Normal    Created                       pod/payments-7c4d8b4cd9-b7hwk                                    Container created
+ticketdrop           5m1s        Normal    Pulled                        pod/payments-7c4d8b4cd9-b7hwk                                    Container image "ticketdrop/payments:dev" already present on machine and can be accessed by the pod
+ticketdrop           5m1s        Normal    Scheduled                     pod/fulfillment-84978584dc-2dr95                                 Successfully assigned ticketdrop/fulfillment-84978584dc-2dr95 to ticketdrop-control-plane
+ticketdrop           5m1s        Normal    Pulled                        pod/fulfillment-84978584dc-2dr95                                 Container image "ticketdrop/fulfillment:dev" already present on machine and can be accessed by the pod
+ticketdrop           5m          Normal    Created                       pod/notifications-69d9fddccb-sv9q4                               Container created
+ticketdrop           5m          Normal    Started                       pod/fulfillment-84978584dc-2dr95                                 Container started
+ticketdrop           5m          Normal    Killing                       pod/fulfillment-84978584dc-2dr95                                 Stopping container fulfillment
+ticketdrop           5m          Normal    Scheduled                     pod/gateway-5b4dd9c645-49jqd                                     Successfully assigned ticketdrop/gateway-5b4dd9c645-49jqd to ticketdrop-control-plane
+ticketdrop           5m          Normal    Pulled                        pod/gateway-5b4dd9c645-49jqd                                     Container image "ticketdrop/gateway:dev" already present on machine and can be accessed by the pod
+ticketdrop           5m          Normal    Created                       pod/gateway-5b4dd9c645-49jqd                                     Container created
+ticketdrop           5m          Normal    Started                       pod/gateway-5b4dd9c645-49jqd                                     Container started
+ticketdrop           5m          Normal    Scheduled                     pod/gateway-5b4dd9c645-z4nn5                                     Successfully assigned ticketdrop/gateway-5b4dd9c645-z4nn5 to ticketdrop-control-plane
+ticketdrop           5m          Normal    Pulled                        pod/gateway-5b4dd9c645-z4nn5                                     Container image "ticketdrop/gateway:dev" already present on machine and can be accessed by the pod
+ticketdrop           5m          Normal    Started                       pod/notifications-69d9fddccb-sv9q4                               Container started
+ticketdrop           5m          Normal    Pulled                        pod/notifications-69d9fddccb-sv9q4                               Container image "ticketdrop/notifications:dev" already present on machine and can be accessed by the pod
+ticketdrop           5m          Normal    Pulled                        pod/scheduler-68f84d669b-4wzgz                                   Container image "ticketdrop/scheduler:dev" already present on machine and can be accessed by the pod
+ticketdrop           5m          Normal    Created                       pod/scheduler-68f84d669b-4wzgz                                   Container created
+ticketdrop           5m          Normal    Started                       pod/scheduler-68f84d669b-4wzgz                                   Container started
+ticketdrop           5m          Normal    Pulled                        pod/scheduler-68f84d669b-lgxnl                                   Container image "ticketdrop/scheduler:dev" already present on machine and can be accessed by the pod
+ticketdrop           5m          Normal    Created                       pod/scheduler-68f84d669b-lgxnl                                   Container created
+ticketdrop           5m          Normal    Started                       pod/scheduler-68f84d669b-lgxnl                                   Container started
+ticketdrop           5m          Normal    Created                       pod/gateway-5b4dd9c645-z4nn5                                     Container created
+ticketdrop           5m          Normal    Started                       pod/gateway-5b4dd9c645-z4nn5                                     Container started
+ticketdrop           5m          Normal    Scheduled                     pod/web-c9b8d756f-jqmbr                                          Successfully assigned ticketdrop/web-c9b8d756f-jqmbr to ticketdrop-control-plane
+ticketdrop           5m          Normal    Pulled                        pod/web-c9b8d756f-jqmbr                                          Container image "ticketdrop/web:dev" already present on machine and can be accessed by the pod
+ticketdrop           5m          Normal    Created                       pod/web-c9b8d756f-jqmbr                                          Container created
+ticketdrop           5m          Normal    Scheduled                     pod/web-c9b8d756f-t27gv                                          Successfully assigned ticketdrop/web-c9b8d756f-t27gv to ticketdrop-control-plane
+ticketdrop           5m          Normal    Pulled                        pod/web-c9b8d756f-t27gv                                          Container image "ticketdrop/web:dev" already present on machine and can be accessed by the pod
+ticketdrop           5m          Normal    Created                       pod/web-c9b8d756f-t27gv                                          Container created
+ticketdrop           4m59s       Normal    Started                       pod/web-c9b8d756f-t27gv                                          Container started
+ticketdrop           4m59s       Normal    Started                       pod/web-c9b8d756f-jqmbr                                          Container started
+ticketdrop           2m16s       Warning   Unhealthy                     pod/orders-779858c5b8-9p85s                                      Startup probe failed: Get "http://10.244.0.19:9090/healthz": dial tcp 10.244.0.19:9090: connect: connection refused
+ticketdrop           2m16s       Normal    Pulled                        pod/orders-779858c5b8-9p85s                                      Container image "ticketdrop/orders:dev" already present on machine and can be accessed by the pod
+ticketdrop           2m16s       Normal    Created                       pod/orders-779858c5b8-9p85s                                      Container created
+ticketdrop           2m16s       Normal    Started                       pod/orders-779858c5b8-9p85s                                      Container started
+ticketdrop           2m7s        Normal    Pulled                        pod/orders-779858c5b8-2bnxr                                      Container image "ticketdrop/orders:dev" already present on machine and can be accessed by the pod
+ticketdrop           2m7s        Normal    Created                       pod/orders-779858c5b8-2bnxr                                      Container created
+ticketdrop           2m7s        Normal    Started                       pod/orders-779858c5b8-2bnxr                                      Container started
+ticketdrop           66s         Warning   BackOff                       pod/orders-779858c5b8-9p85s                                      Back-off restarting failed container orders in pod orders-779858c5b8-9p85s_ticketdrop(818d9655-fe7d-4f19-8a3b-153b9f04576a)
+ticketdrop           50s         Warning   BackOff                       pod/orders-779858c5b8-2bnxr                                      Back-off restarting failed container orders in pod orders-779858c5b8-2bnxr_ticketdrop(aa6bda7a-608a-4ff1-b7bb-d27f9aa42b83)
+
+== kind, on failure: orders' log
+== pod/orders-779858c5b8-2bnxr
+{"time":"2026-11-19T14:20:38.535531775Z","level":"INFO","msg":"starting","service":"orders","version":"d8b7e1e"}
+{"time":"2026-11-19T14:20:38.535609332Z","level":"ERROR","msg":"service failed","service":"orders","error":"DATABASE_MAX_CONNS: \"10x\" is not an integer"}
+== pod/orders-779858c5b8-9p85s
+{"time":"2026-11-19T14:20:29.537310045Z","level":"INFO","msg":"starting","service":"orders","version":"d8b7e1e"}
+{"time":"2026-11-19T14:20:29.537395988Z","level":"ERROR","msg":"service failed","service":"orders","error":"DATABASE_MAX_CONNS: \"10x\" is not an integer"}
+
+== ci-ok
+lint: success
+kind: failure
+##[error]a required job did not pass
+##[error]Process completed with exit code 1.

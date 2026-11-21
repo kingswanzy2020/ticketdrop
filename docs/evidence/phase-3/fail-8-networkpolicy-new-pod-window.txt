@@ -1,0 +1,19 @@
+Thu Nov 19 11:03:11 PM KST 2026
+Docker Desktop (kube context docker-desktop), kindnet docker.io/kindest/kindnetd:v20260820-69b56db7.
+A scratch namespace np-window with only platform/network-policies/default-deny.yaml (Ingress and Egress, no rules), so even DNS is denied.
+Each probe is a new busybox pod that sleeps N seconds, then runs: wget -q -T 3 -O /dev/null http://goaws.data:4100/
+reached = goaws answered (HTTP 400); 'bad address' = the DNS lookup was dropped; 'timed out' = the connection was dropped.
+
+namespace/np-window created
+networkpolicy.networking.k8s.io/default-deny created
+sleep 0s, then wget: reached
+sleep 0s, then wget: reached
+sleep 0s, then wget: reached
+sleep 1s, then wget: error: wget: bad address 'goaws.data:4100'
+sleep 1s, then wget: error: wget: bad address 'goaws.data:4100'
+sleep 2s, then wget: error: wget: bad address 'goaws.data:4100'
+sleep 2s, then wget: error: wget: bad address 'goaws.data:4100'
+sleep 3s, then wget: error: wget: bad address 'goaws.data:4100'
+sleep 5s, then wget: error: wget: bad address 'goaws.data:4100'
+
+namespace "np-window" deleted

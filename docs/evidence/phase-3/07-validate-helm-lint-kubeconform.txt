@@ -1,0 +1,107 @@
+Thu Nov 19 10:54:48 PM KST 2026
+ticketdrop-gitops at 00acadf
+v3.20.2+g8fb76d6
+v0.8.0
+
+22:54:48 helm lint, each service's values (0s)
+
+$ helm lint --strict charts/service -f charts/service/values/values-catalog.yaml
+==> Linting charts/service
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint --strict charts/service -f charts/service/values/values-inventory.yaml
+==> Linting charts/service
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint --strict charts/service -f charts/service/values/values-orders.yaml
+==> Linting charts/service
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint --strict charts/service -f charts/service/values/values-payments.yaml
+==> Linting charts/service
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint --strict charts/service -f charts/service/values/values-fulfillment.yaml
+==> Linting charts/service
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint --strict charts/service -f charts/service/values/values-notifications.yaml
+==> Linting charts/service
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint --strict charts/service -f charts/service/values/values-scheduler.yaml
+==> Linting charts/service
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint --strict charts/service -f charts/service/values/values-gateway.yaml
+==> Linting charts/service
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint --strict charts/service -f charts/service/values/values-web.yaml
+==> Linting charts/service
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+
+22:54:49 kubeconform, each service as rendered (1s)
+
+$ helm template catalog charts/service -n ticketdrop -f charts/service/values/values-catalog.yaml | kc -
+Summary: 4 resources found parsing stdin - Valid: 4, Invalid: 0, Errors: 0, Skipped: 0
+
+$ helm template inventory charts/service -n ticketdrop -f charts/service/values/values-inventory.yaml | kc -
+Summary: 4 resources found parsing stdin - Valid: 4, Invalid: 0, Errors: 0, Skipped: 0
+
+$ helm template orders charts/service -n ticketdrop -f charts/service/values/values-orders.yaml | kc -
+Summary: 4 resources found parsing stdin - Valid: 4, Invalid: 0, Errors: 0, Skipped: 0
+
+$ helm template payments charts/service -n ticketdrop -f charts/service/values/values-payments.yaml | kc -
+Summary: 3 resources found parsing stdin - Valid: 3, Invalid: 0, Errors: 0, Skipped: 0
+
+$ helm template fulfillment charts/service -n ticketdrop -f charts/service/values/values-fulfillment.yaml | kc -
+Summary: 6 resources found parsing stdin - Valid: 6, Invalid: 0, Errors: 0, Skipped: 0
+
+$ helm template notifications charts/service -n ticketdrop -f charts/service/values/values-notifications.yaml | kc -
+Summary: 3 resources found parsing stdin - Valid: 3, Invalid: 0, Errors: 0, Skipped: 0
+
+$ helm template scheduler charts/service -n ticketdrop -f charts/service/values/values-scheduler.yaml | kc -
+Summary: 4 resources found parsing stdin - Valid: 4, Invalid: 0, Errors: 0, Skipped: 0
+
+$ helm template gateway charts/service -n ticketdrop -f charts/service/values/values-gateway.yaml | kc -
+Summary: 4 resources found parsing stdin - Valid: 4, Invalid: 0, Errors: 0, Skipped: 0
+
+$ helm template web charts/service -n ticketdrop -f charts/service/values/values-web.yaml | kc -
+Summary: 4 resources found parsing stdin - Valid: 4, Invalid: 0, Errors: 0, Skipped: 0
+
+22:54:53 kubeconform, the platform manifests (5s)
+
+$ kc platform/namespaces.yaml platform/goaws platform/network-policies platform/postgres platform/routes
+Summary: 23 resources found in 11 files - Valid: 23, Invalid: 0, Errors: 0, Skipped: 0
+
+22:54:54 kubeconform, the operators' charts with this repo's values (6s)
+
+$ helm template cnpg cnpg/cloudnative-pg --version 0.29.1 -n cnpg-system -f platform/cnpg/values.yaml | kc -
+Summary: 22 resources found parsing stdin - Valid: 11, Invalid: 0, Errors: 0, Skipped: 11
+
+$ helm template keda kedacore/keda --version 2.21.0 -n keda -f platform/keda/values.yaml | kc -
+Summary: 30 resources found parsing stdin - Valid: 24, Invalid: 0, Errors: 0, Skipped: 6
+
+$ helm template traefik traefik/traefik --version 42.1.3 -n traefik -f platform/traefik/values.yaml | kc -
+Summary: 6 resources found parsing stdin - Valid: 6, Invalid: 0, Errors: 0, Skipped: 0
+
+22:54:58 all valid (10s)

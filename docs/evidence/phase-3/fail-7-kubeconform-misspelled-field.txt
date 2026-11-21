@@ -1,0 +1,167 @@
+Thu Nov 19 10:48:02 PM KST 2026
+Two typos in a throwaway worktree of ticketdrop-gitops at 4c4382f (validate.sh copied in from the working tree), then scripts/validate.sh:
+diff --git a/charts/service/templates/deployment.yaml b/charts/service/templates/deployment.yaml
+index 78a5541..49fc18d 100644
+--- a/charts/service/templates/deployment.yaml
++++ b/charts/service/templates/deployment.yaml
+@@ -18,7 +18,7 @@ spec:
+         {{- include "service.labels" . | nindent 8 }}
+     spec:
+       # Must exceed SHUTDOWN_DELAY + SHUTDOWN_TIMEOUT, or the shutdown is cut off.
+-      terminationGracePeriodSeconds: {{ .Values.shutdown.terminationGracePeriodSeconds }}
++      terminationGracePeriodSecond: {{ .Values.shutdown.terminationGracePeriodSeconds }}
+       {{- with .Values.topologySpread }}
+       topologySpreadConstraints:
+         - maxSkew: {{ .maxSkew }}
+diff --git a/platform/routes/httproute.yaml b/platform/routes/httproute.yaml
+index 47514b3..33b8621 100644
+--- a/platform/routes/httproute.yaml
++++ b/platform/routes/httproute.yaml
+@@ -4,7 +4,7 @@ metadata:
+   name: ticketdrop
+   namespace: ticketdrop
+ spec:
+-  parentRefs:
++  parentRef:
+     - name: ticketdrop
+       namespace: traefik
+       sectionName: http
+
++ scripts/validate.sh
+Thu Nov 19 10:48:02 PM KST 2026
+ticketdrop-gitops at 4c4382f (with uncommitted changes)
+v3.20.2+g8fb76d6
+v0.8.0
+
+22:48:02 helm lint, each service's values (0s)
+
+$ helm lint --strict charts/service -f charts/service/values/values-catalog.yaml
+==> Linting charts/service
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint --strict charts/service -f charts/service/values/values-inventory.yaml
+==> Linting charts/service
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint --strict charts/service -f charts/service/values/values-orders.yaml
+==> Linting charts/service
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint --strict charts/service -f charts/service/values/values-payments.yaml
+==> Linting charts/service
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint --strict charts/service -f charts/service/values/values-fulfillment.yaml
+==> Linting charts/service
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint --strict charts/service -f charts/service/values/values-notifications.yaml
+==> Linting charts/service
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint --strict charts/service -f charts/service/values/values-scheduler.yaml
+==> Linting charts/service
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint --strict charts/service -f charts/service/values/values-gateway.yaml
+==> Linting charts/service
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm lint --strict charts/service -f charts/service/values/values-web.yaml
+==> Linting charts/service
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+
+22:48:03 kubeconform, each service as rendered (1s)
+
+$ helm template catalog charts/service -n ticketdrop -f charts/service/values/values-catalog.yaml | kc -
+stdin - Deployment catalog is invalid: problem validating schema. Check JSON formatting: jsonschema validation failed with 'https://raw.githubusercontent.com/yannh/kubernetes-json-schema/9367d1ce1c88b8bbf6ee06d0e80510f26394913f/v1.36.4-standalone-strict/deployment-apps-v1.json#' - at '/spec/template/spec': additional properties 'terminationGracePeriodSecond' not allowed
+Summary: 4 resources found parsing stdin - Valid: 3, Invalid: 1, Errors: 0, Skipped: 0
+FAIL: the check above
+
+$ helm template inventory charts/service -n ticketdrop -f charts/service/values/values-inventory.yaml | kc -
+stdin - Deployment inventory is invalid: problem validating schema. Check JSON formatting: jsonschema validation failed with 'https://raw.githubusercontent.com/yannh/kubernetes-json-schema/9367d1ce1c88b8bbf6ee06d0e80510f26394913f/v1.36.4-standalone-strict/deployment-apps-v1.json#' - at '/spec/template/spec': additional properties 'terminationGracePeriodSecond' not allowed
+Summary: 4 resources found parsing stdin - Valid: 3, Invalid: 1, Errors: 0, Skipped: 0
+FAIL: the check above
+
+$ helm template orders charts/service -n ticketdrop -f charts/service/values/values-orders.yaml | kc -
+stdin - Deployment orders is invalid: problem validating schema. Check JSON formatting: jsonschema validation failed with 'https://raw.githubusercontent.com/yannh/kubernetes-json-schema/9367d1ce1c88b8bbf6ee06d0e80510f26394913f/v1.36.4-standalone-strict/deployment-apps-v1.json#' - at '/spec/template/spec': additional properties 'terminationGracePeriodSecond' not allowed
+Summary: 4 resources found parsing stdin - Valid: 3, Invalid: 1, Errors: 0, Skipped: 0
+FAIL: the check above
+
+$ helm template payments charts/service -n ticketdrop -f charts/service/values/values-payments.yaml | kc -
+stdin - Deployment payments is invalid: problem validating schema. Check JSON formatting: jsonschema validation failed with 'https://raw.githubusercontent.com/yannh/kubernetes-json-schema/9367d1ce1c88b8bbf6ee06d0e80510f26394913f/v1.36.4-standalone-strict/deployment-apps-v1.json#' - at '/spec/template/spec': additional properties 'terminationGracePeriodSecond' not allowed
+Summary: 3 resources found parsing stdin - Valid: 2, Invalid: 1, Errors: 0, Skipped: 0
+FAIL: the check above
+
+$ helm template fulfillment charts/service -n ticketdrop -f charts/service/values/values-fulfillment.yaml | kc -
+stdin - Deployment fulfillment is invalid: problem validating schema. Check JSON formatting: jsonschema validation failed with 'https://raw.githubusercontent.com/yannh/kubernetes-json-schema/9367d1ce1c88b8bbf6ee06d0e80510f26394913f/v1.36.4-standalone-strict/deployment-apps-v1.json#' - at '/spec/template/spec': additional properties 'terminationGracePeriodSecond' not allowed
+Summary: 6 resources found parsing stdin - Valid: 5, Invalid: 1, Errors: 0, Skipped: 0
+FAIL: the check above
+
+$ helm template notifications charts/service -n ticketdrop -f charts/service/values/values-notifications.yaml | kc -
+stdin - Deployment notifications is invalid: problem validating schema. Check JSON formatting: jsonschema validation failed with 'https://raw.githubusercontent.com/yannh/kubernetes-json-schema/9367d1ce1c88b8bbf6ee06d0e80510f26394913f/v1.36.4-standalone-strict/deployment-apps-v1.json#' - at '/spec/template/spec': additional properties 'terminationGracePeriodSecond' not allowed
+Summary: 3 resources found parsing stdin - Valid: 2, Invalid: 1, Errors: 0, Skipped: 0
+FAIL: the check above
+
+$ helm template scheduler charts/service -n ticketdrop -f charts/service/values/values-scheduler.yaml | kc -
+stdin - Deployment scheduler is invalid: problem validating schema. Check JSON formatting: jsonschema validation failed with 'https://raw.githubusercontent.com/yannh/kubernetes-json-schema/9367d1ce1c88b8bbf6ee06d0e80510f26394913f/v1.36.4-standalone-strict/deployment-apps-v1.json#' - at '/spec/template/spec': additional properties 'terminationGracePeriodSecond' not allowed
+Summary: 4 resources found parsing stdin - Valid: 3, Invalid: 1, Errors: 0, Skipped: 0
+FAIL: the check above
+
+$ helm template gateway charts/service -n ticketdrop -f charts/service/values/values-gateway.yaml | kc -
+stdin - Deployment gateway is invalid: problem validating schema. Check JSON formatting: jsonschema validation failed with 'https://raw.githubusercontent.com/yannh/kubernetes-json-schema/9367d1ce1c88b8bbf6ee06d0e80510f26394913f/v1.36.4-standalone-strict/deployment-apps-v1.json#' - at '/spec/template/spec': additional properties 'terminationGracePeriodSecond' not allowed
+Summary: 4 resources found parsing stdin - Valid: 3, Invalid: 1, Errors: 0, Skipped: 0
+FAIL: the check above
+
+$ helm template web charts/service -n ticketdrop -f charts/service/values/values-web.yaml | kc -
+stdin - Deployment web is invalid: problem validating schema. Check JSON formatting: jsonschema validation failed with 'https://raw.githubusercontent.com/yannh/kubernetes-json-schema/9367d1ce1c88b8bbf6ee06d0e80510f26394913f/v1.36.4-standalone-strict/deployment-apps-v1.json#' - at '/spec/template/spec': additional properties 'terminationGracePeriodSecond' not allowed
+Summary: 4 resources found parsing stdin - Valid: 3, Invalid: 1, Errors: 0, Skipped: 0
+FAIL: the check above
+
+22:48:07 kubeconform, the platform manifests (5s)
+
+$ kc platform/namespaces.yaml platform/goaws platform/network-policies platform/postgres platform/routes
+platform/routes/httproute.yaml - HTTPRoute ticketdrop is invalid: problem validating schema. Check JSON formatting: jsonschema validation failed with 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/49729e49e8f062933e3716a26540d41b0cd0856c/gateway.networking.k8s.io/httproute_v1.json#' - at '/spec': additional properties 'parentRef' not allowed
+Summary: 23 resources found in 11 files - Valid: 22, Invalid: 1, Errors: 0, Skipped: 0
+FAIL: the check above
+
+22:48:08 kubeconform, the operators' charts with this repo's values (6s)
+
+$ helm template cnpg cnpg/cloudnative-pg --version 0.29.1 -n cnpg-system -f platform/cnpg/values.yaml | kc -
+Summary: 22 resources found parsing stdin - Valid: 11, Invalid: 0, Errors: 0, Skipped: 11
+
+$ helm template keda kedacore/keda --version 2.21.0 -n keda -f platform/keda/values.yaml | kc -
+Summary: 30 resources found parsing stdin - Valid: 24, Invalid: 0, Errors: 0, Skipped: 6
+
+$ helm template traefik traefik/traefik --version 42.1.3 -n traefik -f platform/traefik/values.yaml | kc -
+Summary: 6 resources found parsing stdin - Valid: 6, Invalid: 0, Errors: 0, Skipped: 0
+
+FAILED: 10 check(s) failed
+
+22:48:13 FAILED with status 1 after 11s. The last $ line above is the step that failed.
+validate.sh exit 1
+
+helm lint passes the same typo: it checks that the chart renders, not the fields:
++ helm lint --strict charts/service -f charts/service/values/values-orders.yaml
+==> Linting charts/service
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
