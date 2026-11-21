@@ -34,7 +34,8 @@ details.phase > summary .progress { font: 600 0.8rem var(--mono); color: var(--m
     <li>Repos: <b>ticketdrop/</b> and <b>ticketdrop-gitops/</b></li>
     <li>Evidence goes in <b>docs/evidence/phase-N/</b></li>
     <li><span class="pill done">Phase 2 finished 17 November</span></li>
-    <li><span class="pill now">Phase 3: both CIs running, exit checks passed 19 November</span></li>
+    <li><span class="pill done">Phase 3 finished 19 November</span></li>
+    <li><span class="pill now">Phase 4 now</span></li>
   </ul>
 </header>
 
@@ -45,8 +46,8 @@ details.phase > summary .progress { font: 600 0.8rem var(--mono); color: var(--m
     <thead><tr><th>Phase</th><th>Status</th><th>Finished when</th></tr></thead>
     <tbody>
       <tr><td><a href="#phase-2">2. Kubernetes on Docker Desktop</a></td><td><span class="pill done">Done</span></td><td>The drop passes through the Gateway, and KEDA scales fulfillment 0 → N → 0.</td></tr>
-      <tr><td><a href="#phase-3">3. CI</a></td><td><span class="pill now">Now</span></td><td>A PR touching one service builds only that service, and a failing test or a critical CVE blocks the merge.</td></tr>
-      <tr><td><a href="#phase-4">4. AWS with Terraform</a></td><td><span class="pill">Draft</span></td><td><code>make aws-up</code> gives Ready nodes, and <code>make aws-down</code> leaves nothing billing. Both are timed.</td></tr>
+      <tr><td><a href="#phase-3">3. CI</a></td><td><span class="pill done">Done</span></td><td>A PR touching one service builds only that service, and a failing test or a critical CVE blocks the merge.</td></tr>
+      <tr><td><a href="#phase-4">4. AWS with Terraform</a></td><td><span class="pill now">Now</span></td><td><code>make aws-up</code> gives Ready nodes, and <code>make aws-down</code> leaves nothing billing. Both are timed.</td></tr>
       <tr><td><a href="#phase-5">5. GitOps platform</a></td><td><span class="pill">Draft</span></td><td>Everything is Synced and Healthy with no hand applies, a route gets DNS and a certificate, and Karpenter adds and removes a node.</td></tr>
       <tr><td><a href="#phase-6">6. CD and going live</a></td><td><span class="pill">Draft</span></td><td>A one-line change reaches EKS without <code>kubectl</code>, the app is on HTTPS, and there are no static keys.</td></tr>
       <tr><td><a href="#phase-7">7. Observability</a></td><td><span class="pill">Draft</span></td><td>Each alert is fired once on purpose and seen firing.</td></tr>
@@ -339,8 +340,8 @@ scripts/check.sh             # is the stack whole? Run it any time</code></pre>
 </section>
 </details>
 
-<details class="phase" id="phase-3" open>
-<summary><span class="eyebrow">Phase 3 · CI · you</span><h2>Every pull request checked, with no cloud credentials</h2><span class="pill now">Now</span><span class="progress" data-progress></span></summary>
+<details class="phase" id="phase-3">
+<summary><span class="eyebrow">Phase 3 · CI · you</span><h2>Every pull request checked, with no cloud credentials</h2><span class="pill done">Done</span><span class="progress" data-progress></span></summary>
 
 <section>
   <span class="eyebrow">The picture</span>
@@ -824,130 +825,255 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
 
 
 <div class="note prose later-note">
-  <p><strong>Phases 4 to 9 are drafts.</strong> They follow the approved plan and what Phases 1 to 3 changed. The coach refines each one when the phase starts: versions are pinned then, from current releases, and a step that turns out wrong is rewritten, not followed. Capture files keep the same pattern: <code>docs/evidence/phase-N/NN-&lt;what&gt;.txt</code>, <code>fail-NN-&lt;what&gt;.txt</code>, <code>date</code> first.</p>
+  <p><strong>Phases 5 to 9 are drafts.</strong> They follow the approved plan and what Phases 1 to 4 changed. The coach refines each one when the phase starts: versions are pinned then, from current releases, and a step that turns out wrong is rewritten, not followed. Capture files keep the same pattern: <code>docs/evidence/phase-N/NN-&lt;what&gt;.txt</code>, <code>fail-NN-&lt;what&gt;.txt</code>, <code>date</code> first.</p>
 </div>
 
-<details class="phase" id="phase-4">
-<summary><span class="eyebrow">Phase 4 · AWS with Terraform · you</span><h2>A cluster that appears and disappears on command</h2><span class="pill">Not started</span><span class="progress" data-progress></span></summary>
+<details class="phase" id="phase-4" open>
+<summary><span class="eyebrow">Phase 4 · AWS with Terraform · you</span><h2>A cluster that appears and disappears on command</h2><span class="pill now">Now</span><span class="progress" data-progress></span></summary>
 <section>
+  <span class="eyebrow">The picture</span>
+  <h2>Pay by the hour, and prove nothing is left running</h2>
   <div class="prose">
-    <p>The first phase that costs money: about $0.30 to $0.50 an hour while EKS is up. The rule for every session is to bring it up, use it, then run <code>make aws-down</code> and the orphan check. Three Terraform layers keep the expensive part separate: <code>foundation</code> stays up (near-free), <code>cluster</code> lives only for a session, and <code>gitops-bootstrap</code> (Phase 5) sits on top.</p>
+    <p>The first phase that costs money: about $0.25 an hour while the cluster is up, under $1 a month while it is down. The rule for every session: bring it up, use it, then run <code>make aws-down</code> and the orphan check. The budget only warns, and hours late.</p>
+    <p>Three Terraform layers keep the expensive part separate. <code>foundation</code> stays up and costs cents: identity, the registry, DNS, the budget. <code>cluster</code> lives only for a session: the network, EKS, messaging, secrets. <code>gitops-bootstrap</code> sits on top, in Phase 5.</p>
+    <p class="muted">Steps reordered and corrected by the coach on 22 November from the earlier draft, after read-only checks of the account. Versions were checked that day; pin each a little behind the newest (DECISIONS 62).</p>
   </div>
+  <div class="facts-row prose">
+    <ul class="facts">
+      <li>Region: <b>us-east-1</b></li>
+      <li>Layers: <b>terraform/bootstrap, live/foundation, live/cluster</b></li>
+      <li>Evidence goes in <b>docs/evidence/phase-4/</b></li>
+      <li>While up: <b>about $0.25 an hour</b></li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">Before the first resource</span>
+  <h2>What the account looks like today</h2>
+  <div class="prose"><ul>
+    <li><strong>Nothing billing.</strong> Only the default VPC, and four CloudWatch log groups left from sample-fastapi-react (about 130 KB, no retention). No EKS, NAT, EIP, load balancer, EC2, EBS, S3, ECR, customer-managed KMS key, GitHub OIDC provider or GitHub-trusted role.</li>
+    <li><strong>The CLI signs in with a stored access key,</strong> as an IAM user with no MFA device. That breaks the plan's "no static keys".</li>
+    <li><strong>A budget exists:</strong> "Budget for 20 dollars", monthly, alerts on actual spend at 70% and 90%. No forecast alert.</li>
+    <li><strong><code>kahmedt.com</code> has a dangling delegation.</strong> It is registered at Porkbun until 11 November 2027, and Porkbun still names the four awsdns servers of the deleted zone (ns-127, ns-1511, ns-2011, ns-926). <code>dig NS</code> returns nothing. Anyone whose new Route 53 zone lands on those servers could answer for the domain. Fix this first.</li>
+    <li><strong>The service chart has no ServiceAccount template,</strong> so every pod runs as <code>default</code>. Pod Identity is keyed by namespace and ServiceAccount, so each service needs its own. Pick the names now (the service name, in <code>ticketdrop</code>); the template comes in Phase 5.</li>
+    <li><strong>Six services need AWS:</strong> catalog publishes; orders, inventory, payments and fulfillment publish and consume; notifications consumes. Gateway, web and scheduler need nothing. Six pod roles, plus KEDA and Karpenter in Phase 5.</li>
+    <li><strong>Your sample-fastapi-react EKS wrapper is on module v20</strong> with AWS provider 5.x. v21 drops the <code>cluster_</code> prefix from its inputs and needs provider 6, so port it, don't copy it.</li>
+  </ul></div>
+</section>
+
+<section>
+  <span class="eyebrow">Yours to decide</span>
+  <h2>Twelve decisions, with the coach's recommendation</h2>
+  <div class="table"><table>
+    <thead><tr><th>Decision</th><th>Recommended</th><th>Why, and what it costs</th></tr></thead>
+    <tbody>
+      <tr><td>1. How you sign in</td><td>IAM Identity Center (<code>aws configure sso</code>), then delete the access key; confirm root has MFA</td><td>No long-lived key on disk. A little setup now.</td></tr>
+      <tr><td>2. Region</td><td><code>us-east-1</code></td><td>Where the account already is.</td></tr>
+      <tr><td>3. Kubernetes version</td><td>1.36</td><td>The same as Docker Desktop and the kind test. In standard support until August 2027; 1.37 is EKS's default.</td></tr>
+      <tr><td>4. Node architecture</td><td>arm64, two <code>t4g</code> nodes</td><td>Cheaper, and the images are already multi-arch. CI scans only amd64 images, so record that the arm64 ones aren't scanned.</td></tr>
+      <tr><td>5. Budget</td><td>Keep $20, add a forecast alert at 100%, import it into <code>foundation</code>, turn on Cost Anomaly Detection (free)</td><td>A warning, not a cut-off: budget data lags by hours.</td></tr>
+      <tr><td>6. Hosted zone</td><td>Create it by hand today, then <code>terraform import</code> it into <code>foundation</code> with <code>prevent_destroy</code></td><td>The dangling delegation can't wait for Terraform. $0.50 a month, meant to stay.</td></tr>
+      <tr><td>7. What CI applies</td><td><code>foundation</code> only. <code>cluster</code> gets plan-on-PR, and goes up and down from the laptop with <code>make aws-up</code> and <code>aws-down</code>.</td><td>The biggest correction to the plan: apply-on-merge for <code>cluster</code> would start a billing cluster on every merge. <code>foundation</code>'s first apply is from the laptop, because it creates the roles CI uses.</td></tr>
+      <tr><td>8. Plan output in a public repo</td><td>A change summary in the job summary; the full plan not published</td><td>Logs, comments and artifacts are public, and a plan shows account IDs and ARNs.</td></tr>
+      <tr><td>9. Where the infra checks live</td><td>Inside <code>ci.yaml</code>, through <code>changes</code> and <code>ci-ok</code></td><td>One required check gates Terraform too. A separate workflow would need its own required check.</td></tr>
+      <tr><td>10. Secrets out of state</td><td>An ephemeral <code>random_password</code> with <code>secret_string_wo</code> on <code>aws_secretsmanager_secret_version</code></td><td>State holds no passwords. Check both exist in the provider version you pin.</td></tr>
+      <tr><td>11. KMS key for Secrets</td><td>One per cluster, 7-day deletion window</td><td>A key pending deletion isn't billed; cancelling the deletion bills it again. The other way: one key in <code>foundation</code>, about $1 a month.</td></tr>
+      <tr><td>12. VPC CNI NetworkPolicy mode</td><td>Test both, then record which you keep</td><td><code>standard</code>: a new pod starts allowed, the same gap as TROUBLESHOOTING 18. <code>strict</code>: it starts denied, and everything it reaches, CoreDNS included, needs a policy.</td></tr>
+    </tbody>
+  </table></div>
+  <p class="muted prose">Record in DECISIONS: what CI applies, how plans are published, the KMS key's placement, the NetworkPolicy mode, the node architecture, the Kubernetes version, and secrets kept out of state.</p>
+</section>
+
+<section>
+  <span class="eyebrow">Versions, 22 November</span>
+  <h2>The newest of each, to pin a little behind</h2>
+  <div class="table"><table>
+    <thead><tr><th>Tool</th><th>Newest</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td>Terraform</td><td>1.17.2</td><td>the laptop has 1.16.1</td></tr>
+      <tr><td>AWS provider</td><td>6.73.0</td><td></td></tr>
+      <tr><td><code>terraform-aws-modules/eks</code></td><td>21.30.2</td><td>needs AWS provider 6.59 or later</td></tr>
+      <tr><td><code>terraform-aws-modules/vpc</code></td><td>6.8.0</td><td>needs AWS provider 6.28 or later</td></tr>
+      <tr><td>tflint</td><td>0.66.0</td><td>the laptop has 0.62.0</td></tr>
+      <tr><td>tflint-ruleset-aws</td><td>0.50.0</td><td></td></tr>
+      <tr><td>EKS Kubernetes</td><td>1.37 is the default</td><td>1.36 in standard support until August 2027; 1.34's ends 2 December 2026</td></tr>
+      <tr><td>vpc-cni for 1.36</td><td><code>v1.23.3-eksbuild.2</code></td><td></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <span class="eyebrow">The work</span>
+  <h2>Nine steps, in order</h2>
 
   <div class="step"><div class="head"><label><input type="checkbox" id="p4-s1"><h3>1. Guardrails before anything bills</h3></label></div><dl>
     <dt>Do</dt><dd>
       <ul>
-        <li>Set an AWS Budget with an email alert.</li>
-        <li>Sign in through an SSO or short-lived CLI profile, not stored access keys.</li>
-        <li>Recreate the Route 53 hosted zone for <code>kahmedt.com</code>, which no longer exists, and point the registrar at its four name servers.</li>
+        <li>Capture the broken DNS first.</li>
+        <li>Create the hosted zone for <code>kahmedt.com</code> and point Porkbun at its four new name servers.</li>
+        <li>Set up SSO, then deactivate and delete the access key. Confirm root has MFA.</li>
+        <li>Add the forecast alert to the budget, and turn on Cost Anomaly Detection.</li>
       </ul></dd>
-    <dt>Why</dt><dd>A forgotten NAT gateway or node costs more than the whole project. DNS changes take hours to spread, so start them first.</dd>
-    <dt>Watch for</dt><dd>A recreated zone gets new name servers. The registrar still points at the old ones until you change them.</dd>
-    <dt>Done when</dt><dd><code>aws sts get-caller-identity</code> works with no keys on disk, the budget exists, and <code>dig NS kahmedt.com +short</code> returns the new zone's servers.</dd>
-    <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>01-budget-and-identity.txt</code>, <code>01-dns-delegation.txt</code>.</li></ul></dd>
+    <dt>Why</dt><dd>The dangling delegation is open now. A forgotten NAT gateway or node costs more than the whole project. DNS changes take hours to spread, so start them first.</dd>
+    <dt>Watch for</dt><dd>A new zone gets new name servers. Porkbun keeps the old ones until you change them.</dd>
+    <dt>Done when</dt><dd><code>aws sts get-caller-identity</code> works with no <code>~/.aws/credentials</code> file, and <code>dig NS kahmedt.com +short</code> returns the new zone's servers.</dd>
+    <dt class="cap">Capture</dt><dd class="cap"><ul>
+      <li><span class="once">Only now</span> <code>01-dns-dangling-before.txt</code>: <code>dig</code> and the registry's (RDAP) name servers, before the fix.</li>
+      <li><span class="once">Only now</span> <code>01-account-baseline.txt</code>: the empty listings, before the first resource.</li>
+      <li><code>01-budget-and-identity.txt</code>, <code>01-dns-delegation.txt</code>.</li>
+    </ul></dd>
+    <dt>Costs</dt><dd>The zone, $0.50 a month. It stays.</dd>
   </dl></div>
 
-  <div class="step"><div class="head"><label><input type="checkbox" id="p4-s2"><h3>2. State bucket (<code>terraform/bootstrap</code>)</h3></label></div><dl>
-    <dt>Do</dt><dd>An S3 bucket for Terraform state, with versioning, encryption, public access blocked and <code>use_lockfile</code> locking. It keeps its own state locally, and you run it once. Start from <code>sample-fastapi-react/terraform/bootstrap</code>.</dd>
-    <dt>Why</dt><dd>State in a bucket survives your laptop, and the lock file stops two applies from running at once.</dd>
-    <dt>Watch for</dt><dd>Account IDs never go in git: <code>*.tfvars</code> and the bootstrap's local state stay ignored.</dd>
+  <div class="step"><div class="head"><label><input type="checkbox" id="p4-s2"><h3>2. The orphan check, written now</h3></label></div><dl>
+    <dt>Do</dt><dd><code>scripts/orphan-check.sh</code>, listing anything that bills: EKS clusters, EC2 instances, EBS volumes and snapshots, NAT gateways, Elastic IPs and other public IPv4 addresses, load balancers, ENIs, VPC endpoints, non-default VPCs, KMS keys (those pending deletion as information only), Secrets Manager secrets, and <code>/aws/eks/*</code> log groups.</dd>
+    <dt>Why</dt><dd>Moved from last to second, so it guards every apply from here on, not only the final teardown.</dd>
+    <dt>Watch for</dt><dd>Things a controller creates (an NLB, Karpenter nodes, volumes) are not in Terraform's state. The script must find them by listing, not from state.</dd>
+    <dt>Done when</dt><dd>It reports nothing on today's account.</dd>
+    <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>02-orphan-check-baseline.txt</code>.</li></ul></dd>
+  </dl></div>
+
+  <div class="step"><div class="head"><label><input type="checkbox" id="p4-s3"><h3>3. State bucket (<code>terraform/bootstrap</code>)</h3></label></div><dl>
+    <dt>Do</dt><dd>An S3 bucket for state, with versioning, encryption, public access blocked, <code>use_lockfile</code> locking, and a lifecycle rule that expires old versions. It keeps its own state locally, and you run it once. Start from <code>sample-fastapi-react/terraform/bootstrap</code>.</dd>
+    <dt>Why</dt><dd>State in a bucket survives your laptop, and the lock file stops two applies at once.</dd>
+    <dt>Watch for</dt><dd><ul>
+      <li>The bucket name must not contain the account ID, or must come from a gitignored partial backend file. <code>.gitignore</code> covers <code>*.tfvars</code> and <code>*.tfstate</code>, but not <code>backend.hcl</code>.</li>
+      <li>Commit <code>.terraform.lock.hcl</code>.</li>
+      <li>One state key per layer.</li>
+    </ul></dd>
     <dt>Done when</dt><dd>The bucket exists, and a second <code>terraform apply</code> changes nothing.</dd>
-    <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>02-bootstrap-apply.txt</code>.</li></ul></dd>
+    <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>03-bootstrap-apply.txt</code>.</li></ul></dd>
+    <dt>Costs</dt><dd>Cents.</dd>
   </dl></div>
 
-  <div class="step"><div class="head"><label><input type="checkbox" id="p4-s3"><h3>3. <code>live/foundation</code>: identity and registry</h3></label></div><dl>
+  <div class="step"><div class="head"><label><input type="checkbox" id="p4-s4"><h3>4. <code>live/foundation</code>: identity, registry, DNS, budget</h3></label></div><dl>
     <dt>Do</dt><dd>
       <ul>
         <li>GitHub's OIDC provider.</li>
-        <li>A read-only plan role that any PR may assume.</li>
-        <li>An apply role that only <code>main</code> may assume.</li>
-        <li>A push role for CI that may write to ECR only.</li>
-        <li>Nine ECR repositories, with immutable tags, scan on push and a lifecycle rule.</li>
-        <li>A lookup of the hosted zone, and the budget in code.</li>
-      </ul></dd>
-    <dt>Why</dt><dd>CI gets short-lived credentials per run, scoped by repository and branch, so there are no static keys to leak. These stay up between sessions and cost cents.</dd>
+        <li>A plan role that a PR may assume, and an apply role that only <code>main</code> may.</li>
+        <li>An ECR push role for CI.</li>
+        <li>Nine ECR repositories: immutable tags, scan on push, a lifecycle rule.</li>
+        <li>Import the hosted zone (with <code>prevent_destroy</code>) and the budget.</li>
+      </ul>
+      Apply it from the laptop the first time: it creates the roles CI will use.</dd>
+    <dt>Why</dt><dd>CI gets short-lived credentials per run, scoped by repository and branch, so there is no static key to leak. All of it stays up between sessions for cents.</dd>
     <dt>Watch for</dt><dd><ul>
-      <li>The trust policy's <code>sub</code> condition: <code>repo:kingswanzy2020/ticketdrop:ref:refs/heads/main</code> for apply, <code>…:pull_request</code> for plan. A wildcard here lets any branch apply.</li>
+      <li>The plan role must write and delete the <code>.tflock</code> key in the state bucket: <code>use_lockfile</code> locks during plan too.</li>
+      <li>Anything that can read state can read whatever state holds.</li>
+      <li>The trust policy's <code>sub</code>: <code>repo:kingswanzy2020/ticketdrop:ref:refs/heads/main</code> for apply, <code>…:pull_request</code> for plan. A wildcard lets any branch apply. If the apply job uses a GitHub <code>environment:</code>, the <code>sub</code> becomes <code>…:environment:&lt;name&gt;</code> instead, and a trust keyed on <code>main</code> stops matching.</li>
       <li>Immutable tags mean a re-run cannot overwrite <code>&lt;sha&gt;</code>. That is what you want.</li>
     </ul></dd>
-    <dt>Done when</dt><dd>A test workflow on a PR can assume the plan role and is refused the apply role.</dd>
-    <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>03-foundation-apply.txt</code>.</li><li><span class="once">Only now</span> <code>fail-3-apply-role-refused-on-pr.txt</code>: the refused <code>AssumeRoleWithWebIdentity</code> from that PR's run.</li></ul></dd>
+    <dt>Done when</dt><dd>A PR can assume the plan role and is refused the apply role.</dd>
+    <dt class="cap">Capture</dt><dd class="cap"><ul>
+      <li><code>04-foundation-apply.txt</code>.</li>
+      <li><span class="once">Only now</span> <code>fail-4-apply-role-refused-on-pr.txt</code>: the refused <code>AssumeRoleWithWebIdentity</code> from that PR's run.</li>
+    </ul></dd>
+    <dt>Costs</dt><dd>ECR storage, $0.10 per GB-month, kept small by the lifecycle rule. The rest is free.</dd>
   </dl></div>
 
-  <div class="step"><div class="head"><label><input type="checkbox" id="p4-s4"><h3>4. <code>live/cluster</code>: the network</h3></label></div><dl>
-    <dt>Do</dt><dd>A VPC from <code>terraform-aws-modules/vpc</code>: 3 AZs, public and private subnets, one NAT gateway. Tag the subnets for the load balancer controller (<code>kubernetes.io/role/elb</code>, <code>internal-elb</code>) and for Karpenter's discovery.</dd>
-    <dt>Why</dt><dd>One NAT gateway instead of three saves about $65 a month. The cost is that the whole cluster loses outbound traffic if that one AZ fails. Record that as a decision.</dd>
-    <dt>Watch for</dt><dd>Missing discovery tags show up in Phase 5, as an NLB that never gets subnets or a Karpenter node that never launches. Add them now.</dd>
+  <div class="step"><div class="head"><label><input type="checkbox" id="p4-s5"><h3>5. Plan on PR, and apply on merge for <code>foundation</code></h3></label></div><dl>
+    <dt>Do</dt><dd>In <code>ci.yaml</code> (decision 9): fmt, validate, tflint with the aws ruleset, <code>trivy config</code>, then <code>plan</code>, with a change summary in the job summary. On <code>main</code>, apply <code>foundation</code> only (decision 7).</dd>
+    <dt>Why</dt><dd>Moved earlier, so every later layer arrives with a plan someone has read. Nobody applies <code>foundation</code> from a laptop again.</dd>
+    <dt>Watch for</dt><dd><ul>
+      <li><code>id-token: write</code> only on the job that needs it.</li>
+      <li>The <code>cluster</code> layer must have no <code>kubernetes</code> or <code>helm</code> provider: its API endpoint is limited to your IP, so CI can't reach it.</li>
+      <li>Apply the plan that was reviewed, or apply fresh on <code>main</code>: decide which and record why.</li>
+    </ul></dd>
+    <dt>Done when</dt><dd>A PR shows its plan summary, and the merge applies <code>foundation</code>.</dd>
+    <dt class="cap">Capture</dt><dd class="cap"><ul>
+      <li><span class="once">Only now</span> <code>05-plan-on-pr.png</code>, while the PR is open.</li>
+      <li><code>05-apply-on-merge.txt</code>.</li>
+    </ul></dd>
+  </dl></div>
+
+  <div class="step"><div class="head"><label><input type="checkbox" id="p4-s6"><h3>6. <code>live/cluster</code>: the network</h3></label></div><dl>
+    <dt>Do</dt><dd>A VPC from <code>terraform-aws-modules/vpc</code>: 3 AZs, public and private subnets, one NAT gateway, and an S3 gateway endpoint (free), so ECR image layers don't go through the NAT.</dd>
+    <dt>Why</dt><dd>One NAT gateway instead of three saves about $65 a month. The cost is that the cluster loses outbound traffic if that one AZ fails: record it as a decision.</dd>
+    <dt>Watch for</dt><dd>Tag the subnets now: <code>kubernetes.io/role/elb</code>, <code>kubernetes.io/role/internal-elb</code> and <code>karpenter.sh/discovery</code>. Missing tags show up in Phase 5, as an NLB with no subnets or a Karpenter node that never launches.</dd>
     <dt>Done when</dt><dd><code>terraform plan</code> is clean after apply, and the subnets carry the tags.</dd>
-    <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>04-network-plan.txt</code>.</li></ul></dd>
+    <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>06-network-plan.txt</code>.</li></ul></dd>
+    <dt>Costs</dt><dd>The NAT gateway, about $0.045 an hour plus $0.045 per GB; its Elastic IP and any public IPv4 address, $0.005 an hour each. To stop: <code>terraform destroy</code>, then the orphan check.</dd>
   </dl></div>
 
-  <div class="step"><div class="head"><label><input type="checkbox" id="p4-s5"><h3>5. <code>live/cluster</code>: EKS</h3></label></div><dl>
-    <dt>Do</dt><dd>EKS from <code>terraform-aws-modules/eks</code>, starting from your <code>sample-fastapi-react</code> wrapper:
+  <div class="step"><div class="head"><label><input type="checkbox" id="p4-s7"><h3>7. <code>live/cluster</code>: EKS</h3></label></div><dl>
+    <dt>Do</dt><dd>EKS from <code>terraform-aws-modules/eks</code> v21, porting your wrapper:
       <ul>
-        <li>access entries, not <code>aws-auth</code>;</li>
-        <li>KMS encryption of Secrets;</li>
+        <li>access entries, not <code>aws-auth</code>, with an explicit entry for your SSO role;</li>
+        <li>KMS encryption of Secrets (decision 11);</li>
         <li>the public endpoint limited to your IP;</li>
-        <li>IMDSv2 required;</li>
+        <li>IMDSv2 required, hop limit 1;</li>
         <li>the VPC CNI with network policy on;</li>
         <li>the Pod Identity agent add-on;</li>
-        <li>a small on-demand managed node group for Karpenter, CoreDNS and Argo CD.</li>
+        <li>a small on-demand managed node group, two arm64 <code>t4g</code> (decision 4).</li>
       </ul></dd>
-    <dt>Why</dt><dd>Pod Identity trust does not name a per-cluster OIDC provider, so roles survive a rebuild. Docker Desktop enforced NetworkPolicy, and the VPC CNI must too, or Phase 2's rules do nothing here.</dd>
+    <dt>Why</dt><dd>Pod Identity trust doesn't name a per-cluster OIDC provider, so the roles survive a rebuild. Docker Desktop enforced NetworkPolicy, and the VPC CNI must too, or Phase 2's rules do nothing here.</dd>
     <dt>Watch for</dt><dd><ul>
-      <li>Your IP changes, and the API then stops answering. Keep it in a variable you can update.</li>
-      <li>The metrics-server port rule from your old wrapper.</li>
+      <li>Don't rely on the creator-admin entry: an SSO role's ARN has a random suffix.</li>
+      <li>Your IP changes, and the API stops answering. Keep it in a variable.</li>
+      <li>Pod Identity doesn't need IMDS. In Phase 5, give controllers their region explicitly.</li>
+      <li>With control-plane logging on, EKS can recreate its log group after destroy, without retention. The orphan check should catch it.</li>
       <li>Revisit Postgres: one CNPG instance with <code>max_connections</code> 100 was sized for a laptop (DECISIONS 31 and 57).</li>
     </ul></dd>
-    <dt>Done when</dt><dd><code>kubectl get nodes</code> shows the system nodes Ready, and a test pod is denied by a default-deny policy.</dd>
-    <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>05-eks-nodes-ready.txt</code>, <code>05-networkpolicy-enforced.txt</code>.</li></ul></dd>
+    <dt>Done when</dt><dd>The nodes are Ready, a default-deny policy blocks a test pod, and the TROUBLESHOOTING 18 probe has been run in <code>standard</code> and in <code>strict</code> mode (decision 12).</dd>
+    <dt class="cap">Capture</dt><dd class="cap"><ul>
+      <li><code>07-eks-nodes-ready.txt</code>, <code>07-networkpolicy-enforced.txt</code>.</li>
+      <li><span class="once">Only now</span> <code>07-new-pod-window-standard.txt</code> and <code>07-new-pod-window-strict.txt</code>: they need the cluster up.</li>
+    </ul></dd>
+    <dt>Costs</dt><dd>The control plane, $0.10 an hour ($0.60 on an extended-support version, so stay on 1.35 or later); two <code>t4g.medium</code> nodes, about $0.034 an hour each; their gp3 volumes; the KMS key, about $1 a month prorated; logs, $0.50 per GB. To stop: destroy, then the orphan check.</dd>
   </dl></div>
 
-  <div class="step"><div class="head"><label><input type="checkbox" id="p4-s6"><h3>6. <code>live/cluster</code>: messaging, secrets and pod roles</h3></label></div><dl>
+  <div class="step"><div class="head"><label><input type="checkbox" id="p4-s8"><h3>8. <code>live/cluster</code>: messaging, secrets and pod roles</h3></label></div><dl>
     <dt>Do</dt><dd>
       <ul>
-        <li>The SNS topic, with five SQS queues and their DLQs (<code>maxReceiveCount</code> 3). The subscriptions filter on <code>event_type</code>, as in <code>deploy/local/goaws.yaml</code>.</li>
-        <li>Karpenter's prerequisites: the node role, the interruption queue and its EventBridge rules.</li>
-        <li>A Pod Identity association per service, allowing only its own queue and the topic.</li>
-        <li>Secrets Manager entries with a zero-day recovery window.</li>
+        <li>The topic <code>ticketdrop-events</code>, with five queues and five DLQs exactly as in <code>deploy/local/goaws.yaml</code>: raw delivery, the same <code>event_type</code> filters, <code>maxReceiveCount</code> 3.</li>
+        <li>Karpenter's prerequisites, from the EKS module's <code>karpenter</code> submodule.</li>
+        <li>Six Pod Identity associations, one per service that needs AWS, each allowed only its own queue and the topic.</li>
+        <li>Six database secrets with a recovery window of 0 (decision 10).</li>
       </ul></dd>
-    <dt>Why</dt><dd>goaws stood in for exactly this. Copying its filters and redrive keeps the services unchanged. One role per service means a compromised payments pod cannot read fulfillment's queue.</dd>
+    <dt>Why</dt><dd>goaws stood in for exactly this, so copying its filters and redrive keeps the services unchanged. One role per service means a compromised payments pod can't read fulfillment's queue.</dd>
     <dt>Watch for</dt><dd><ul>
-      <li>goaws had exact-match filters only. SNS's filter policy is JSON, and <code>RawMessageDelivery</code> must match what <code>events.Consumer</code> expects.</li>
-      <li>The queue's visibility timeout must stay above <code>CONSUMER_TIMEOUT</code>.</li>
+      <li>Each queue needs a policy that lets the topic send to it, scoped by <code>aws:SourceArn</code>. Without it the subscription looks fine and nothing ever arrives.</li>
+      <li>The visibility timeout must stay above <code>CONSUMER_TIMEOUT</code> (20 s by default in the code; locally 10 s with 5 s consumers). 30 s is suggested.</li>
+      <li>SSE-SQS, not a customer-managed KMS key, or SNS needs a key policy too.</li>
     </ul></dd>
-    <dt>Done when</dt><dd>An <code>aws sns publish</code> with each event type arrives only in the queues that should get it.</dd>
-    <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>06-fanout-by-event-type.txt</code>.</li></ul></dd>
+    <dt>Done when</dt><dd>An <code>aws sns publish</code> of each event type arrives only in the queues that should get it.</dd>
+    <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>08-fanout-by-event-type.txt</code>.</li></ul></dd>
+    <dt>Costs</dt><dd>SNS and SQS at free-tier scale. Secrets, $0.40 per secret-month prorated, and gone at destroy with a recovery window of 0.</dd>
   </dl></div>
 
-  <div class="step"><div class="head"><label><input type="checkbox" id="p4-s7"><h3>7. Plan on PR, apply on merge</h3></label></div><dl>
-    <dt>Do</dt><dd>Two workflows:
-      <ul>
-        <li><code>infra-plan</code> on PRs touching <code>terraform/</code>: fmt, validate, tflint, Trivy config scan, then <code>plan</code> posted to the PR.</li>
-        <li><code>infra-apply</code> on <code>main</code>, using the apply role.</li>
-      </ul></dd>
-    <dt>Why</dt><dd>The reviewer sees what will change before it does, and nobody applies from a laptop.</dd>
-    <dt>Watch for</dt><dd><ul>
-      <li>The plan job needs <code>id-token: write</code>, and only that job.</li>
-      <li>Apply the plan that was reviewed, or apply fresh on <code>main</code>; decide which and record why.</li>
-    </ul></dd>
-    <dt>Done when</dt><dd>A PR shows its plan, and merging applies it.</dd>
-    <dt class="cap">Capture</dt><dd class="cap"><ul><li><span class="once">Only now</span> <code>07-plan-on-pr.png</code>, while the PR is open.</li><li><code>07-apply-on-merge.txt</code>.</li></ul></dd>
-  </dl></div>
-
-  <div class="step"><div class="head"><label><input type="checkbox" id="p4-s8"><h3>8. <code>make aws-up</code>, <code>make aws-down</code> and the orphan check</h3></label></div><dl>
-    <dt>Do</dt><dd>Scripts that bring <code>cluster</code> up from nothing and destroy it again. Then <code>scripts/orphan-check.sh</code> lists anything still billing:
-      <ul>
-        <li>load balancers, NAT gateways and Elastic IPs;</li>
-        <li>EC2 instances and EBS volumes;</li>
-        <li>ENIs left in the VPC;</li>
-        <li>CloudWatch log groups.</li>
-      </ul></dd>
+  <div class="step"><div class="head"><label><input type="checkbox" id="p4-s9"><h3>9. <code>make aws-up</code>, <code>make aws-down</code>, then the orphan check</h3></label></div><dl>
+    <dt>Do</dt><dd><code>aws-up</code> looks up your IP (<code>checkip.amazonaws.com</code>) and applies <code>cluster</code>. <code>aws-down</code> destroys <code>cluster</code> and never touches <code>foundation</code>. Then the orphan check.</dd>
     <dt>Why</dt><dd>"Rebuilds from Git in N minutes" is a result. A teardown you trust is what makes the cluster affordable.</dd>
-    <dt>Watch for</dt><dd>Anything a controller created (NLB, Karpenter nodes, volumes) is not in Terraform's state. In Phase 5, <code>aws-down</code> must remove the Argo CD apps first, and you'll add that then.</dd>
+    <dt>Watch for</dt><dd>In Phase 5, <code>aws-down</code> must remove the Argo CD apps first, so the controllers delete what they created. You'll add that then.</dd>
     <dt>Done when</dt><dd>Up from nothing gives Ready nodes, down leaves the orphan check empty, and both are timed.</dd>
-    <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>08-aws-up-timed.txt</code>, <code>08-aws-down-timed.txt</code>, <code>08-orphan-check-empty.txt</code>.</li></ul></dd>
+    <dt class="cap">Capture</dt><dd class="cap"><ul>
+      <li><span class="once">Only now</span> <code>09-aws-up-timed.txt</code>: the first run from nothing.</li>
+      <li><code>09-aws-down-timed.txt</code>, <code>09-orphan-check-empty.txt</code>.</li>
+      <li><span class="once">Only now</span> <code>09-session-cost.txt</code>, the next day, from Cost Explorer.</li>
+    </ul></dd>
   </dl></div>
+  <p class="muted prose">Every capture starts with <code>date</code> and goes in <code>docs/evidence/phase-4/</code>.</p>
+</section>
+
+<section>
+  <span class="eyebrow">The bill</span>
+  <h2>What costs money, and how it stops</h2>
+  <div class="table"><table>
+    <thead><tr><th>Item</th><th>Rate</th><th>When</th><th>How it stops</th></tr></thead>
+    <tbody>
+      <tr><td>Hosted zone</td><td>$0.50 a month</td><td>always</td><td>It doesn't; it is meant to stay</td></tr>
+      <tr><td>ECR, state bucket</td><td>cents a month</td><td>always</td><td>Lifecycle rules keep them small</td></tr>
+      <tr><td>EKS control plane</td><td>$0.10 an hour</td><td>cluster up</td><td><code>make aws-down</code></td></tr>
+      <tr><td>NAT gateway</td><td>about $0.045 an hour, plus $0.045 per GB</td><td>cluster up</td><td><code>make aws-down</code></td></tr>
+      <tr><td>Two <code>t4g.medium</code> nodes</td><td>about $0.034 an hour each</td><td>cluster up</td><td><code>make aws-down</code></td></tr>
+      <tr><td>Elastic IP, public IPv4</td><td>$0.005 an hour each</td><td>cluster up</td><td><code>make aws-down</code>, then the orphan check</td></tr>
+      <tr><td>KMS key</td><td>about $1 a month, prorated</td><td>until deleted</td><td>7-day deletion window; not billed while pending</td></tr>
+      <tr><td>Secrets</td><td>$0.40 per secret-month, prorated</td><td>cluster up</td><td>Recovery window 0, gone at destroy</td></tr>
+      <tr><td>Logs</td><td>$0.50 per GB ingested</td><td>if enabled</td><td>The orphan check finds a recreated log group</td></tr>
+    </tbody>
+  </table></div>
+  <p class="muted prose">us-east-1 list prices from the coach's memory, not checked against the pricing pages: confirm them there. The budget is a backstop that lags by hours; the orphan check is the real one.</p>
   <div class="prose"><p><strong>Exit:</strong> <code>make aws-up</code> from nothing gives Ready nodes, and <code>make aws-down</code> leaves nothing billing, as the orphan check shows. Both are timed.</p></div>
 </section>
 </details>
