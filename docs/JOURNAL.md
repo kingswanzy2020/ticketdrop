@@ -216,7 +216,7 @@ November 17, 2026: Exit drop through the Gateway: 600 orders for 1000 tickets, 4
 
 ## Phase 3: CI
 
-Dates: to . Exit check: a PR touching one service builds only that service; a
+Dates: November 18 to November 19, 2026. Exit check: a PR touching one service builds only that service; a
 failing test or a critical CVE blocks the merge; in the GitOps repo a chart
 that fails lint, kubeconform or the kind install blocks the merge.
 
