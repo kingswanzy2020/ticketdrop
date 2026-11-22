@@ -446,3 +446,27 @@ CI job prints on failure, name the real one. `rebuild.sh` could wait for each
 Deployment on its own, or run `check.sh` before failing, so its message names
 only what is down. Evidence:
 [`fail-8-chart-blocks-merge.txt`](evidence/phase-3/fail-8-chart-blocks-merge.txt).
+
+## 21. Setting up Identity Center left an unused multi-Region KMS key
+
+**Seen.** The first run of `scripts/orphan-check.sh`, on 23 November 2026,
+found one customer-managed KMS key in us-east-1, described as "IAM Identity
+Center customer managed key with baseline KMS key policy", with no alias,
+created 22 November 2026 at 14:09 UTC while Identity Center was being set up.
+It is a multi-Region primary key (`mrk-…`) with a replica in us-west-2, so a
+check of us-east-1 alone found only half of it. Each bills about $1 a month.
+
+**Cause.** Identity Center was finally enabled with an AWS-owned key
+(`EncryptionConfigurationDetails.KeyType` is `AWS_OWNED_KMS_KEY`), and neither
+key has a grant, so nothing uses them. That the setup created them when the
+customer-managed key option was offered, and then went on without them, is
+inferred from the description and the time, not recorded anywhere.
+
+**Fix.** Deletion scheduled with the shortest window, 7 days: the replica is
+`PendingDeletion` until 30 November 2026, and the primary is
+`PendingReplicaDeletion` until then, after which its own window starts. A key
+pending deletion can still be restored with `aws kms cancel-key-deletion`.
+`ALL_REGIONS=1 scripts/orphan-check.sh` is what finds a replica in another
+region. Evidence:
+[`fail-2-unused-kms-key.txt`](evidence/phase-4/fail-2-unused-kms-key.txt),
+[`02-orphan-check-baseline.txt`](evidence/phase-4/02-orphan-check-baseline.txt).

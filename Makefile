@@ -42,3 +42,7 @@ outage-check: ## Take the payment provider down and prove no order or ticket is 
 .PHONY: demo-drop
 demo-drop: ## Send a k6 crowd at a drop and check nothing was oversold (CUSTOMERS=1000 CAPACITY=1000 ARRIVE=15 TARGET=compose|cluster)
 	CUSTOMERS=$(CUSTOMERS) CAPACITY=$(CAPACITY) ARRIVE=$(ARRIVE) TARGET=$(TARGET) ./scripts/demo-drop.sh
+
+.PHONY: orphan-check
+orphan-check: ## List anything in the AWS account that still bills (AWS_REGION=us-east-1, ALL_REGIONS=1 for every region)
+	./scripts/orphan-check.sh

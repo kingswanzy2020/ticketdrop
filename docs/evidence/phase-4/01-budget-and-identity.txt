@@ -1,0 +1,138 @@
+Mon Nov 23 03:09:05 AM KST 2026
++ aws sts get-caller-identity --query Arn --output text
+arn:aws:sts::<account-id>:assumed-role/AWSReservedSSO_AdministratorAccess_<id>/Jose-temp-IAM-user
++ aws configure list
+NAME       : VALUE                    : TYPE             : LOCATION
+profile    : ticketdrop               : env              : ['AWS_PROFILE', 'AWS_DEFAULT_PROFILE']
+access_key : ****     : sso              : 
+secret_key : ****     : sso              : 
+region     : us-east-1                : config-file      : ~/.aws/config
++ aws iam get-account-summary --query 'SummaryMap.{rootMFA:AccountMFAEnabled,rootAccessKeys:AccountAccessKeysPresent}'
+{
+    "rootMFA": 1,
+    "rootAccessKeys": 0
+}
+++ aws iam list-users --query 'Users[].UserName' --output text
++ for u in $(aws iam list-users --query 'Users[].UserName' --output text)
++ aws iam list-access-keys --user-name Jose --query 'AccessKeyMetadata[].{user:UserName,status:Status,created:CreateDate}'
+[
+    {
+        "user": "Jose",
+        "status": "Active",
+        "created": "2025-10-23T17:12:36+00:00"
+    }
+]
++ aws organizations describe-organization --query Organization.FeatureSet
+"ALL"
++ aws sso-admin list-instances --query 'Instances[].{store:IdentityStoreId,status:Status}'
+[
+    {
+        "store": "d-9066672d6d",
+        "status": "ACTIVE"
+    }
+]
++ aws budgets describe-budgets --account-id <account-id> --query 'Budgets[].{name:BudgetName,limit:BudgetLimit.Amount,unit:TimeUnit}'
+[
+    {
+        "name": "Budget for 20 dollars",
+        "limit": "20.0",
+        "unit": "MONTHLY"
+    }
+]
++ aws budgets describe-notifications-for-budget --account-id <account-id> --budget-name 'Budget for 20 dollars' --query 'Notifications[].{type:NotificationType,op:ComparisonOperator,pct:Threshold}'
+[
+    {
+        "type": "ACTUAL",
+        "op": "GREATER_THAN",
+        "pct": 90.0
+    },
+    {
+        "type": "FORECASTED",
+        "op": "GREATER_THAN",
+        "pct": 100.0
+    }
+]
++ aws ce get-anomaly-monitors --query 'AnomalyMonitors[].{name:MonitorName,dimension:MonitorDimension}'
+[
+    {
+        "name": "Overspending Book",
+        "dimension": "LINKED_ACCOUNT"
+    },
+    {
+        "name": "Default-Services-Monitor",
+        "dimension": "SERVICE"
+    }
+]
++ aws ce get-anomaly-subscriptions --query 'AnomalySubscriptions[].{name:SubscriptionName,frequency:Frequency,subscribers:Subscribers[].Type,threshold:ThresholdExpression}'
+[
+    {
+        "name": "Default-Services-Subscription",
+        "frequency": "DAILY",
+        "subscribers": [
+            "EMAIL"
+        ],
+        "threshold": {
+            "And": [
+                {
+                    "Dimensions": {
+                        "Key": "ANOMALY_TOTAL_IMPACT_ABSOLUTE",
+                        "Values": [
+                            "100.0"
+                        ],
+                        "MatchOptions": [
+                            "GREATER_THAN_OR_EQUAL"
+                        ]
+                    }
+                },
+                {
+                    "Dimensions": {
+                        "Key": "ANOMALY_TOTAL_IMPACT_PERCENTAGE",
+                        "Values": [
+                            "40.0"
+                        ],
+                        "MatchOptions": [
+                            "GREATER_THAN_OR_EQUAL"
+                        ]
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "name": "ticketdrop-cost-alert",
+        "frequency": "DAILY",
+        "subscribers": [
+            "EMAIL"
+        ],
+        "threshold": {
+            "Dimensions": {
+                "Key": "ANOMALY_TOTAL_IMPACT_ABSOLUTE",
+                "Values": [
+                    "15"
+                ],
+                "MatchOptions": [
+                    "GREATER_THAN_OR_EQUAL"
+                ]
+            }
+        }
+    },
+    {
+        "name": "My Projects",
+        "frequency": "DAILY",
+        "subscribers": [
+            "EMAIL"
+        ],
+        "threshold": {
+            "Dimensions": {
+                "Key": "ANOMALY_TOTAL_IMPACT_ABSOLUTE",
+                "Values": [
+                    "70"
+                ],
+                "MatchOptions": [
+                    "GREATER_THAN_OR_EQUAL"
+                ]
+            }
+        }
+    }
+]
++ set +x
