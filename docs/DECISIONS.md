@@ -1626,3 +1626,28 @@ is not tested. The nine images are built from scratch on each run, with no
 cache shared with the app repo. The test cluster has one node and no
 persistence beyond the run, so nothing about upgrades, data surviving a
 restart or more than one node is shown.
+
+## 68. One state bucket with a fixed name, holding its own state as well as every layer's
+
+**Decision.** `terraform/bootstrap` creates one S3 bucket,
+`ticketdrop-tfstate-kahmedt`, for the state of every layer, each under its own
+key (`bootstrap/`, `foundation/`, `cluster/`) with `use_lockfile` locking. The
+name has no account ID in it. Bootstrap's own state was applied locally once
+and then moved into the bucket with `terraform init -migrate-state`. The
+bucket has `prevent_destroy`, versioning, SSE-S3, all four public-access
+blocks, a TLS-only policy, and a lifecycle rule that drops old versions after
+90 days and clears the delete markers each run's `.tflock` leaves.
+
+**Why.** With no account ID in the name, each layer's `backend "s3"` block is
+committed whole: no `backend.hcl` to keep out of git, and no CI variable.
+State in the bucket survives the laptop, where a local `terraform.tfstate`
+would not. `prevent_destroy` matters twice: losing the bucket loses track of
+everything, and a deleted bucket's name can be taken by anyone, along with
+whatever an old backend block then writes to it. Applied on 23 November 2026,
+six resources; the plan after the move changed nothing
+([`03-bootstrap-apply.txt`](evidence/phase-4/03-bootstrap-apply.txt)).
+
+**Cost.** The name is tied to the domain and must stay unique across all of
+S3. Bootstrap's state lives in the bucket it describes, so rebuilding it in a
+new account means commenting out the backend block for the first apply. Under
+$0.01 a month, and the bucket stays up between sessions.
