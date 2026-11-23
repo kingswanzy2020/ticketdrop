@@ -1,0 +1,60 @@
+Mon Nov 23 03:25:58 AM KST 2026
+$ scripts/orphan-check.sh
+orphan-check as arn:aws:sts::<account-id>:assumed-role/AWSReservedSSO_AdministratorAccess_<id>/Jose-temp-IAM-user
+== us-east-1
+  ok     EKS clusters
+  ok     EC2 instances
+  ok     EBS volumes
+  ok     EBS snapshots
+  ok     AMIs
+  ok     NAT gateways
+  ok     Elastic IPs
+  ok     other public IPv4 addresses
+  ok     load balancers
+  ok     classic load balancers
+  ok     VPC endpoints
+  ok     non-default VPCs
+  FOUND  customer-managed KMS keys: 1
+           mrk-a18b79bd24cf4cea8855f12bfe8281da Enabled, created 2026-11-22T23:09:05.590000+09:00: IAM Identity Center customer managed key with baseline KMS key policy
+  ok     secrets
+  ok     EKS log groups
+  INFO   other log groups: 4
+           /aws/rds/instance/fastapi-react-dev-k8s-postgres/postgresql 37340 bytes
+           /aws/rds/instance/fastapi-react-dev-postgres/postgresql 96907 bytes
+           /aws/transfer/s-02d6c68b111248538 0 bytes
+           /aws/transfer/s-958f54bf60c44d4e8 0 bytes
+
+orphan-check: 1 kind(s) of billable resource found
+exit 1
+
+$ AWS_REGION=us-west-2 scripts/orphan-check.sh
+orphan-check as arn:aws:sts::<account-id>:assumed-role/AWSReservedSSO_AdministratorAccess_<id>/Jose-temp-IAM-user
+== us-west-2
+  ok     EKS clusters
+  ok     EC2 instances
+  ok     EBS volumes
+  ok     EBS snapshots
+  ok     AMIs
+  ok     NAT gateways
+  ok     Elastic IPs
+  ok     other public IPv4 addresses
+  ok     load balancers
+  ok     classic load balancers
+  ok     VPC endpoints
+  ok     non-default VPCs
+  FOUND  customer-managed KMS keys: 1
+           mrk-a18b79bd24cf4cea8855f12bfe8281da Enabled, created 2026-11-22T23:09:07.035000+09:00: 
+  ok     secrets
+  ok     EKS log groups
+
+orphan-check: 1 kind(s) of billable resource found
+exit 1
+
+$ aws sso-admin describe-instance ... EncryptionConfigurationDetails
+{
+    "KeyType": "AWS_OWNED_KMS_KEY",
+    "EncryptionStatus": "ENABLED"
+}
+$ aws kms list-grants (us-east-1, us-west-2)
+0
+0

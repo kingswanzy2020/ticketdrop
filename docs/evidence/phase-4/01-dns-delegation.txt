@@ -1,0 +1,89 @@
+Mon Nov 23 03:07:38 AM KST 2026
++ aws route53 get-hosted-zone --id /hostedzone/Z104117617BCE7Z0YYG9M --query '{zone:HostedZone.Name,nameServers:DelegationSet.NameServers}'
+{
+    "zone": "kahmedt.com.",
+    "nameServers": [
+        "ns-1204.awsdns-22.org",
+        "ns-1754.awsdns-27.co.uk",
+        "ns-129.awsdns-16.com",
+        "ns-976.awsdns-58.net"
+    ]
+}
++ curl -fsS https://rdap.verisign.com/com/v1/domain/kahmedt.com
++ jq '{ldhName, nameservers:[.nameservers[].ldhName|ascii_downcase], lastChanged:[.events[]|select(.eventAction=="last changed")|.eventDate]}'
+{
+  "ldhName": "KAHMEDT.COM",
+  "nameservers": [
+    "ns-1204.awsdns-22.org",
+    "ns-129.awsdns-16.com",
+    "ns-1754.awsdns-27.co.uk",
+    "ns-976.awsdns-58.net"
+  ],
+  "lastChanged": [
+    "2026-11-22T07:57:02Z"
+  ]
+}
++ dig -4 @a.gtld-servers.net NS kahmedt.com +norecurse +noall +authority
+kahmedt.com.		172800	IN	NS	ns-1204.awsdns-22.org.
+kahmedt.com.		172800	IN	NS	ns-129.awsdns-16.com.
+kahmedt.com.		172800	IN	NS	ns-1754.awsdns-27.co.uk.
+kahmedt.com.		172800	IN	NS	ns-976.awsdns-58.net.
++ dig -4 @8.8.8.8 NS kahmedt.com +noall +comments +answer
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 18802
+;; flags: qr rd ra; QUERY: 1, ANSWER: 4, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 512
+;; ANSWER SECTION:
+kahmedt.com.		21600	IN	NS	ns-1754.awsdns-27.co.uk.
+kahmedt.com.		21600	IN	NS	ns-976.awsdns-58.net.
+kahmedt.com.		21600	IN	NS	ns-1204.awsdns-22.org.
+kahmedt.com.		21600	IN	NS	ns-129.awsdns-16.com.
+
+++ aws route53 get-hosted-zone --id /hostedzone/Z104117617BCE7Z0YYG9M --query DelegationSet.NameServers --output text
++ for ns in $(aws route53 get-hosted-zone --id "$Z" --query 'DelegationSet.NameServers' --output text)
++ dig -4 @ns-1204.awsdns-22.org SOA kahmedt.com +norecurse +noall +comments +answer
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 39804
+;; flags: qr aa; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+;; ANSWER SECTION:
+kahmedt.com.		900	IN	SOA	ns-1204.awsdns-22.org. awsdns-hostmaster.amazon.com. 1 7200 900 1209600 86400
+
++ for ns in $(aws route53 get-hosted-zone --id "$Z" --query 'DelegationSet.NameServers' --output text)
++ dig -4 @ns-1754.awsdns-27.co.uk SOA kahmedt.com +norecurse +noall +comments +answer
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 39204
+;; flags: qr aa; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+;; ANSWER SECTION:
+kahmedt.com.		900	IN	SOA	ns-1204.awsdns-22.org. awsdns-hostmaster.amazon.com. 1 7200 900 1209600 86400
+
++ for ns in $(aws route53 get-hosted-zone --id "$Z" --query 'DelegationSet.NameServers' --output text)
++ dig -4 @ns-129.awsdns-16.com SOA kahmedt.com +norecurse +noall +comments +answer
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 59593
+;; flags: qr aa; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+;; ANSWER SECTION:
+kahmedt.com.		900	IN	SOA	ns-1204.awsdns-22.org. awsdns-hostmaster.amazon.com. 1 7200 900 1209600 86400
+
++ for ns in $(aws route53 get-hosted-zone --id "$Z" --query 'DelegationSet.NameServers' --output text)
++ dig -4 @ns-976.awsdns-58.net SOA kahmedt.com +norecurse +noall +comments +answer
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 57223
+;; flags: qr aa; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+;; ANSWER SECTION:
+kahmedt.com.		900	IN	SOA	ns-1204.awsdns-22.org. awsdns-hostmaster.amazon.com. 1 7200 900 1209600 86400
+
++ set +x
