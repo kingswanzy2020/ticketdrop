@@ -16,6 +16,9 @@
 *.tfvars.json
 !*.tfvars.example
 crash.log
+# Plan files hold every value in plain text
+*.tfplan
+tfplan
 
 # Editors and OS
 .idea/
