@@ -146,16 +146,41 @@ details.phase > summary .progress { font: 600 0.8rem var(--mono); color: var(--m
 .flow path.dash { stroke-dasharray: 5 4; }
 .later-note { margin-block: 1.5rem; }
 .index td:first-child { white-space: nowrap; }
+
+/* Commands: a bar naming where to run them, the copy buttons, then the code. */
+:root { --stop: #b3261e; --stop-soft: #fbe2df; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --stop: #f2867c; --stop-soft: #3b1714; } }
+:root[data-theme="dark"] { --stop: #f2867c; --stop-soft: #3b1714; }
+.cmd { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--code-bg); min-width: 0; }
+.cmd-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; padding: 6px 8px 6px 12px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.cmd-where { font: 600 0.75rem var(--mono); color: var(--muted); margin-right: auto; overflow-wrap: anywhere; }
+.cmd-file { font: 0.72rem var(--mono); color: var(--accent); overflow-wrap: anywhere; }
+.cmd-bar button, .step .ask { font: 600 0.72rem var(--mono); letter-spacing: 0.03em; padding: 3px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; white-space: nowrap; }
+.cmd-bar button:hover, .step .ask:hover { border-color: var(--accent); color: var(--accent); }
+.cmd-bar button.done, .step .ask.done { border-color: var(--done); color: var(--done); }
+.cmd pre { border-radius: 0; background: none; }
+.cmd .cm { color: var(--muted); }
+.tag { font: 600 0.68rem var(--mono); letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.tag.bill { background: var(--accent-soft); color: var(--accent); }
+.tag.kill { background: var(--stop-soft); color: var(--stop); }
+.expect { margin-top: -2px; border-left: 3px solid var(--done); background: var(--done-soft); padding: 8px 12px; border-radius: 0 8px 8px 0; font: 0.8rem/1.5 var(--mono); white-space: pre; overflow-x: auto; color: var(--ink); }
+.expect b { display: block; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--done); }
+.step dd.run { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.run-note { font-size: 0.9rem; color: var(--muted); }
+.step .ask { margin-left: auto; flex: none; background: var(--surface); color: var(--muted); }
+@media (max-width: 520px) { .step .head { flex-wrap: wrap; } .step .ask { margin-left: 32px; } }
+.cmds { display: flex; flex-direction: column; gap: 12px; }
 </style>
 
 <div class="wrap">
 
 <header class="top">
-  <span class="eyebrow">TicketDrop workbook · your part · updated 18 November 2026</span>
+  <span class="eyebrow">TicketDrop workbook · your part · updated 24 November 2026</span>
   <h1>From a laptop to EKS, one phase at a time</h1>
-  <p class="lede">Each phase lists the steps you do yourself, in order: what to do, why, what to watch for, how to check it, and the evidence to save. Phase 2 is finished and folded away. Phase 3 is open.</p>
+  <p class="lede">Each phase lists the steps you do yourself, in order: what to do, why, what to watch for, how to check it, the commands to run, and the evidence to save. Phases 2 and 3 are finished and folded away. Phase 4 is open.</p>
   <ul class="facts">
     <li>Repos: <b>ticketdrop/</b> and <b>ticketdrop-gitops/</b></li>
+    <li>Commands: <b>each step's Run row</b>, and <a href="#commands">everyday ones here</a></li>
     <li>Evidence goes in <b>docs/evidence/phase-N/</b></li>
     <li><span class="pill done">Phase 2 finished 17 November</span></li>
     <li><span class="pill done">Phase 3 finished 19 November</span></li>
@@ -180,6 +205,65 @@ details.phase > summary .progress { font: 600 0.8rem var(--mono); color: var(--m
     </tbody>
   </table></div>
   <p class="muted prose">Tick a step when its "done when" check passes and its capture is saved. Ticks are remembered in this browser only. Phase 2's steps start ticked.</p>
+</section>
+
+<section id="commands">
+  <span class="eyebrow">Commands</span>
+  <h2>Every step has its commands, ready to copy</h2>
+  <div class="prose">
+    <p>Each step has a <b>Run</b> row: its commands in order, with the folder to run them from in the bar above them. Run them yourself, or ask Claude to run some for you.</p>
+    <ul>
+      <li><b>Copy</b> copies the block as it is. Each block starts with the <code>cd</code> it needs, so it works from any terminal set up as below.</li>
+      <li><b>Copy + save</b> appears on a block whose output is a capture still to take. It copies the same commands, wrapped so that the output goes into the file named beside it, with <code>date</code> first, each command shown above its output, and 12-digit account IDs masked. It refuses to overwrite a file that already exists.</li>
+      <li>Tags: <span class="tag bill">bills</span> starts something AWS charges for by the hour, <span class="tag kill">deletes</span> removes something, <span class="once">Only now</span> is a capture that can't be taken later.</li>
+      <li>Text in <code>&lt;angle brackets&gt;</code> is yours to fill in. <code>#</code> starts a comment.</li>
+      <li>Phases 5 to 9 are drafts, and so are their commands: names such as namespaces and release names are settled when the phase starts.</li>
+    </ul>
+  </div>
+  <div class="cmds">
+    <div class="cmd"><div class="cmd-bar"><span class="cmd-where">once per terminal, or once in ~/.bashrc</span><button type="button" data-copy>Copy</button></div><pre><code>export TD=~/Desktop/Personal-Lab/DevOps/ticketdrop
+export TDG=~/Desktop/Personal-Lab/DevOps/ticketdrop-gitops
+export AWS_PROFILE=ticketdrop AWS_REGION=us-east-1
+export CLUSTER=ticketdrop    <span class="cm"># the EKS cluster's name, from Phase 4; change it if yours differs</span></code></pre></div>
+  </div>
+  <div class="prose">
+    <h3>Asking Claude</h3>
+    <p>Each step's title has an <b>Ask Claude</b> button. It copies a line naming the step, such as <code>Workbook Phase 4, step 4 (live/foundation: identity, registry, DNS, budget):</code>. Paste it into Claude Code, opened in the <code>ticketdrop</code> folder, and add what you want:</p>
+    <ul>
+      <li>"brief me", or "is it done?" (the <code>@coach</code> agent);</li>
+      <li>"review my diff" (<code>@infra-reviewer</code>);</li>
+      <li>"this failed:" and the output (<code>@cluster-debugger</code>);</li>
+      <li>"run the Run block for me". Claude runs read-only checks straight away and asks you first before anything that bills, applies or deletes.</li>
+    </ul>
+    <h3>Everyday commands</h3>
+  </div>
+  <div class="cmds">
+    <div class="cmd"><div class="cmd-bar"><span class="cmd-where">local stack, docker compose · ticketdrop/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TD"
+make up              <span class="cm"># shopfront http://localhost:8092, API :8090</span>
+make ps; make logs
+make drop-check      <span class="cm"># ORDERS=600 CAPACITY=1000 KILL=payments|inventory|fulfillment</span>
+make outage-check    <span class="cm"># about 2 minutes</span>
+make demo-drop       <span class="cm"># CUSTOMERS=1000 CAPACITY=1000 ARRIVE=15</span>
+make down            <span class="cm"># deletes its volumes</span></code></pre></div>
+    <div class="cmd"><div class="cmd-bar"><span class="cmd-where">Docker Desktop cluster · ticketdrop-gitops/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TDG"
+kubectl config use-context docker-desktop
+scripts/check.sh      <span class="cm"># is the stack whole?</span>
+scripts/rebuild.sh    <span class="cm"># everything from the files; safe to run again</span>
+scripts/validate.sh   <span class="cm"># lint and schemas, no cluster</span>
+scripts/teardown.sh   <span class="cm"># asks you to type yes</span>
+cd "$TD" &amp;&amp; make drop-check TARGET=cluster    <span class="cm"># through the Gateway on http://localhost:8088</span></code></pre></div>
+    <div class="cmd"><div class="cmd-bar"><span class="cmd-where">before you push · ticketdrop/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TD"
+make vet &amp;&amp; golangci-lint run ./... &amp;&amp; go test -race -count=1 ./...
+go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
+actionlint
+terraform fmt -check -recursive terraform</code></pre></div>
+    <div class="cmd"><div class="cmd-bar"><span class="cmd-where">an AWS session · ticketdrop/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TD"
+aws sso login    <span class="cm"># when a call says the token has expired</span>
+aws sts get-caller-identity --query Arn --output text
+export MY_IP=$(curl -fsS https://checkip.amazonaws.com)    <span class="cm"># the EKS API answers only this address</span>
+make orphan-check    <span class="cm"># anything still billing? Run it at the end of every session</span></code></pre></div>
+  </div>
+  <p class="muted prose">Tools these use: <code>aws</code>, <code>kubectl</code>, <code>helm</code>, <code>gh</code>, <code>jq</code>, <code>docker</code>, <code>terraform</code> 1.17.2, <code>tflint</code>, <code>shellcheck</code>, <code>actionlint</code>, <code>psql</code>, <code>dig</code>. Trivy and k6 run from their images.</p>
 </section>
 
 <details class="phase" id="phase-2">
@@ -409,6 +493,14 @@ details.phase > summary .progress { font: 600 0.8rem var(--mono); color: var(--m
     <dt>Why</dt><dd>Everything below runs here. 8 GB is tight for a database operator, an ingress controller, KEDA and nine services together.</dd>
     <dt>Watch for</dt><dd>Your only kube context today points at an EKS cluster that no longer exists. Make sure the new one is selected before any <code>kubectl apply</code>.</dd>
     <dt>Done when</dt><dd><code>kubectl config current-context</code> prints <code>docker-desktop</code> and <code>kubectl get nodes</code> shows Ready.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button></div><pre><code>kubectl config use-context docker-desktop
+kubectl config current-context
+kubectl get nodes</code></pre></div>
+      <div class="expect"><b>Expect</b>docker-desktop
+NAME                    STATUS   ROLES           AGE   VERSION
+desktop-control-plane   Ready    control-plane   ...   v1.36.4</div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap none">Nothing to keep from this step. If it fails, capture the error before you fix it.</dd>
   </dl></div>
 
@@ -417,6 +509,13 @@ details.phase > summary .progress { font: 600 0.8rem var(--mono); color: var(--m
     <dt>Why</dt><dd>A namespace is a room with its own rules. With <code>restricted</code> enforced, a pod that asks to run as root is refused at the door, so a mistake in your chart shows up now and not in an audit.</dd>
     <dt>Watch for</dt><dd>Do not enforce <code>restricted</code> on <code>data</code> yet. Check what the database operator's pods need first.</dd>
     <dt>Done when</dt><dd><code>kubectl run test --image=nginx -n ticketdrop</code> is rejected with a Pod Security message.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop-gitops/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TDG"
+kubectl apply -f platform/namespaces.yaml
+kubectl get ns ticketdrop data --show-labels
+kubectl run test --image=nginx -n ticketdrop  <span class="cm">  # must be refused</span></code></pre></div>
+      <div class="expect"><b>Expect</b>Error from server (Forbidden): pods "test" is forbidden: violates PodSecurity "restricted:latest": ...</div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><code>02-restricted-rejects-root-pod.txt</code>: the <code>kubectl run</code> command and the whole Pod Security rejection message.</dd>
   </dl></div>
 
@@ -425,6 +524,16 @@ details.phase > summary .progress { font: 600 0.8rem var(--mono); color: var(--m
     <dt>Why</dt><dd>There is no registry yet. Docker Desktop's cluster can use images from the local store when the containerd image store is on, which it is on your machine.</dd>
     <dt>Watch for</dt><dd>With the tag <code>latest</code>, Kubernetes always tries to pull from a registry and fails. <code>ErrImagePull</code> on a local image nearly always means the tag or the pull policy.</dd>
     <dt>Done when</dt><dd>A throwaway pod using <code>ticketdrop/gateway:dev</code> gets past image pull. It will then crash for lack of settings, which is expected.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TD"
+SVCS="web gateway catalog orders inventory payments fulfillment notifications scheduler"
+for s in $SVCS; do docker build -f services/$s/Dockerfile -t ticketdrop/$s:dev . || break; done
+<span class="cm"># A rebuilt image reaches the node only when loaded into it (TROUBLESHOOTING 8)</span>
+for s in $SVCS; do
+  docker save ticketdrop/$s:dev | docker exec -i desktop-control-plane ctr -n k8s.io images import -
+done
+kubectl rollout restart deploy -n ticketdrop  <span class="cm">  # running pods pick up the new images</span></code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap none">Nothing to keep from this step. If it fails, capture the error before you fix it.</dd>
   </dl></div>
 
@@ -433,6 +542,17 @@ details.phase > summary .progress { font: 600 0.8rem var(--mono); color: var(--m
     <dt>Why</dt><dd>It stands in for SNS and SQS until Phase 4. It is also your first complete workload: config, pod, stable address.</dd>
     <dt>Watch for</dt><dd>The file's <code>Host</code> value and every service's <code>EVENTS_QUEUE_URL</code> must use the Service's in-cluster name, such as <code>goaws.data.svc.cluster.local</code>. It keeps its queues in memory, so a restart empties them.</dd>
     <dt>Done when</dt><dd>From a port-forward, <code>aws --endpoint-url http://localhost:4100 sqs list-queues</code> lists ten queues: five, each with its dead-letter queue.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop-gitops/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TDG"
+kubectl apply -f platform/goaws/
+kubectl rollout status deploy/goaws -n data --timeout=120s
+<span class="cm"># 4100 is also the compose emulator's port: run make down first if it is up</span>
+kubectl port-forward -n data svc/goaws 4100:4100 &gt;/dev/null &amp; pf=$!; sleep 2
+AWS_ACCESS_KEY_ID=x AWS_SECRET_ACCESS_KEY=x aws --region us-east-1 \
+  --endpoint-url http://localhost:4100 sqs list-queues
+kill $pf</code></pre></div>
+      <div class="expect"><b>Expect</b>ten QueueUrls: five &lt;service&gt;-events, each with its &lt;service&gt;-events-dlq</div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><code>04-goaws-ten-queues.txt</code>: the <code>list-queues</code> output with all ten queue URLs.</dd>
   </dl></div>
 
@@ -441,6 +561,27 @@ details.phase > summary .progress { font: 600 0.8rem var(--mono); color: var(--m
     <dt>Why</dt><dd>An operator is a controller that knows how to run one piece of software. You describe "a Postgres like this" and it handles startup, storage and failover. You have already run Postgres as a bare StatefulSet; this is the next level.</dd>
     <dt>Watch for</dt><dd>A design choice that is yours to make and record: one Postgres cluster with six databases, or six clusters. One is lighter on memory and matches local compose; six isolates better. Read the operator's current docs for how it declares extra databases and roles before you commit.</dd>
     <dt>Done when</dt><dd><code>psql</code> through a port-forward, using one service's own user, can reach its database and is refused on another's.</dd>
+    <dt>Run</dt><dd class="run">
+      <p class="run-note">The long version, with the reasons, is <code>docs/guide/phase-2-commands.md</code>.</p>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop-gitops/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TDG"
+helm upgrade --install cnpg cnpg/cloudnative-pg --version 0.29.1 -n cnpg-system \
+  -f platform/cnpg/values.yaml --wait
+scripts/db-secrets.sh  <span class="cm">  # pg-&lt;svc&gt; in data, &lt;svc&gt;-db in ticketdrop; passwords stay in secrets/</span>
+kubectl apply -f platform/postgres/cluster.yaml
+kubectl wait cluster/pg -n data --for=condition=Ready --timeout=300s
+kubectl apply -f platform/postgres/roles.yaml -f platform/postgres/databases.yaml
+kubectl get cluster pg -n data
+kubectl get databaserole,database -n data  <span class="cm">  # APPLIED true on all ten</span></code></pre></div>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop-gitops/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TDG"
+kubectl port-forward -n data svc/pg-rw 15432:5432 &gt;/dev/null &amp; pf=$!; sleep 2
+<span class="cm"># a passfile, so the password never appears in the shell trace or history</span>
+sed 's/^/127.0.0.1:15432:*:orders:/' secrets/orders.password &gt; ~/.pgpass-td; chmod 600 ~/.pgpass-td
+PGPASSFILE=~/.pgpass-td psql "host=127.0.0.1 port=15432 user=orders dbname=orders sslmode=require" \
+  -c 'select current_user, current_database();'  <span class="cm">  # works</span>
+PGPASSFILE=~/.pgpass-td psql "host=127.0.0.1 port=15432 user=orders dbname=catalog sslmode=require" \
+  -c 'select 1;'  <span class="cm">  # refused by pg_hba.conf</span>
+rm ~/.pgpass-td; kill $pf</code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul>
       <li><code>05-postgres-cluster-healthy.txt</code>: the operator's status for your cluster, showing it healthy.</li>
       <li><code>05-psql-own-database-only.txt</code>: both attempts in one capture, the connection that works and the one that is refused, with its error. Check that no password or full <code>DATABASE_URL</code> is in it.</li>
@@ -458,6 +599,18 @@ details.phase > summary .progress { font: 600 0.8rem var(--mono); color: var(--m
       <li>Give every container resource requests. Karpenter will later size nodes from them.</li>
     </ul></dd>
     <dt>Done when</dt><dd><code>helm lint</code> is clean, the <code>orders</code> pod is Ready, and <code>kubectl delete pod</code> on it logs the shutdown steps in order and exits 0.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop-gitops/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TDG"
+helm lint charts/service -f charts/service/values/values-orders.yaml</code></pre></div>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop-gitops/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TDG"
+helm upgrade --install orders charts/service -n ticketdrop -f charts/service/values/values-orders.yaml
+kubectl rollout status deploy/orders -n ticketdrop</code></pre></div>
+      <p class="run-note">The shutdown test needs two terminals. Start the log first: it goes with the pod.</p>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">terminal 1 · any folder</span><span class="once">Only now</span><button type="button" data-copy>Copy</button></div><pre><code>POD=$(kubectl get pod -n ticketdrop -l app.kubernetes.io/name=orders -o name | head -1)
+kubectl logs -f -n ticketdrop "$POD"</code></pre></div>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">terminal 2 · any folder</span><button type="button" data-copy>Copy</button></div><pre><code>POD=$(kubectl get pod -n ticketdrop -l app.kubernetes.io/name=orders -o name | head -1)
+kubectl delete -n ticketdrop "$POD"</code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul>
       <li><code>06-helm-lint-clean.txt</code>: the <code>helm lint</code> output.</li>
       <li><span class="once">Only now</span> <code>06-orders-shutdown-in-order.txt</code>: the pod's log from the delete to the exit, showing the shutdown steps in order and exit code 0. The log goes with the pod, so start <code>kubectl logs -f</code> in a second terminal before you delete it.</li>
@@ -469,6 +622,28 @@ details.phase > summary .progress { font: 600 0.8rem var(--mono); color: var(--m
     <dt>Why</dt><dd>This is the test of your chart: if a service needs a template change and not just values, the chart was not general enough. The disruption budget tells Kubernetes how many pods it may take away at once during maintenance.</dd>
     <dt>Watch for</dt><dd><code>payments</code> and <code>fulfillment</code> serve no app traffic, so their Service matters only for metrics. <code>gateway</code> has no database and no queue; the chart must cope with both being absent. <code>web</code> has neither as well, and needs only <code>API_URL</code>. <code>catalog</code> has a database and the topic but no queue. <code>notifications</code> is the reverse: a queue and no database. <code>scheduler</code> is the odd one: no app port, no events at all, but it needs its database, and it should run two replicas, since the point of its leader election is surviving the loss of one.</dd>
     <dt>Done when</dt><dd>All nine are Ready, exactly one scheduler pod reports <code>scheduler_leader 1</code> on <code>/metrics</code>, and an order ends <code>ticketed</code>. A drop has to exist before it can be ordered: through a <code>kubectl port-forward</code> to catalog, <code>curl -X PUT localhost:&lt;port&gt;/internal/v1/drops/first -d '{"name":"First","venue":"Here","opens_at":"2026-01-01T00:00:00Z","tiers":[{"tier":"general","price_cents":2500,"capacity":100}]}'</code>. An opening time in the past makes the scheduler open it within a second. Then order it through a port-forward to the gateway, or open a port-forward to <code>web</code> in a browser and buy a ticket there.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop-gitops/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TDG"
+for s in catalog inventory orders payments fulfillment notifications scheduler gateway web; do
+  helm upgrade --install $s charts/service -n ticketdrop -f charts/service/values/values-$s.yaml
+done
+kubectl wait --for=condition=Available deploy --all -n ticketdrop --timeout=300s
+kubectl get pods -n ticketdrop</code></pre></div>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button></div><pre><code>for p in $(kubectl get pod -n ticketdrop -l app.kubernetes.io/name=scheduler -o name); do
+  kubectl port-forward -n ticketdrop "$p" 19090:9090 &gt;/dev/null &amp; pf=$!; sleep 2
+  echo "$p $(curl -s localhost:19090/metrics | grep '^scheduler_leader')"
+  kill $pf; wait $pf 2&gt;/dev/null
+done</code></pre></div>
+      <div class="expect"><b>Expect</b>pod/scheduler-...  scheduler_leader 1
+pod/scheduler-...  scheduler_leader 0</div>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button></div><pre><code><span class="cm"># a drop has to exist before it can be ordered; a past opening time opens it within a second</span>
+kubectl port-forward -n ticketdrop svc/catalog 18091:8080 &gt;/dev/null &amp; pf=$!; sleep 2
+curl -X PUT localhost:18091/internal/v1/drops/first -d '{"name":"First","venue":"Here",
+  "opens_at":"2026-01-01T00:00:00Z","tiers":[{"tier":"general","price_cents":2500,"capacity":100}]}'
+kill $pf
+<span class="cm"># then buy a ticket in the shopfront: http://localhost:8088/ once step 8 is done, or</span>
+kubectl port-forward -n ticketdrop svc/web 18092:8080  <span class="cm">  # http://localhost:18092/</span></code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul>
       <li><code>07-nine-services-ready.txt</code>: <code>kubectl get pods -n ticketdrop</code> with all nine Ready.</li>
       <li><code>07-scheduler-one-leader.txt</code>: <code>scheduler_leader</code> from both scheduler pods, one reporting 1 and the other 0.</li>
@@ -481,6 +656,16 @@ details.phase > summary .progress { font: 600 0.8rem var(--mono); color: var(--m
     <dt>Why</dt><dd>Port-forward is a back door for you. A Gateway is the real entrance. The same two objects, with a hostname and a certificate added, are what you will use on EKS.</dd>
     <dt>Watch for</dt><dd>Port 8080 is already taken on your machine, so choose another for Traefik's listener. A route in one namespace attaching to a Gateway in another has to be allowed by the Gateway. Confirm in the current Traefik chart docs how the Gateway API CRDs get installed.</dd>
     <dt>Done when</dt><dd><code>curl http://localhost:&lt;port&gt;/v1/drops/x/availability</code> is answered by the app (a JSON 404 from inventory), <code>http://localhost:&lt;port&gt;/</code> in a browser shows the shopfront, and <code>/v1/healthz</code> through the same address is a 404 from the gateway: the admin port is not exposed.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop-gitops/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TDG"
+kubectl apply --server-side -f platform/gateway-api/standard-install-v1.6.3.yaml
+helm upgrade --install traefik traefik/traefik --version 42.1.3 -n traefik \
+  -f platform/traefik/values.yaml --wait
+kubectl apply -f platform/routes/
+kubectl get gateway -n traefik; kubectl get httproute -n ticketdrop</code></pre></div>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button></div><pre><code>curl -i http://localhost:8088/v1/drops/x/availability  <span class="cm">  # a JSON 404 from inventory</span>
+curl -i http://localhost:8088/v1/healthz               <span class="cm">  # a 404: the admin port is not exposed</span></code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul>
       <li><code>08-shopfront-through-gateway.png</code>: the shopfront in a browser with the address bar visible, so the Traefik port shows.</li>
       <li><code>08-routes-through-gateway.txt</code>: both <code>curl -i</code> calls with their status lines: the JSON 404 from inventory, and the 404 for <code>/v1/healthz</code>.</li>
@@ -492,6 +677,30 @@ details.phase > summary .progress { font: 600 0.8rem var(--mono); color: var(--m
     <dt>Why</dt><dd>By default every pod can call every other pod. If the gateway were ever compromised, it could talk straight to the payments database. A default-deny policy means each connection exists because you wrote it down.</dd>
     <dt>Watch for</dt><dd>Forgetting DNS is the classic mistake: everything breaks and nothing says why. Also, it is not yet confirmed that Docker Desktop's cluster enforces NetworkPolicy at all. Test that first; if it does not, write the policies anyway and prove them on EKS.</dd>
     <dt>Done when</dt><dd>A test pod in <code>ticketdrop</code> cannot reach Postgres, while <code>orders</code> still can, and an order still completes.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop-gitops/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TDG"
+kubectl apply -f platform/network-policies/dns.yaml
+<span class="cm"># each service's own policy comes with its Helm release (step 7); the deny goes in last</span>
+kubectl apply -f platform/network-policies/default-deny.yaml
+kubectl get networkpolicy -n ticketdrop</code></pre></div>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button></div><pre><code>kubectl apply -f - &lt;&lt;'EOF'
+apiVersion: v1
+kind: Pod
+metadata: {name: np-probe, namespace: ticketdrop, labels: {run: np-probe}}
+spec:
+  securityContext: {runAsNonRoot: true, seccompProfile: {type: RuntimeDefault}}
+  containers:
+    - name: probe
+      image: ghcr.io/cloudnative-pg/postgresql:18.6-system-trixie
+      command: [sleep, infinity]
+      securityContext: {allowPrivilegeEscalation: false, capabilities: {drop: [ALL]}}
+EOF
+kubectl wait pod/np-probe -n ticketdrop --for=condition=Ready --timeout=120s
+sleep 5  <span class="cm">  # a new pod is not policed for its first moments (TROUBLESHOOTING 18)</span>
+kubectl exec -n ticketdrop np-probe -- pg_isready -t 5 -h pg-rw.data.svc.cluster.local  <span class="cm">  # no response</span>
+kubectl delete pod np-probe -n ticketdrop
+cd "$TD" &amp;&amp; make drop-check TARGET=cluster ORDERS=50  <span class="cm">  # the services still reach Postgres</span></code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul>
       <li><span class="once">Only now</span> <code>09-networkpolicy-enforcement-test.txt</code>: your first test of whether Docker Desktop enforces NetworkPolicy at all, whichever way it comes out. It settles an open question, and if the answer is no it is the reason behind a decision.</li>
       <li><code>09-test-pod-blocked-orders-allowed.txt</code>: the test pod failing to reach Postgres, and an order still ending <code>ticketed</code> with the policies in place.</li>
@@ -503,6 +712,16 @@ details.phase > summary .progress { font: 600 0.8rem var(--mono); color: var(--m
     <dt>Why</dt><dd>CPU tells you a pod is busy. Queue depth tells you work is waiting, which is what matters for a consumer. With nothing waiting, zero pods run and cost nothing.</dd>
     <dt>Watch for</dt><dd>The scaler needs an endpoint override and credentials to reach an emulator instead of AWS; check the current KEDA docs for the exact field names. Decide what "enough backlog for one more pod" is and write down why: fulfillment handles about 20 orders a second per pod.</dd>
     <dt>Done when</dt><dd>With the queue empty there are no fulfillment pods. Placing a few hundred orders brings several up, and they go away again after the queue drains.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop-gitops/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TDG"
+helm upgrade --install keda kedacore/keda --version 2.21.0 -n keda -f platform/keda/values.yaml --wait
+helm upgrade --install fulfillment charts/service -n ticketdrop -f charts/service/values/values-fulfillment.yaml
+kubectl get scaledobject,hpa -n ticketdrop</code></pre></div>
+      <p class="run-note">Start the watch first, leave it running until the count is back at zero, then stop it with Ctrl-C.</p>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">terminal 1 · any folder</span><span class="once">Only now</span><button type="button" data-copy>Copy</button></div><pre><code>kubectl get pods -n ticketdrop -l app.kubernetes.io/name=fulfillment -w \
+  | while read -r l; do echo "$(date +%T) $l"; done</code></pre></div>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">terminal 2 · ticketdrop/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TD" &amp;&amp; make drop-check TARGET=cluster ORDERS=600</code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul>
       <li><span class="once">Only now</span> <code>10-fulfillment-scale-0-n-0.txt</code>: a watch on the fulfillment pods (<code>kubectl get pods -w</code>, with timestamps) started before the orders are placed and left running until the count is back at zero.</li>
       <li><span class="once">Only now</span> <code>10-fulfillment-scaled-up.png</code>: one screenshot at the peak, with the pod list and the queue depth side by side.</li>
@@ -550,9 +769,10 @@ details.phase > summary .progress { font: 600 0.8rem var(--mono); color: var(--m
     <h3>The scripts</h3>
     <p>Three scripts in <code>ticketdrop-gitops/scripts/</code> follow the orders below. Run them from the repo root:</p>
   </div>
-  <pre><code>scripts/teardown.sh          # asks you to type yes; --yes skips the question
-scripts/rebuild.sh 2&gt;&amp;1 | tee ../ticketdrop/docs/evidence/phase-2/&lt;name&gt;.txt
-scripts/check.sh             # is the stack whole? Run it any time</code></pre>
+  <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop-gitops/</span><span class="tag kill">deletes</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TDG"
+scripts/teardown.sh          <span class="cm"># asks you to type yes; --yes skips the question</span>
+scripts/rebuild.sh 2&gt;&amp;1 | tee "$TD/docs/evidence/phase-2/&lt;name&gt;.txt"
+scripts/check.sh             <span class="cm"># is the stack whole? Run it any time</span></code></pre></div>
   <div class="prose">
     <ul>
       <li><strong><code>teardown.sh</code></strong> deletes in the order below. It fails if KEDA objects are still there after the uninstalls. If a namespace sticks in <code>Terminating</code>, it prints the reason and stops. At the end it fails if any Helm release, webhook or GatewayClass is left.</li>
@@ -762,6 +982,12 @@ scripts/check.sh             # is the stack whole? Run it any time</code></pre>
       <li>The rulesets <code>protect-app-main</code> and <code>protect-infra-main</code> already require a PR and the check <code>ci-ok</code>, with no bypass and "branches must be up to date" on. <strong>So nothing can merge in either repo until step 5 adds <code>ci-ok</code>.</strong></li>
       <li><code>phase-3-ci</code> starts at <code>e1287c4</code>, not <code>ad888ba</code>. The files are the same.</li>
     </ul></dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button></div><pre><code>R=kingswanzy2020/ticketdrop  <span class="cm">  # and kingswanzy2020/ticketdrop-gitops</span>
+gh api repos/$R/actions/permissions
+gh api repos/$R/actions/permissions/workflow --jq .default_workflow_permissions  <span class="cm">  # read</span>
+gh api repos/$R/rulesets --jq '.[] | "\(.id) \(.name) \(.enforcement)"'</code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul>
       <li><code>00-phase-2-merged.txt</code> and <code>00-actions-settings.txt</code>: saved 18 November.</li>
     </ul></dd>
@@ -777,8 +1003,20 @@ scripts/check.sh             # is the stack whole? Run it any time</code></pre>
       <li>Avoid releases only days old. <code>setup-go</code> is pinned at v7.0.0 because v7.1.0 came out on 17 November.</li>
     </ul></dd>
     <dt>Done when</dt><dd><code>actionlint</code> is clean, and every <code>uses:</code> carries a 40-character SHA that matches its tag.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TD"
+actionlint -verbose
+grep -rn 'uses:' .github | grep -v '@[0-9a-f]\{40\}' || echo "every uses: is pinned to a full SHA"
+<span class="cm"># each pinned SHA against the commit its tag points at today</span>
+grep -ho 'uses: [^ ]* # v[^ ]*' .github/workflows/*.yaml | sort -u |
+while read -r _ ref _ tag; do
+  repo=${ref%@*}; pinned=${ref#*@}
+  actual=$(gh api "repos/$repo/commits/$tag" --jq .sha)
+  [ "$pinned" = "$actual" ] &amp;&amp; echo "MATCH    $repo $tag" || echo "MISMATCH $repo $tag pinned=$pinned tag=$actual"
+done</code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul>
-      <li><code>01-actions-pinned.txt</code> and <code>01-actionlint-clean.txt</code>. The commands are under "Capture commands" below.</li>
+      <li><code>01-actions-pinned.txt</code> and <code>01-actionlint-clean.txt</code> (saved).</li>
     </ul></dd>
   </dl></div>
 
@@ -799,6 +1037,18 @@ scripts/check.sh             # is the stack whole? Run it any time</code></pre>
         <li>an all-zero or missing base prints all nine.</li>
       </ul>
       On GitHub, the first run's summary shows the list.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TD"
+s=.github/scripts/changed-services.sh
+shellcheck $s
+$s d85b804^ d85b804                                 <span class="cm">  # docs only: []</span>
+$s e1287c4^ e1287c4                                 <span class="cm">  # pkg/: all nine</span>
+$s 0000000000000000000000000000000000000000 HEAD    <span class="cm">  # no usable base: all nine</span>
+$s origin/main HEAD                                 <span class="cm">  # what your branch would build</span></code></pre></div>
+      <div class="expect"><b>Expect</b>[]
+["catalog","fulfillment","gateway","inventory","notifications","orders","payments","scheduler","web"]
+...</div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul>
       <li><code>02-changes-local.txt</code>: every case above.</li>
       <li><span class="once">Only now</span> <code>02-changes-first-pr-run.txt</code> and <code>02-first-pr-checks.png</code>: the first run's log, and its checks list. There is only one first run, and logs expire after 90 days.</li>
@@ -814,6 +1064,13 @@ scripts/check.sh             # is the stack whole? Run it any time</code></pre>
       <li><code>-race</code> needs cgo. The Ubuntu runner has gcc, and a distroless image doesn't need it, because the tests never run in the image.</li>
     </ul></dd>
     <dt>Done when</dt><dd>The go job is green on the PR.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TD"
+make vet
+golangci-lint run ./...
+go test -race -count=1 ./...
+go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...</code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul>
       <li><code>03-go-checks-local.txt</code>: all four checks passing on <code>phase-3-ci</code>.</li>
       <li><code>fail-3-go-checks-on-main.txt</code>: the same checks on <code>main</code>, as it was before the fixes: golangci-lint's 21 issues, govulncheck's 15 vulnerabilities on Go 1.27.1, and v1.1.4's panic. These can be reproduced from <code>main</code> until it changes, so take them before you merge.</li>
@@ -830,6 +1087,19 @@ scripts/check.sh             # is the stack whole? Run it any time</code></pre>
       <li>The database is about 1.7 GB. Cached once a day, that keeps nine parallel jobs from each downloading it and from hitting <code>TOOMANYREQUESTS</code>.</li>
     </ul></dd>
     <dt>Done when</dt><dd>The first run shows nine <code>build (…)</code> jobs, each with a clean gate and both platforms built.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TD"
+S=orders  <span class="cm">  # any service</span>
+W=$HOME/.cache/td-scan; mkdir -p $W/cache  <span class="cm">  # not /tmp: Docker Desktop cannot mount it</span>
+T=aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+docker buildx build -f services/$S/Dockerfile --platform linux/amd64 \
+  --build-arg VERSION=local --output type=docker,dest=$W/image.tar .
+docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$W:/scan" $T \
+  image --cache-dir /scan/cache --input /scan/image.tar --severity CRITICAL --ignore-unfixed --exit-code 1
+echo "gate exit $?"
+docker buildx build -f services/$S/Dockerfile --platform linux/amd64,linux/arm64 --build-arg VERSION=local .
+rm -rf $W  <span class="cm">  # the database alone is 1.7 GB</span></code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul>
       <li><code>04-build-scan-local.txt</code>: one service built, scanned and built for both platforms on your laptop.</li>
       <li>The CI side is in <code>02-changes-first-pr-run.txt</code>, the same run.</li>
@@ -845,6 +1115,13 @@ scripts/check.sh             # is the stack whole? Run it any time</code></pre>
     </ul></dd>
     <dt>Done when</dt><dd>The <code>phase-3-ci</code> PR shows ci-ok green and the merge button enabled.</dd>
     <dt>Done</dt><dd>PR #4: ci-ok green, merge state <code>CLEAN</code>. Both rulesets now require <code>ci-ok</code> from GitHub Actions only (DECISIONS 64). The concurrency, buildx and schedule changes went in with it (DECISIONS 65).</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TD"
+gh pr checks &lt;pr&gt;                                                <span class="cm">  # ci-ok among them</span>
+gh pr view &lt;pr&gt; --json mergeStateStatus --jq .mergeStateStatus  <span class="cm">  # CLEAN, or BLOCKED</span>
+gh api repos/kingswanzy2020/ticketdrop/rulesets/&lt;id&gt; \
+  --jq '.rules[] | select(.type=="required_status_checks") | .parameters.required_status_checks'</code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>05-ci-ok-green.txt</code> and <code>05-ci-ok-source-github-actions.txt</code> (saved). <code>05-ci-ok-green.png</code> is yours: PR #4's checks, from its page.</li></ul></dd>
   </dl></div>
 
@@ -865,6 +1142,19 @@ scripts/check.sh             # is the stack whole? Run it any time</code></pre>
       <li>The orders PR shows only <code>build (orders)</code>, and the docs PR shows no build.</li>
       <li>On the test and CVE PRs, ci-ok fails and the merge button is disabled.</li>
     </ul></dd>
+    <dt>Run</dt><dd class="run">
+      <p class="run-note">Any proof PR, in either repo: the same commands with its own branch.</p>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TD"
+git switch -c &lt;branch&gt; origin/main
+<span class="cm"># make the one change, then</span>
+git commit -am "&lt;what it proves&gt;" &amp;&amp; git push -u origin &lt;branch&gt;
+gh pr create --fill --base main
+gh pr checks --watch
+gh pr view --json mergeStateStatus --jq .mergeStateStatus  <span class="cm">  # CLEAN or BLOCKED</span>
+id=$(gh run list --branch &lt;branch&gt; --workflow ci --limit 1 --json databaseId --jq '.[0].databaseId')
+gh run view "$id"; gh run view "$id" --log-failed
+gh pr close &lt;branch&gt; --delete-branch  <span class="cm">  # after the screenshot</span></code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul>
       <li><code>06-one-service-built.txt</code>, <code>06-docs-only-ci-ok.txt</code>: each run's log.</li>
       <li><span class="once">Only now</span> <code>fail-6-test-blocks-merge.txt</code> plus <code>.png</code>, and <code>fail-6-critical-cve-blocks-merge.txt</code> plus <code>.png</code>. Take the screenshot while the PR is open, with the failed check and the disabled merge button both in view.</li>
@@ -893,6 +1183,14 @@ scripts/check.sh             # is the stack whole? Run it any time</code></pre>
     </ul></dd>
     <dt>Done when</dt><dd>It passes, and a misspelled field fails it.</dd>
     <dt>Done</dt><dd><code>scripts/validate.sh</code> in the GitOps repo, run by CI's lint job after shellcheck. Both schema sets are pinned to a commit (kubeconform's own default reads <code>master</code>), CRDs are skipped, and every check runs before it fails, so one run lists every problem. 117 resources in about 10 s. A misspelled field failed it in all nine services and the HTTPRoute; <code>helm lint</code> passed the same typo. A misspelled <em>values key</em> is not caught: the chart has no <code>values.schema.json</code> (DECISIONS 66).</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop-gitops/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TDG"
+helm repo add cnpg https://cloudnative-pg.github.io/charts
+helm repo add kedacore https://kedacore.github.io/charts
+helm repo add traefik https://traefik.github.io/charts
+helm repo update
+scripts/validate.sh  <span class="cm">  # helm lint + kubeconform for all nine and platform/, no cluster</span></code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>07-validate-helm-lint-kubeconform.txt</code>, <code>fail-7-kubeconform-misspelled-field.txt</code>, <code>fail-7-shellcheck-lib-alone.txt</code> (saved).</li></ul></dd>
   </dl></div>
 
@@ -913,6 +1211,13 @@ scripts/check.sh             # is the stack whole? Run it any time</code></pre>
       <li>Found on the way: cloud-provider-kind installs Gateway API CRDs of its own unless started with <code>--gateway-channel disabled</code> (TROUBLESHOOTING 16), and a new pod is not policed for its first second, so a probe must wait before it calls (TROUBLESHOOTING 18). The same window is on Docker Desktop.</li>
     </ul></dd>
     <dt>Done when</dt><dd><code>check.sh</code> passes in the runner, and a chart change that breaks a pod blocks the gitops PR.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop-gitops/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TDG"
+shellcheck -x scripts/{check,rebuild,teardown,validate,db-secrets}.sh
+scripts/rebuild.sh  <span class="cm">  # what the kind job runs, here on Docker Desktop; ends with check.sh</span>
+gh run list -R kingswanzy2020/ticketdrop-gitops --workflow ci --limit 5
+gh run view &lt;id&gt; -R kingswanzy2020/ticketdrop-gitops --log-failed</code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul>
       <li><code>08-kind-install-test.txt</code>, <code>fail-8-cloud-provider-kind-gateway-crds.txt</code>, <code>fail-8-networkpolicy-new-pod-window.txt</code>, <code>fail-8-chart-blocks-merge.txt</code> (saved).</li>
       <li><span class="once">Only now</span> <code>fail-8-chart-blocks-merge.png</code>, while that PR is open.</li>
@@ -930,114 +1235,14 @@ scripts/check.sh             # is the stack whole? Run it any time</code></pre>
       </ul></dd>
     <dt>Why</dt><dd>The write-up at the end is built from these, and the reasons are freshest now.</dd>
     <dt>Done when</dt><dd>Every evidence file is linked from the entry it backs.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TD"
+grep -c '^## ' docs/DECISIONS.md docs/TROUBLESHOOTING.md
+<span class="cm"># every evidence file is linked from some record</span>
+for f in docs/evidence/phase-3/*; do grep -rqF "$(basename "$f")" docs/*.md || echo "not linked: $f"; done</code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap none">Nothing new.</dd>
   </dl></div>
-</section>
-
-<section>
-  <span class="eyebrow">Capture commands</span>
-  <h2>Copy, run from the <code>ticketdrop</code> folder</h2>
-  <div class="note prose">
-    <p>Each block runs <code>date</code> first and uses <code>set -x</code>, so every command appears in the file above its output.</p>
-    <ul>
-      <li>The tools needed are <code>gh</code>, <code>jq</code>, <code>docker</code>, <code>shellcheck</code> (<code>brew install shellcheck</code>) and <code>actionlint</code> (<code>go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.12</code>).</li>
-      <li>Output written by <code>tee</code> has no VS Code markers. If you paste from the terminal instead, clean the file with <code>sed -i 's/\x1b\]633;[^\x07]*\x07//g' &lt;file&gt;</code>.</li>
-    </ul>
-  </div>
-<pre><code>E=docs/evidence/phase-3
-s=.github/scripts/changed-services.sh
-
-# 01: every action pinned, and each SHA matches its tag
-{ date; set -x
-  grep -rn 'uses:' .github | grep -v '@[0-9a-f]\{40\}' || echo "every uses: is pinned to a full SHA"
-  set +x
-  grep -ho 'uses: [^ ]* # v[^ ]*' .github/workflows/*.yaml | sort -u |
-  while read -r _ ref _ tag; do
-    repo=${ref%@*} pinned=${ref#*@}
-    actual=$(gh api "repos/$repo/commits/$tag" --jq .sha)
-    [ "$pinned" = "$actual" ] &amp;&amp; r=MATCH || r=MISMATCH
-    echo "$repo $tag pinned=$pinned tag=$actual $r"
-  done
-} 2&gt;&amp;1 | tee $E/01-actions-pinned.txt
-
-# 01: actionlint (it runs shellcheck on every run: block)
-{ date; actionlint -version; shellcheck --version | head -2; set -x
-  actionlint -verbose; echo "exit $?"
-} 2&gt;&amp;1 | tee $E/01-actionlint-clean.txt
-
-# 02: the change-detection cases, on real and throwaway commits
-{ date; set -x
-  shellcheck $s; echo "shellcheck exit $?"
-  : docs only;  $s d85b804^ d85b804
-  : pkg;        $s e1287c4^ e1287c4
-  : new branch; $s 0000000000000000000000000000000000000000 HEAD
-  : missing;    $s deadbeefdeadbeefdeadbeefdeadbeefdeadbeef HEAD
-  git worktree add -q -b tmp-changes ../tc HEAD
-  cd ../tc
-  echo '// x' &gt;&gt; services/orders/cmd/main.go; git commit -qam one
-  : one service; ../ticketdrop/$s HEAD^ HEAD
-  git mv services/orders/internal/order/inventory_test.go services/payments/moved_test.go; git commit -qm mv
-  : rename;      ../ticketdrop/$s HEAD^ HEAD
-  mkdir services/tickets; cp services/orders/Dockerfile services/tickets/; git add services/tickets; git commit -qm new
-  : new service; ../ticketdrop/$s HEAD^ HEAD
-  git rm -rq services/tickets; git commit -qm del
-  : deleted;     ../ticketdrop/$s HEAD^ HEAD
-  cd ../ticketdrop
-  git worktree remove --force ../tc; git branch -D tmp-changes
-  set +x
-} 2&gt;&amp;1 | tee $E/02-changes-local.txt
-
-# 03: the Go checks on this branch
-{ date; go version; golangci-lint version; set -x
-  make vet
-  golangci-lint run ./...
-  go test -race -count=1 ./...
-  go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
-  set +x
-} 2&gt;&amp;1 | tee $E/03-go-checks-local.txt
-
-# fail-3: the same checks on main, before the fixes (take before you merge)
-git worktree add -q ../tm origin/main
-( cd ../tm &amp;&amp; { date; git log --oneline -1; set -x
-  go version
-  golangci-lint run ./... | tail -4
-  go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./... | grep -E '^(Vulnerability #|    (Found|Fixed) in|Your code)'
-  go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./... 2&gt;&amp;1 | head -1
-  set +x; } 2&gt;&amp;1 ) | tee $E/fail-3-go-checks-on-main.txt
-git worktree remove --force ../tm
-
-# 04: one image built, scanned, and built for both platforms
-#     (a folder under your home: Docker Desktop cannot mount /tmp)
-W=$HOME/.cache/td-scan; mkdir -p $W/cache
-T=aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
-{ date; set -x
-  docker buildx build -f services/orders/Dockerfile --platform linux/amd64 \
-    --build-arg VERSION=local --output type=docker,dest=$W/image.tar .
-  docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$W:/scan" $T \
-    image --cache-dir /scan/cache --input /scan/image.tar \
-    --severity CRITICAL --ignore-unfixed --exit-code 1
-  echo "gate exit $?"
-  docker buildx build -f services/orders/Dockerfile --platform linux/amd64,linux/arm64 \
-    --build-arg VERSION=local .
-  set +x
-} 2&gt;&amp;1 | tee $E/04-build-scan-local.txt
-rm -rf $W    # the database alone is 1.7 GB
-
-# 02 and 04 on GitHub: the first PR run (ONLY NOW: there is one first run)
-git push -u origin phase-3-ci
-gh pr create --base main --head phase-3-ci --title "Phase 3: CI" --body "CI for the app repo."
-gh run watch
-id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId --jq '.[0].databaseId')
-{ date; gh run view "$id"; gh run view "$id" --log; } 2&gt;&amp;1 | tee $E/02-changes-first-pr-run.txt
-# then a screenshot of the PR's checks list: $E/02-first-pr-checks.png
-
-# 06 later, for each proof PR: the same three lines with its own branch and file name
-#   id=$(gh run list --branch &lt;branch&gt; --workflow ci --limit 1 --json databaseId --jq '.[0].databaseId')
-#   { date; gh run view "$id"; gh run view "$id" --log; } 2&gt;&amp;1 | tee $E/06-&lt;what&gt;.txt</code></pre>
-  <div class="note prose">
-    <p>Steps 5 to 8 were captured for you on 19 November. Each file starts with <code>date</code> and the commands that produced it. The full build logs are left out for size; <code>gh run view &lt;id&gt; --log</code> gives them while GitHub keeps them.</p>
-    <p>Step 7 runs at home too: <code>cd ../ticketdrop-gitops &amp;&amp; scripts/validate.sh</code>. It needs helm, kubeconform and the three Helm repos. Step 8 at home is <code>scripts/rebuild.sh</code> on Docker Desktop, as before.</p>
-  </div>
 </section>
 
 <section>
@@ -1113,6 +1318,7 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
     <p>The first phase that costs money: about $0.25 an hour while the cluster is up, under $1 a month while it is down. The rule for every session: bring it up, use it, then run <code>make aws-down</code> and the orphan check. The budget only warns, and hours late.</p>
     <p>Three Terraform layers keep the expensive part separate. <code>foundation</code> stays up and costs cents: identity, the registry, DNS, the budget. <code>cluster</code> lives only for a session: the network, EKS, messaging, secrets. <code>gitops-bootstrap</code> sits on top, in Phase 5.</p>
     <p class="muted">Steps reordered and corrected by the coach on 22 November from the earlier draft, after read-only checks of the account. Versions were checked that day; pin each a little behind the newest (DECISIONS 62).</p>
+    <p><strong>Where you are, 24 November:</strong> steps 1 to 3 are merged (PRs #13 and #14), and the branch <code>phase-4-foundation</code> is open for step 4.</p>
   </div>
   <div class="facts-row prose">
     <ul class="facts">
@@ -1180,6 +1386,30 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
 </section>
 
 <section>
+  <span class="eyebrow">Every session</span>
+  <h2>Start, and the end that is never skipped</h2>
+  <div class="prose">
+    <p>The blocks below use three names. If yours differ, change them here and in the terminal setup at the top:</p>
+    <ul>
+      <li><code>$CLUSTER</code>: the EKS cluster's name, and the value of the subnets' <code>karpenter.sh/discovery</code> tag;</li>
+      <li><code>admin_cidr</code>: the <code>live/cluster</code> variable that holds the address the EKS API answers;</li>
+      <li><code>ticketdrop-eks</code>: the kube context name, so it can never be mistaken for <code>docker-desktop</code>.</li>
+    </ul>
+  </div>
+  <div class="cmds">
+    <div class="cmd"><div class="cmd-bar"><span class="cmd-where">start · any folder</span><button type="button" data-copy>Copy</button></div><pre><code>aws sso login
+aws sts get-caller-identity --query Arn --output text
+export MY_IP=$(curl -fsS https://checkip.amazonaws.com)    <span class="cm"># it changes; the API stops answering when it does</span>
+aws eks update-kubeconfig --name "$CLUSTER" --alias ticketdrop-eks    <span class="cm"># only while the cluster is up</span>
+kubectl config current-context</code></pre></div>
+    <div class="cmd"><div class="cmd-bar"><span class="cmd-where">end · ticketdrop/</span><span class="tag kill">deletes</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TD"
+make aws-down    <span class="cm"># from step 9; until then: terraform -chdir=terraform/live/cluster destroy -var "admin_cidr=$MY_IP/32"</span>
+make orphan-check
+kubectl config use-context docker-desktop    <span class="cm"># so nothing local lands on a cluster that is gone</span></code></pre></div>
+  </div>
+</section>
+
+<section>
   <span class="eyebrow">The work</span>
   <h2>Nine steps, in order</h2>
 
@@ -1194,6 +1424,27 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
     <dt>Why</dt><dd>The dangling delegation is open now. A forgotten NAT gateway or node costs more than the whole project. DNS changes take hours to spread, so start them first.</dd>
     <dt>Watch for</dt><dd>A new zone gets new name servers. Porkbun keeps the old ones until you change them.</dd>
     <dt>Done when</dt><dd><code>aws sts get-caller-identity</code> works with no <code>~/.aws/credentials</code> file, and <code>dig NS kahmedt.com +short</code> returns the new zone's servers.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button></div><pre><code>ZONE=$(aws route53 list-hosted-zones-by-name --dns-name kahmedt.com --query 'HostedZones[0].Id' --output text)
+aws route53 get-hosted-zone --id "$ZONE" --query DelegationSet.NameServers
+curl -fsS https://rdap.verisign.com/com/v1/domain/kahmedt.com | jq '[.nameservers[].ldhName | ascii_downcase]'
+dig -4 @a.gtld-servers.net NS kahmedt.com +norecurse +noall +authority
+dig NS kahmedt.com +short</code></pre></div>
+      <div class="expect"><b>Expect</b>the same four awsdns servers from all four commands</div>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button></div><pre><code>aws sso login  <span class="cm">  # when a call says the token has expired</span>
+aws sts get-caller-identity --query Arn --output text  <span class="cm">  # AWSReservedSSO_..., not an IAM user</span>
+ls ~/.aws/credentials 2&gt;/dev/null || echo "no credentials file"
+aws iam get-account-summary --query 'SummaryMap.{rootMFA:AccountMFAEnabled,rootAccessKeys:AccountAccessKeysPresent}'
+for u in $(aws iam list-users --query 'Users[].UserName' --output text); do
+  aws iam list-access-keys --user-name "$u" --query 'AccessKeyMetadata[].[UserName,AccessKeyId,Status]' --output text
+done
+ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
+aws budgets describe-notifications-for-budget --account-id "$ACCOUNT" --budget-name "Budget for 20 dollars"
+aws ce get-anomaly-monitors --query 'AnomalyMonitors[].MonitorName'</code></pre></div>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">any folder</span><span class="tag kill">deletes</span><button type="button" data-copy>Copy</button></div><pre><code><span class="cm"># the stored key, once SSO works: deactivate first, delete when nothing has broken</span>
+aws iam update-access-key --user-name &lt;user&gt; --access-key-id &lt;AKIA...&gt; --status Inactive
+aws iam delete-access-key --user-name &lt;user&gt; --access-key-id &lt;AKIA...&gt;</code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul>
       <li><span class="once">Only now</span> <code>01-dns-dangling-before.txt</code>: <code>dig</code> and the registry's (RDAP) name servers, before the fix.</li>
       <li><span class="once">Only now</span> <code>01-account-baseline.txt</code>: the empty listings, before the first resource.</li>
@@ -1207,6 +1458,13 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
     <dt>Why</dt><dd>Moved from last to second, so it guards every apply from here on, not only the final teardown.</dd>
     <dt>Watch for</dt><dd>Things a controller creates (an NLB, Karpenter nodes, volumes) are not in Terraform's state. The script must find them by listing, not from state.</dd>
     <dt>Done when</dt><dd>It reports nothing on today's account.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TD"
+make orphan-check; echo "exit $?"  <span class="cm">  # 0 nothing bills, 1 something does, 2 could not check</span>
+ALL_REGIONS=1 make orphan-check    <span class="cm">  # every enabled region, slow</span></code></pre></div>
+      <div class="expect"><b>Expect</b>orphan-check: nothing billable found
+exit 0</div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>02-orphan-check-baseline.txt</code>.</li></ul></dd>
   </dl></div>
 
@@ -1219,6 +1477,23 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
       <li>One state key per layer.</li>
     </ul></dd>
     <dt>Done when</dt><dd>The bucket exists, and a second <code>terraform apply</code> changes nothing.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop/terraform/bootstrap</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TD/terraform/bootstrap"
+terraform fmt -check &amp;&amp; terraform init &amp;&amp; terraform validate
+terraform plan  <span class="cm">  # after the first apply</span></code></pre></div>
+      <div class="expect"><b>Expect</b>No changes. Your infrastructure matches the configuration.</div>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop/terraform/bootstrap</span><button type="button" data-copy>Copy</button></div><pre><code>B=ticketdrop-tfstate-kahmedt
+aws s3api get-bucket-versioning --bucket $B
+aws s3api get-public-access-block --bucket $B --query PublicAccessBlockConfiguration
+aws s3api get-bucket-encryption --bucket $B --query 'ServerSideEncryptionConfiguration.Rules[0]'
+aws s3 ls s3://$B --recursive  <span class="cm">  # one terraform.tfstate per layer</span></code></pre></div>
+      <p class="run-note">Only on a fresh account, once: the bucket has to exist before it can hold its own state.</p>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop/terraform/bootstrap</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TD/terraform/bootstrap"
+<span class="cm"># 1. comment out the backend "s3" block in versions.tf</span>
+terraform init &amp;&amp; terraform apply
+<span class="cm"># 2. put the block back, then move the local state into the bucket</span>
+terraform init -migrate-state</code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>03-bootstrap-apply.txt</code>.</li></ul></dd>
     <dt>Costs</dt><dd>Cents.</dd>
   </dl></div>
@@ -1241,6 +1516,39 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
       <li>Immutable tags mean a re-run cannot overwrite <code>&lt;sha&gt;</code>. That is what you want.</li>
     </ul></dd>
     <dt>Done when</dt><dd>A PR can assume the plan role and is refused the apply role.</dd>
+    <dt>Run</dt><dd class="run">
+      <p class="run-note">Check the code with no AWS calls first, then import what already exists, then apply.</p>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop/terraform/live/foundation</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TD/terraform/live/foundation"
+terraform fmt -recursive
+terraform init  <span class="cm">  # backend key foundation/terraform.tfstate, in the same bucket</span>
+terraform validate
+tflint --init &amp;&amp; tflint</code></pre></div>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop/terraform/live/foundation</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TD/terraform/live/foundation"
+ZONE_ID=$(aws route53 list-hosted-zones-by-name --dns-name kahmedt.com \
+  --query 'HostedZones[0].Id' --output text | cut -d/ -f3)
+ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
+<span class="cm"># the addresses are your resource names; or write import {} blocks and let plan show them</span>
+terraform import '&lt;address of the aws_route53_zone&gt;' "$ZONE_ID"
+terraform import '&lt;address of the aws_budgets_budget&gt;' "$ACCOUNT:Budget for 20 dollars"
+terraform state list</code></pre></div>
+      <div class="cmd" data-save="docs/evidence/phase-4/04-foundation-apply.txt"><div class="cmd-bar"><span class="cmd-where">ticketdrop/terraform/live/foundation</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 04-foundation-apply.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>cd "$TD/terraform/live/foundation"
+terraform plan -out=tfplan  <span class="cm">  # read it: the zone and budget should be updates, never replacements</span>
+terraform apply tfplan &amp;&amp; rm tfplan
+terraform plan -detailed-exitcode; echo "plan exit $?"  <span class="cm">  # 0: nothing left to change</span></code></pre></div>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button></div><pre><code>aws iam list-open-id-connect-providers
+aws iam get-role --role-name &lt;plan role&gt; --query 'Role.AssumeRolePolicyDocument.Statement[0].Condition'
+aws iam get-role --role-name &lt;apply role&gt; --query 'Role.AssumeRolePolicyDocument.Statement[0].Condition'
+aws ecr describe-repositories --output table \
+  --query 'repositories[].[repositoryName,imageTagMutability,imageScanningConfiguration.scanOnPush]'
+aws ecr get-lifecycle-policy --repository-name &lt;one repo&gt; --query lifecyclePolicyText --output text | jq .</code></pre></div>
+      <div class="expect"><b>Expect</b>plan role: sub repo:kingswanzy2020/ticketdrop:pull_request
+apply role: sub repo:kingswanzy2020/ticketdrop:ref:refs/heads/main
+nine repositories, IMMUTABLE, scan on push True</div>
+      <div class="cmd" data-save="docs/evidence/phase-4/fail-4-apply-role-refused-on-pr.txt"><div class="cmd-bar"><span class="cmd-where">ticketdrop/</span><span class="once">Only now</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ fail-4-apply-role-refused-on-pr.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>cd "$TD"
+<span class="cm"># from the PR run whose job tries the apply role and must be refused</span>
+id=$(gh run list --branch "$(git branch --show-current)" --workflow ci --limit 1 --json databaseId --jq '.[0].databaseId')
+gh run view "$id" --log | grep -B2 -A4 'AssumeRoleWithWebIdentity'</code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul>
       <li><code>04-foundation-apply.txt</code>.</li>
       <li><span class="once">Only now</span> <code>fail-4-apply-role-refused-on-pr.txt</code>: the refused <code>AssumeRoleWithWebIdentity</code> from that PR's run.</li>
@@ -1257,6 +1565,29 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
       <li>Apply the plan that was reviewed, or apply fresh on <code>main</code>: decide which and record why.</li>
     </ul></dd>
     <dt>Done when</dt><dd>A PR shows its plan summary, and the merge applies <code>foundation</code>.</dd>
+    <dt>Run</dt><dd class="run">
+      <p class="run-note">The same checks CI runs, on the laptop, before you push.</p>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TD"
+terraform fmt -check -recursive terraform
+for d in terraform/bootstrap terraform/live/*/; do
+  (cd "$d" &amp;&amp; terraform init -backend=false -input=false &gt;/dev/null &amp;&amp; terraform validate) || break
+done
+(cd terraform &amp;&amp; tflint --init &amp;&amp; tflint --recursive)
+docker run --rm -v "$TD/terraform:/src:ro" \
+  aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb \
+  config --severity HIGH,CRITICAL /src</code></pre></div>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TD"
+git push -u origin "$(git branch --show-current)"
+gh pr create --fill --base main
+gh pr checks --watch
+gh run view --web  <span class="cm">  # the plan's change summary is on the run page</span></code></pre></div>
+      <div class="cmd" data-save="docs/evidence/phase-4/05-apply-on-merge.txt"><div class="cmd-bar"><span class="cmd-where">ticketdrop/</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 05-apply-on-merge.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>cd "$TD"
+gh pr merge --merge --delete-branch
+sleep 10
+id=$(gh run list --branch main --workflow ci --limit 1 --json databaseId --jq '.[0].databaseId')
+gh run watch "$id"
+gh run view "$id" --log | grep -E 'Apply complete|No changes'</code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul>
       <li><span class="once">Only now</span> <code>05-plan-on-pr.png</code>, while the PR is open.</li>
       <li><code>05-apply-on-merge.txt</code>.</li>
@@ -1268,6 +1599,24 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
     <dt>Why</dt><dd>One NAT gateway instead of three saves about $65 a month. The cost is that the cluster loses outbound traffic if that one AZ fails: record it as a decision.</dd>
     <dt>Watch for</dt><dd>Tag the subnets now: <code>kubernetes.io/role/elb</code>, <code>kubernetes.io/role/internal-elb</code> and <code>karpenter.sh/discovery</code>. Missing tags show up in Phase 5, as an NLB with no subnets or a Karpenter node that never launches.</dd>
     <dt>Done when</dt><dd><code>terraform plan</code> is clean after apply, and the subnets carry the tags.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop/terraform/live/cluster</span><span class="tag bill">bills</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TD/terraform/live/cluster"
+terraform init &amp;&amp; terraform validate
+terraform plan -var "admin_cidr=$MY_IP/32" -out=tfplan
+terraform apply tfplan &amp;&amp; rm tfplan</code></pre></div>
+      <div class="cmd" data-save="docs/evidence/phase-4/06-network-plan.txt"><div class="cmd-bar"><span class="cmd-where">ticketdrop/terraform/live/cluster</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 06-network-plan.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>cd "$TD/terraform/live/cluster"
+aws ec2 describe-subnets --filters Name=tag:karpenter.sh/discovery,Values=$CLUSTER --output table \
+  --query 'Subnets[].[AvailabilityZone,CidrBlock,MapPublicIpOnLaunch]'
+aws ec2 describe-subnets --filters Name=tag-key,Values=kubernetes.io/role/elb --query 'length(Subnets)'
+aws ec2 describe-subnets --filters Name=tag-key,Values=kubernetes.io/role/internal-elb --query 'length(Subnets)'
+aws ec2 describe-nat-gateways --filter Name=state,Values=available --query 'length(NatGateways)'
+aws ec2 describe-vpc-endpoints --query 'VpcEndpoints[].[ServiceName,VpcEndpointType]' --output text
+terraform plan -var "admin_cidr=$MY_IP/32" -detailed-exitcode; echo "plan exit $?"</code></pre></div>
+      <div class="expect"><b>Expect</b>3 private subnets tagged for Karpenter; 3 public (elb), 3 private (internal-elb)
+1 NAT gateway
+com.amazonaws.us-east-1.s3   Gateway
+plan exit 0</div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>06-network-plan.txt</code>.</li></ul></dd>
     <dt>Costs</dt><dd>The NAT gateway, about $0.045 an hour plus $0.045 per GB; its Elastic IP and any public IPv4 address, $0.005 an hour each. To stop: <code>terraform destroy</code>, then the orphan check.</dd>
   </dl></div>
@@ -1292,6 +1641,57 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
       <li>Revisit Postgres: one CNPG instance with <code>max_connections</code> 100 was sized for a laptop (DECISIONS 31 and 57).</li>
     </ul></dd>
     <dt>Done when</dt><dd>The nodes are Ready, a default-deny policy blocks a test pod, and the TROUBLESHOOTING 18 probe has been run in <code>standard</code> and in <code>strict</code> mode (decision 12).</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop/terraform/live/cluster</span><span class="tag bill">bills</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TD/terraform/live/cluster"
+terraform plan -var "admin_cidr=$MY_IP/32" -out=tfplan &amp;&amp; terraform apply tfplan &amp;&amp; rm tfplan
+aws eks update-kubeconfig --name "$CLUSTER" --alias ticketdrop-eks
+kubectl config current-context  <span class="cm">  # ticketdrop-eks, not docker-desktop</span></code></pre></div>
+      <div class="cmd" data-save="docs/evidence/phase-4/07-eks-nodes-ready.txt"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 07-eks-nodes-ready.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>kubectl get nodes -L kubernetes.io/arch,topology.kubernetes.io/zone,node.kubernetes.io/instance-type
+aws eks describe-cluster --name "$CLUSTER" --query 'cluster.{version:version,
+  publicCidrs:resourcesVpcConfig.publicAccessCidrs,auth:accessConfig.authenticationMode,
+  encrypted:encryptionConfig[0].resources}'
+aws eks list-access-entries --cluster-name "$CLUSTER"
+aws eks list-addons --cluster-name "$CLUSTER"
+aws ec2 describe-instances --output table \
+  --filters Name=tag:eks:cluster-name,Values="$CLUSTER" Name=instance-state-name,Values=running \
+  --query 'Reservations[].Instances[].[InstanceId,InstanceType,MetadataOptions.HttpTokens,MetadataOptions.HttpPutResponseHopLimit]'</code></pre></div>
+      <div class="expect"><b>Expect</b>two Ready arm64 nodes in different zones
+publicCidrs: [your IP/32]; encrypted: [secrets]
+HttpTokens required, hop limit 1</div>
+      <div class="cmd" data-save="docs/evidence/phase-4/07-networkpolicy-enforced.txt"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 07-networkpolicy-enforced.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>kubectl create namespace np-test
+kubectl run web -n np-test --image=nginx:1.29 --port=80 --labels=app=web
+kubectl expose pod web -n np-test --port=80
+kubectl run client -n np-test --image=curlimages/curl:8.17.0 --restart=Never --command -- sleep infinity
+kubectl wait pod/web pod/client -n np-test --for=condition=Ready --timeout=120s
+kubectl exec -n np-test client -- curl -s -m 5 -o /dev/null -w '%{http_code}\n' http://web  <span class="cm">  # 200</span>
+kubectl apply -n np-test -f - &lt;&lt;'EOF'
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: default-deny}
+spec: {podSelector: {}, policyTypes: [Ingress]}
+EOF
+sleep 5
+kubectl exec -n np-test client -- curl -s -m 5 -o /dev/null -w '%{http_code}\n' http://web || echo blocked</code></pre></div>
+      <div class="expect"><b>Expect</b>200
+000
+blocked</div>
+      <p class="run-note">The new-pod window (TROUBLESHOOTING 18): run this with the deny still in place, once in each mode. Change the mode in your add-on's configuration in Terraform, apply, check it, and run it again.</p>
+      <div class="cmd" data-save="docs/evidence/phase-4/07-new-pod-window-standard.txt"><div class="cmd-bar"><span class="cmd-where">standard mode · any folder</span><span class="once">Only now</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 07-new-pod-window-standard.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>kubectl get ds aws-node -n kube-system \
+  -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="NETWORK_POLICY_ENFORCING_MODE")].value}'; echo
+kubectl run early -n np-test --image=curlimages/curl:8.17.0 --restart=Never --command -- sh -c \
+  'for i in 1 2 3 4 5 6; do date +%T; curl -s -m 1 -o /dev/null -w "%{http_code}\n" http://web; sleep 0.5; done'
+kubectl wait pod/early -n np-test --for=jsonpath='{.status.phase}'=Succeeded --timeout=120s
+kubectl logs -n np-test early  <span class="cm">  # standard: the first calls may get 200; strict: none, DNS included</span>
+kubectl delete pod early -n np-test</code></pre></div>
+      <div class="cmd" data-save="docs/evidence/phase-4/07-new-pod-window-strict.txt"><div class="cmd-bar"><span class="cmd-where">strict mode · any folder</span><span class="once">Only now</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 07-new-pod-window-strict.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>kubectl get ds aws-node -n kube-system \
+  -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="NETWORK_POLICY_ENFORCING_MODE")].value}'; echo
+kubectl run early -n np-test --image=curlimages/curl:8.17.0 --restart=Never --command -- sh -c \
+  'for i in 1 2 3 4 5 6; do date +%T; curl -s -m 1 -o /dev/null -w "%{http_code}\n" http://web; sleep 0.5; done'
+kubectl wait pod/early -n np-test --for=jsonpath='{.status.phase}'=Succeeded --timeout=120s
+kubectl logs -n np-test early  <span class="cm">  # standard: the first calls may get 200; strict: none, DNS included</span>
+kubectl delete pod early -n np-test</code></pre></div>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">any folder</span><span class="tag kill">deletes</span><button type="button" data-copy>Copy</button></div><pre><code>kubectl delete namespace np-test</code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul>
       <li><code>07-eks-nodes-ready.txt</code>, <code>07-networkpolicy-enforced.txt</code>.</li>
       <li><span class="once">Only now</span> <code>07-new-pod-window-standard.txt</code> and <code>07-new-pod-window-strict.txt</code>: they need the cluster up.</li>
@@ -1314,6 +1714,42 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
       <li>SSE-SQS, not a customer-managed KMS key, or SNS needs a key policy too.</li>
     </ul></dd>
     <dt>Done when</dt><dd>An <code>aws sns publish</code> of each event type arrives only in the queues that should get it.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button></div><pre><code>TOPIC=$(aws sns list-topics --query "Topics[?ends_with(TopicArn, ':ticketdrop-events')].TopicArn" --output text)
+for s in $(aws sns list-subscriptions-by-topic --topic-arn "$TOPIC" --query 'Subscriptions[].SubscriptionArn' --output text); do
+  aws sns get-subscription-attributes --subscription-arn "$s" --output text \
+    --query 'Attributes.[Endpoint,RawMessageDelivery,FilterPolicy]'
+done
+for q in orders inventory payments fulfillment notifications; do
+  u=$(aws sqs get-queue-url --queue-name $q-events --query QueueUrl --output text)
+  aws sqs get-queue-attributes --queue-url "$u" --query Attributes \
+    --attribute-names VisibilityTimeout RedrivePolicy SqsManagedSseEnabled
+done
+aws eks list-pod-identity-associations --cluster-name "$CLUSTER" --output text \
+  --query 'associations[].[namespace,serviceAccount]'
+aws secretsmanager list-secrets --query 'SecretList[].Name'</code></pre></div>
+      <p class="run-note">The done-when test. No consumer runs yet, so the messages wait in the queues; the loop reads each queue empty and prints what it got.</p>
+      <div class="cmd" data-save="docs/evidence/phase-4/08-fanout-by-event-type.txt"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 08-fanout-by-event-type.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>TOPIC=$(aws sns list-topics --query "Topics[?ends_with(TopicArn, ':ticketdrop-events')].TopicArn" --output text)
+for t in order.created drop.opened payment.succeeded payment.failed order.confirmed \
+         hold.expired ticket.issued order.ticketed order.failed; do
+  aws sns publish --topic-arn "$TOPIC" --message "fanout-test $t" &gt;/dev/null \
+    --message-attributes "{\"event_type\":{\"DataType\":\"String\",\"StringValue\":\"$t\"}}"
+done
+sleep 5
+for q in orders inventory payments fulfillment notifications; do
+  u=$(aws sqs get-queue-url --queue-name $q-events --query QueueUrl --output text); got=""
+  while m=$(aws sqs receive-message --queue-url "$u" --max-number-of-messages 10 --wait-time-seconds 2 --output json) &amp;&amp; [ -n "$m" ]; do
+    got="$got $(jq -r '.Messages[].Body | sub("fanout-test "; "")' &lt;&lt;&lt;"$m")"
+    for h in $(jq -r '.Messages[].ReceiptHandle' &lt;&lt;&lt;"$m"); do aws sqs delete-message --queue-url "$u" --receipt-handle "$h"; done
+  done
+  echo "$q-events:$(echo $got | tr ' ' '\n' | sort | tr '\n' ' ')"
+done</code></pre></div>
+      <div class="expect"><b>Expect</b>orders-events: hold.expired payment.failed ticket.issued
+inventory-events: drop.opened payment.failed payment.succeeded
+payments-events: order.created
+fulfillment-events: order.confirmed
+notifications-events: order.failed order.ticketed</div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>08-fanout-by-event-type.txt</code>.</li></ul></dd>
     <dt>Costs</dt><dd>SNS and SQS at free-tier scale. Secrets, $0.40 per secret-month prorated, and gone at destroy with a recovery window of 0.</dd>
   </dl></div>
@@ -1323,6 +1759,22 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
     <dt>Why</dt><dd>"Rebuilds from Git in N minutes" is a result. A teardown you trust is what makes the cluster affordable.</dd>
     <dt>Watch for</dt><dd>In Phase 5, <code>aws-down</code> must remove the Argo CD apps first, so the controllers delete what they created. You'll add that then.</dd>
     <dt>Done when</dt><dd>Up from nothing gives Ready nodes, down leaves the orphan check empty, and both are timed.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd" data-save="docs/evidence/phase-4/09-aws-up-timed.txt"><div class="cmd-bar"><span class="cmd-where">ticketdrop/</span><span class="tag bill">bills</span><span class="once">Only now</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 09-aws-up-timed.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>cd "$TD"
+time make aws-up
+aws eks update-kubeconfig --name "$CLUSTER" --alias ticketdrop-eks
+kubectl get nodes</code></pre></div>
+      <div class="cmd" data-save="docs/evidence/phase-4/09-aws-down-timed.txt"><div class="cmd-bar"><span class="cmd-where">ticketdrop/</span><span class="tag kill">deletes</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 09-aws-down-timed.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>cd "$TD"
+time make aws-down</code></pre></div>
+      <div class="cmd" data-save="docs/evidence/phase-4/09-orphan-check-empty.txt"><div class="cmd-bar"><span class="cmd-where">ticketdrop/</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 09-orphan-check-empty.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>cd "$TD"
+make orphan-check</code></pre></div>
+      <div class="expect"><b>Expect</b>orphan-check: nothing billable found</div>
+      <p class="run-note">The next day. Each Cost Explorer call costs $0.01.</p>
+      <div class="cmd" data-save="docs/evidence/phase-4/09-session-cost.txt"><div class="cmd-bar"><span class="cmd-where">any folder</span><span class="once">Only now</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 09-session-cost.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>aws ce get-cost-and-usage --granularity DAILY --metrics UnblendedCost \
+  --time-period Start=$(date -u -d yesterday +%F),End=$(date -u +%F) \
+  --group-by Type=DIMENSION,Key=SERVICE \
+  --query 'ResultsByTime[].Groups[].[Keys[0],Metrics.UnblendedCost.Amount]' --output text</code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul>
       <li><span class="once">Only now</span> <code>09-aws-up-timed.txt</code>: the first run from nothing.</li>
       <li><code>09-aws-down-timed.txt</code>, <code>09-orphan-check-empty.txt</code>.</li>
@@ -1363,6 +1815,15 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
     <dt>Do</dt><dd>A Terraform layer that installs Argo CD with Helm, plus one root Application pointing at <code>ticketdrop-gitops/bootstrap/</code>.</dd>
     <dt>Why</dt><dd>It is the one install Argo CD cannot do for itself. Its own layer can be destroyed before <code>cluster</code>.</dd>
     <dt>Done when</dt><dd>The root app is Synced, even with nothing under it yet.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop/terraform/live/gitops-bootstrap</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TD/terraform/live/gitops-bootstrap"
+terraform init &amp;&amp; terraform plan -out=tfplan &amp;&amp; terraform apply tfplan &amp;&amp; rm tfplan
+kubectl get pods -n argocd</code></pre></div>
+      <div class="cmd" data-save="docs/evidence/phase-5/01-argocd-root-synced.txt"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 01-argocd-root-synced.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>kubectl get applications -n argocd \
+  -o custom-columns=NAME:.metadata.name,SYNC:.status.sync.status,HEALTH:.status.health.status</code></pre></div>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button></div><pre><code>kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath='{.data.password}' | base64 -d; echo
+kubectl port-forward -n argocd svc/argocd-server 8443:443  <span class="cm">  # https://localhost:8443, user admin</span></code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>01-argocd-root-synced.txt</code>.</li></ul></dd>
   </dl></div>
 
@@ -1379,6 +1840,19 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
       <li>Large CRDs need <code>ServerSideApply=true</code> (DECISIONS 42).</li>
     </ul></dd>
     <dt>Done when</dt><dd>Everything is Synced and Healthy after <code>aws-up</code>, with no <code>kubectl apply</code> by hand.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop-gitops/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TDG"
+scripts/validate.sh  <span class="cm">  # before every push</span></code></pre></div>
+      <div class="cmd" data-save="docs/evidence/phase-5/02-all-apps-healthy.txt"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 02-all-apps-healthy.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>kubectl get applications -n argocd --no-headers -o custom-columns=\
+'WAVE:.metadata.annotations.argocd\.argoproj\.io/sync-wave,NAME:.metadata.name,SYNC:.status.sync.status,HEALTH:.status.health.status' \
+  | sort -n
+kubectl wait applications --all -n argocd --for=jsonpath='{.status.health.status}'=Healthy --timeout=30m</code></pre></div>
+      <p class="run-note">When one is stuck: what it says, which of its objects is not right, and recent events.</p>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button></div><pre><code>kubectl get application &lt;app&gt; -n argocd -o json | jq '.status.conditions, .status.operationState.message'
+kubectl get application &lt;app&gt; -n argocd -o json \
+  | jq '.status.resources[] | select(.status != "Synced" or (.health.status // "Healthy") != "Healthy")'
+kubectl get events -A --sort-by=.lastTimestamp | tail -30</code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>02-all-apps-healthy.txt</code>, and <code>fail-2-&lt;what&gt;.txt</code> for each ordering failure.</li></ul></dd>
   </dl></div>
 
@@ -1387,6 +1861,18 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
     <dt>Why</dt><dd>Karpenter adds right-sized nodes when pods are pending, and the multi-arch images from Phase 3 let it pick Graviton.</dd>
     <dt>Watch for</dt><dd>It sizes nodes from the pods' resource requests, which is why the chart sets them. Missing discovery tags mean nothing ever launches.</dd>
     <dt>Done when</dt><dd>A pending pod brings up a node, and the node goes away after the pod is deleted.</dd>
+    <dt>Run</dt><dd class="run">
+      <p class="run-note">Start the watch first. Leave it running through both the node coming up and going away.</p>
+      <div class="cmd" data-save="docs/evidence/phase-5/03-karpenter-node-up-and-down.txt"><div class="cmd-bar"><span class="cmd-where">terminal 1 · any folder</span><span class="once">Only now</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 03-karpenter-node-up-and-down.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>kubectl get nodes -L karpenter.sh/capacity-type,kubernetes.io/arch,node.kubernetes.io/instance-type -w \
+  | while read -r l; do echo "$(date +%T) $l"; done</code></pre></div>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">terminal 2 · any folder</span><span class="tag bill">bills</span><button type="button" data-copy>Copy</button></div><pre><code>kubectl get nodepools,ec2nodeclasses
+kubectl create deployment inflate -n default --image=public.ecr.aws/eks-distro/kubernetes/pause:3.7 --replicas=0
+kubectl set resources deployment inflate -n default --requests=cpu=1,memory=1Gi
+kubectl scale deployment inflate -n default --replicas=5
+kubectl get nodeclaims -w  <span class="cm">  # a claim, then a node; Ctrl-C when Ready</span>
+kubectl delete deployment inflate -n default  <span class="cm">  # consolidation removes the node</span></code></pre></div>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button></div><pre><code>kubectl logs -n &lt;karpenter namespace&gt; -l app.kubernetes.io/name=karpenter --tail=50  <span class="cm">  # when nothing launches</span></code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul><li><span class="once">Only now</span> <code>03-karpenter-node-up-and-down.txt</code>: a <code>kubectl get nodes -w</code> running through both, with timestamps.</li></ul></dd>
   </dl></div>
 
@@ -1405,6 +1891,16 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
       <li>cert-manager and external-dns each need their own Route 53 role. Check that Pod Identity works at the pinned versions, or use IRSA for that one controller.</li>
     </ul></dd>
     <dt>Done when</dt><dd>A test route gets a DNS record and a valid certificate.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button></div><pre><code>kubectl get svc -n traefik  <span class="cm">  # EXTERNAL-IP is the NLB's DNS name</span>
+kubectl get gateway -A; kubectl get httproute -A
+kubectl get certificate -A; kubectl get challenges -A</code></pre></div>
+      <div class="cmd" data-save="docs/evidence/phase-5/04-test-route-https.txt"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 04-test-route-https.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>dig +short &lt;host&gt;.kahmedt.com
+curl -sv https://&lt;host&gt;.kahmedt.com/ -o /dev/null 2&gt;&amp;1 | grep -E 'subject:|issuer:|expire date:|HTTP/'</code></pre></div>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button></div><pre><code>kubectl logs -n &lt;external-dns namespace&gt; deploy/external-dns --tail=50
+kubectl describe challenge -A
+aws elbv2 describe-target-health --target-group-arn &lt;arn&gt;  <span class="cm">  # NLB targets healthy?</span></code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>04-test-route-https.txt</code>: <code>dig</code> plus <code>curl -v</code> showing the certificate.</li></ul></dd>
   </dl></div>
 
@@ -1412,6 +1908,13 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
     <dt>Do</dt><dd>Change <code>aws-down</code> to delete the Applications first and wait for the controllers to remove the NLB, the DNS records, the Karpenter nodes and the volumes. Only then destroy <code>gitops-bootstrap</code> and <code>cluster</code>.</dd>
     <dt>Why</dt><dd>Deletion order again (TROUBLESHOOTING 6). A controller that is gone cannot clean up after itself, and what it leaves keeps billing.</dd>
     <dt>Done when</dt><dd>The orphan check is empty after a full down.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd" data-save="docs/evidence/phase-5/05-down-orphan-check-empty.txt"><div class="cmd-bar"><span class="cmd-where">ticketdrop/</span><span class="tag kill">deletes</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 05-down-orphan-check-empty.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>cd "$TD"
+time make aws-down
+make orphan-check
+aws route53 list-resource-record-sets --hosted-zone-id &lt;zone id&gt; --output text \
+  --query 'ResourceRecordSets[].[Name,Type]'  <span class="cm">  # only NS and SOA, and what you made by hand</span></code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>05-down-orphan-check-empty.txt</code>.</li></ul></dd>
   </dl></div>
   <div class="prose"><p><strong>Exit:</strong> after <code>make aws-up</code>, with no <code>kubectl apply</code> by hand, everything is Synced and Healthy. A test route gets DNS and a valid certificate. Karpenter adds a node for a pending pod and removes it afterwards.</p></div>
@@ -1436,6 +1939,21 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
       <li>The tag is the full SHA, never <code>latest</code>.</li>
     </ul></dd>
     <dt>Done when</dt><dd>ECR holds <code>&lt;sha&gt;</code> for the changed service, and <code>cosign verify</code> passes against the workflow's identity.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd" data-save="docs/evidence/phase-6/01-release-run.txt"><div class="cmd-bar"><span class="cmd-where">ticketdrop/</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 01-release-run.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>cd "$TD"
+id=$(gh run list --workflow release --limit 1 --json databaseId --jq '.[0].databaseId')
+gh run watch "$id"; gh run view "$id"
+SHA=$(git rev-parse origin/main)
+aws ecr describe-images --repository-name &lt;repo&gt;/orders --image-ids imageTag=$SHA \
+  --query 'imageDetails[0].[imageTags,imagePushedAt]'</code></pre></div>
+      <div class="cmd" data-save="docs/evidence/phase-6/01-cosign-verify.txt"><div class="cmd-bar"><span class="cmd-where">ticketdrop/</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 01-cosign-verify.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>cd "$TD"
+REG=$(aws sts get-caller-identity --query Account --output text).dkr.ecr.us-east-1.amazonaws.com
+SHA=$(git rev-parse origin/main)
+aws ecr get-login-password | docker login --username AWS --password-stdin "$REG"
+cosign verify "$REG/&lt;repo&gt;/orders:$SHA" \
+  --certificate-identity "https://github.com/kingswanzy2020/ticketdrop/.github/workflows/release.yaml@refs/heads/main" \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com | jq '.[0].optional.Subject'</code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>01-release-run.txt</code>, <code>01-cosign-verify.txt</code>.</li></ul></dd>
   </dl></div>
 
@@ -1444,6 +1962,12 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
     <dt>Why</dt><dd>CI never holds cluster credentials. Git is the only way in, which is what lets the EKS API stay locked to your IP.</dd>
     <dt>Watch for</dt><dd><code>protect-infra-main</code> requires a PR and <code>ci-ok</code>. Decide whether the bot opens a PR that merges itself once green, or is a named bypass actor, and record why.</dd>
     <dt>Done when</dt><dd>A merged app change produces a commit or PR in the gitops repo that names the new SHA.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd" data-save="docs/evidence/phase-6/02-tag-bump-commit.txt"><div class="cmd-bar"><span class="cmd-where">ticketdrop-gitops/</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 02-tag-bump-commit.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>cd "$TDG"
+git pull
+git log --oneline -5 -- apps/  <span class="cm">  # the bot's commit, naming the new SHA</span>
+gh pr list --state all --limit 5  <span class="cm">  # if the bot opens PRs</span></code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>02-tag-bump-commit.txt</code>.</li></ul></dd>
   </dl></div>
 
@@ -1452,12 +1976,34 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
     <dt>Why</dt><dd>On EKS, <code>db-secrets.sh</code> and the password files are replaced by secrets that are never written to git or to a laptop.</dd>
     <dt>Watch for</dt><dd>The services read <code>DATABASE_URL</code> from the environment, so either sync the mount to a Kubernetes Secret or change how the URL is read. Decide which.</dd>
     <dt>Done when</dt><dd>Every service is Ready with its URL from Secrets Manager, and no AWS key exists in GitHub or the cluster.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button></div><pre><code>kubectl get secretproviderclass -n ticketdrop
+kubectl get pods -n ticketdrop</code></pre></div>
+      <div class="cmd" data-save="docs/evidence/phase-6/03-no-static-keys.txt"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 03-no-static-keys.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>gh secret list -R kingswanzy2020/ticketdrop
+gh secret list -R kingswanzy2020/ticketdrop-gitops
+kubectl get secrets -A -o json | jq -r '.items[].data // {} | .[] | @base64d' 2&gt;/dev/null | grep -c AKIA
+aws iam list-users --query 'Users[].UserName' --output text | xargs -n1 \
+  aws iam list-access-keys --query 'AccessKeyMetadata[].AccessKeyId' --output text --user-name</code></pre></div>
+      <div class="expect"><b>Expect</b>no AWS_* secrets in either repo
+0
+no access keys</div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>03-no-static-keys.txt</code>: <code>gh secret list</code> for both repos, plus a search of the cluster's Secrets for <code>AKIA</code>.</li></ul></dd>
   </dl></div>
 
   <div class="step"><div class="head"><label><input type="checkbox" id="p6-s4"><h3>4. Live, and the one-line change</h3></label></div><dl>
     <dt>Do</dt><dd>Serve the shop on your domain over HTTPS. Then merge a one-line visible change and watch it arrive.</dd>
     <dt>Done when</dt><dd>New pods run the new SHA, and nobody ran <code>kubectl</code> or <code>helm</code>.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd" data-save="docs/evidence/phase-6/04-change-to-pods.txt"><div class="cmd-bar"><span class="cmd-where">ticketdrop/</span><span class="once">Only now</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 04-change-to-pods.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>cd "$TD"
+gh pr merge &lt;pr&gt; --merge; date -u +%T  <span class="cm">  # merged</span>
+id=$(gh run list --workflow release --limit 1 --json databaseId --jq '.[0].databaseId')
+gh run watch "$id"; date -u +%T  <span class="cm">  # image pushed</span>
+kubectl get applications -n argocd -w  <span class="cm">  # synced; Ctrl-C</span>
+kubectl get pods -n ticketdrop -l app.kubernetes.io/name=&lt;svc&gt; \
+  -o custom-columns=NAME:.metadata.name,IMAGE:.spec.containers[0].image,STARTED:.status.startTime
+curl -sI https://&lt;host&gt;.kahmedt.com/ | head -1</code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul><li><span class="once">Only now</span> <code>04-change-to-pods.txt</code>: the timestamps from merge, to image pushed, to gitops commit, to Argo CD sync, to new pods Ready, and the SHA on a pod.</li></ul></dd>
   </dl></div>
   <div class="prose"><p><strong>Exit:</strong> a one-line change reaches EKS with nobody running <code>kubectl</code>, the app is live over HTTPS on your domain, and no static AWS keys exist in GitHub or the cluster.</p></div>
@@ -1470,6 +2016,14 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
   <div class="step"><div class="head"><label><input type="checkbox" id="p7-s1"><h3>1. Prometheus scrapes every service</h3></label></div><dl>
     <dt>Do</dt><dd>kube-prometheus-stack from Argo CD, and a ServiceMonitor from the chart for port 9090 <code>/metrics</code>.</dd>
     <dt>Done when</dt><dd>Every service's target is UP in Prometheus.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button></div><pre><code>kubectl get servicemonitors -n ticketdrop
+kubectl port-forward -n monitoring svc/&lt;release&gt;-prometheus 9090:9090 &gt;/dev/null &amp; pf=$!; sleep 2
+curl -s localhost:9090/api/v1/targets \
+  | jq -r '.data.activeTargets[] | select(.labels.namespace=="ticketdrop") | "\(.labels.service)\t\(.health)"' | sort
+kill $pf</code></pre></div>
+      <div class="expect"><b>Expect</b>one line per service, each up</div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>01-targets-up.png</code>.</li></ul></dd>
   </dl></div>
   <div class="step"><div class="head"><label><input type="checkbox" id="p7-s2"><h3>2. Dashboards as code</h3></label></div><dl>
@@ -1482,15 +2036,37 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
       </ul></dd>
     <dt>Why</dt><dd>A dashboard clicked together in the UI is lost on the next rebuild.</dd>
     <dt>Done when</dt><dd>After a rebuild the dashboards are there with data, untouched by hand.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button></div><pre><code>kubectl get configmaps -A -l grafana_dashboard=1
+kubectl get secret &lt;release&gt;-grafana -n monitoring -o jsonpath='{.data.admin-password}' | base64 -d; echo
+kubectl port-forward -n monitoring svc/&lt;release&gt;-grafana 3000:80  <span class="cm">  # http://localhost:3000, user admin</span></code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>02-dashboards-after-rebuild.png</code>.</li></ul></dd>
   </dl></div>
   <div class="step"><div class="head"><label><input type="checkbox" id="p7-s3"><h3>3. Alerts, each fired once on purpose</h3></label></div><dl>
     <dt>Do</dt><dd>PrometheusRules for a DLQ above 0 and for queue age above a limit, routed through Alertmanager. Then trigger each one: send a poison message, and pause fulfillment.</dd>
     <dt>Why</dt><dd>An alert never seen firing is a guess.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button></div><pre><code>kubectl get prometheusrules -A
+<span class="cm"># DLQ above 0: a message no consumer can read reaches the DLQ after 3 receives</span>
+u=$(aws sqs get-queue-url --queue-name payments-events --query QueueUrl --output text)
+aws sqs send-message --queue-url "$u" --message-body 'this is not an event'
+<span class="cm"># queue age: hold fulfillment at 0 pods, then place orders</span>
+kubectl annotate scaledobject fulfillment -n ticketdrop autoscaling.keda.sh/paused-replicas=0 --overwrite</code></pre></div>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">any folder</span><button type="button" data-copy>Copy</button></div><pre><code>kubectl port-forward -n monitoring svc/&lt;release&gt;-prometheus 9090:9090 &gt;/dev/null &amp; pf=$!; sleep 2
+curl -s localhost:9090/api/v1/alerts | jq -r '.data.alerts[] | "\(.labels.alertname)\t\(.state)"'
+kill $pf</code></pre></div>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">any folder</span><span class="tag kill">deletes</span><button type="button" data-copy>Copy</button></div><pre><code>kubectl annotate scaledobject fulfillment -n ticketdrop autoscaling.keda.sh/paused-replicas-  <span class="cm">  # release it</span>
+d=$(aws sqs get-queue-url --queue-name payments-events-dlq --query QueueUrl --output text)
+aws sqs purge-queue --queue-url "$d"</code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul><li><span class="once">Only now</span> <code>03-dlq-alert-firing.png</code> and <code>03-queue-age-alert-firing.png</code>, taken while each is firing.</li></ul></dd>
   </dl></div>
   <div class="step"><div class="head"><label><input type="checkbox" id="p7-s4"><h3>4. Optional: follow one order</h3></label></div><dl>
     <dt>Do</dt><dd>An OpenTelemetry collector and Tempo. Claude adds tracing to <code>pkg/platform</code> first, because there is none yet.</dd>
+    <dt>Run</dt><dd class="run">
+      <p class="run-note">Commands come with the tracing work, once Claude has added it to <code>pkg/platform</code>.</p>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul><li><code>04-one-order-trace.png</code>.</li></ul></dd>
   </dl></div>
   <div class="prose"><p><strong>Exit:</strong> each alert is triggered once on purpose and seen firing.</p></div>
@@ -1500,15 +2076,31 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
 <details class="phase" id="phase-8">
 <summary><span class="eyebrow">Phase 8 · Drills · both</span><h2>Break it on EKS and measure what happens</h2><span class="pill">Not started</span><span class="progress" data-progress></span></summary>
 <section>
-  <div class="note prose"><p>Every drill here can be captured only while it runs. Start the watches (<code>kubectl get pods,nodes -w</code>, the dashboards) before each one.</p></div>
+  <div class="note prose"><p>Every drill here can be captured only while it runs. Start the watches (<code>kubectl get pods,nodes -w</code>, the dashboards) before each one.</p><p>Claude owes this phase an EKS target for <code>drop-check</code> and <code>demo-drop</code>. Today <code>TARGET=cluster</code> means Docker Desktop: the Gateway on <code>localhost:8088</code> and goaws through a port-forward. The commands below write it as <code>TARGET=&lt;eks target&gt;</code>.</p></div>
   <div class="step"><div class="head"><label><input type="checkbox" id="p8-s1"><h3>1. A full drop on EKS</h3></label></div><dl>
     <dt>Do</dt><dd><code>make demo-drop TARGET=cluster</code> against the public address, sized past what the system nodes hold.</dd>
     <dt>Done when</dt><dd>You have five numbers: the time to drain the queue, the time from pending pod to node Ready, p95 latency, the Spot share of nodes, and zero oversold.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">watch terminals · any folder</span><button type="button" data-copy>Copy</button></div><pre><code>kubectl get pods -n ticketdrop -w | while read -r l; do echo "$(date +%T) $l"; done
+kubectl get nodes -L karpenter.sh/capacity-type -w | while read -r l; do echo "$(date +%T) $l"; done</code></pre></div>
+      <div class="cmd" data-save="docs/evidence/phase-8/01-drop-numbers.txt"><div class="cmd-bar"><span class="cmd-where">ticketdrop/</span><span class="once">Only now</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 01-drop-numbers.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>cd "$TD"
+make demo-drop TARGET=&lt;eks target&gt; CUSTOMERS=1000 CAPACITY=1000
+kubectl get nodes -L karpenter.sh/capacity-type --no-headers | awk '{print $NF}' | sort | uniq -c  <span class="cm">  # Spot share</span></code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul><li><span class="once">Only now</span> <code>01-drop-numbers.txt</code> plus dashboard screenshots.</li></ul></dd>
   </dl></div>
   <div class="step"><div class="head"><label><input type="checkbox" id="p8-s2"><h3>2. Kill a node, and simulate a Spot interruption</h3></label></div><dl>
     <dt>Do</dt><dd>Terminate one worker mid-drop. Then send a Spot interruption, for example with AWS FIS, and watch Karpenter drain and replace the node.</dd>
     <dt>Done when</dt><dd>No order is lost, and the disruption budgets hold.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd" data-save="docs/evidence/phase-8/02-node-kill.txt"><div class="cmd-bar"><span class="cmd-where">any folder</span><span class="once">Only now</span><span class="tag kill">deletes</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 02-node-kill.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>kubectl get pdb -n ticketdrop
+NODE=$(kubectl get nodes -l karpenter.sh/nodepool -o jsonpath='{.items[0].metadata.name}')
+ID=$(kubectl get node "$NODE" -o jsonpath='{.spec.providerID}' | cut -d/ -f5)
+aws ec2 terminate-instances --instance-ids "$ID"</code></pre></div>
+      <div class="cmd" data-save="docs/evidence/phase-8/02-spot-interruption.txt"><div class="cmd-bar"><span class="cmd-where">any folder</span><span class="once">Only now</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 02-spot-interruption.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>aws fis list-experiment-templates --query 'experimentTemplates[].[id,description]' --output text
+aws fis start-experiment --experiment-template-id &lt;id&gt;
+aws fis get-experiment --id &lt;experiment id&gt; --query experiment.state</code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul><li><span class="once">Only now</span> <code>02-node-kill.txt</code>, <code>02-spot-interruption.txt</code>.</li></ul></dd>
   </dl></div>
   <div class="step"><div class="head"><label><input type="checkbox" id="p8-s3"><h3>3. Poison message, bad release, Postgres failover</h3></label></div><dl>
@@ -1519,6 +2111,20 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
         <li>With CNPG running two or more instances on EKS, delete the primary.</li>
       </ul></dd>
     <dt>Done when</dt><dd>Each one recovers with nothing lost, and you have its recovery time.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd" data-save="docs/evidence/phase-8/03-poison.txt"><div class="cmd-bar"><span class="cmd-where">any folder</span><span class="once">Only now</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 03-poison.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>u=$(aws sqs get-queue-url --queue-name payments-events --query QueueUrl --output text)
+d=$(aws sqs get-queue-url --queue-name payments-events-dlq --query QueueUrl --output text)
+date +%T; aws sqs send-message --queue-url "$u" --message-body 'this is not an event'
+watch -n 5 aws sqs get-queue-attributes --queue-url "$d" --attribute-names ApproximateNumberOfMessages</code></pre></div>
+      <div class="cmd" data-save="docs/evidence/phase-8/03-bad-release-rollback.txt"><div class="cmd-bar"><span class="cmd-where">ticketdrop-gitops/</span><span class="once">Only now</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 03-bad-release-rollback.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>cd "$TDG"
+git switch -c revert-bad-release origin/main
+git revert --no-edit &lt;bad commit&gt;
+git push -u origin revert-bad-release &amp;&amp; gh pr create --fill &amp;&amp; gh pr merge --auto --merge
+kubectl get applications -n argocd -w</code></pre></div>
+      <div class="cmd" data-save="docs/evidence/phase-8/03-pg-failover.txt"><div class="cmd-bar"><span class="cmd-where">terminal 1 · any folder</span><span class="once">Only now</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 03-pg-failover.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>kubectl get pods -n data -L cnpg.io/instanceRole -w | while read -r l; do echo "$(date +%T) $l"; done</code></pre></div>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">terminal 2 · any folder</span><span class="tag kill">deletes</span><button type="button" data-copy>Copy</button></div><pre><code>kubectl delete pod -n data -l cnpg.io/instanceRole=primary --wait=false
+kubectl get cluster pg -n data</code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul><li><span class="once">Only now</span> one file per drill: <code>03-poison.txt</code>, <code>03-bad-release-rollback.txt</code>, <code>03-pg-failover.txt</code>.</li></ul></dd>
   </dl></div>
   <div class="prose"><p><strong>Exit:</strong> numbers and screenshots for each drill.</p></div>
@@ -1539,10 +2145,25 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
       </ol>
       Time each one.</dd>
     <dt>Done when</dt><dd>The rebuilt stack passes the same drop check, and the total time is recorded.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd" data-save="docs/evidence/phase-9/01-rebuild-timed.txt"><div class="cmd-bar"><span class="cmd-where">ticketdrop/</span><span class="tag bill">bills</span><span class="once">Only now</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 01-rebuild-timed.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>cd "$TD"
+date -u
+time make aws-down
+time make orphan-check
+time make aws-up
+aws eks update-kubeconfig --name "$CLUSTER" --alias ticketdrop-eks
+time kubectl wait applications --all -n argocd --for=jsonpath='{.status.health.status}'=Healthy --timeout=45m
+time make drop-check TARGET=&lt;eks target&gt;
+date -u</code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul><li><span class="once">Only now</span> <code>01-rebuild-timed.txt</code>.</li></ul></dd>
   </dl></div>
   <div class="step"><div class="head"><label><input type="checkbox" id="p9-s2"><h3>2. The write-up</h3></label></div><dl>
     <dt>Do</dt><dd>Yours, written at the end from DECISIONS, TROUBLESHOOTING, PROOF and your journal.</dd>
+    <dt>Run</dt><dd class="run">
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">ticketdrop/</span><button type="button" data-copy>Copy</button></div><pre><code>cd "$TD"
+for f in docs/evidence/phase-*/*; do grep -rqF "$(basename "$f")" docs/*.md || echo "not linked: $f"; done</code></pre></div>
+    </dd>
     <dt class="cap">Capture</dt><dd class="cap none">Nothing new.</dd>
   </dl></div>
 </section>
@@ -1579,5 +2200,59 @@ id=$(gh run list --branch phase-3-ci --workflow ci --limit 1 --json databaseId -
   window.addEventListener('hashchange', openHash);
   openHash();
   show();
+})();
+</script>
+<script>
+/* Copy buttons on each command block, and an Ask Claude button on each step. */
+(function () {
+  function flash(btn, text) {
+    var was = btn.textContent;
+    btn.textContent = text; btn.classList.add('done');
+    setTimeout(function () { btn.textContent = was; btn.classList.remove('done'); }, 1400);
+  }
+  function copy(text, btn) {
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+      flash(btn, ok ? 'Copied' : 'Copy failed');
+    }
+    try { navigator.clipboard.writeText(text).then(function () { flash(btn, 'Copied'); }, fallback); }
+    catch (e) { fallback(); }
+  }
+  // The block, run with its output saved: date first, each command traced
+  // above its output, account IDs masked, and never over an existing file.
+  function saving(code, file) {
+    return 'f="$TD/' + file + '"\n' +
+      'if [ -z "$TD" ]; then echo "Set TD first: the terminal setup block at the top of the workbook"\n' +
+      'elif [ -e "$f" ]; then echo "$f already exists: rename it to keep both"\n' +
+      'else { date; set -x\n' + code + '\n{ set +x; } 2>/dev/null; } 2>&1 \\\n' +
+      '  | sed -uE \'s/\\b[0-9]{12}\\b/<account-id>/g\' | tee -i "$f"\nfi\n';
+  }
+  Array.prototype.slice.call(document.querySelectorAll('.cmd')).forEach(function (block) {
+    var code = block.querySelector('pre code');
+    if (!code) return;
+    var text = code.textContent.replace(/\s+$/, '');
+    var c = block.querySelector('[data-copy]');
+    if (c) c.addEventListener('click', function () { copy(text + '\n', c); });
+    var s = block.querySelector('[data-copy-save]');
+    if (s) s.addEventListener('click', function () { copy(saving(text, block.getAttribute('data-save')), s); });
+  });
+  Array.prototype.slice.call(document.querySelectorAll('.step .head')).forEach(function (head) {
+    var h = head.querySelector('h3');
+    var phase = head.closest('details.phase');
+    if (!h || !phase) return;
+    var m = h.textContent.trim().match(/^(\d+)\.\s*(.*)$/);
+    var line = 'Workbook Phase ' + phase.id.replace('phase-', '') + ', step ' +
+      (m ? m[1] + ' (' + m[2] + ')' : h.textContent.trim()) + ': ';
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'ask'; b.textContent = 'Ask Claude';
+    b.title = 'Copies a line naming this step, to paste into Claude Code with your question';
+    b.addEventListener('click', function () { copy(line, b); });
+    head.appendChild(b);
+  });
 })();
 </script>
