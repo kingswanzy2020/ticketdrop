@@ -1,0 +1,54 @@
+Tue Nov 24 10:41:06 PM KST 2026
+Terraform v1.17.2
+on linux_amd64
++ provider registry.terraform.io/hashicorp/aws v6.73.0
+
+data.aws_caller_identity.current: Reading...
+data.aws_iam_policy_document.plan: Reading...
+aws_iam_openid_connect_provider.github: Refreshing state... [id=arn:aws:iam::<account-id>:oidc-provider/token.actions.githubusercontent.com]
+aws_route53_zone.main: Refreshing state... [id=Z104117617BCE7Z0YYG9M]
+aws_ecr_repository.service["web"]: Refreshing state... [id=ticketdrop/web]
+aws_ecr_repository.service["gateway"]: Refreshing state... [id=ticketdrop/gateway]
+aws_ecr_repository.service["catalog"]: Refreshing state... [id=ticketdrop/catalog]
+aws_ecr_repository.service["orders"]: Refreshing state... [id=ticketdrop/orders]
+aws_ecr_repository.service["notifications"]: Refreshing state... [id=ticketdrop/notifications]
+aws_ecr_repository.service["fulfillment"]: Refreshing state... [id=ticketdrop/fulfillment]
+data.aws_iam_policy_document.plan: Read complete after 0s [id=3342817616]
+aws_ecr_repository.service["scheduler"]: Refreshing state... [id=ticketdrop/scheduler]
+data.aws_caller_identity.current: Read complete after 0s [id=<account-id>]
+aws_ecr_repository.service["payments"]: Refreshing state... [id=ticketdrop/payments]
+aws_ecr_repository.service["inventory"]: Refreshing state... [id=ticketdrop/inventory]
+data.aws_iam_policy_document.ci_trust["push"]: Reading...
+data.aws_iam_policy_document.ci_trust["push"]: Read complete after 0s [id=3938565607]
+data.aws_iam_policy_document.ci_trust["apply"]: Reading...
+data.aws_iam_policy_document.ci_trust["apply"]: Read complete after 0s [id=416700864]
+data.aws_iam_policy_document.ci_trust["plan"]: Reading...
+data.aws_iam_policy_document.ci_trust["plan"]: Read complete after 0s [id=2736815259]
+aws_budgets_budget.monthly: Refreshing state... [id=<account-id>:Budget for 20 dollars]
+aws_iam_role.ci["plan"]: Refreshing state... [id=ticketdrop-ci-plan]
+aws_iam_role.ci["push"]: Refreshing state... [id=ticketdrop-ci-push]
+aws_iam_role.ci["apply"]: Refreshing state... [id=ticketdrop-ci-apply]
+aws_ecr_lifecycle_policy.service["payments"]: Refreshing state... [id=ticketdrop/payments]
+aws_ecr_lifecycle_policy.service["orders"]: Refreshing state... [id=ticketdrop/orders]
+aws_ecr_lifecycle_policy.service["catalog"]: Refreshing state... [id=ticketdrop/catalog]
+aws_ecr_lifecycle_policy.service["scheduler"]: Refreshing state... [id=ticketdrop/scheduler]
+data.aws_iam_policy_document.push: Reading...
+data.aws_iam_policy_document.push: Read complete after 0s [id=3976318657]
+aws_ecr_lifecycle_policy.service["fulfillment"]: Refreshing state... [id=ticketdrop/fulfillment]
+aws_ecr_lifecycle_policy.service["inventory"]: Refreshing state... [id=ticketdrop/inventory]
+aws_ecr_lifecycle_policy.service["web"]: Refreshing state... [id=ticketdrop/web]
+aws_ecr_lifecycle_policy.service["gateway"]: Refreshing state... [id=ticketdrop/gateway]
+aws_ecr_lifecycle_policy.service["notifications"]: Refreshing state... [id=ticketdrop/notifications]
+aws_iam_role_policy.plan: Refreshing state... [id=ticketdrop-ci-plan:plan]
+aws_iam_role_policy.push: Refreshing state... [id=ticketdrop-ci-push:push]
+aws_iam_role_policy_attachment.ci_read_only["apply"]: Refreshing state... [id=ticketdrop-ci-apply/arn:aws:iam::aws:policy/ReadOnlyAccess]
+aws_iam_role_policy_attachment.ci_read_only["plan"]: Refreshing state... [id=ticketdrop-ci-plan/arn:aws:iam::aws:policy/ReadOnlyAccess]
+data.aws_iam_policy_document.apply: Reading...
+data.aws_iam_policy_document.apply: Read complete after 0s [id=1404853922]
+aws_iam_role_policy.apply: Refreshing state... [id=ticketdrop-ci-apply:apply]
+
+No changes. Your infrastructure matches the configuration.
+
+Terraform has compared your real infrastructure against your configuration
+and found no differences, so no changes are needed.
+Releasing state lock. This may take a few moments...

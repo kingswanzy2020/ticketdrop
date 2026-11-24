@@ -1,0 +1,64 @@
+Tue Nov 24 10:42:03 PM KST 2026
+{
+    "role": "ticketdrop-ci-plan",
+    "trust": {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Principal": {
+                    "Federated": "arn:aws:iam::<account-id>:oidc-provider/token.actions.githubusercontent.com"
+                },
+                "Action": "sts:AssumeRoleWithWebIdentity",
+                "Condition": {
+                    "StringEquals": {
+                        "token.actions.githubusercontent.com:sub": "repo:kingswanzy2020/ticketdrop:pull_request",
+                        "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+                    }
+                }
+            }
+        ]
+    }
+}
+{
+    "role": "ticketdrop-ci-apply",
+    "trust": {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Principal": {
+                    "Federated": "arn:aws:iam::<account-id>:oidc-provider/token.actions.githubusercontent.com"
+                },
+                "Action": "sts:AssumeRoleWithWebIdentity",
+                "Condition": {
+                    "StringEquals": {
+                        "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+                        "token.actions.githubusercontent.com:sub": "repo:kingswanzy2020/ticketdrop:environment:foundation-apply"
+                    }
+                }
+            }
+        ]
+    }
+}
+{
+    "role": "ticketdrop-ci-push",
+    "trust": {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Principal": {
+                    "Federated": "arn:aws:iam::<account-id>:oidc-provider/token.actions.githubusercontent.com"
+                },
+                "Action": "sts:AssumeRoleWithWebIdentity",
+                "Condition": {
+                    "StringEquals": {
+                        "token.actions.githubusercontent.com:sub": "repo:kingswanzy2020/ticketdrop:ref:refs/heads/main",
+                        "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+                    }
+                }
+            }
+        ]
+    }
+}
