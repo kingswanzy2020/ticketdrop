@@ -1651,3 +1651,38 @@ six resources; the plan after the move changed nothing
 S3. Bootstrap's state lives in the bucket it describes, so rebuilding it in a
 new account means commenting out the backend block for the first apply. Under
 $0.01 a month, and the bucket stays up between sessions.
+
+## 69. CI reaches AWS through GitHub OIDC and three roles, each trusting one exact `sub`
+
+**Decision.** `terraform/live/foundation` holds what stays up between sessions:
+GitHub's OIDC provider, three CI roles, nine ECR repositories
+(`ticketdrop/<service>`, immutable tags, scan on push, the newest 30 tagged
+images kept), and the hosted zone and budget, which were made in the console
+and are imported, along with the OIDC provider. Each role's trust policy
+requires `aud = sts.amazonaws.com` and one exact `sub` (`StringEquals`):
+
+| Role | `sub` | Can do |
+|---|---|---|
+| `ticketdrop-ci-plan` | `repo:kingswanzy2020/ticketdrop:pull_request` | `ReadOnlyAccess`, minus secret values, SSM parameters and `kms:Decrypt`; write and delete only `*.tflock` in the state bucket |
+| `ticketdrop-ci-apply` | `…:environment:foundation-apply` | `ReadOnlyAccess`, plus writes to what this layer manages only: the OIDC provider, `ticketdrop-ci-*` roles (attaching `ReadOnlyAccess` and nothing else), `ticketdrop/*` repositories, the zone's comment and tags, budgets, and `foundation/*` state |
+| `ticketdrop-ci-push` | `…:ref:refs/heads/main` | push to and read the nine repositories; nothing that deletes |
+
+The layer is written inline, not as `terraform/modules/`: each piece is used
+once.
+
+**Why.** No AWS key is ever stored in GitHub; each run gets credentials for an
+hour, for one repository and one kind of event. Fork PRs get no OIDC token, so
+outsiders cannot reach even the plan role. The apply role trusts a GitHub
+environment, limited to `main`, rather than `main` itself, because with a
+`main` subject every job on main, the Monday scheduled run included, could
+take it. The three policies passed IAM Access Analyzer with no findings, and
+the first plan was 3 to import, 26 to add, 3 to change (tags only), 0 to
+destroy.
+
+**Cost.** The apply role can rewrite the `ticketdrop-ci-*` roles' inline
+policies, so in principle it could widen itself; what prevents that is the
+environment, `main` and the ruleset that requires a PR. A PR's plan can read
+every resource's configuration in the account, and the state of every layer.
+The budget's `metrics` is ignored rather than managed, since the provider
+accepts it only with a `filter_expression`. Nothing here bills apart from the
+zone's $0.50 a month and, from Phase 6, the images stored.

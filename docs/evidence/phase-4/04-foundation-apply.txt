@@ -1,0 +1,104 @@
+Tue Nov 24 10:41:30 PM KST 2026
+Releasing state lock. This may take a few moments...
+
+Apply complete! Resources: 0 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+ci_role_arns = {
+  "apply" = "arn:aws:iam::<account-id>:role/ticketdrop-ci-apply"
+  "plan" = "arn:aws:iam::<account-id>:role/ticketdrop-ci-plan"
+  "push" = "arn:aws:iam::<account-id>:role/ticketdrop-ci-push"
+}
+ecr_repository_urls = {
+  "catalog" = "<account-id>.dkr.ecr.us-east-1.amazonaws.com/ticketdrop/catalog"
+  "fulfillment" = "<account-id>.dkr.ecr.us-east-1.amazonaws.com/ticketdrop/fulfillment"
+  "gateway" = "<account-id>.dkr.ecr.us-east-1.amazonaws.com/ticketdrop/gateway"
+  "inventory" = "<account-id>.dkr.ecr.us-east-1.amazonaws.com/ticketdrop/inventory"
+  "notifications" = "<account-id>.dkr.ecr.us-east-1.amazonaws.com/ticketdrop/notifications"
+  "orders" = "<account-id>.dkr.ecr.us-east-1.amazonaws.com/ticketdrop/orders"
+  "payments" = "<account-id>.dkr.ecr.us-east-1.amazonaws.com/ticketdrop/payments"
+  "scheduler" = "<account-id>.dkr.ecr.us-east-1.amazonaws.com/ticketdrop/scheduler"
+  "web" = "<account-id>.dkr.ecr.us-east-1.amazonaws.com/ticketdrop/web"
+}
+name_servers = tolist([
+  "ns-1204.awsdns-22.org",
+  "ns-129.awsdns-16.com",
+  "ns-1754.awsdns-27.co.uk",
+  "ns-976.awsdns-58.net",
+])
+zone_id = "Z104117617BCE7Z0YYG9M"
+Tue Nov 24 10:41:42 PM KST 2026
+aws_ecr_repository.service["payments"]: Refreshing state... [id=ticketdrop/payments]
+data.aws_caller_identity.current: Reading...
+aws_iam_openid_connect_provider.github: Refreshing state... [id=arn:aws:iam::<account-id>:oidc-provider/token.actions.githubusercontent.com]
+aws_ecr_repository.service["catalog"]: Refreshing state... [id=ticketdrop/catalog]
+aws_ecr_repository.service["scheduler"]: Refreshing state... [id=ticketdrop/scheduler]
+aws_ecr_repository.service["gateway"]: Refreshing state... [id=ticketdrop/gateway]
+aws_ecr_repository.service["inventory"]: Refreshing state... [id=ticketdrop/inventory]
+aws_ecr_repository.service["web"]: Refreshing state... [id=ticketdrop/web]
+aws_ecr_repository.service["fulfillment"]: Refreshing state... [id=ticketdrop/fulfillment]
+aws_ecr_repository.service["notifications"]: Refreshing state... [id=ticketdrop/notifications]
+data.aws_caller_identity.current: Read complete after 0s [id=<account-id>]
+aws_ecr_repository.service["orders"]: Refreshing state... [id=ticketdrop/orders]
+data.aws_iam_policy_document.plan: Reading...
+data.aws_iam_policy_document.plan: Read complete after 0s [id=3342817616]
+aws_route53_zone.main: Refreshing state... [id=Z104117617BCE7Z0YYG9M]
+data.aws_iam_policy_document.ci_trust["plan"]: Reading...
+data.aws_iam_policy_document.ci_trust["plan"]: Read complete after 0s [id=2736815259]
+data.aws_iam_policy_document.ci_trust["push"]: Reading...
+data.aws_iam_policy_document.ci_trust["apply"]: Reading...
+data.aws_iam_policy_document.ci_trust["push"]: Read complete after 0s [id=3938565607]
+data.aws_iam_policy_document.ci_trust["apply"]: Read complete after 0s [id=416700864]
+aws_budgets_budget.monthly: Refreshing state... [id=<account-id>:Budget for 20 dollars]
+aws_iam_role.ci["push"]: Refreshing state... [id=ticketdrop-ci-push]
+aws_iam_role.ci["apply"]: Refreshing state... [id=ticketdrop-ci-apply]
+aws_iam_role.ci["plan"]: Refreshing state... [id=ticketdrop-ci-plan]
+aws_ecr_lifecycle_policy.service["inventory"]: Refreshing state... [id=ticketdrop/inventory]
+data.aws_iam_policy_document.push: Reading...
+aws_ecr_lifecycle_policy.service["notifications"]: Refreshing state... [id=ticketdrop/notifications]
+aws_ecr_lifecycle_policy.service["scheduler"]: Refreshing state... [id=ticketdrop/scheduler]
+aws_ecr_lifecycle_policy.service["web"]: Refreshing state... [id=ticketdrop/web]
+data.aws_iam_policy_document.push: Read complete after 0s [id=3976318657]
+aws_ecr_lifecycle_policy.service["fulfillment"]: Refreshing state... [id=ticketdrop/fulfillment]
+aws_ecr_lifecycle_policy.service["payments"]: Refreshing state... [id=ticketdrop/payments]
+aws_ecr_lifecycle_policy.service["catalog"]: Refreshing state... [id=ticketdrop/catalog]
+aws_ecr_lifecycle_policy.service["gateway"]: Refreshing state... [id=ticketdrop/gateway]
+aws_ecr_lifecycle_policy.service["orders"]: Refreshing state... [id=ticketdrop/orders]
+aws_iam_role_policy.plan: Refreshing state... [id=ticketdrop-ci-plan:plan]
+aws_iam_role_policy.push: Refreshing state... [id=ticketdrop-ci-push:push]
+aws_iam_role_policy_attachment.ci_read_only["apply"]: Refreshing state... [id=ticketdrop-ci-apply/arn:aws:iam::aws:policy/ReadOnlyAccess]
+aws_iam_role_policy_attachment.ci_read_only["plan"]: Refreshing state... [id=ticketdrop-ci-plan/arn:aws:iam::aws:policy/ReadOnlyAccess]
+data.aws_iam_policy_document.apply: Reading...
+data.aws_iam_policy_document.apply: Read complete after 0s [id=1404853922]
+aws_iam_role_policy.apply: Refreshing state... [id=ticketdrop-ci-apply:apply]
+
+No changes. Your infrastructure matches the configuration.
+
+Terraform has compared your real infrastructure against your configuration
+and found no differences, so no changes are needed.
+Releasing state lock. This may take a few moments...
+exit 0
+
+Tue Nov 24 11:01:18 PM KST 2026
+# The apply that created these ran at about 22:39 KST and was not captured;
+# the runs above came after it, so they show no changes. When AWS says each was made:
+$ terraform state list | grep -vc "^data\."
+29
+$ aws iam get-role --role-name ticketdrop-ci-<role> --query Role.[RoleName,CreateDate]
+ticketdrop-ci-plan	2026-11-24T13:39:45+00:00
+ticketdrop-ci-apply	2026-11-24T13:39:44+00:00
+ticketdrop-ci-push	2026-11-24T13:39:45+00:00
+$ aws ecr describe-repositories --query repositories[].[repositoryName,createdAt,imageTagMutability]
+ticketdrop/catalog	2026-11-24T22:39:42.876000+09:00	IMMUTABLE
+ticketdrop/fulfillment	2026-11-24T22:39:43.110000+09:00	IMMUTABLE
+ticketdrop/gateway	2026-11-24T22:39:43.604000+09:00	IMMUTABLE
+ticketdrop/inventory	2026-11-24T22:39:43.635000+09:00	IMMUTABLE
+ticketdrop/notifications	2026-11-24T22:39:43.874000+09:00	IMMUTABLE
+ticketdrop/orders	2026-11-24T22:39:43.478000+09:00	IMMUTABLE
+ticketdrop/payments	2026-11-24T22:39:43.672000+09:00	IMMUTABLE
+ticketdrop/scheduler	2026-11-24T22:39:42.865000+09:00	IMMUTABLE
+ticketdrop/web	2026-11-24T22:39:42.879000+09:00	IMMUTABLE
+$ aws s3api list-object-versions --bucket ticketdrop-tfstate-kahmedt --prefix foundation/terraform.tfstate
+2026-11-24T13:41:42+00:00	74129	True
+2026-11-24T13:39:50+00:00	70266	False
