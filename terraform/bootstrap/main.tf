@@ -37,7 +37,9 @@ resource "aws_s3_bucket_versioning" "state" {
 }
 
 # State holds every attribute in plain text. SSE-S3: a KMS key would add a
-# monthly charge and nothing else here.
+# monthly charge and nothing else here (DECISIONS 68), so Trivy's CMK rule is
+# accepted rather than met.
+#trivy:ignore:AWS-0132
 resource "aws_s3_bucket_server_side_encryption_configuration" "state" {
   bucket = aws_s3_bucket.state.id
 
