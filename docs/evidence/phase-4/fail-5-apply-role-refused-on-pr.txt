@@ -1,0 +1,77 @@
+Thu Nov 26 09:08:10 PM KST 2026
+oidc-probe run 45816796631 on a pull_request
+Set up job	2026-11-26T12:07:59.9455805Z Current runner version: '2.338.2'
+Set up job	2026-11-26T12:07:59.9480859Z ##[group]Runner Image Provisioner
+Set up job	2026-11-26T12:07:59.9481785Z Hosted Compute Agent
+Set up job	2026-11-26T12:07:59.9482549Z Version: 20261111.635
+Set up job	2026-11-26T12:07:59.9483307Z Commit: b8a594ea514ff44cadb5342986c68b1eac6e22ed
+Set up job	2026-11-26T12:07:59.9484059Z Build Date: 2026-11-11T01:49:01Z
+Set up job	2026-11-26T12:07:59.9484867Z Worker ID: {c04693b0-3e2b-4c87-bbee-8defa3c70c89}
+Set up job	2026-11-26T12:07:59.9485620Z Region: westcentralus
+Set up job	2026-11-26T12:07:59.9486208Z Cloud: Azure
+Set up job	2026-11-26T12:07:59.9486796Z ##[endgroup]
+Set up job	2026-11-26T12:07:59.9488327Z ##[group]Operating System
+Set up job	2026-11-26T12:07:59.9489038Z Ubuntu
+Set up job	2026-11-26T12:07:59.9489720Z 24.04.5
+Set up job	2026-11-26T12:07:59.9490249Z LTS
+Set up job	2026-11-26T12:07:59.9490816Z ##[endgroup]
+Set up job	2026-11-26T12:07:59.9491379Z ##[group]Runner Image
+Set up job	2026-11-26T12:07:59.9492004Z Image: ubuntu-24.04
+Set up job	2026-11-26T12:07:59.9492851Z Version: 20261122.23.1
+Set up job	2026-11-26T12:07:59.9494037Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261122.23/images/ubuntu/Ubuntu2404-Readme.md
+Set up job	2026-11-26T12:07:59.9495860Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261122.23
+Set up job	2026-11-26T12:07:59.9496886Z ##[endgroup]
+Set up job	2026-11-26T12:07:59.9498010Z ##[group]GITHUB_TOKEN Permissions
+Set up job	2026-11-26T12:07:59.9500212Z Contents: read
+Set up job	2026-11-26T12:07:59.9501257Z Metadata: read
+Set up job	2026-11-26T12:07:59.9502037Z ##[endgroup]
+Set up job	2026-11-26T12:07:59.9504686Z Secret source: Actions
+Set up job	2026-11-26T12:07:59.9505709Z Cache mode: write
+Set up job	2026-11-26T12:07:59.9506529Z Prepare workflow directory
+Set up job	2026-11-26T12:07:59.9849648Z Prepare all required actions
+Set up job	2026-11-26T12:07:59.9898191Z Getting action download info
+Set up job	2026-11-26T12:08:00.2807633Z Download action repository 'aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd' (SHA:e1253824e5c10ff9df46874f81ed3ec929e19cfd)
+Set up job	2026-11-26T12:08:01.0206729Z Complete job name: probe
+plan role (expect success)	2026-11-26T12:08:01.1204657Z ##[group]Run aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+plan role (expect success)	2026-11-26T12:08:01.1206014Z with:
+plan role (expect success)	2026-11-26T12:08:01.1206800Z   role-to-assume: arn:aws:iam::***:role/ticketdrop-ci-plan
+plan role (expect success)	2026-11-26T12:08:01.1207533Z   aws-region: us-east-1
+plan role (expect success)	2026-11-26T12:08:01.1208068Z   mask-aws-account-id: true
+plan role (expect success)	2026-11-26T12:08:01.1208623Z   audience: sts.amazonaws.com
+plan role (expect success)	2026-11-26T12:08:01.1209387Z ##[endgroup]
+plan role (expect success)	2026-11-26T12:08:01.7089958Z Assuming role with OIDC
+plan role (expect success)	2026-11-26T12:08:01.9046133Z Authenticated as assumedRoleId <role-id>:GitHubActions
+apply role (expect refusal)	2026-11-26T12:08:02.0975065Z ##[group]Run aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+apply role (expect refusal)	2026-11-26T12:08:02.0977212Z with:
+apply role (expect refusal)	2026-11-26T12:08:02.0978773Z   role-to-assume: arn:aws:iam::***:role/ticketdrop-ci-apply
+apply role (expect refusal)	2026-11-26T12:08:02.0980404Z   aws-region: us-east-1
+apply role (expect refusal)	2026-11-26T12:08:02.1053773Z   mask-aws-account-id: true
+apply role (expect refusal)	2026-11-26T12:08:02.1055964Z   retry-max-attempts: 1
+apply role (expect refusal)	2026-11-26T12:08:02.1057329Z   audience: sts.amazonaws.com
+apply role (expect refusal)	2026-11-26T12:08:02.1058554Z env:
+apply role (expect refusal)	2026-11-26T12:08:02.1059564Z   AWS_DEFAULT_REGION: us-east-1
+apply role (expect refusal)	2026-11-26T12:08:02.1060842Z   AWS_REGION: us-east-1
+apply role (expect refusal)	2026-11-26T12:08:02.1062163Z   AWS_ACCESS_KEY_ID: ***
+apply role (expect refusal)	2026-11-26T12:08:02.1063989Z   AWS_SECRET_ACCESS_KEY: ***
+apply role (expect refusal)	2026-11-26T12:08:02.1102323Z   AWS_SESSION_TOKEN: ***
+apply role (expect refusal)	2026-11-26T12:08:02.1103655Z ##[endgroup]
+apply role (expect refusal)	2026-11-26T12:08:02.4502342Z Assuming role with OIDC
+apply role (expect refusal)	2026-11-26T12:08:02.6417247Z Retry AssumeRole: attempt 1 of 1 failed: Could not assume role with OIDC: Not authorized to perform sts:AssumeRoleWithWebIdentity. Retrying after 14ms.
+apply role (expect refusal)	2026-11-26T12:08:02.6421648Z Retry AssumeRole: reached max retries (1); giving up.
+apply role (expect refusal)	2026-11-26T12:08:02.6445011Z ##[error]Could not assume role with OIDC: Not authorized to perform sts:AssumeRoleWithWebIdentity
+the apply role must have been refused	2026-11-26T12:08:02.6629424Z ##[group]Run echo "apply role outcome: $OUTCOME"
+the apply role must have been refused	2026-11-26T12:08:02.6631093Z echo "apply role outcome: $OUTCOME"
+the apply role must have been refused	2026-11-26T12:08:02.6633435Z [ "$OUTCOME" = failure ] || { echo "::error::a pull request was given the apply role"; exit 1; }
+the apply role must have been refused	2026-11-26T12:08:02.6684943Z shell: /usr/bin/bash -e {0}
+the apply role must have been refused	2026-11-26T12:08:02.6686113Z env:
+the apply role must have been refused	2026-11-26T12:08:02.6687082Z   AWS_DEFAULT_REGION: us-east-1
+the apply role must have been refused	2026-11-26T12:08:02.6688273Z   AWS_REGION: us-east-1
+the apply role must have been refused	2026-11-26T12:08:02.6689536Z   AWS_ACCESS_KEY_ID: ***
+the apply role must have been refused	2026-11-26T12:08:02.6691010Z   AWS_SECRET_ACCESS_KEY: ***
+the apply role must have been refused	2026-11-26T12:08:02.6726053Z   AWS_SESSION_TOKEN: ***
+the apply role must have been refused	2026-11-26T12:08:02.6727152Z   OUTCOME: failure
+the apply role must have been refused	2026-11-26T12:08:02.6728142Z ##[endgroup]
+the apply role must have been refused	2026-11-26T12:08:02.6827490Z apply role outcome: failure
+Post apply role (expect refusal)	2026-11-26T12:08:02.7134503Z Post job cleanup.
+Post plan role (expect success)	2026-11-26T12:08:02.8233712Z Post job cleanup.
+Complete job	2026-11-26T12:08:02.9069191Z Cleaning up orphan processes

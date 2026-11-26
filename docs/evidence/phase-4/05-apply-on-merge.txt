@@ -1,0 +1,321 @@
+Thu Nov 26 08:55:34 PM KST 2026
+ci run 45774725119, job apply-foundation, main 7bc714d (merge of #17)
+2026-11-26T07:22:37.3628763Z Current runner version: '2.338.2'
+2026-11-26T07:22:37.3646579Z ##[group]Runner Image Provisioner
+2026-11-26T07:22:37.3647245Z Hosted Compute Agent
+2026-11-26T07:22:37.3647991Z Version: 20261111.635
+2026-11-26T07:22:37.3648565Z Commit: b8a594ea514ff44cadb5342986c68b1eac6e22ed
+2026-11-26T07:22:37.3649106Z Build Date: 2026-11-11T01:49:01Z
+2026-11-26T07:22:37.3649680Z Worker ID: {3b0dc4d0-a149-4cdd-a4c3-3254c4ac1994}
+2026-11-26T07:22:37.3650255Z Region: us-west-2
+2026-11-26T07:22:37.3650745Z Cloud: AWS
+2026-11-26T07:22:37.3651140Z ##[endgroup]
+2026-11-26T07:22:37.3652529Z ##[group]Operating System
+2026-11-26T07:22:37.3653052Z Ubuntu
+2026-11-26T07:22:37.3653436Z 24.04.5
+2026-11-26T07:22:37.3653854Z LTS
+2026-11-26T07:22:37.3654238Z ##[endgroup]
+2026-11-26T07:22:37.3654634Z ##[group]Runner Image
+2026-11-26T07:22:37.3655119Z Image: ubuntu-24.04
+2026-11-26T07:22:37.3655570Z Version: 20261122.23.1
+2026-11-26T07:22:37.3656520Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261122.23/images/ubuntu/Ubuntu2404-Readme.md
+2026-11-26T07:22:37.3657652Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261122.23
+2026-11-26T07:22:37.3658359Z ##[endgroup]
+2026-11-26T07:22:37.3659233Z ##[group]GITHUB_TOKEN Permissions
+2026-11-26T07:22:37.3660867Z Contents: read
+2026-11-26T07:22:37.3661303Z Metadata: read
+2026-11-26T07:22:37.3662055Z ##[endgroup]
+2026-11-26T07:22:37.3663631Z Secret source: Actions
+2026-11-26T07:22:37.3664334Z Cache mode: write
+2026-11-26T07:22:37.3664831Z Prepare workflow directory
+2026-11-26T07:22:37.3929315Z Prepare all required actions
+2026-11-26T07:22:37.3966387Z Getting action download info
+2026-11-26T07:22:37.7959553Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)
+2026-11-26T07:22:39.4575308Z Download action repository 'aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd' (SHA:e1253824e5c10ff9df46874f81ed3ec929e19cfd)
+2026-11-26T07:22:39.7755489Z Download action repository 'hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e' (SHA:dfe3c3f87815947d99a8997f908cb6525fc44e9e)
+2026-11-26T07:22:40.2080696Z Complete job name: apply-foundation
+2026-11-26T07:22:40.2657632Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+2026-11-26T07:22:40.2658193Z with:
+2026-11-26T07:22:40.2658476Z   persist-credentials: false
+2026-11-26T07:22:40.2658839Z   repository: kingswanzy2020/ticketdrop
+2026-11-26T07:22:40.2660912Z   token: ***
+2026-11-26T07:22:40.2661190Z   ssh-strict: true
+2026-11-26T07:22:40.2661768Z   ssh-user: git
+2026-11-26T07:22:40.2662060Z   clean: true
+2026-11-26T07:22:40.2662383Z   sparse-checkout-cone-mode: true
+2026-11-26T07:22:40.2662688Z   fetch-depth: 1
+2026-11-26T07:22:40.2662958Z   fetch-tags: false
+2026-11-26T07:22:40.2663265Z   show-progress: true
+2026-11-26T07:22:40.2663548Z   lfs: false
+2026-11-26T07:22:40.2663826Z   submodules: false
+2026-11-26T07:22:40.2664097Z   set-safe-directory: true
+2026-11-26T07:22:40.2664462Z   allow-unsafe-pr-checkout: false
+2026-11-26T07:22:40.2664899Z env:
+2026-11-26T07:22:40.2665167Z   GOLANGCI_LINT_VERSION: v2.14.0
+2026-11-26T07:22:40.2665497Z   GOVULNCHECK_VERSION: v1.9.0
+2026-11-26T07:22:40.2665867Z   TERRAFORM_VERSION: 1.17.2
+2026-11-26T07:22:40.2666199Z   TFLINT_VERSION: v0.66.0
+2026-11-26T07:22:40.2666551Z   AWS_REGION: us-east-1
+2026-11-26T07:22:40.2667007Z   TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-26T07:22:40.2667472Z ##[endgroup]
+2026-11-26T07:22:43.9181836Z Syncing repository: kingswanzy2020/ticketdrop
+2026-11-26T07:22:43.9183325Z ##[group]Getting Git version info
+2026-11-26T07:22:43.9183751Z Working directory is '/home/runner/work/ticketdrop/ticketdrop'
+2026-11-26T07:22:43.9184432Z [command]/usr/bin/git version
+2026-11-26T07:22:44.2442758Z git version 2.56.1
+2026-11-26T07:22:44.2456546Z ##[endgroup]
+2026-11-26T07:22:44.2465782Z Temporarily overriding HOME='/home/runner/work/_temp/001ce907-0ef6-44ca-84b9-a7fed7eadbc4' before making global git config changes
+2026-11-26T07:22:44.2467338Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-26T07:22:44.2471341Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/ticketdrop/ticketdrop
+2026-11-26T07:22:44.2906218Z Deleting the contents of '/home/runner/work/ticketdrop/ticketdrop'
+2026-11-26T07:22:44.2908275Z ##[group]Determining repository object format
+2026-11-26T07:22:44.2909421Z ##[endgroup]
+2026-11-26T07:22:44.2909874Z ##[group]Initializing the repository
+2026-11-26T07:22:44.2913370Z [command]/usr/bin/git init /home/runner/work/ticketdrop/ticketdrop
+2026-11-26T07:22:44.3397109Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-26T07:22:44.3397954Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-26T07:22:44.3398549Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-26T07:22:44.3398998Z hint: call:
+2026-11-26T07:22:44.3399406Z hint:
+2026-11-26T07:22:44.3399813Z hint: 	git config --global init.defaultBranch <name>
+2026-11-26T07:22:44.3400151Z hint:
+2026-11-26T07:22:44.3400557Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-26T07:22:44.3401065Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-26T07:22:44.3401678Z hint:
+2026-11-26T07:22:44.3402071Z hint: 	git branch -m <name>
+2026-11-26T07:22:44.3402522Z hint:
+2026-11-26T07:22:44.3402926Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-26T07:22:44.3403634Z Initialized empty Git repository in /home/runner/work/ticketdrop/ticketdrop/.git/
+2026-11-26T07:22:44.3410896Z [command]/usr/bin/git remote add origin https://github.com/kingswanzy2020/ticketdrop
+2026-11-26T07:22:44.3451309Z ##[endgroup]
+2026-11-26T07:22:44.3452243Z ##[group]Disabling automatic garbage collection
+2026-11-26T07:22:44.3454321Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-26T07:22:44.3477963Z ##[endgroup]
+2026-11-26T07:22:44.3478529Z ##[group]Setting up auth
+2026-11-26T07:22:44.3481765Z Removing SSH command configuration
+2026-11-26T07:22:44.3482743Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-26T07:22:44.3509214Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-26T07:22:44.8567276Z Removing HTTP extra header
+2026-11-26T07:22:44.8572603Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-26T07:22:44.8604800Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-26T07:22:44.8754098Z Removing includeIf entries pointing to credentials config files
+2026-11-26T07:22:44.8758713Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-26T07:22:44.8784288Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-26T07:22:44.8942406Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-53aad871-ecf8-4ab0-b8b0-a0fbcd8a1784.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-26T07:22:44.8970613Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/ticketdrop/ticketdrop/.git.path /home/runner/work/_temp/git-credentials-53aad871-ecf8-4ab0-b8b0-a0fbcd8a1784.config
+2026-11-26T07:22:44.8993236Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/ticketdrop/ticketdrop/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-53aad871-ecf8-4ab0-b8b0-a0fbcd8a1784.config
+2026-11-26T07:22:44.9015434Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-53aad871-ecf8-4ab0-b8b0-a0fbcd8a1784.config
+2026-11-26T07:22:44.9038057Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-53aad871-ecf8-4ab0-b8b0-a0fbcd8a1784.config
+2026-11-26T07:22:44.9058911Z ##[endgroup]
+2026-11-26T07:22:44.9059437Z ##[group]Fetching the repository
+2026-11-26T07:22:44.9064708Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +7bc714d801d1bce97b1cdd83c87faa7e6edecc8c:refs/remotes/origin/main
+2026-11-26T07:22:45.6864278Z From https://github.com/kingswanzy2020/ticketdrop
+2026-11-26T07:22:45.6864945Z  * [new ref]         7bc714d801d1bce97b1cdd83c87faa7e6edecc8c -> origin/main
+2026-11-26T07:22:45.6874268Z [command]/usr/bin/git branch --list --remote origin/main
+2026-11-26T07:22:45.6918930Z   origin/main
+2026-11-26T07:22:45.6919736Z [command]/usr/bin/git rev-parse refs/remotes/origin/main
+2026-11-26T07:22:45.6942610Z 7bc714d801d1bce97b1cdd83c87faa7e6edecc8c
+2026-11-26T07:22:45.6943835Z ##[endgroup]
+2026-11-26T07:22:45.6944364Z ##[group]Determining the checkout info
+2026-11-26T07:22:45.6944944Z ##[endgroup]
+2026-11-26T07:22:45.6948190Z [command]/usr/bin/git sparse-checkout disable
+2026-11-26T07:22:45.7000454Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-26T07:22:45.7022163Z ##[group]Checking out the ref
+2026-11-26T07:22:45.7025200Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-11-26T07:22:45.8059289Z Switched to a new branch 'main'
+2026-11-26T07:22:45.8073581Z branch 'main' set up to track 'origin/main'.
+2026-11-26T07:22:45.8080926Z ##[endgroup]
+2026-11-26T07:22:45.8120482Z [command]/usr/bin/git log -1 --format=%H
+2026-11-26T07:22:45.8141125Z 7bc714d801d1bce97b1cdd83c87faa7e6edecc8c
+2026-11-26T07:22:45.8157635Z ##[group]Removing auth
+2026-11-26T07:22:45.8157912Z Removing SSH command configuration
+2026-11-26T07:22:45.8158362Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-26T07:22:45.8174997Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-26T07:22:45.8328944Z Removing HTTP extra header
+2026-11-26T07:22:45.8330532Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-26T07:22:45.8358113Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-26T07:22:45.8505946Z Removing includeIf entries pointing to credentials config files
+2026-11-26T07:22:45.8512250Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-26T07:22:45.8542602Z includeif.gitdir:/home/runner/work/ticketdrop/ticketdrop/.git.path
+2026-11-26T07:22:45.8543358Z includeif.gitdir:/home/runner/work/ticketdrop/ticketdrop/.git/worktrees/*.path
+2026-11-26T07:22:45.8543851Z includeif.gitdir:/github/workspace/.git.path
+2026-11-26T07:22:45.8544369Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-26T07:22:45.8554401Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/ticketdrop/ticketdrop/.git.path
+2026-11-26T07:22:45.8573201Z /home/runner/work/_temp/git-credentials-53aad871-ecf8-4ab0-b8b0-a0fbcd8a1784.config
+2026-11-26T07:22:45.8580179Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/ticketdrop/ticketdrop/.git.path \/home\/runner\/work\/_temp\/git\-credentials\-53aad871\-ecf8\-4ab0\-b8b0\-a0fbcd8a1784\.config
+2026-11-26T07:22:45.8606310Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/ticketdrop/ticketdrop/.git/worktrees/*.path
+2026-11-26T07:22:45.8624486Z /home/runner/work/_temp/git-credentials-53aad871-ecf8-4ab0-b8b0-a0fbcd8a1784.config
+2026-11-26T07:22:45.8629984Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/ticketdrop/ticketdrop/.git/worktrees/*.path \/home\/runner\/work\/_temp\/git\-credentials\-53aad871\-ecf8\-4ab0\-b8b0\-a0fbcd8a1784\.config
+2026-11-26T07:22:45.8655324Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-11-26T07:22:45.8672777Z /github/runner_temp/git-credentials-53aad871-ecf8-4ab0-b8b0-a0fbcd8a1784.config
+2026-11-26T07:22:45.8677731Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path \/github\/runner_temp\/git\-credentials\-53aad871\-ecf8\-4ab0\-b8b0\-a0fbcd8a1784\.config
+2026-11-26T07:22:45.8701616Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-26T07:22:45.8718203Z /github/runner_temp/git-credentials-53aad871-ecf8-4ab0-b8b0-a0fbcd8a1784.config
+2026-11-26T07:22:45.8722860Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path \/github\/runner_temp\/git\-credentials\-53aad871\-ecf8\-4ab0\-b8b0\-a0fbcd8a1784\.config
+2026-11-26T07:22:45.8746860Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-26T07:22:45.8896093Z Removing credentials config '/home/runner/work/_temp/git-credentials-53aad871-ecf8-4ab0-b8b0-a0fbcd8a1784.config'
+2026-11-26T07:22:45.8902381Z ##[endgroup]
+2026-11-26T07:22:45.9124500Z ##[group]Run aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+2026-11-26T07:22:45.9124909Z with:
+2026-11-26T07:22:45.9125348Z   role-to-assume: arn:aws:iam::***:role/ticketdrop-ci-apply
+2026-11-26T07:22:45.9125684Z   aws-region: us-east-1
+2026-11-26T07:22:45.9125953Z   mask-aws-account-id: true
+2026-11-26T07:22:45.9126444Z   audience: sts.amazonaws.com
+2026-11-26T07:22:45.9126686Z env:
+2026-11-26T07:22:45.9126890Z   GOLANGCI_LINT_VERSION: v2.14.0
+2026-11-26T07:22:45.9127185Z   GOVULNCHECK_VERSION: v1.9.0
+2026-11-26T07:22:45.9127460Z   TERRAFORM_VERSION: 1.17.2
+2026-11-26T07:22:45.9127716Z   TFLINT_VERSION: v0.66.0
+2026-11-26T07:22:45.9127949Z   AWS_REGION: us-east-1
+2026-11-26T07:22:45.9128373Z   TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-26T07:22:45.9128787Z ##[endgroup]
+2026-11-26T07:22:46.3717866Z Assuming role with OIDC
+2026-11-26T07:22:46.5820576Z Authenticated as assumedRoleId <role-id>:GitHubActions
+2026-11-26T07:22:46.9567811Z ##[group]Run hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e
+2026-11-26T07:22:46.9568226Z with:
+2026-11-26T07:22:46.9568495Z   terraform_version: 1.17.2
+2026-11-26T07:22:46.9568756Z   terraform_wrapper: false
+2026-11-26T07:22:46.9569060Z   cli_config_credentials_hostname: app.terraform.io
+2026-11-26T07:22:46.9569375Z env:
+2026-11-26T07:22:46.9569611Z   GOLANGCI_LINT_VERSION: v2.14.0
+2026-11-26T07:22:46.9569927Z   GOVULNCHECK_VERSION: v1.9.0
+2026-11-26T07:22:46.9570200Z   TERRAFORM_VERSION: 1.17.2
+2026-11-26T07:22:46.9570854Z   TFLINT_VERSION: v0.66.0
+2026-11-26T07:22:46.9571110Z   AWS_REGION: us-east-1
+2026-11-26T07:22:46.9572301Z   TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-26T07:22:46.9572810Z   AWS_DEFAULT_REGION: us-east-1
+2026-11-26T07:22:46.9573286Z   AWS_ACCESS_KEY_ID: ***
+2026-11-26T07:22:46.9573647Z   AWS_SECRET_ACCESS_KEY: ***
+2026-11-26T07:22:46.9580085Z   AWS_SESSION_TOKEN: ***
+2026-11-26T07:22:46.9580468Z ##[endgroup]
+2026-11-26T07:22:47.5974041Z [command]/usr/bin/unzip -o -q /home/runner/work/_temp/285ecbee-17a2-4984-89b0-d9f2a85879e3
+2026-11-26T07:22:48.3365960Z ##[group]Run terraform init -input=false
+2026-11-26T07:22:48.3366432Z terraform init -input=false
+2026-11-26T07:22:48.3366855Z terraform plan -input=false -no-color -lock-timeout=5m -out=tfplan
+2026-11-26T07:22:48.3367343Z terraform apply -input=false -no-color -lock-timeout=5m -auto-approve tfplan
+2026-11-26T07:22:49.0501379Z shell: /usr/bin/bash -e {0}
+2026-11-26T07:22:49.0502146Z env:
+2026-11-26T07:22:49.0502415Z   GOLANGCI_LINT_VERSION: v2.14.0
+2026-11-26T07:22:49.0502746Z   GOVULNCHECK_VERSION: v1.9.0
+2026-11-26T07:22:49.0503012Z   TERRAFORM_VERSION: 1.17.2
+2026-11-26T07:22:49.0503313Z   TFLINT_VERSION: v0.66.0
+2026-11-26T07:22:49.0503565Z   AWS_REGION: us-east-1
+2026-11-26T07:22:49.0504041Z   TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+2026-11-26T07:22:49.0504517Z   AWS_DEFAULT_REGION: us-east-1
+2026-11-26T07:22:49.0505068Z   AWS_ACCESS_KEY_ID: ***
+2026-11-26T07:22:49.0505592Z   AWS_SECRET_ACCESS_KEY: ***
+2026-11-26T07:22:49.0512495Z   AWS_SESSION_TOKEN: ***
+2026-11-26T07:22:49.0512802Z   TF_VAR_budget_email: ***
+2026-11-26T07:22:49.0513103Z ##[endgroup]
+2026-11-26T07:22:49.0788527Z Initializing the backend...
+2026-11-26T07:22:49.5705978Z 
+2026-11-26T07:22:49.5706423Z Successfully configured the backend "s3"! Terraform will automatically
+2026-11-26T07:22:49.5707195Z use this backend unless the backend configuration changes.
+2026-11-26T07:22:49.5709199Z 
+2026-11-26T07:22:49.8993185Z Initializing provider plugins...
+2026-11-26T07:22:49.8993850Z - Reusing version 6.73.0 of hashicorp/aws from the dependency lock file
+2026-11-26T07:22:50.0421930Z - Installing hashicorp/aws v6.73.0...
+2026-11-26T07:22:56.2346638Z - Installed hashicorp/aws v6.73.0 (signed by HashiCorp)
+2026-11-26T07:22:56.2346994Z 
+2026-11-26T07:22:56.2347557Z Terraform has been successfully initialized!
+2026-11-26T07:22:56.2347917Z 
+2026-11-26T07:22:56.2348307Z You may now begin working with Terraform. Try running "terraform plan" to see
+2026-11-26T07:22:56.2348738Z any changes that are required for your infrastructure. All Terraform commands
+2026-11-26T07:22:56.2349152Z should now work.
+2026-11-26T07:22:56.2349297Z 
+2026-11-26T07:22:56.2349476Z If you ever set or change modules or backend configuration for Terraform,
+2026-11-26T07:22:56.2349951Z rerun this command to reinitialize your working directory. If you forget, other
+2026-11-26T07:22:56.2350451Z commands will detect it and remind you to do so if necessary.
+2026-11-26T07:22:59.3931076Z data.aws_iam_policy_document.plan: Reading...
+2026-11-26T07:22:59.3941405Z aws_iam_openid_connect_provider.github: Refreshing state... [id=arn:aws:iam::***:oidc-provider/token.actions.githubusercontent.com]
+2026-11-26T07:22:59.3942859Z aws_ecr_repository.service["web"]: Refreshing state... [id=ticketdrop/web]
+2026-11-26T07:22:59.3946006Z aws_route53_zone.main: Refreshing state... [id=Z104117617BCE7Z0YYG9M]
+2026-11-26T07:22:59.3946784Z aws_ecr_repository.service["scheduler"]: Refreshing state... [id=ticketdrop/scheduler]
+2026-11-26T07:22:59.3947449Z aws_ecr_repository.service["orders"]: Refreshing state... [id=ticketdrop/orders]
+2026-11-26T07:22:59.3948155Z data.aws_caller_identity.current: Reading...
+2026-11-26T07:22:59.3948701Z aws_ecr_repository.service["payments"]: Refreshing state... [id=ticketdrop/payments]
+2026-11-26T07:22:59.3980112Z aws_ecr_repository.service["fulfillment"]: Refreshing state... [id=ticketdrop/fulfillment]
+2026-11-26T07:22:59.3985448Z aws_ecr_repository.service["catalog"]: Refreshing state... [id=ticketdrop/catalog]
+2026-11-26T07:22:59.3986145Z data.aws_iam_policy_document.plan: Read complete after 0s [id=3342817616]
+2026-11-26T07:22:59.3986790Z aws_ecr_repository.service["inventory"]: Refreshing state... [id=ticketdrop/inventory]
+2026-11-26T07:22:59.4573410Z data.aws_caller_identity.current: Read complete after 0s [id=***]
+2026-11-26T07:22:59.4585947Z aws_ecr_repository.service["gateway"]: Refreshing state... [id=ticketdrop/gateway]
+2026-11-26T07:22:59.6693423Z aws_ecr_repository.service["notifications"]: Refreshing state... [id=ticketdrop/notifications]
+2026-11-26T07:22:59.6777638Z data.aws_iam_policy_document.ci_trust["plan"]: Reading...
+2026-11-26T07:22:59.6786795Z data.aws_iam_policy_document.ci_trust["plan"]: Read complete after 0s [id=1648274090]
+2026-11-26T07:22:59.6797050Z data.aws_iam_policy_document.ci_trust["apply"]: Reading...
+2026-11-26T07:22:59.6806382Z data.aws_iam_policy_document.ci_trust["apply"]: Read complete after 0s [id=3357165852]
+2026-11-26T07:22:59.6816937Z data.aws_iam_policy_document.ci_trust["push"]: Reading...
+2026-11-26T07:22:59.6825671Z data.aws_iam_policy_document.ci_trust["push"]: Read complete after 0s [id=831737011]
+2026-11-26T07:22:59.6854966Z aws_budgets_budget.monthly: Refreshing state... [id=***:Budget for 20 dollars]
+2026-11-26T07:22:59.7301227Z data.aws_iam_policy_document.apply: Reading...
+2026-11-26T07:22:59.7321404Z aws_iam_role.ci["push"]: Refreshing state... [id=ticketdrop-ci-push]
+2026-11-26T07:22:59.7322320Z aws_iam_role.ci["apply"]: Refreshing state... [id=ticketdrop-ci-apply]
+2026-11-26T07:22:59.7332344Z data.aws_iam_policy_document.apply: Read complete after 0s [id=1404853922]
+2026-11-26T07:22:59.7347314Z aws_iam_role.ci["plan"]: Refreshing state... [id=ticketdrop-ci-plan]
+2026-11-26T07:22:59.8300792Z data.aws_iam_policy_document.push: Reading...
+2026-11-26T07:22:59.8313072Z aws_ecr_lifecycle_policy.service["orders"]: Refreshing state... [id=ticketdrop/orders]
+2026-11-26T07:22:59.8314137Z aws_ecr_lifecycle_policy.service["fulfillment"]: Refreshing state... [id=ticketdrop/fulfillment]
+2026-11-26T07:22:59.8323483Z aws_ecr_lifecycle_policy.service["payments"]: Refreshing state... [id=ticketdrop/payments]
+2026-11-26T07:22:59.8324506Z aws_ecr_lifecycle_policy.service["gateway"]: Refreshing state... [id=ticketdrop/gateway]
+2026-11-26T07:22:59.8328449Z data.aws_iam_policy_document.push: Read complete after 0s [id=3976318657]
+2026-11-26T07:22:59.8392914Z aws_ecr_lifecycle_policy.service["scheduler"]: Refreshing state... [id=ticketdrop/scheduler]
+2026-11-26T07:22:59.8420011Z aws_ecr_lifecycle_policy.service["catalog"]: Refreshing state... [id=ticketdrop/catalog]
+2026-11-26T07:22:59.9213656Z aws_ecr_lifecycle_policy.service["inventory"]: Refreshing state... [id=ticketdrop/inventory]
+2026-11-26T07:22:59.9283193Z aws_ecr_lifecycle_policy.service["notifications"]: Refreshing state... [id=ticketdrop/notifications]
+2026-11-26T07:22:59.9283987Z aws_ecr_lifecycle_policy.service["web"]: Refreshing state... [id=ticketdrop/web]
+2026-11-26T07:23:00.2470065Z aws_iam_role_policy.plan: Refreshing state... [id=ticketdrop-ci-plan:plan]
+2026-11-26T07:23:00.2475635Z aws_iam_role_policy.push: Refreshing state... [id=ticketdrop-ci-push:push]
+2026-11-26T07:23:00.2476539Z aws_iam_role_policy.apply: Refreshing state... [id=ticketdrop-ci-apply:apply]
+2026-11-26T07:23:00.2477524Z aws_iam_role_policy_attachment.ci_read_only["apply"]: Refreshing state... [id=ticketdrop-ci-apply/arn:aws:iam::aws:policy/ReadOnlyAccess]
+2026-11-26T07:23:00.2478592Z aws_iam_role_policy_attachment.ci_read_only["plan"]: Refreshing state... [id=ticketdrop-ci-plan/arn:aws:iam::aws:policy/ReadOnlyAccess]
+2026-11-26T07:23:01.0170460Z 
+2026-11-26T07:23:01.0171347Z No changes. Your infrastructure matches the configuration.
+2026-11-26T07:23:01.0171991Z 
+2026-11-26T07:23:01.0172230Z Terraform has compared your real infrastructure against your configuration
+2026-11-26T07:23:01.0172807Z and found no differences, so no changes are needed.
+2026-11-26T07:23:04.4538214Z 
+2026-11-26T07:23:04.4540052Z Apply complete! Resources: 0 added, 0 changed, 0 destroyed.
+2026-11-26T07:23:04.4540560Z 
+2026-11-26T07:23:04.4540815Z Outputs:
+2026-11-26T07:23:04.4541057Z 
+2026-11-26T07:23:04.4541315Z ci_role_arns = {
+2026-11-26T07:23:04.4542454Z   "apply" = "arn:aws:iam::***:role/ticketdrop-ci-apply"
+2026-11-26T07:23:04.4543024Z   "plan" = "arn:aws:iam::***:role/ticketdrop-ci-plan"
+2026-11-26T07:23:04.4544051Z   "push" = "arn:aws:iam::***:role/ticketdrop-ci-push"
+2026-11-26T07:23:04.4544510Z }
+2026-11-26T07:23:04.4544858Z ecr_repository_urls = {
+2026-11-26T07:23:04.4545333Z   "catalog" = "***.dkr.ecr.us-east-1.amazonaws.com/ticketdrop/catalog"
+2026-11-26T07:23:04.4545958Z   "fulfillment" = "***.dkr.ecr.us-east-1.amazonaws.com/ticketdrop/fulfillment"
+2026-11-26T07:23:04.4546585Z   "gateway" = "***.dkr.ecr.us-east-1.amazonaws.com/ticketdrop/gateway"
+2026-11-26T07:23:04.4547237Z   "inventory" = "***.dkr.ecr.us-east-1.amazonaws.com/ticketdrop/inventory"
+2026-11-26T07:23:04.4547865Z   "notifications" = "***.dkr.ecr.us-east-1.amazonaws.com/ticketdrop/notifications"
+2026-11-26T07:23:04.4548680Z   "orders" = "***.dkr.ecr.us-east-1.amazonaws.com/ticketdrop/orders"
+2026-11-26T07:23:04.4549250Z   "payments" = "***.dkr.ecr.us-east-1.amazonaws.com/ticketdrop/payments"
+2026-11-26T07:23:04.4549886Z   "scheduler" = "***.dkr.ecr.us-east-1.amazonaws.com/ticketdrop/scheduler"
+2026-11-26T07:23:04.4551153Z   "web" = "***.dkr.ecr.us-east-1.amazonaws.com/ticketdrop/web"
+2026-11-26T07:23:04.4551860Z }
+2026-11-26T07:23:04.4552213Z name_servers = tolist([
+2026-11-26T07:23:04.4552672Z   "ns-1204.awsdns-22.org",
+2026-11-26T07:23:04.4553035Z   "ns-129.awsdns-16.com",
+2026-11-26T07:23:04.4553451Z   "ns-1754.awsdns-27.co.uk",
+2026-11-26T07:23:04.4553842Z   "ns-976.awsdns-58.net",
+2026-11-26T07:23:04.4554213Z ])
+2026-11-26T07:23:04.4554558Z zone_id = "Z104117617BCE7Z0YYG9M"
+2026-11-26T07:23:04.4727351Z Post job cleanup.
+2026-11-26T07:23:04.5326719Z Post job cleanup.
+2026-11-26T07:23:04.5963912Z [command]/usr/bin/git version
+2026-11-26T07:23:04.6000845Z git version 2.56.1
+2026-11-26T07:23:04.6025906Z Temporarily overriding HOME='/home/runner/work/_temp/3b86d771-cf3f-413d-9822-9e18e13bf629' before making global git config changes
+2026-11-26T07:23:04.6026947Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-26T07:23:04.6028077Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/ticketdrop/ticketdrop
+2026-11-26T07:23:04.6057794Z Removing SSH command configuration
+2026-11-26T07:23:04.6058674Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-26T07:23:04.6084532Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-26T07:23:04.6243493Z Removing HTTP extra header
+2026-11-26T07:23:04.6247126Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-26T07:23:04.6269249Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-26T07:23:04.6437411Z Removing includeIf entries pointing to credentials config files
+2026-11-26T07:23:04.6440901Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-26T07:23:04.6463803Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-26T07:23:04.6754236Z Cleaning up orphan processes
