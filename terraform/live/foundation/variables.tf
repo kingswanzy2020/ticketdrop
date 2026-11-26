@@ -4,10 +4,15 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
-variable "github_repo" {
-  description = "The repository whose workflows may assume the CI roles, as owner/name."
+variable "github_sub_prefix" {
+  description = <<-EOT
+    The start of the `sub` claim in this repository's OIDC tokens. GitHub issues
+    immutable subjects, which carry the owner and repository IDs, so a renamed or
+    re-created repository cannot inherit the trust. Read it with
+    `gh api repos/OWNER/REPO/actions/oidc/customization/sub`.
+  EOT
   type        = string
-  default     = "kingswanzy2020/ticketdrop"
+  default     = "repo:kingswanzy2020@84867045/ticketdrop@1402918619"
 }
 
 variable "services" {

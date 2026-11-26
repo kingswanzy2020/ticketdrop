@@ -1663,12 +1663,21 @@ requires `aud = sts.amazonaws.com` and one exact `sub` (`StringEquals`):
 
 | Role | `sub` | Can do |
 |---|---|---|
-| `ticketdrop-ci-plan` | `repo:kingswanzy2020/ticketdrop:pull_request` | `ReadOnlyAccess`, minus secret values, SSM parameters and `kms:Decrypt`; write and delete only `*.tflock` in the state bucket |
+| `ticketdrop-ci-plan` | `repo:kingswanzy2020@84867045/ticketdrop@1402918619:pull_request` | `ReadOnlyAccess`, minus secret values, SSM parameters and `kms:Decrypt`; write and delete only `*.tflock` in the state bucket |
 | `ticketdrop-ci-apply` | `…:environment:foundation-apply` | `ReadOnlyAccess`, plus writes to what this layer manages only: the OIDC provider, `ticketdrop-ci-*` roles (attaching `ReadOnlyAccess` and nothing else), `ticketdrop/*` repositories, the zone's comment and tags, budgets, and `foundation/*` state |
 | `ticketdrop-ci-push` | `…:ref:refs/heads/main` | push to and read the nine repositories; nothing that deletes |
 
 The layer is written inline, not as `terraform/modules/`: each piece is used
 once.
+
+*Amended 25 Nov 2026.* The subjects were first written in the old
+`repo:OWNER/REPO:…` form, which would have refused every role: this repository
+issues GitHub's immutable subjects (`use_immutable_subject: true` from
+`gh api repos/kingswanzy2020/ticketdrop/actions/oidc/customization/sub`), which
+carry the owner and repository IDs. The roles now trust that form, held in
+`var.github_sub_prefix`, rather than switching the repository back to the old
+one: a renamed or re-created repository with the same name cannot then take
+the roles. The IDs are public.
 
 **Why.** No AWS key is ever stored in GitHub; each run gets credentials for an
 hour, for one repository and one kind of event. Fork PRs get no OIDC token, so
@@ -1686,3 +1695,27 @@ every resource's configuration in the account, and the state of every layer.
 The budget's `metrics` is ignored rather than managed, since the provider
 accepts it only with a `filter_expression`. Nothing here bills apart from the
 zone's $0.50 a month and, from Phase 6, the images stored.
+
+## 70. The merge applies a fresh plan made on `main`, not the plan reviewed on the PR
+
+**Decision.** A PR that changes `terraform/live/foundation/` runs
+`plan-foundation` as `ticketdrop-ci-plan`: the full plan goes to the run's log
+and a summary of the changed resources to its job summary. The plan file is
+thrown away with the runner. After the merge, `apply-foundation` runs in the
+`foundation-apply` environment as `ticketdrop-ci-apply`, plans again against
+`main`, and applies that plan in the same job. Only one apply runs at a time
+(`concurrency: foundation-apply`), and only after the static checks pass.
+
+**Why.** The ruleset requires a branch to be up to date before it merges, so
+the PR's plan was made against the code that lands on `main`. The fresh plan
+can differ only if something changed in AWS in between, such as an edit in the
+console, and the apply job's log shows what it did. Applying the reviewed plan
+instead would mean carrying the plan file from the PR run to the main run as
+an artifact, and in a public repository an artifact can be downloaded by
+anyone: the plan file holds the budget email in plain text.
+
+**Cost.** What is applied is not byte for byte what was reviewed. A change made
+in AWS between the PR's plan and the merge is applied, or undone, without
+anyone reading it first. Nothing pauses the apply for approval: the
+environment limits it to `main` and has no required reviewer, since one person
+both reviews and merges.

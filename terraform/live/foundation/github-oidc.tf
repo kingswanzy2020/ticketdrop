@@ -21,9 +21,9 @@ locals {
   state_arn = "arn:aws:s3:::ticketdrop-tfstate-kahmedt"
 
   ci_subjects = {
-    plan  = "repo:${var.github_repo}:pull_request"
-    apply = "repo:${var.github_repo}:environment:foundation-apply"
-    push  = "repo:${var.github_repo}:ref:refs/heads/main"
+    plan  = "${var.github_sub_prefix}:pull_request"
+    apply = "${var.github_sub_prefix}:environment:foundation-apply"
+    push  = "${var.github_sub_prefix}:ref:refs/heads/main"
   }
 
   read_only = "arn:aws:iam::aws:policy/ReadOnlyAccess"

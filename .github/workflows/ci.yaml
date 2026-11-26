@@ -12,8 +12,9 @@ on:
     - cron: "23 3 * * 1"
   workflow_dispatch:
 
-# The token can read the repository and nothing else. No job here holds a
-# cloud credential.
+# The token can read the repository and nothing else. No job holds a stored
+# cloud key: plan-foundation and apply-foundation add id-token: write to get
+# an hour of AWS credentials through OIDC, and no other job can.
 permissions:
   contents: read
 
@@ -27,6 +28,9 @@ concurrency:
 env:
   GOLANGCI_LINT_VERSION: v2.14.0
   GOVULNCHECK_VERSION: v1.9.0
+  TERRAFORM_VERSION: 1.17.2
+  TFLINT_VERSION: v0.66.0
+  AWS_REGION: us-east-1
   # The image, by digest: in March 2026 trivy-action's tags were repointed at
   # an infostealer and the v0.69.4 binary was malicious (CVE-2026-33634).
   TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
@@ -37,12 +41,15 @@ jobs:
     timeout-minutes: 5
     outputs:
       services: ${{ steps.list.outputs.services }}
+      terraform: ${{ steps.list.outputs.terraform }}
+      foundation: ${{ steps.list.outputs.foundation }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # The diff needs the base commit, which a shallow clone leaves out.
           fetch-depth: 0
           persist-credentials: false
+
       - id: list
         env:
           BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
@@ -51,6 +58,44 @@ jobs:
           services=$(.github/scripts/changed-services.sh "$BASE" "$HEAD")
           echo "services=$services" >> "$GITHUB_OUTPUT"
           echo "Services to build: $services" >> "$GITHUB_STEP_SUMMARY"
+
+          # Without a usable base (schedule, new branch, or zero SHA),
+          # run Terraform checks, but never assume foundation changed.
+          if [[ -z "$BASE" || "$BASE" =~ ^0+$ ]] || ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
+            terraform=true
+            foundation=false
+          else
+            if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+              changed=$(git diff --name-only --no-renames "$BASE...$HEAD")
+            else
+              changed=$(git diff --name-only --no-renames "$BASE" "$HEAD")
+            fi
+
+            terraform=false
+            foundation=false
+
+            while IFS= read -r path; do
+              case "$path" in
+                terraform/*|.github/workflows/ci.yaml)
+                  terraform=true
+                  ;;
+              esac
+
+              case "$path" in
+                terraform/live/foundation/*)
+                  foundation=true
+                  ;;
+              esac
+            done <<< "$changed"
+          fi
+
+          echo "terraform=$terraform" >> "$GITHUB_OUTPUT"
+          echo "foundation=$foundation" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "Terraform changed: $terraform"
+            echo "Foundation changed: $foundation"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   # One module: a change in pkg/ can break any service, so these run on every
   # change, whatever the changes job found.
@@ -61,17 +106,22 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
+
       - name: vet and gofmt
         run: make vet
+
       - name: golangci-lint
         uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
         with:
           version: ${{ env.GOLANGCI_LINT_VERSION }}
+
       - name: test
         run: go test -race ./...
+
       - name: govulncheck
         run: go run "golang.org/x/vuln/cmd/govulncheck@$GOVULNCHECK_VERSION" ./...
 
@@ -93,6 +143,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
         with:
           # Otherwise the action installs whatever buildx is newest that day.
@@ -113,6 +164,7 @@ jobs:
 
       - id: day
         run: echo "date=$(date -u +%F)" >> "$GITHUB_OUTPUT"
+
       # The vulnerability database (about 1.7 GB) is downloaded at most once a
       # day, which also keeps nine parallel jobs clear of registry rate limits.
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -150,22 +202,229 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}
 
+  # Terraform static checks. This job has no AWS credentials.
+  terraform:
+    needs: changes
+    if: needs.changes.outputs.terraform == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: setup Terraform
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Terraform formatting
+        run: terraform fmt -check -recursive terraform/
+
+      - name: setup TFLint
+        uses: terraform-linters/setup-tflint@6ffdbaa3be476b3431f7275c26966ef32ff60337 # v6.3.2
+        with:
+          tflint_version: ${{ env.TFLINT_VERSION }}
+
+      # --recursive looks for .tflint.hcl in each module's own directory, so
+      # the one shared config is passed by absolute path to both commands.
+      - name: initialize TFLint plugins
+        working-directory: terraform
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: tflint --init --config "$PWD/.tflint.hcl"
+
+      - name: TFLint
+        working-directory: terraform
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: tflint --recursive --config "$PWD/.tflint.hcl"
+
+      - name: Terraform validate in each directory
+        shell: bash
+        run: |
+          while IFS= read -r directory; do
+            echo "::group::Validate $directory"
+            terraform -chdir="$directory" init -backend=false -input=false
+            terraform -chdir="$directory" validate
+            echo "::endgroup::"
+          done < <(find terraform -type f -name '*.tf' -not -path '*/.terraform/*' -printf '%h\n' | sort -u)
+
+      - name: Trivy Terraform configuration scan
+        run: |
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE/terraform:/scan:ro" \
+            "$TRIVY_IMAGE" config \
+            --severity HIGH,CRITICAL \
+            --exit-code 1 \
+            /scan
+
+  # PRs only, as ticketdrop-ci-plan: it reads everything and writes only the
+  # state lock. Fork PRs get no OIDC token and no secrets, so they skip it.
+  plan-foundation:
+    needs: changes
+    if: >-
+      github.event_name == 'pull_request' &&
+      needs.changes.outputs.foundation == 'true' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/ticketdrop-ci-plan
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+
+      - name: setup Terraform
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      # The full plan goes to the log for review; the account ID and the email
+      # are secrets, so GitHub masks them there.
+      - name: Terraform init and plan
+        working-directory: terraform/live/foundation
+        env:
+          TF_VAR_budget_email: ${{ secrets.BUDGET_EMAIL }}
+        run: |
+          terraform init -input=false
+          terraform plan -input=false -no-color -lock-timeout=5m -out=tfplan
+
+      # Never upload tfplan. It can contain sensitive values, including email
+      # addresses and other state-derived data. Only publish a filtered summary,
+      # leaving out the resources with nothing to do.
+      - name: summarize Terraform plan
+        working-directory: terraform/live/foundation
+        run: |
+          terraform show -json tfplan | jq -r '
+            [.resource_changes[]? | select(.change.actions != ["no-op"]) |
+              {
+                address: .address,
+                actions: (.change.actions | join(", "))
+              }
+            ] as $changes |
+
+            "### Foundation Terraform plan\n\n" +
+            "| Resource address | Actions |\n|---|---|\n" +
+            (
+              if ($changes | length) == 0 then
+                "| No resource changes | — |\n"
+              else
+                ($changes | map("| `\(.address)` | `\(.actions)` |") | join("\n")) + "\n"
+              end
+            ) +
+            "\n#### Action counts\n" +
+            (
+              [.resource_changes[]?.change.actions | join(", ")] |
+              group_by(.) |
+              map("- `\(.[0])`: \(length)") |
+              join("\n")
+            )
+          ' >> "$GITHUB_STEP_SUMMARY"
+
+  # Apply only after a push to main, and only once the static checks pass. A
+  # scheduled run can never reach this job, and the apply role's sub refuses
+  # any job outside the foundation-apply environment.
+  apply-foundation:
+    needs: [changes, terraform]
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.changes.outputs.foundation == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: foundation-apply
+    concurrency:
+      group: foundation-apply
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/ticketdrop-ci-apply
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+
+      - name: setup Terraform
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Terraform plan and apply
+        working-directory: terraform/live/foundation
+        env:
+          TF_VAR_budget_email: ${{ secrets.BUDGET_EMAIL }}
+        run: |
+          terraform init -input=false
+          terraform plan -input=false -no-color -lock-timeout=5m -out=tfplan
+          terraform apply -input=false -no-color -lock-timeout=5m -auto-approve tfplan
+
   # The one check the ruleset requires. It always runs, and passes only when
-  # every job it needs passed, or when build was skipped because there was
-  # nothing to build. Without `if: always()` it would be skipped when a job it
-  # needs fails, and a skipped required check counts as passing.
+  # every job it needs passed, or was skipped because its own condition was
+  # false. Without `if: always()` it would be skipped when a job it needs
+  # fails, and a skipped required check counts as passing. apply-foundation is
+  # left out: it runs after the merge, so there is nothing left for it to block.
   ci-ok:
-    needs: [changes, go, build]
+    needs: [changes, go, build, terraform, plan-foundation]
     if: always()
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
       - env:
           NEEDS: ${{ toJSON(needs) }}
+          EVENT_NAME: ${{ github.event_name }}
+          TERRAFORM_CHANGED: ${{ needs.changes.outputs.terraform }}
+          FOUNDATION_CHANGED: ${{ needs.changes.outputs.foundation }}
+          SAME_REPO_PR: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
         run: |
           jq -r 'to_entries[] | "\(.key): \(.value.result)"' <<<"$NEEDS"
-          jq -e '
-            .changes.result == "success" and .go.result == "success" and
-            (.build.result == "success" or
-             (.build.result == "skipped" and .changes.outputs.services == "[]"))
-          ' <<<"$NEEDS" >/dev/null || { echo "::error::a required job did not pass"; exit 1; }
+
+          jq -e \
+            --arg event "$EVENT_NAME" \
+            --arg terraform_changed "$TERRAFORM_CHANGED" \
+            --arg foundation_changed "$FOUNDATION_CHANGED" \
+            --arg same_repo_pr "$SAME_REPO_PR" '
+              .changes.result == "success" and
+              .go.result == "success" and
+              (
+                .build.result == "success" or
+                (.build.result == "skipped" and .changes.outputs.services == "[]")
+              ) and
+              (
+                .terraform.result == "success" or
+                (.terraform.result == "skipped" and $terraform_changed != "true")
+              ) and
+              (
+                .["plan-foundation"].result == "success" or
+                (
+                  .["plan-foundation"].result == "skipped" and
+                  (
+                    $event != "pull_request" or
+                    $foundation_changed != "true" or
+                    $same_repo_pr != "true"
+                  )
+                )
+              )
+            ' <<<"$NEEDS" >/dev/null || {
+              echo "::error::a required job did not pass"
+              exit 1
+            }

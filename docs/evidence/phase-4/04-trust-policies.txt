@@ -62,3 +62,27 @@ Tue Nov 24 10:42:03 PM KST 2026
         ]
     }
 }
+
+Wed Nov 25 02:18:09 PM KST 2026
+# after the sub format fix
+[
+    "ticketdrop-ci-plan",
+    {
+        "token.actions.githubusercontent.com:sub": "repo:kingswanzy2020@84867045/ticketdrop@1402918619:pull_request",
+        "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+    }
+]
+[
+    "ticketdrop-ci-apply",
+    {
+        "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+        "token.actions.githubusercontent.com:sub": "repo:kingswanzy2020@84867045/ticketdrop@1402918619:environment:foundation-apply"
+    }
+]
+[
+    "ticketdrop-ci-push",
+    {
+        "token.actions.githubusercontent.com:sub": "repo:kingswanzy2020@84867045/ticketdrop@1402918619:ref:refs/heads/main",
+        "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+    }
+]
