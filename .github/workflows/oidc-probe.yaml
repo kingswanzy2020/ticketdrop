@@ -1,0 +1,34 @@
+name: oidc-probe
+# Throwaway: proves a PR cannot take the apply role. Never merged.
+on: pull_request
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: plan role (expect success)
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/ticketdrop-ci-plan
+          aws-region: us-east-1
+          mask-aws-account-id: true
+      - name: apply role (expect refusal)
+        id: apply
+        continue-on-error: true
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/ticketdrop-ci-apply
+          aws-region: us-east-1
+          mask-aws-account-id: true
+          retry-max-attempts: 1
+      - name: the apply role must have been refused
+        env:
+          OUTCOME: ${{ steps.apply.outcome }}
+        run: |
+          echo "apply role outcome: $OUTCOME"
+          [ "$OUTCOME" = failure ] || { echo "::error::a pull request was given the apply role"; exit 1; }
