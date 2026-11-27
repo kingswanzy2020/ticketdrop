@@ -90,7 +90,7 @@ details.phase > summary .progress { font: 600 0.8rem var(--mono); color: var(--m
     <p>Each step has a <b>Run</b> row: its commands in order, with the folder to run them from in the bar above them. Run them yourself, or ask Claude to run some for you.</p>
     <ul>
       <li><b>Copy</b> copies the block as it is. Each block starts with the <code>cd</code> it needs, so it works from any terminal set up as below.</li>
-      <li><b>Copy + save</b> appears on a block whose output is a capture still to take. It copies the same commands, wrapped so that the output goes into the file named beside it, with <code>date</code> first, each command shown above its output, and 12-digit account IDs masked. It refuses to overwrite a file that already exists.</li>
+      <li><b>Copy + save</b> appears on a block whose output is a capture still to take. It copies the same commands, wrapped so that the output goes into the file named beside it, with <code>date</code> first, each command shown above its output, and the account ID, AWS role IDs, the SSO role's suffix and your address (<code>$MY_IP</code>) masked. It refuses to overwrite a file that already has output in it, and says <code>NOT SAVED</code> when it does; an empty file is written over.</li>
       <li>Tags: <span class="tag bill">bills</span> starts something AWS charges for by the hour, <span class="tag kill">deletes</span> removes something, <span class="once">Only now</span> is a capture that can't be taken later.</li>
       <li>Text in <code>&lt;angle brackets&gt;</code> is yours to fill in. <code>#</code> starts a comment.</li>
       <li>Phases 5 to 9 are drafts, and so are their commands: names such as namespaces and release names are settled when the phase starts.</li>
@@ -1421,21 +1421,44 @@ kubectl exec -n np-test client -- curl -s -m 5 -o /dev/null -w '%{http_code}\n' 
       <div class="expect"><b>Expect</b>200
 000
 blocked</div>
-      <p class="run-note">The new-pod window (TROUBLESHOOTING 18): run this with the deny still in place, once in each mode. Change the mode in your add-on's configuration in Terraform, apply, check it, and run it again.</p>
+      <p class="run-note">The new-pod window (TROUBLESHOOTING 18). <code>web</code> now takes calls from anyone, and a pod labelled <code>app=early</code> may send nothing. A new <code>early</code> pod calls <code>web</code> by IP, since its DNS is denied too, the moment it starts. Any <code>200</code> it gets is traffic that went out before its policy applied. Run the setup once, the standard probe, then <code>terraform apply -var "admin_cidr=$MY_IP/32" -var network_policy_mode=strict</code> and the strict probe.</p>
+      <div class="cmd"><div class="cmd-bar"><span class="cmd-where">setup, once · any folder</span><button type="button" data-copy>Copy</button></div><pre><code>kubectl apply -n np-test -f - &lt;&lt;'EOF'
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: allow-web}
+spec: {podSelector: {matchLabels: {app: web}}, policyTypes: [Ingress], ingress: [{}]}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: deny-early-egress}
+spec: {podSelector: {matchLabels: {app: early}}, policyTypes: [Egress]}
+EOF</code></pre></div>
       <div class="cmd" data-save="docs/evidence/phase-4/07-new-pod-window-standard.txt"><div class="cmd-bar"><span class="cmd-where">standard mode · any folder</span><span class="once">Only now</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 07-new-pod-window-standard.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>kubectl get ds aws-node -n kube-system \
   -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="NETWORK_POLICY_ENFORCING_MODE")].value}'; echo
-kubectl run early -n np-test --image=curlimages/curl:8.17.0 --restart=Never --command -- sh -c \
-  'for i in 1 2 3 4 5 6; do date +%T; curl -s -m 1 -o /dev/null -w "%{http_code}\n" http://web; sleep 0.5; done'
+kubectl rollout status ds/aws-node -n kube-system --timeout=180s
+WEB=$(kubectl get pod web -n np-test -o jsonpath='{.status.podIP}')
+kubectl exec -n np-test client -- curl -s -m 5 -o /dev/null -w '%{http_code}\n' "http://$WEB"  <span class="cm">  # 200: web takes calls</span>
+kubectl run early -n np-test --labels=app=early --image=curlimages/curl:8.17.0 --restart=Never --command -- sh -c \
+  "for i in 1 2 3 4 5 6; do date +%T; curl -s -m 1 -o /dev/null -w '%{http_code}\n' http://$WEB; sleep 0.5; done"
 kubectl wait pod/early -n np-test --for=jsonpath='{.status.phase}'=Succeeded --timeout=120s
-kubectl logs -n np-test early  <span class="cm">  # standard: the first calls may get 200; strict: none, DNS included</span>
+kubectl logs -n np-test early  <span class="cm">  # standard: the first calls may get 200, then 000</span>
 kubectl delete pod early -n np-test</code></pre></div>
+      <div class="expect"><b>Expect</b>standard
+200
+then early's log: perhaps a 200 or two first, then 000</div>
       <div class="cmd" data-save="docs/evidence/phase-4/07-new-pod-window-strict.txt"><div class="cmd-bar"><span class="cmd-where">strict mode · any folder</span><span class="once">Only now</span><button type="button" data-copy>Copy</button><span class="cmd-file">→ 07-new-pod-window-strict.txt</span><button type="button" data-copy-save title="Copies the block wrapped so its output is saved to this file">Copy + save</button></div><pre><code>kubectl get ds aws-node -n kube-system \
   -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="NETWORK_POLICY_ENFORCING_MODE")].value}'; echo
-kubectl run early -n np-test --image=curlimages/curl:8.17.0 --restart=Never --command -- sh -c \
-  'for i in 1 2 3 4 5 6; do date +%T; curl -s -m 1 -o /dev/null -w "%{http_code}\n" http://web; sleep 0.5; done'
+kubectl rollout status ds/aws-node -n kube-system --timeout=180s
+WEB=$(kubectl get pod web -n np-test -o jsonpath='{.status.podIP}')
+kubectl exec -n np-test client -- curl -s -m 5 -o /dev/null -w '%{http_code}\n' "http://$WEB"  <span class="cm">  # 200: web takes calls</span>
+kubectl run early -n np-test --labels=app=early --image=curlimages/curl:8.17.0 --restart=Never --command -- sh -c \
+  "for i in 1 2 3 4 5 6; do date +%T; curl -s -m 1 -o /dev/null -w '%{http_code}\n' http://$WEB; sleep 0.5; done"
 kubectl wait pod/early -n np-test --for=jsonpath='{.status.phase}'=Succeeded --timeout=120s
-kubectl logs -n np-test early  <span class="cm">  # standard: the first calls may get 200; strict: none, DNS included</span>
+kubectl logs -n np-test early  <span class="cm">  # strict: 000 from the very first call</span>
 kubectl delete pod early -n np-test</code></pre></div>
+      <div class="expect"><b>Expect</b>strict
+200
+then early's log: 000 every time</div>
       <div class="cmd"><div class="cmd-bar"><span class="cmd-where">any folder</span><span class="tag kill">deletes</span><button type="button" data-copy>Copy</button></div><pre><code>kubectl delete namespace np-test</code></pre></div>
     </dd>
     <dt class="cap">Capture</dt><dd class="cap"><ul>
@@ -1973,10 +1996,12 @@ for f in docs/evidence/phase-*/*; do grep -rqF "$(basename "$f")" docs/*.md || e
   // above its output, account IDs masked, and never over an existing file.
   function saving(code, file) {
     return 'f="$TD/' + file + '"\n' +
-      'if [ -z "$TD" ]; then echo "Set TD first: the terminal setup block at the top of the workbook"\n' +
-      'elif [ -e "$f" ]; then echo "$f already exists: rename it to keep both"\n' +
-      'else { date; set -x\n' + code + '\n{ set +x; } 2>/dev/null; } 2>&1 \\\n' +
-      '  | sed -uE \'s/\\b[0-9]{12}\\b/<account-id>/g\' | tee -i "$f"\nfi\n';
+      'if [ ! -f "$TD/go.mod" ]; then echo "NOT SAVED: TD is \'$TD\', not the ticketdrop folder. Run: export TD=~/Desktop/Personal-Lab/DevOps/ticketdrop"\n' +
+      'elif [ -s "$f" ]; then echo "NOT SAVED: $f already has output in it. Rename it to keep both, or delete it to retake."\n' +
+      'else mkdir -p "$(dirname "$f")"; ip="${MY_IP:-a^}"; ip="${ip//./\\\\.}"\n' +
+      '{ date; set -x\n' + code + '\n{ set +x; } 2>/dev/null; } 2>&1 \\\n' +
+      '  | sed -uE -e \'s/\\b[0-9]{12}\\b/<account-id>/g\' -e \'s/\\b(AROA|AIDA|AKIA|ASIA)[A-Z0-9]{12,}/<role-id>/g\' \\\n' +
+      '      -e \'s/(AWSReservedSSO_[A-Za-z]+_)[0-9a-f]{16}/\\1<suffix>/g\' -e "s/$ip/<my-ip>/g" | tee -i "$f"\nfi\n';
   }
   Array.prototype.slice.call(document.querySelectorAll('.cmd')).forEach(function (block) {
     var code = block.querySelector('pre code');

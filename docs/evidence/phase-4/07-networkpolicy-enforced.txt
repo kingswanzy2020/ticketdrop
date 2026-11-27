@@ -1,0 +1,22 @@
+Fri Nov 27 10:33:32 PM KST 2026
++ kubectl create namespace np-test
+namespace/np-test created
++ kubectl run web -n np-test --image=nginx:1.29 --port=80 --labels=app=web
+pod/web created
++ kubectl expose pod web -n np-test --port=80
+service/web exposed
++ kubectl run client -n np-test --image=curlimages/curl:8.17.0 --restart=Never --command -- sleep infinity
+pod/client created
++ kubectl wait pod/web pod/client -n np-test --for=condition=Ready --timeout=120s
+pod/web condition met
+pod/client condition met
++ kubectl exec -n np-test client -- curl -s -m 5 -o /dev/null -w '%{http_code}\n' http://web
+200
++ kubectl apply -n np-test -f -
+networkpolicy.networking.k8s.io/default-deny created
++ sleep 5
++ kubectl exec -n np-test client -- curl -s -m 5 -o /dev/null -w '%{http_code}\n' http://web
+000
+command terminated with exit code 28
++ echo blocked
+blocked

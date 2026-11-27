@@ -1749,3 +1749,101 @@ internet until it is back. Traffic from `1b` and `1c` crosses zones to reach
 the NAT, about $0.01 per GB. With no flow logs, there is no record of who
 talked to what. About $0.05 an hour while the network is up, which is $1.20 a
 day if it is left running.
+
+## 72. EKS 1.36 with access entries only, an API open to one address, and Pod Identity instead of IRSA
+
+**Decision.** `terraform/live/cluster/eks.tf` uses `terraform-aws-modules/eks`
+21.30.2, ported from the sample-fastapi-react wrapper (v20), not copied.
+- Kubernetes 1.36, in standard support until 2 August 2027.
+- Authentication mode `API`: access entries only, no `aws-auth` ConfigMap.
+  The creator entry is off; one explicit entry gives the SSO admin role
+  `AmazonEKSClusterAdminPolicy`. The role is looked up by name with
+  `data "aws_iam_roles"`, and its full ARN, path included, is used.
+- The API endpoint is public but answers `var.admin_cidr` only, which has no
+  default and refuses `0.0.0.0/0`; the private endpoint is on for the nodes.
+- Secrets are encrypted with a KMS key made for this cluster, 7-day deletion
+  window, administered by the same SSO role.
+- `enable_irsa = false`: pods reach AWS through Pod Identity, so there is no
+  per-cluster OIDC provider.
+- Control-plane logs: `audit` and `authenticator`, kept 7 days.
+- Add-ons pinned: vpc-cni `v1.23.3-eksbuild.2` with network policy on,
+  eks-pod-identity-agent `v1.4.1-eksbuild.3` (the default for 1.36), kube-proxy
+  `v1.36.0-eksbuild.65`, coredns `v1.14.7-eksbuild.35`. The providers the
+  module needs (`time`, `tls`, `null`, `cloudinit`) are pinned exactly.
+- Trivy's two CRITICAL findings inside the module are accepted with a reason
+  above the `module` block: AWS-0040 (public endpoint) and AWS-0104 (node
+  egress to `0.0.0.0/0`). CI's Terraform scan now runs only Trivy's Terraform
+  scanner, because the module ships example Kubernetes YAML that is not ours.
+
+**Why.** The creator entry, and the module's default KMS administrator, both
+follow whoever runs the plan, so CI's plan role (step 9) would see them change
+on every run. A role looked up by name survives the SSO suffix changing if the
+permission set is reassigned. Pod Identity trust names the cluster's service
+account, not a per-cluster OIDC provider, so the roles survive a rebuild.
+Pinned add-ons mean a plan never upgrades one by itself. The first plan, on 27
+November 2026, was 60 to add (the network's 24 with it), with nothing changed.
+
+**Cost.** The API is still on the internet, and stops answering whenever the
+laptop's address changes, until the next apply. The audit log costs a little
+per session, and EKS can recreate its log group after a destroy. The KMS key
+bills $1 a month prorated while it exists; after a destroy it waits 7 days
+for deletion and bills nothing. Pinned add-ons and providers have to be bumped
+by hand.
+
+## 73. Two on-demand t4g.medium nodes, AL2023 arm64
+
+**Decision.** One managed node group, `system`: two `t4g.medium` (2 vCPU,
+4 GiB, Graviton), on-demand, minimum 2 and maximum 3, across the private
+subnets. AL2023 arm64 image, a 20 GiB encrypted gp3 root disk, IMDSv2
+required with a hop limit of 1. The node security group carries
+`karpenter.sh/discovery`, for Phase 5.
+
+**Why.** arm64 is about 20% cheaper than the same size on x86, and the images
+are already built for both. Two nodes in different zones let one fail. A hop
+limit of 1 stops a pod reaching the node's instance metadata and borrowing its
+role; Pod Identity does not need it. Spot and anything larger come with
+Karpenter in Phase 5.
+
+**Cost.** About $0.07 an hour for the two. With the VPC CNI's default IP
+allocation a t4g.medium holds at most 17 pods, so 34 across both, and the
+DaemonSets take several of them; prefix delegation would raise that, and is
+left to Phase 5. CI scans only the amd64 images (DECISIONS 63), so the arm64
+ones that run here are not scanned.
+
+## 73. Standard vs. Strick Network Policy Enforcement
+
+**Decision.** Chose the standard network policy enforcement type, though the strict is available as -var network_policy_mode=strict from the terraform live cluster directory.  
+With the strict mode, every pod is denied from its first packet, so every namespace needs explicit allow rules, DNS included, or pods fail at startup. In standard, those same policies still apply after the first second or two.
+
+**Why.** 
+
+**Cost.** This means a new pod's traffic is unpoliced for about its first 1.5 seconds. That covers init containers and anything a service sends at startup.
+## 74. NetworkPolicy is enforced in strict mode: every pod starts denied
+
+**Decision.** The VPC CNI runs with `NETWORK_POLICY_ENFORCING_MODE=strict`,
+the default of `var.network_policy_mode` in `terraform/live/cluster`. A new pod
+is denied all traffic until its policies are applied, and a pod that no policy
+allows stays denied. `standard` remains available with
+`-var network_policy_mode=standard`.
+
+**Why.** Both modes were tested on 27 November 2026, with a new pod whose
+egress is denied calling a pod that accepts traffic, every half second from
+the moment it started. In `standard` its first three calls, over about 1.5
+seconds, got `200`; in `strict` none did
+([`07-new-pod-window-standard.txt`](evidence/phase-4/07-new-pod-window-standard.txt),
+[`07-new-pod-window-strict.txt`](evidence/phase-4/07-new-pod-window-strict.txt)).
+Traffic that leaves before a pod's policy applies is not what the policies
+are for, and the same window was already found on kind and Docker Desktop
+(TROUBLESHOOTING 18). The nine services each already have default-deny,
+allow-DNS and their own allow rules in the chart, and `db.Connect` retries
+for a minute, so a blocked first second at startup is absorbed.
+
+**Cost.** Everything a pod needs must be allowed by a policy, in every
+namespace, not only `ticketdrop`. CoreDNS needs an ingress allow in
+`kube-system`, or DNS fails for every pod; that comes from AWS's
+documentation, since the strict probe called by IP and DNS under strict was
+not tested. The Phase 5 platform (Argo CD, Traefik, Karpenter, KEDA,
+cert-manager, external-dns) needs policies too, and Argo CD's must be
+installed with Argo CD itself, because without DNS and egress it cannot fetch
+the rest from Git. Any connection a pod makes in its first second or so
+fails, and must be retried. Pods on the host network are not affected.

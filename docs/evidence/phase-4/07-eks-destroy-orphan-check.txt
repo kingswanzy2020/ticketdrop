@@ -1,0 +1,2101 @@
+Fri Nov 27 10:46:23 PM KST 2026
+module.eks.data.aws_iam_policy_document.assume_role_policy[0]: Reading...
+module.eks.module.eks_managed_node_group["system"].data.aws_iam_policy_document.assume_role_policy[0]: Reading...
+module.eks.data.aws_partition.current[0]: Reading...
+module.eks.module.kms.data.aws_caller_identity.current[0]: Reading...
+module.eks.module.kms.data.aws_partition.current[0]: Reading...
+data.aws_iam_roles.sso_admin: Reading...
+module.eks.data.aws_caller_identity.current[0]: Reading...
+module.eks.aws_cloudwatch_log_group.this[0]: Refreshing state... [id=/aws/eks/ticketdrop/cluster]
+module.vpc.aws_vpc.this[0]: Refreshing state... [id=vpc-0839f9d03c9c81a24]
+module.eks.data.aws_partition.current[0]: Read complete after 0s [id=aws]
+module.eks.data.aws_iam_policy_document.assume_role_policy[0]: Read complete after 0s [id=2830595799]
+module.eks.module.eks_managed_node_group["system"].data.aws_iam_policy_document.assume_role_policy[0]: Read complete after 0s [id=2560088296]
+module.eks.module.kms.data.aws_partition.current[0]: Read complete after 0s [id=aws]
+module.eks.module.eks_managed_node_group["system"].aws_iam_role.this[0]: Refreshing state... [id=system-eks-node-group-5e30670a2ef846bb0a2eb4bf51]
+module.eks.aws_iam_role.this[0]: Refreshing state... [id=ticketdrop-cluster-deed80eef76c7dfbbb0558deb3]
+module.eks.module.kms.data.aws_caller_identity.current[0]: Read complete after 1s [id=<account-id>]
+module.eks.data.aws_caller_identity.current[0]: Read complete after 1s [id=<account-id>]
+module.eks.data.aws_iam_session_context.current[0]: Reading...
+data.aws_iam_roles.sso_admin: Read complete after 1s [id=us-east-1]
+module.eks.data.aws_iam_session_context.current[0]: Read complete after 1s [id=arn:aws:sts::<account-id>:assumed-role/AWSReservedSSO_AdministratorAccess_<suffix>/Jose-temp-IAM-user]
+module.eks.aws_iam_role_policy_attachment.this["AmazonEKSClusterPolicy"]: Refreshing state... [id=ticketdrop-cluster-deed80eef76c7dfbbb0558deb3/arn:aws:iam::aws:policy/AmazonEKSClusterPolicy]
+module.eks.module.kms.data.aws_iam_policy_document.this[0]: Reading...
+module.eks.module.kms.data.aws_iam_policy_document.this[0]: Read complete after 0s [id=1867534305]
+module.eks.module.kms.aws_kms_key.this[0]: Refreshing state... [id=6b510b5b-6b3d-4020-8179-0e960c3d5cbf]
+module.eks.module.eks_managed_node_group["system"].aws_iam_role_policy_attachment.this["AmazonEKS_CNI_Policy"]: Refreshing state... [id=system-eks-node-group-5e30670a2ef846bb0a2eb4bf51/arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy]
+module.eks.module.eks_managed_node_group["system"].aws_iam_role_policy_attachment.this["AmazonEKSWorkerNodePolicy"]: Refreshing state... [id=system-eks-node-group-5e30670a2ef846bb0a2eb4bf51/arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy]
+module.eks.module.eks_managed_node_group["system"].aws_iam_role_policy_attachment.this["AmazonEC2ContainerRegistryReadOnly"]: Refreshing state... [id=system-eks-node-group-5e30670a2ef846bb0a2eb4bf51/arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly]
+module.eks.module.kms.aws_kms_alias.this["cluster"]: Refreshing state... [id=alias/eks/ticketdrop]
+module.eks.aws_iam_policy.cluster_encryption[0]: Refreshing state... [id=arn:aws:iam::<account-id>:policy/ticketdrop-cluster-ClusterEncryptionddc9fb98bf91f238b2296832ed]
+module.eks.aws_iam_role_policy_attachment.cluster_encryption[0]: Refreshing state... [id=ticketdrop-cluster-deed80eef76c7dfbbb0558deb3/arn:aws:iam::<account-id>:policy/ticketdrop-cluster-ClusterEncryptionddc9fb98bf91f238b2296832ed]
+module.vpc.aws_route_table.public[0]: Refreshing state... [id=rtb-04c6e616b20740e8b]
+module.vpc.aws_route_table.private[0]: Refreshing state... [id=rtb-09bb3799f14cef1f6]
+module.vpc.aws_subnet.public[2]: Refreshing state... [id=subnet-07f6cf250baab616a]
+module.vpc.aws_subnet.public[1]: Refreshing state... [id=subnet-0b1385c6f8f134c4f]
+module.vpc.aws_subnet.public[0]: Refreshing state... [id=subnet-081fcc7a471cbda98]
+module.vpc.aws_default_route_table.default[0]: Refreshing state... [id=rtb-0f561a74e9f49d5e3]
+module.vpc.aws_default_network_acl.this[0]: Refreshing state... [id=acl-077a0ca224f03b778]
+module.vpc.aws_internet_gateway.this[0]: Refreshing state... [id=igw-04e8400a47a4e19bb]
+module.vpc.aws_default_security_group.this[0]: Refreshing state... [id=sg-06121a78a8456aa61]
+module.vpc.aws_subnet.private[2]: Refreshing state... [id=subnet-0169d9235696f86f0]
+module.vpc.aws_subnet.private[0]: Refreshing state... [id=subnet-012827ca4ae4956ad]
+module.vpc.aws_subnet.private[1]: Refreshing state... [id=subnet-07c6394edc0fcf646]
+module.eks.aws_security_group.node[0]: Refreshing state... [id=sg-000f89f52c5eff983]
+module.eks.aws_security_group.cluster[0]: Refreshing state... [id=sg-0dbdd14adf1bac7ab]
+module.vpc.aws_eip.nat[0]: Refreshing state... [id=eipalloc-09e75c3b54e5a8ec9]
+module.vpc.aws_route.public_internet_gateway[0]: Refreshing state... [id=r-rtb-04c6e616b20740e8b1080289494]
+aws_vpc_endpoint.s3: Refreshing state... [id=vpce-0f668b5832175f589]
+module.vpc.aws_route_table_association.public[2]: Refreshing state... [id=rtbassoc-0ed8e4da5ae4bdc1c]
+module.vpc.aws_route_table_association.public[0]: Refreshing state... [id=rtbassoc-07258dcfe3fd7ba75]
+module.vpc.aws_route_table_association.public[1]: Refreshing state... [id=rtbassoc-058f59e77ed9de1ef]
+module.vpc.aws_route_table_association.private[2]: Refreshing state... [id=rtbassoc-06ee8351567455077]
+module.vpc.aws_route_table_association.private[1]: Refreshing state... [id=rtbassoc-02b72a3405fe6ce2e]
+module.vpc.aws_route_table_association.private[0]: Refreshing state... [id=rtbassoc-0ca405b67372da9fa]
+module.eks.aws_security_group_rule.cluster["ingress_nodes_443"]: Refreshing state... [id=sgrule-1187009142]
+module.eks.aws_security_group_rule.node["ingress_cluster_9443_webhook"]: Refreshing state... [id=sgrule-1717240831]
+module.eks.aws_security_group_rule.node["ingress_nodes_ephemeral"]: Refreshing state... [id=sgrule-1578366891]
+module.eks.aws_security_group_rule.node["ingress_cluster_10251_webhook"]: Refreshing state... [id=sgrule-535866784]
+module.eks.aws_security_group_rule.node["ingress_cluster_6443_webhook"]: Refreshing state... [id=sgrule-296094741]
+module.eks.aws_security_group_rule.node["ingress_self_coredns_udp"]: Refreshing state... [id=sgrule-3881117850]
+module.eks.aws_security_group_rule.node["ingress_cluster_8443_webhook"]: Refreshing state... [id=sgrule-49950772]
+module.eks.aws_security_group_rule.node["ingress_cluster_kubelet"]: Refreshing state... [id=sgrule-733609435]
+module.eks.aws_security_group_rule.node["egress_all"]: Refreshing state... [id=sgrule-3505081288]
+module.eks.aws_security_group_rule.node["ingress_cluster_443"]: Refreshing state... [id=sgrule-2085760026]
+module.eks.aws_security_group_rule.node["ingress_self_coredns_tcp"]: Refreshing state... [id=sgrule-1124764533]
+module.eks.aws_security_group_rule.node["ingress_cluster_4443_webhook"]: Refreshing state... [id=sgrule-3638848387]
+module.eks.aws_security_group_rule.node["ingress_self_all"]: Refreshing state... [id=sgrule-373802189]
+module.vpc.aws_nat_gateway.this[0]: Refreshing state... [id=nat-0c4268614b377991a]
+module.vpc.aws_route.private_nat_gateway[0]: Refreshing state... [id=r-rtb-09bb3799f14cef1f61080289494]
+module.eks.aws_eks_cluster.this[0]: Refreshing state... [id=ticketdrop]
+module.eks.data.aws_eks_addon_version.this["eks-pod-identity-agent"]: Reading...
+module.eks.data.aws_eks_addon_version.this["kube-proxy"]: Reading...
+module.eks.data.aws_eks_addon_version.this["vpc-cni"]: Reading...
+module.eks.aws_eks_access_entry.this["sso_admin"]: Refreshing state... [id=ticketdrop:arn:aws:iam::<account-id>:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AdministratorAccess_<suffix>]
+module.eks.data.aws_eks_addon_version.this["coredns"]: Reading...
+module.eks.time_sleep.this[0]: Refreshing state... [id=2026-11-27T12:27:29Z]
+module.eks.module.eks_managed_node_group["system"].module.user_data.null_resource.validate_cluster_service_cidr: Refreshing state... [id=697324781536978615]
+module.eks.module.eks_managed_node_group["system"].data.aws_ssm_parameter.ami[0]: Reading...
+module.eks.module.eks_managed_node_group["system"].aws_launch_template.this[0]: Refreshing state... [id=lt-0ee6f563b672bbef8]
+module.eks.data.aws_eks_addon_version.this["vpc-cni"]: Read complete after 0s [id=vpc-cni]
+module.eks.data.aws_eks_addon_version.this["coredns"]: Read complete after 0s [id=coredns]
+module.eks.data.aws_eks_addon_version.this["eks-pod-identity-agent"]: Read complete after 0s [id=eks-pod-identity-agent]
+module.eks.data.aws_eks_addon_version.this["kube-proxy"]: Read complete after 1s [id=kube-proxy]
+module.eks.aws_eks_addon.before_compute["vpc-cni"]: Refreshing state... [id=ticketdrop:vpc-cni]
+module.eks.aws_eks_addon.before_compute["eks-pod-identity-agent"]: Refreshing state... [id=ticketdrop:eks-pod-identity-agent]
+module.eks.aws_eks_access_policy_association.this["sso_admin_admin"]: Refreshing state... [id=ticketdrop#arn:aws:iam::<account-id>:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AdministratorAccess_<suffix>#arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy]
+module.eks.module.eks_managed_node_group["system"].data.aws_ssm_parameter.ami[0]: Read complete after 2s [id=/aws/service/eks/optimized-ami/1.36/amazon-linux-2023/arm64/standard/recommended/release_version]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Refreshing state... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3]
+module.eks.aws_eks_addon.this["coredns"]: Refreshing state... [id=ticketdrop:coredns]
+module.eks.aws_eks_addon.this["kube-proxy"]: Refreshing state... [id=ticketdrop:kube-proxy]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  - destroy
+
+Terraform will perform the following actions:
+
+  # aws_vpc_endpoint.s3 will be destroyed
+  - resource "aws_vpc_endpoint" "s3" {
+      - arn                        = "arn:aws:ec2:us-east-1:<account-id>:vpc-endpoint/vpce-0f668b5832175f589" -> null
+      - cidr_blocks                = [
+          - "16.182.0.0/16",
+          - "54.231.0.0/16",
+          - "3.5.0.0/19",
+          - "52.216.0.0/15",
+          - "16.15.156.0/22",
+          - "16.15.96.0/20",
+          - "16.15.160.0/19",
+          - "18.34.0.0/19",
+          - "16.15.64.0/19",
+          - "3.2.103.0/24",
+          - "18.34.232.0/21",
+          - "16.15.192.0/18",
+          - "16.15.112.0/21",
+          - "16.15.120.0/22",
+        ] -> null
+      - dns_entry                  = [] -> null
+      - id                         = "vpce-0f668b5832175f589" -> null
+      - ip_address_type            = "ipv4" -> null
+      - network_interface_ids      = [] -> null
+      - owner_id                   = "<account-id>" -> null
+      - policy                     = jsonencode(
+            {
+              - Statement = [
+                  - {
+                      - Action    = "*"
+                      - Effect    = "Allow"
+                      - Principal = "*"
+                      - Resource  = "*"
+                    },
+                ]
+              - Version   = "2008-10-17"
+            }
+        ) -> null
+      - prefix_list_id             = "pl-63a5400a" -> null
+      - private_dns_enabled        = false -> null
+      - region                     = "us-east-1" -> null
+      - requester_managed          = false -> null
+      - route_table_ids            = [
+          - "rtb-09bb3799f14cef1f6",
+        ] -> null
+      - security_group_ids         = [] -> null
+      - service_name               = "com.amazonaws.us-east-1.s3" -> null
+      - service_region             = "us-east-1" -> null
+      - state                      = "available" -> null
+      - subnet_ids                 = [] -> null
+      - tags                       = {
+          - "Name" = "ticketdrop-s3"
+        } -> null
+      - tags_all                   = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Name"      = "ticketdrop-s3"
+          - "Project"   = "ticketdrop"
+        } -> null
+      - vpc_endpoint_type          = "Gateway" -> null
+      - vpc_id                     = "vpc-0839f9d03c9c81a24" -> null
+        # (2 unchanged attributes hidden)
+
+      - dns_options {
+          - dns_record_ip_type                             = "service-defined" -> null
+          - private_dns_only_for_inbound_resolver_endpoint = false -> null
+          - private_dns_specified_domains                  = [] -> null
+            # (1 unchanged attribute hidden)
+        }
+    }
+
+  # module.eks.aws_cloudwatch_log_group.this[0] will be destroyed
+  - resource "aws_cloudwatch_log_group" "this" {
+      - arn                         = "arn:aws:logs:us-east-1:<account-id>:log-group:/aws/eks/ticketdrop/cluster" -> null
+      - deletion_protection_enabled = false -> null
+      - id                          = "/aws/eks/ticketdrop/cluster" -> null
+      - log_group_class             = "STANDARD" -> null
+      - name                        = "/aws/eks/ticketdrop/cluster" -> null
+      - region                      = "us-east-1" -> null
+      - retention_in_days           = 7 -> null
+      - skip_destroy                = false -> null
+      - tags                        = {
+          - "Name" = "/aws/eks/ticketdrop/cluster"
+        } -> null
+      - tags_all                    = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Name"      = "/aws/eks/ticketdrop/cluster"
+          - "Project"   = "ticketdrop"
+        } -> null
+        # (2 unchanged attributes hidden)
+    }
+
+  # module.eks.aws_eks_access_entry.this["sso_admin"] will be destroyed
+  - resource "aws_eks_access_entry" "this" {
+      - access_entry_arn  = "arn:aws:eks:us-east-1:<account-id>:access-entry/ticketdrop/role/<account-id>/AWSReservedSSO_AdministratorAccess_<suffix>/5ed10e7c-921c-061f-5a49-b431719a68fd" -> null
+      - cluster_name      = "ticketdrop" -> null
+      - created_at        = "2026-11-27T12:26:59Z" -> null
+      - id                = "ticketdrop:arn:aws:iam::<account-id>:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AdministratorAccess_<suffix>" -> null
+      - kubernetes_groups = [] -> null
+      - modified_at       = "2026-11-27T12:26:59Z" -> null
+      - principal_arn     = "arn:aws:iam::<account-id>:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AdministratorAccess_<suffix>" -> null
+      - region            = "us-east-1" -> null
+      - tags              = {} -> null
+      - tags_all          = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Project"   = "ticketdrop"
+        } -> null
+      - type              = "STANDARD" -> null
+      - user_name         = "arn:aws:sts::<account-id>:assumed-role/AWSReservedSSO_AdministratorAccess_<suffix>/{{SessionName}}" -> null
+    }
+
+  # module.eks.aws_eks_access_policy_association.this["sso_admin_admin"] will be destroyed
+  - resource "aws_eks_access_policy_association" "this" {
+      - associated_at = "2026-11-27 12:27:01.643 +0000 UTC" -> null
+      - cluster_name  = "ticketdrop" -> null
+      - id            = "ticketdrop#arn:aws:iam::<account-id>:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AdministratorAccess_<suffix>#arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy" -> null
+      - modified_at   = "2026-11-27 12:27:01.643 +0000 UTC" -> null
+      - policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy" -> null
+      - principal_arn = "arn:aws:iam::<account-id>:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AdministratorAccess_<suffix>" -> null
+      - region        = "us-east-1" -> null
+
+      - access_scope {
+          - namespaces = [] -> null
+          - type       = "cluster" -> null
+        }
+    }
+
+  # module.eks.aws_eks_addon.before_compute["eks-pod-identity-agent"] will be destroyed
+  - resource "aws_eks_addon" "before_compute" {
+      - addon_name                  = "eks-pod-identity-agent" -> null
+      - addon_version               = "v1.4.1-eksbuild.3" -> null
+      - arn                         = "arn:aws:eks:us-east-1:<account-id>:addon/ticketdrop/eks-pod-identity-agent/c0d10e7c-94d3-4cc3-f46f-e321eea53501" -> null
+      - cluster_name                = "ticketdrop" -> null
+      - created_at                  = "2026-11-27T12:27:01Z" -> null
+      - id                          = "ticketdrop:eks-pod-identity-agent" -> null
+      - modified_at                 = "2026-11-27T12:27:07Z" -> null
+      - preserve                    = true -> null
+      - region                      = "us-east-1" -> null
+      - resolve_conflicts_on_create = "NONE" -> null
+      - resolve_conflicts_on_update = "OVERWRITE" -> null
+      - tags                        = {} -> null
+      - tags_all                    = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Project"   = "ticketdrop"
+        } -> null
+        # (2 unchanged attributes hidden)
+
+      - namespace_config {
+          - namespace = "kube-system" -> null
+        }
+
+      - timeouts {}
+    }
+
+  # module.eks.aws_eks_addon.before_compute["vpc-cni"] will be destroyed
+  - resource "aws_eks_addon" "before_compute" {
+      - addon_name                  = "vpc-cni" -> null
+      - addon_version               = "v1.23.3-eksbuild.2" -> null
+      - arn                         = "arn:aws:eks:us-east-1:<account-id>:addon/ticketdrop/vpc-cni/60d10e7c-94d2-aa41-3036-5a6bf8bd8cdf" -> null
+      - cluster_name                = "ticketdrop" -> null
+      - configuration_values        = jsonencode(
+            {
+              - enableNetworkPolicy = "true"
+              - env                 = {
+                  - NETWORK_POLICY_ENFORCING_MODE = "standard"
+                }
+            }
+        ) -> null
+      - created_at                  = "2026-11-27T12:27:01Z" -> null
+      - id                          = "ticketdrop:vpc-cni" -> null
+      - modified_at                 = "2026-11-27T13:42:18Z" -> null
+      - preserve                    = true -> null
+      - region                      = "us-east-1" -> null
+      - resolve_conflicts_on_create = "NONE" -> null
+      - resolve_conflicts_on_update = "OVERWRITE" -> null
+      - tags                        = {} -> null
+      - tags_all                    = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Project"   = "ticketdrop"
+        } -> null
+        # (1 unchanged attribute hidden)
+
+      - namespace_config {
+          - namespace = "kube-system" -> null
+        }
+
+      - timeouts {}
+    }
+
+  # module.eks.aws_eks_addon.this["coredns"] will be destroyed
+  - resource "aws_eks_addon" "this" {
+      - addon_name                  = "coredns" -> null
+      - addon_version               = "v1.14.7-eksbuild.35" -> null
+      - arn                         = "arn:aws:eks:us-east-1:<account-id>:addon/ticketdrop/coredns/30d10e7d-abb0-260e-7dbc-47864d264109" -> null
+      - cluster_name                = "ticketdrop" -> null
+      - created_at                  = "2026-11-27T12:29:23Z" -> null
+      - id                          = "ticketdrop:coredns" -> null
+      - modified_at                 = "2026-11-27T12:29:37Z" -> null
+      - preserve                    = true -> null
+      - region                      = "us-east-1" -> null
+      - resolve_conflicts_on_create = "NONE" -> null
+      - resolve_conflicts_on_update = "OVERWRITE" -> null
+      - tags                        = {} -> null
+      - tags_all                    = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Project"   = "ticketdrop"
+        } -> null
+        # (2 unchanged attributes hidden)
+
+      - namespace_config {
+          - namespace = "kube-system" -> null
+        }
+
+      - timeouts {}
+    }
+
+  # module.eks.aws_eks_addon.this["kube-proxy"] will be destroyed
+  - resource "aws_eks_addon" "this" {
+      - addon_name                  = "kube-proxy" -> null
+      - addon_version               = "v1.36.0-eksbuild.65" -> null
+      - arn                         = "arn:aws:eks:us-east-1:<account-id>:addon/ticketdrop/kube-proxy/2ed10e7d-abb1-0cbf-8fa5-bebf82441d6d" -> null
+      - cluster_name                = "ticketdrop" -> null
+      - created_at                  = "2026-11-27T12:29:23Z" -> null
+      - id                          = "ticketdrop:kube-proxy" -> null
+      - modified_at                 = "2026-11-27T12:29:41Z" -> null
+      - preserve                    = true -> null
+      - region                      = "us-east-1" -> null
+      - resolve_conflicts_on_create = "NONE" -> null
+      - resolve_conflicts_on_update = "OVERWRITE" -> null
+      - tags                        = {} -> null
+      - tags_all                    = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Project"   = "ticketdrop"
+        } -> null
+        # (2 unchanged attributes hidden)
+
+      - namespace_config {
+          - namespace = "kube-system" -> null
+        }
+
+      - timeouts {}
+    }
+
+  # module.eks.aws_eks_cluster.this[0] will be destroyed
+  - resource "aws_eks_cluster" "this" {
+      - arn                           = "arn:aws:eks:us-east-1:<account-id>:cluster/ticketdrop" -> null
+      - bootstrap_self_managed_addons = false -> null
+      - certificate_authority         = [
+          - {
+              - data = "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURNakNDQWhxZ0F3SUJBZ0lSQU53V0JGKzVpaWg5TUJmZXFpNFd0aWN3RFFZSktvWklodmNOQVFFTEJRQXcKSnpFUU1BNEdBMVVFQ2hNSFFWZFRJRVZMVXpFVE1CRUdBMVVFQXhNS2EzVmlaWEp1WlhSbGN6QWVGdzB5TmpFeApNamN4TWpFM01EbGFGdzB6TVRFeE1qWXhNakUzTURsYU1DY3hFREFPQmdOVkJBb1RCMEZYVXlCRlMxTXhFekFSCkJnTlZCQU1UQ210MVltVnlibVYwWlhNd2dnRWlNQTBHQ1NxR1NJYjNEUUVCQVFVQUE0SUJEd0F3Z2dFS0FvSUIKQVFET3VxWE5ZdzJ0NGx5YU9UcWtnM1kzZ1h3QVRJRU9QZTJZSk9MQ1laNkt1Ukh4TnM5dkdkRWV6YjJXUllnWQpIZTBRM3VUa20xRStadC9zQW1HaXkwWFpIZ29lOFZ1Q1M3MWRmWmdTY2p5cXdRQ0t0Qm0rWW13bUNrS1Rtd2ZYCjJmNEpaR3o3REdaaWkwTUFJL1FqL3pvaHl0YjR4MjRoSHJWUnRWR1RwV2xHeWlVRW1vV1I5Y3J2QXFlc0E4YXEKZVJSOXdYcVJENHVLekVIbTJoSlRzZWtzZUxUOXk3cEMrZHpGN01aYzZ0Z1pRQWlFUlhwY2JGNERTZE9WN1AvWgpRZng5aktlZ0Q0SDR2aDVpbXBxS3hiTjE0NWZybndFWDc3Rm1TWFU1ZFJHOHREakpYOUdVYnQ3d2JqcXlEWW43CjA2NTNEY082TXNzY3U0THpQU1hFOGx4UkFnTUJBQUdqV1RCWE1BNEdBMVVkRHdFQi93UUVBd0lDcERBUEJnTlYKSFJNQkFmOEVCVEFEQVFIL01CMEdBMVVkRGdRV0JCUy9yeHpBSHZkSXRDQkpSRkhOenM3ZGtNZ3U5REFWQmdOVgpIUkVFRGpBTWdncHJkV0psY201bGRHVnpNQTBHQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUJaT1UxUGJxVzNIMEVqCkg5cTJQdFVGZ3BnQVlFSEh0VU1UYWc3aU1PTXZyNTgxYWkzdFc3OHlGVTF4NmJiemN5am5ldUlOMTQxWmpQaWoKTTRsY3c0L0ZoRVg2Q0VibmNrWGJHYzErZzJwUktSZnhkNGJURnQyWVkvMExEc21HdDNmTWtGY0hTY1VKdGtjYQplTTdoMHpxb3N6U3daY3VsbWdJV1ZMVXlZa1FoVEpHREVWSkdxenFuM0UyQU1tUm5MQU1ucjNzcUNYOVllSkJsCmdKWWhtMWdYMmFOQkEvbGRXZ3ZrdXRZd3ZtWFdWMDI2M1lvR0Z3L0JMbGxvaU9KQnA1enV5MTJ2MkhzQ3FzN0oKQUlkQU5zeno0VVpGSjhBY3lxczVqSSt4cWkrWnMzL2drKzRMNVFtUnVZQUdrVTVQMWtHdVprQ1Zub0pxQXdXQwpxc3YyeHdwUAotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg=="
+            },
+        ] -> null
+      - created_at                    = "2026-11-27T12:16:50Z" -> null
+      - deletion_protection           = false -> null
+      - enabled_cluster_log_types     = [
+          - "audit",
+          - "authenticator",
+        ] -> null
+      - endpoint                      = "https://989DC9D392C228FDB0E2BB12DB731899.gr7.us-east-1.eks.amazonaws.com" -> null
+      - id                            = "ticketdrop" -> null
+      - identity                      = [
+          - {
+              - oidc = [
+                  - {
+                      - issuer = "https://oidc.eks.us-east-1.amazonaws.com/id/989DC9D392C228FDB0E2BB12DB731899"
+                    },
+                ]
+            },
+        ] -> null
+      - name                          = "ticketdrop" -> null
+      - platform_version              = "eks.19" -> null
+      - region                        = "us-east-1" -> null
+      - role_arn                      = "arn:aws:iam::<account-id>:role/ticketdrop-cluster-deed80eef76c7dfbbb0558deb3" -> null
+      - status                        = "ACTIVE" -> null
+      - tags                          = {} -> null
+      - tags_all                      = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Project"   = "ticketdrop"
+        } -> null
+      - version                       = "1.36" -> null
+
+      - access_config {
+          - authentication_mode                         = "API" -> null
+          - bootstrap_cluster_creator_admin_permissions = false -> null
+        }
+
+      - compute_config {
+          - enabled       = false -> null
+          - node_pools    = [] -> null
+            # (1 unchanged attribute hidden)
+        }
+
+      - control_plane_scaling_config {
+          - tier = "standard" -> null
+        }
+
+      - encryption_config {
+          - resources = [
+              - "secrets",
+            ] -> null
+
+          - provider {
+              - key_arn = "arn:aws:kms:us-east-1:<account-id>:key/6b510b5b-6b3d-4020-8179-0e960c3d5cbf" -> null
+            }
+        }
+
+      - kube_api_server_config {
+          - event_ttl = "60m" -> null
+
+          - service_node_port_range {
+              - max_port = 32767 -> null
+              - min_port = 30000 -> null
+            }
+        }
+
+      - kube_controller_manager_config {
+          - horizontal_pod_autoscaler_controller_config {
+              - horizontal_pod_autoscaler_sync_period = "15s" -> null
+            }
+          - pod_gc_controller_config {
+              - terminated_pod_gc_threshold = 12500 -> null
+            }
+        }
+
+      - kube_scheduler_config {
+          - node_resources_fit {
+              - scoring_strategy {
+                  - type = "LeastAllocated" -> null
+
+                  - resource {
+                      - name   = "cpu" -> null
+                      - weight = 1 -> null
+                    }
+                  - resource {
+                      - name   = "memory" -> null
+                      - weight = 1 -> null
+                    }
+                }
+            }
+        }
+
+      - kubernetes_network_config {
+          - ip_family         = "ipv4" -> null
+          - service_ipv4_cidr = "172.20.0.0/16" -> null
+            # (1 unchanged attribute hidden)
+
+          - elastic_load_balancing {
+              - enabled = false -> null
+            }
+        }
+
+      - storage_config {
+          - block_storage {
+              - enabled = false -> null
+            }
+        }
+
+      - upgrade_policy {
+          - support_type = "EXTENDED" -> null
+        }
+
+      - vpc_config {
+          - cluster_security_group_id = "sg-0a918d5ba24104485" -> null
+          - control_plane_egress_mode = "AWS_MANAGED" -> null
+          - endpoint_private_access   = true -> null
+          - endpoint_public_access    = true -> null
+          - public_access_cidrs       = [
+              - "<my-ip>/32",
+            ] -> null
+          - security_group_ids        = [
+              - "sg-0dbdd14adf1bac7ab",
+            ] -> null
+          - subnet_ids                = [
+              - "subnet-012827ca4ae4956ad",
+              - "subnet-0169d9235696f86f0",
+              - "subnet-07c6394edc0fcf646",
+            ] -> null
+          - vpc_id                    = "vpc-0839f9d03c9c81a24" -> null
+        }
+    }
+
+  # module.eks.aws_iam_policy.cluster_encryption[0] will be destroyed
+  - resource "aws_iam_policy" "cluster_encryption" {
+      - arn              = "arn:aws:iam::<account-id>:policy/ticketdrop-cluster-ClusterEncryptionddc9fb98bf91f238b2296832ed" -> null
+      - attachment_count = 1 -> null
+      - description      = "Cluster encryption policy to allow cluster role to utilize CMK provided" -> null
+      - id               = "arn:aws:iam::<account-id>:policy/ticketdrop-cluster-ClusterEncryptionddc9fb98bf91f238b2296832ed" -> null
+      - name             = "ticketdrop-cluster-ClusterEncryptionddc9fb98bf91f238b2296832ed" -> null
+      - name_prefix      = "ticketdrop-cluster-ClusterEncryption" -> null
+      - path             = "/" -> null
+      - policy           = jsonencode(
+            {
+              - Statement = [
+                  - {
+                      - Action   = [
+                          - "kms:Encrypt",
+                          - "kms:Decrypt",
+                          - "kms:ListGrants",
+                          - "kms:DescribeKey",
+                        ]
+                      - Effect   = "Allow"
+                      - Resource = "arn:aws:kms:us-east-1:<account-id>:key/6b510b5b-6b3d-4020-8179-0e960c3d5cbf"
+                    },
+                ]
+              - Version   = "2012-10-17"
+            }
+        ) -> null
+      - policy_id        = "ANPAQDOIRRFGCZI5SEI27" -> null
+      - tags             = {} -> null
+      - tags_all         = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Project"   = "ticketdrop"
+        } -> null
+    }
+
+  # module.eks.aws_iam_role.this[0] will be destroyed
+  - resource "aws_iam_role" "this" {
+      - arn                   = "arn:aws:iam::<account-id>:role/ticketdrop-cluster-deed80eef76c7dfbbb0558deb3" -> null
+      - assume_role_policy    = jsonencode(
+            {
+              - Statement = [
+                  - {
+                      - Action    = [
+                          - "sts:TagSession",
+                          - "sts:AssumeRole",
+                        ]
+                      - Effect    = "Allow"
+                      - Principal = {
+                          - Service = "eks.amazonaws.com"
+                        }
+                      - Sid       = "EKSClusterAssumeRole"
+                    },
+                ]
+              - Version   = "2012-10-17"
+            }
+        ) -> null
+      - create_date           = "2026-11-27T12:16:20Z" -> null
+      - force_detach_policies = true -> null
+      - id                    = "ticketdrop-cluster-deed80eef76c7dfbbb0558deb3" -> null
+      - managed_policy_arns   = [
+          - "arn:aws:iam::<account-id>:policy/ticketdrop-cluster-ClusterEncryptionddc9fb98bf91f238b2296832ed",
+          - "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
+        ] -> null
+      - max_session_duration  = 3600 -> null
+      - name                  = "ticketdrop-cluster-deed80eef76c7dfbbb0558deb3" -> null
+      - name_prefix           = "ticketdrop-cluster-" -> null
+      - path                  = "/" -> null
+      - tags                  = {} -> null
+      - tags_all              = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Project"   = "ticketdrop"
+        } -> null
+      - unique_id             = "<role-id>" -> null
+        # (2 unchanged attributes hidden)
+    }
+
+  # module.eks.aws_iam_role_policy_attachment.cluster_encryption[0] will be destroyed
+  - resource "aws_iam_role_policy_attachment" "cluster_encryption" {
+      - id         = "ticketdrop-cluster-deed80eef76c7dfbbb0558deb3/arn:aws:iam::<account-id>:policy/ticketdrop-cluster-ClusterEncryptionddc9fb98bf91f238b2296832ed" -> null
+      - policy_arn = "arn:aws:iam::<account-id>:policy/ticketdrop-cluster-ClusterEncryptionddc9fb98bf91f238b2296832ed" -> null
+      - role       = "ticketdrop-cluster-deed80eef76c7dfbbb0558deb3" -> null
+    }
+
+  # module.eks.aws_iam_role_policy_attachment.this["AmazonEKSClusterPolicy"] will be destroyed
+  - resource "aws_iam_role_policy_attachment" "this" {
+      - id         = "ticketdrop-cluster-deed80eef76c7dfbbb0558deb3/arn:aws:iam::aws:policy/AmazonEKSClusterPolicy" -> null
+      - policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy" -> null
+      - role       = "ticketdrop-cluster-deed80eef76c7dfbbb0558deb3" -> null
+    }
+
+  # module.eks.aws_security_group.cluster[0] will be destroyed
+  - resource "aws_security_group" "cluster" {
+      - arn                    = "arn:aws:ec2:us-east-1:<account-id>:security-group/sg-0dbdd14adf1bac7ab" -> null
+      - description            = "EKS cluster security group" -> null
+      - egress                 = [] -> null
+      - id                     = "sg-0dbdd14adf1bac7ab" -> null
+      - ingress                = [
+          - {
+              - cidr_blocks      = []
+              - description      = "Node groups to cluster API"
+              - from_port        = 443
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "tcp"
+              - security_groups  = [
+                  - "sg-000f89f52c5eff983",
+                ]
+              - self             = false
+              - to_port          = 443
+            },
+        ] -> null
+      - name                   = "ticketdrop-cluster-f5b7f570cbdd7aa88096f29c61" -> null
+      - name_prefix            = "ticketdrop-cluster-" -> null
+      - owner_id               = "<account-id>" -> null
+      - region                 = "us-east-1" -> null
+      - revoke_rules_on_delete = false -> null
+      - tags                   = {
+          - "Name" = "ticketdrop-cluster"
+        } -> null
+      - tags_all               = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Name"      = "ticketdrop-cluster"
+          - "Project"   = "ticketdrop"
+        } -> null
+      - vpc_id                 = "vpc-0839f9d03c9c81a24" -> null
+    }
+
+  # module.eks.aws_security_group.node[0] will be destroyed
+  - resource "aws_security_group" "node" {
+      - arn                    = "arn:aws:ec2:us-east-1:<account-id>:security-group/sg-000f89f52c5eff983" -> null
+      - description            = "EKS node shared security group" -> null
+      - egress                 = [
+          - {
+              - cidr_blocks      = [
+                  - "0.0.0.0/0",
+                ]
+              - description      = "Allow all egress"
+              - from_port        = 0
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "-1"
+              - security_groups  = []
+              - self             = false
+              - to_port          = 0
+            },
+        ] -> null
+      - id                     = "sg-000f89f52c5eff983" -> null
+      - ingress                = [
+          - {
+              - cidr_blocks      = []
+              - description      = "Cluster API to node 10251/tcp webhook"
+              - from_port        = 10251
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "tcp"
+              - security_groups  = [
+                  - "sg-0dbdd14adf1bac7ab",
+                ]
+              - self             = false
+              - to_port          = 10251
+            },
+          - {
+              - cidr_blocks      = []
+              - description      = "Cluster API to node 4443/tcp webhook"
+              - from_port        = 4443
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "tcp"
+              - security_groups  = [
+                  - "sg-0dbdd14adf1bac7ab",
+                ]
+              - self             = false
+              - to_port          = 4443
+            },
+          - {
+              - cidr_blocks      = []
+              - description      = "Cluster API to node 6443/tcp webhook"
+              - from_port        = 6443
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "tcp"
+              - security_groups  = [
+                  - "sg-0dbdd14adf1bac7ab",
+                ]
+              - self             = false
+              - to_port          = 6443
+            },
+          - {
+              - cidr_blocks      = []
+              - description      = "Cluster API to node 8443/tcp webhook"
+              - from_port        = 8443
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "tcp"
+              - security_groups  = [
+                  - "sg-0dbdd14adf1bac7ab",
+                ]
+              - self             = false
+              - to_port          = 8443
+            },
+          - {
+              - cidr_blocks      = []
+              - description      = "Cluster API to node 9443/tcp webhook"
+              - from_port        = 9443
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "tcp"
+              - security_groups  = [
+                  - "sg-0dbdd14adf1bac7ab",
+                ]
+              - self             = false
+              - to_port          = 9443
+            },
+          - {
+              - cidr_blocks      = []
+              - description      = "Cluster API to node groups"
+              - from_port        = 443
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "tcp"
+              - security_groups  = [
+                  - "sg-0dbdd14adf1bac7ab",
+                ]
+              - self             = false
+              - to_port          = 443
+            },
+          - {
+              - cidr_blocks      = []
+              - description      = "Cluster API to node kubelets"
+              - from_port        = 10250
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "tcp"
+              - security_groups  = [
+                  - "sg-0dbdd14adf1bac7ab",
+                ]
+              - self             = false
+              - to_port          = 10250
+            },
+          - {
+              - cidr_blocks      = []
+              - description      = "Node to node CoreDNS UDP"
+              - from_port        = 53
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "udp"
+              - security_groups  = []
+              - self             = true
+              - to_port          = 53
+            },
+          - {
+              - cidr_blocks      = []
+              - description      = "Node to node CoreDNS"
+              - from_port        = 53
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "tcp"
+              - security_groups  = []
+              - self             = true
+              - to_port          = 53
+            },
+          - {
+              - cidr_blocks      = []
+              - description      = "Node to node ingress on ephemeral ports"
+              - from_port        = 1025
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "tcp"
+              - security_groups  = []
+              - self             = true
+              - to_port          = 65535
+            },
+          - {
+              - cidr_blocks      = []
+              - description      = "Node to node, all ports and protocols"
+              - from_port        = 0
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "-1"
+              - security_groups  = []
+              - self             = true
+              - to_port          = 0
+            },
+        ] -> null
+      - name                   = "ticketdrop-node-0bd312a3e5b77f8d9eadc0770e" -> null
+      - name_prefix            = "ticketdrop-node-" -> null
+      - owner_id               = "<account-id>" -> null
+      - region                 = "us-east-1" -> null
+      - revoke_rules_on_delete = false -> null
+      - tags                   = {
+          - "Name"                             = "ticketdrop-node"
+          - "karpenter.sh/discovery"           = "ticketdrop"
+          - "kubernetes.io/cluster/ticketdrop" = "owned"
+        } -> null
+      - tags_all               = {
+          - "Layer"                            = "cluster"
+          - "ManagedBy"                        = "terraform"
+          - "Name"                             = "ticketdrop-node"
+          - "Project"                          = "ticketdrop"
+          - "karpenter.sh/discovery"           = "ticketdrop"
+          - "kubernetes.io/cluster/ticketdrop" = "owned"
+        } -> null
+      - vpc_id                 = "vpc-0839f9d03c9c81a24" -> null
+    }
+
+  # module.eks.aws_security_group_rule.cluster["ingress_nodes_443"] will be destroyed
+  - resource "aws_security_group_rule" "cluster" {
+      - description              = "Node groups to cluster API" -> null
+      - from_port                = 443 -> null
+      - id                       = "sgrule-1187009142" -> null
+      - protocol                 = "tcp" -> null
+      - region                   = "us-east-1" -> null
+      - security_group_id        = "sg-0dbdd14adf1bac7ab" -> null
+      - security_group_rule_id   = "sgr-0aad4a79db9433d49" -> null
+      - self                     = false -> null
+      - source_security_group_id = "sg-000f89f52c5eff983" -> null
+      - to_port                  = 443 -> null
+      - type                     = "ingress" -> null
+    }
+
+  # module.eks.aws_security_group_rule.node["egress_all"] will be destroyed
+  - resource "aws_security_group_rule" "node" {
+      - cidr_blocks            = [
+          - "0.0.0.0/0",
+        ] -> null
+      - description            = "Allow all egress" -> null
+      - from_port              = 0 -> null
+      - id                     = "sgrule-3505081288" -> null
+      - protocol               = "-1" -> null
+      - region                 = "us-east-1" -> null
+      - security_group_id      = "sg-000f89f52c5eff983" -> null
+      - security_group_rule_id = "sgr-044d032e8dd3b36c3" -> null
+      - self                   = false -> null
+      - to_port                = 0 -> null
+      - type                   = "egress" -> null
+    }
+
+  # module.eks.aws_security_group_rule.node["ingress_cluster_10251_webhook"] will be destroyed
+  - resource "aws_security_group_rule" "node" {
+      - description              = "Cluster API to node 10251/tcp webhook" -> null
+      - from_port                = 10251 -> null
+      - id                       = "sgrule-535866784" -> null
+      - protocol                 = "tcp" -> null
+      - region                   = "us-east-1" -> null
+      - security_group_id        = "sg-000f89f52c5eff983" -> null
+      - security_group_rule_id   = "sgr-06cf2e604e33c4348" -> null
+      - self                     = false -> null
+      - source_security_group_id = "sg-0dbdd14adf1bac7ab" -> null
+      - to_port                  = 10251 -> null
+      - type                     = "ingress" -> null
+    }
+
+  # module.eks.aws_security_group_rule.node["ingress_cluster_443"] will be destroyed
+  - resource "aws_security_group_rule" "node" {
+      - description              = "Cluster API to node groups" -> null
+      - from_port                = 443 -> null
+      - id                       = "sgrule-2085760026" -> null
+      - protocol                 = "tcp" -> null
+      - region                   = "us-east-1" -> null
+      - security_group_id        = "sg-000f89f52c5eff983" -> null
+      - security_group_rule_id   = "sgr-06a210786df257d68" -> null
+      - self                     = false -> null
+      - source_security_group_id = "sg-0dbdd14adf1bac7ab" -> null
+      - to_port                  = 443 -> null
+      - type                     = "ingress" -> null
+    }
+
+  # module.eks.aws_security_group_rule.node["ingress_cluster_4443_webhook"] will be destroyed
+  - resource "aws_security_group_rule" "node" {
+      - description              = "Cluster API to node 4443/tcp webhook" -> null
+      - from_port                = 4443 -> null
+      - id                       = "sgrule-3638848387" -> null
+      - protocol                 = "tcp" -> null
+      - region                   = "us-east-1" -> null
+      - security_group_id        = "sg-000f89f52c5eff983" -> null
+      - security_group_rule_id   = "sgr-056b42c3ecda2a4a5" -> null
+      - self                     = false -> null
+      - source_security_group_id = "sg-0dbdd14adf1bac7ab" -> null
+      - to_port                  = 4443 -> null
+      - type                     = "ingress" -> null
+    }
+
+  # module.eks.aws_security_group_rule.node["ingress_cluster_6443_webhook"] will be destroyed
+  - resource "aws_security_group_rule" "node" {
+      - description              = "Cluster API to node 6443/tcp webhook" -> null
+      - from_port                = 6443 -> null
+      - id                       = "sgrule-296094741" -> null
+      - protocol                 = "tcp" -> null
+      - region                   = "us-east-1" -> null
+      - security_group_id        = "sg-000f89f52c5eff983" -> null
+      - security_group_rule_id   = "sgr-0e252a86d65beffb4" -> null
+      - self                     = false -> null
+      - source_security_group_id = "sg-0dbdd14adf1bac7ab" -> null
+      - to_port                  = 6443 -> null
+      - type                     = "ingress" -> null
+    }
+
+  # module.eks.aws_security_group_rule.node["ingress_cluster_8443_webhook"] will be destroyed
+  - resource "aws_security_group_rule" "node" {
+      - description              = "Cluster API to node 8443/tcp webhook" -> null
+      - from_port                = 8443 -> null
+      - id                       = "sgrule-49950772" -> null
+      - protocol                 = "tcp" -> null
+      - region                   = "us-east-1" -> null
+      - security_group_id        = "sg-000f89f52c5eff983" -> null
+      - security_group_rule_id   = "sgr-01795c1efe2e661c5" -> null
+      - self                     = false -> null
+      - source_security_group_id = "sg-0dbdd14adf1bac7ab" -> null
+      - to_port                  = 8443 -> null
+      - type                     = "ingress" -> null
+    }
+
+  # module.eks.aws_security_group_rule.node["ingress_cluster_9443_webhook"] will be destroyed
+  - resource "aws_security_group_rule" "node" {
+      - description              = "Cluster API to node 9443/tcp webhook" -> null
+      - from_port                = 9443 -> null
+      - id                       = "sgrule-1717240831" -> null
+      - protocol                 = "tcp" -> null
+      - region                   = "us-east-1" -> null
+      - security_group_id        = "sg-000f89f52c5eff983" -> null
+      - security_group_rule_id   = "sgr-07ee9adeb2b158290" -> null
+      - self                     = false -> null
+      - source_security_group_id = "sg-0dbdd14adf1bac7ab" -> null
+      - to_port                  = 9443 -> null
+      - type                     = "ingress" -> null
+    }
+
+  # module.eks.aws_security_group_rule.node["ingress_cluster_kubelet"] will be destroyed
+  - resource "aws_security_group_rule" "node" {
+      - description              = "Cluster API to node kubelets" -> null
+      - from_port                = 10250 -> null
+      - id                       = "sgrule-733609435" -> null
+      - protocol                 = "tcp" -> null
+      - region                   = "us-east-1" -> null
+      - security_group_id        = "sg-000f89f52c5eff983" -> null
+      - security_group_rule_id   = "sgr-071c3e5590bcf368a" -> null
+      - self                     = false -> null
+      - source_security_group_id = "sg-0dbdd14adf1bac7ab" -> null
+      - to_port                  = 10250 -> null
+      - type                     = "ingress" -> null
+    }
+
+  # module.eks.aws_security_group_rule.node["ingress_nodes_ephemeral"] will be destroyed
+  - resource "aws_security_group_rule" "node" {
+      - description            = "Node to node ingress on ephemeral ports" -> null
+      - from_port              = 1025 -> null
+      - id                     = "sgrule-1578366891" -> null
+      - protocol               = "tcp" -> null
+      - region                 = "us-east-1" -> null
+      - security_group_id      = "sg-000f89f52c5eff983" -> null
+      - security_group_rule_id = "sgr-084ef746d128aaa33" -> null
+      - self                   = true -> null
+      - to_port                = 65535 -> null
+      - type                   = "ingress" -> null
+    }
+
+  # module.eks.aws_security_group_rule.node["ingress_self_all"] will be destroyed
+  - resource "aws_security_group_rule" "node" {
+      - description            = "Node to node, all ports and protocols" -> null
+      - from_port              = 0 -> null
+      - id                     = "sgrule-373802189" -> null
+      - protocol               = "-1" -> null
+      - region                 = "us-east-1" -> null
+      - security_group_id      = "sg-000f89f52c5eff983" -> null
+      - security_group_rule_id = "sgr-0d8062a8e1e4f1dd0" -> null
+      - self                   = true -> null
+      - to_port                = 0 -> null
+      - type                   = "ingress" -> null
+    }
+
+  # module.eks.aws_security_group_rule.node["ingress_self_coredns_tcp"] will be destroyed
+  - resource "aws_security_group_rule" "node" {
+      - description            = "Node to node CoreDNS" -> null
+      - from_port              = 53 -> null
+      - id                     = "sgrule-1124764533" -> null
+      - protocol               = "tcp" -> null
+      - region                 = "us-east-1" -> null
+      - security_group_id      = "sg-000f89f52c5eff983" -> null
+      - security_group_rule_id = "sgr-07fc45ffc4b2b3250" -> null
+      - self                   = true -> null
+      - to_port                = 53 -> null
+      - type                   = "ingress" -> null
+    }
+
+  # module.eks.aws_security_group_rule.node["ingress_self_coredns_udp"] will be destroyed
+  - resource "aws_security_group_rule" "node" {
+      - description            = "Node to node CoreDNS UDP" -> null
+      - from_port              = 53 -> null
+      - id                     = "sgrule-3881117850" -> null
+      - protocol               = "udp" -> null
+      - region                 = "us-east-1" -> null
+      - security_group_id      = "sg-000f89f52c5eff983" -> null
+      - security_group_rule_id = "sgr-0cc8ad2b79d6e260f" -> null
+      - self                   = true -> null
+      - to_port                = 53 -> null
+      - type                   = "ingress" -> null
+    }
+
+  # module.eks.time_sleep.this[0] will be destroyed
+  - resource "time_sleep" "this" {
+      - create_duration = "30s" -> null
+      - id              = "2026-11-27T12:27:29Z" -> null
+      - triggers        = {
+          - "certificate_authority_data" = "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURNakNDQWhxZ0F3SUJBZ0lSQU53V0JGKzVpaWg5TUJmZXFpNFd0aWN3RFFZSktvWklodmNOQVFFTEJRQXcKSnpFUU1BNEdBMVVFQ2hNSFFWZFRJRVZMVXpFVE1CRUdBMVVFQXhNS2EzVmlaWEp1WlhSbGN6QWVGdzB5TmpFeApNamN4TWpFM01EbGFGdzB6TVRFeE1qWXhNakUzTURsYU1DY3hFREFPQmdOVkJBb1RCMEZYVXlCRlMxTXhFekFSCkJnTlZCQU1UQ210MVltVnlibVYwWlhNd2dnRWlNQTBHQ1NxR1NJYjNEUUVCQVFVQUE0SUJEd0F3Z2dFS0FvSUIKQVFET3VxWE5ZdzJ0NGx5YU9UcWtnM1kzZ1h3QVRJRU9QZTJZSk9MQ1laNkt1Ukh4TnM5dkdkRWV6YjJXUllnWQpIZTBRM3VUa20xRStadC9zQW1HaXkwWFpIZ29lOFZ1Q1M3MWRmWmdTY2p5cXdRQ0t0Qm0rWW13bUNrS1Rtd2ZYCjJmNEpaR3o3REdaaWkwTUFJL1FqL3pvaHl0YjR4MjRoSHJWUnRWR1RwV2xHeWlVRW1vV1I5Y3J2QXFlc0E4YXEKZVJSOXdYcVJENHVLekVIbTJoSlRzZWtzZUxUOXk3cEMrZHpGN01aYzZ0Z1pRQWlFUlhwY2JGNERTZE9WN1AvWgpRZng5aktlZ0Q0SDR2aDVpbXBxS3hiTjE0NWZybndFWDc3Rm1TWFU1ZFJHOHREakpYOUdVYnQ3d2JqcXlEWW43CjA2NTNEY082TXNzY3U0THpQU1hFOGx4UkFnTUJBQUdqV1RCWE1BNEdBMVVkRHdFQi93UUVBd0lDcERBUEJnTlYKSFJNQkFmOEVCVEFEQVFIL01CMEdBMVVkRGdRV0JCUy9yeHpBSHZkSXRDQkpSRkhOenM3ZGtNZ3U5REFWQmdOVgpIUkVFRGpBTWdncHJkV0psY201bGRHVnpNQTBHQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUJaT1UxUGJxVzNIMEVqCkg5cTJQdFVGZ3BnQVlFSEh0VU1UYWc3aU1PTXZyNTgxYWkzdFc3OHlGVTF4NmJiemN5am5ldUlOMTQxWmpQaWoKTTRsY3c0L0ZoRVg2Q0VibmNrWGJHYzErZzJwUktSZnhkNGJURnQyWVkvMExEc21HdDNmTWtGY0hTY1VKdGtjYQplTTdoMHpxb3N6U3daY3VsbWdJV1ZMVXlZa1FoVEpHREVWSkdxenFuM0UyQU1tUm5MQU1ucjNzcUNYOVllSkJsCmdKWWhtMWdYMmFOQkEvbGRXZ3ZrdXRZd3ZtWFdWMDI2M1lvR0Z3L0JMbGxvaU9KQnA1enV5MTJ2MkhzQ3FzN0oKQUlkQU5zeno0VVpGSjhBY3lxczVqSSt4cWkrWnMzL2drKzRMNVFtUnVZQUdrVTVQMWtHdVprQ1Zub0pxQXdXQwpxc3YyeHdwUAotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg=="
+          - "endpoint"                   = "https://989DC9D392C228FDB0E2BB12DB731899.gr7.us-east-1.eks.amazonaws.com"
+          - "kubernetes_version"         = "1.36"
+          - "name"                       = "ticketdrop"
+          - "service_cidr"               = "172.20.0.0/16"
+        } -> null
+    }
+
+  # module.vpc.aws_default_network_acl.this[0] will be destroyed
+  - resource "aws_default_network_acl" "this" {
+      - arn                    = "arn:aws:ec2:us-east-1:<account-id>:network-acl/acl-077a0ca224f03b778" -> null
+      - default_network_acl_id = "acl-077a0ca224f03b778" -> null
+      - id                     = "acl-077a0ca224f03b778" -> null
+      - owner_id               = "<account-id>" -> null
+      - region                 = "us-east-1" -> null
+      - subnet_ids             = [
+          - "subnet-012827ca4ae4956ad",
+          - "subnet-0169d9235696f86f0",
+          - "subnet-07c6394edc0fcf646",
+          - "subnet-07f6cf250baab616a",
+          - "subnet-081fcc7a471cbda98",
+          - "subnet-0b1385c6f8f134c4f",
+        ] -> null
+      - tags                   = {
+          - "Name" = "ticketdrop-default"
+        } -> null
+      - tags_all               = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Name"      = "ticketdrop-default"
+          - "Project"   = "ticketdrop"
+        } -> null
+      - vpc_id                 = "vpc-0839f9d03c9c81a24" -> null
+
+      - egress {
+          - action          = "allow" -> null
+          - from_port       = 0 -> null
+          - icmp_code       = 0 -> null
+          - icmp_type       = 0 -> null
+          - ipv6_cidr_block = "::/0" -> null
+          - protocol        = "-1" -> null
+          - rule_no         = 101 -> null
+          - to_port         = 0 -> null
+            # (1 unchanged attribute hidden)
+        }
+      - egress {
+          - action          = "allow" -> null
+          - cidr_block      = "0.0.0.0/0" -> null
+          - from_port       = 0 -> null
+          - icmp_code       = 0 -> null
+          - icmp_type       = 0 -> null
+          - protocol        = "-1" -> null
+          - rule_no         = 100 -> null
+          - to_port         = 0 -> null
+            # (1 unchanged attribute hidden)
+        }
+
+      - ingress {
+          - action          = "allow" -> null
+          - from_port       = 0 -> null
+          - icmp_code       = 0 -> null
+          - icmp_type       = 0 -> null
+          - ipv6_cidr_block = "::/0" -> null
+          - protocol        = "-1" -> null
+          - rule_no         = 101 -> null
+          - to_port         = 0 -> null
+            # (1 unchanged attribute hidden)
+        }
+      - ingress {
+          - action          = "allow" -> null
+          - cidr_block      = "0.0.0.0/0" -> null
+          - from_port       = 0 -> null
+          - icmp_code       = 0 -> null
+          - icmp_type       = 0 -> null
+          - protocol        = "-1" -> null
+          - rule_no         = 100 -> null
+          - to_port         = 0 -> null
+            # (1 unchanged attribute hidden)
+        }
+    }
+
+  # module.vpc.aws_default_route_table.default[0] will be destroyed
+  - resource "aws_default_route_table" "default" {
+      - arn                    = "arn:aws:ec2:us-east-1:<account-id>:route-table/rtb-0f561a74e9f49d5e3" -> null
+      - default_route_table_id = "rtb-0f561a74e9f49d5e3" -> null
+      - id                     = "rtb-0f561a74e9f49d5e3" -> null
+      - owner_id               = "<account-id>" -> null
+      - propagating_vgws       = [] -> null
+      - region                 = "us-east-1" -> null
+      - route                  = [] -> null
+      - tags                   = {
+          - "Name" = "ticketdrop-default"
+        } -> null
+      - tags_all               = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Name"      = "ticketdrop-default"
+          - "Project"   = "ticketdrop"
+        } -> null
+      - vpc_id                 = "vpc-0839f9d03c9c81a24" -> null
+
+      - timeouts {
+          - create = "5m" -> null
+          - update = "5m" -> null
+        }
+    }
+
+  # module.vpc.aws_default_security_group.this[0] will be destroyed
+  - resource "aws_default_security_group" "this" {
+      - arn                    = "arn:aws:ec2:us-east-1:<account-id>:security-group/sg-06121a78a8456aa61" -> null
+      - description            = "default VPC security group" -> null
+      - egress                 = [] -> null
+      - id                     = "sg-06121a78a8456aa61" -> null
+      - ingress                = [] -> null
+      - name                   = "default" -> null
+      - owner_id               = "<account-id>" -> null
+      - region                 = "us-east-1" -> null
+      - revoke_rules_on_delete = false -> null
+      - tags                   = {
+          - "Name" = "ticketdrop-default"
+        } -> null
+      - tags_all               = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Name"      = "ticketdrop-default"
+          - "Project"   = "ticketdrop"
+        } -> null
+      - vpc_id                 = "vpc-0839f9d03c9c81a24" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.vpc.aws_eip.nat[0] will be destroyed
+  - resource "aws_eip" "nat" {
+      - allocation_id            = "eipalloc-09e75c3b54e5a8ec9" -> null
+      - arn                      = "arn:aws:ec2:us-east-1:<account-id>:elastic-ip/eipalloc-09e75c3b54e5a8ec9" -> null
+      - association_id           = "eipassoc-07289a553d0cdda69" -> null
+      - domain                   = "vpc" -> null
+      - id                       = "eipalloc-09e75c3b54e5a8ec9" -> null
+      - network_border_group     = "us-east-1" -> null
+      - network_interface        = "eni-037c859ecf8e5d13b" -> null
+      - private_dns              = "ip-10-40-96-85.ec2.internal" -> null
+      - private_ip               = "10.40.96.85" -> null
+      - public_dns               = "ec2-52-54-95-195.compute-1.amazonaws.com" -> null
+      - public_ip                = "52.54.95.195" -> null
+      - public_ipv4_pool         = "amazon" -> null
+      - region                   = "us-east-1" -> null
+      - tags                     = {
+          - "Name" = "ticketdrop-us-east-1a"
+        } -> null
+      - tags_all                 = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Name"      = "ticketdrop-us-east-1a"
+          - "Project"   = "ticketdrop"
+        } -> null
+        # (6 unchanged attributes hidden)
+    }
+
+  # module.vpc.aws_internet_gateway.this[0] will be destroyed
+  - resource "aws_internet_gateway" "this" {
+      - arn      = "arn:aws:ec2:us-east-1:<account-id>:internet-gateway/igw-04e8400a47a4e19bb" -> null
+      - id       = "igw-04e8400a47a4e19bb" -> null
+      - owner_id = "<account-id>" -> null
+      - region   = "us-east-1" -> null
+      - tags     = {
+          - "Name" = "ticketdrop"
+        } -> null
+      - tags_all = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Name"      = "ticketdrop"
+          - "Project"   = "ticketdrop"
+        } -> null
+      - vpc_id   = "vpc-0839f9d03c9c81a24" -> null
+    }
+
+  # module.vpc.aws_nat_gateway.this[0] will be destroyed
+  - resource "aws_nat_gateway" "this" {
+      - allocation_id                      = "eipalloc-09e75c3b54e5a8ec9" -> null
+      - association_id                     = "eipassoc-07289a553d0cdda69" -> null
+      - availability_mode                  = "zonal" -> null
+      - connectivity_type                  = "public" -> null
+      - id                                 = "nat-0c4268614b377991a" -> null
+      - network_interface_id               = "eni-037c859ecf8e5d13b" -> null
+      - private_ip                         = "10.40.96.85" -> null
+      - public_ip                          = "52.54.95.195" -> null
+      - region                             = "us-east-1" -> null
+      - regional_nat_gateway_address       = [] -> null
+      - secondary_allocation_ids           = [] -> null
+      - secondary_private_ip_address_count = 0 -> null
+      - secondary_private_ip_addresses     = [] -> null
+      - subnet_id                          = "subnet-081fcc7a471cbda98" -> null
+      - tags                               = {
+          - "Name" = "ticketdrop-us-east-1a"
+        } -> null
+      - tags_all                           = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Name"      = "ticketdrop-us-east-1a"
+          - "Project"   = "ticketdrop"
+        } -> null
+      - vpc_id                             = "vpc-0839f9d03c9c81a24" -> null
+    }
+
+  # module.vpc.aws_route.private_nat_gateway[0] will be destroyed
+  - resource "aws_route" "private_nat_gateway" {
+      - destination_cidr_block      = "0.0.0.0/0" -> null
+      - id                          = "r-rtb-09bb3799f14cef1f61080289494" -> null
+      - nat_gateway_id              = "nat-0c4268614b377991a" -> null
+      - origin                      = "CreateRoute" -> null
+      - region                      = "us-east-1" -> null
+      - route_table_id              = "rtb-09bb3799f14cef1f6" -> null
+      - state                       = "active" -> null
+        # (14 unchanged attributes hidden)
+
+      - timeouts {
+          - create = "5m" -> null
+        }
+    }
+
+  # module.vpc.aws_route.public_internet_gateway[0] will be destroyed
+  - resource "aws_route" "public_internet_gateway" {
+      - destination_cidr_block      = "0.0.0.0/0" -> null
+      - gateway_id                  = "igw-04e8400a47a4e19bb" -> null
+      - id                          = "r-rtb-04c6e616b20740e8b1080289494" -> null
+      - origin                      = "CreateRoute" -> null
+      - region                      = "us-east-1" -> null
+      - route_table_id              = "rtb-04c6e616b20740e8b" -> null
+      - state                       = "active" -> null
+        # (14 unchanged attributes hidden)
+
+      - timeouts {
+          - create = "5m" -> null
+        }
+    }
+
+  # module.vpc.aws_route_table.private[0] will be destroyed
+  - resource "aws_route_table" "private" {
+      - arn              = "arn:aws:ec2:us-east-1:<account-id>:route-table/rtb-09bb3799f14cef1f6" -> null
+      - id               = "rtb-09bb3799f14cef1f6" -> null
+      - owner_id         = "<account-id>" -> null
+      - propagating_vgws = [] -> null
+      - region           = "us-east-1" -> null
+      - route            = [
+          - {
+              - cidr_block                 = "0.0.0.0/0"
+              - nat_gateway_id             = "nat-0c4268614b377991a"
+                # (12 unchanged attributes hidden)
+            },
+        ] -> null
+      - tags             = {
+          - "Name" = "ticketdrop-private"
+        } -> null
+      - tags_all         = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Name"      = "ticketdrop-private"
+          - "Project"   = "ticketdrop"
+        } -> null
+      - vpc_id           = "vpc-0839f9d03c9c81a24" -> null
+    }
+
+  # module.vpc.aws_route_table.public[0] will be destroyed
+  - resource "aws_route_table" "public" {
+      - arn              = "arn:aws:ec2:us-east-1:<account-id>:route-table/rtb-04c6e616b20740e8b" -> null
+      - id               = "rtb-04c6e616b20740e8b" -> null
+      - owner_id         = "<account-id>" -> null
+      - propagating_vgws = [] -> null
+      - region           = "us-east-1" -> null
+      - route            = [
+          - {
+              - cidr_block                 = "0.0.0.0/0"
+              - gateway_id                 = "igw-04e8400a47a4e19bb"
+                # (12 unchanged attributes hidden)
+            },
+        ] -> null
+      - tags             = {
+          - "Name" = "ticketdrop-public"
+        } -> null
+      - tags_all         = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Name"      = "ticketdrop-public"
+          - "Project"   = "ticketdrop"
+        } -> null
+      - vpc_id           = "vpc-0839f9d03c9c81a24" -> null
+    }
+
+  # module.vpc.aws_route_table_association.private[0] will be destroyed
+  - resource "aws_route_table_association" "private" {
+      - id             = "rtbassoc-0ca405b67372da9fa" -> null
+      - region         = "us-east-1" -> null
+      - route_table_id = "rtb-09bb3799f14cef1f6" -> null
+      - subnet_id      = "subnet-012827ca4ae4956ad" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.vpc.aws_route_table_association.private[1] will be destroyed
+  - resource "aws_route_table_association" "private" {
+      - id             = "rtbassoc-02b72a3405fe6ce2e" -> null
+      - region         = "us-east-1" -> null
+      - route_table_id = "rtb-09bb3799f14cef1f6" -> null
+      - subnet_id      = "subnet-07c6394edc0fcf646" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.vpc.aws_route_table_association.private[2] will be destroyed
+  - resource "aws_route_table_association" "private" {
+      - id             = "rtbassoc-06ee8351567455077" -> null
+      - region         = "us-east-1" -> null
+      - route_table_id = "rtb-09bb3799f14cef1f6" -> null
+      - subnet_id      = "subnet-0169d9235696f86f0" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.vpc.aws_route_table_association.public[0] will be destroyed
+  - resource "aws_route_table_association" "public" {
+      - id             = "rtbassoc-07258dcfe3fd7ba75" -> null
+      - region         = "us-east-1" -> null
+      - route_table_id = "rtb-04c6e616b20740e8b" -> null
+      - subnet_id      = "subnet-081fcc7a471cbda98" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.vpc.aws_route_table_association.public[1] will be destroyed
+  - resource "aws_route_table_association" "public" {
+      - id             = "rtbassoc-058f59e77ed9de1ef" -> null
+      - region         = "us-east-1" -> null
+      - route_table_id = "rtb-04c6e616b20740e8b" -> null
+      - subnet_id      = "subnet-0b1385c6f8f134c4f" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.vpc.aws_route_table_association.public[2] will be destroyed
+  - resource "aws_route_table_association" "public" {
+      - id             = "rtbassoc-0ed8e4da5ae4bdc1c" -> null
+      - region         = "us-east-1" -> null
+      - route_table_id = "rtb-04c6e616b20740e8b" -> null
+      - subnet_id      = "subnet-07f6cf250baab616a" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.vpc.aws_subnet.private[0] will be destroyed
+  - resource "aws_subnet" "private" {
+      - arn                                            = "arn:aws:ec2:us-east-1:<account-id>:subnet/subnet-012827ca4ae4956ad" -> null
+      - assign_ipv6_address_on_creation                = false -> null
+      - availability_zone                              = "us-east-1a" -> null
+      - availability_zone_id                           = "use1-az2" -> null
+      - cidr_block                                     = "10.40.0.0/19" -> null
+      - enable_dns64                                   = false -> null
+      - enable_lni_at_device_index                     = 0 -> null
+      - enable_resource_name_dns_a_record_on_launch    = false -> null
+      - enable_resource_name_dns_aaaa_record_on_launch = false -> null
+      - id                                             = "subnet-012827ca4ae4956ad" -> null
+      - ipv6_native                                    = false -> null
+      - map_customer_owned_ip_on_launch                = false -> null
+      - map_public_ip_on_launch                        = false -> null
+      - owner_id                                       = "<account-id>" -> null
+      - private_dns_hostname_type_on_launch            = "ip-name" -> null
+      - region                                         = "us-east-1" -> null
+      - tags                                           = {
+          - "Name"                            = "ticketdrop-private-us-east-1a"
+          - "karpenter.sh/discovery"          = "ticketdrop"
+          - "kubernetes.io/role/internal-elb" = "1"
+        } -> null
+      - tags_all                                       = {
+          - "Layer"                           = "cluster"
+          - "ManagedBy"                       = "terraform"
+          - "Name"                            = "ticketdrop-private-us-east-1a"
+          - "Project"                         = "ticketdrop"
+          - "karpenter.sh/discovery"          = "ticketdrop"
+          - "kubernetes.io/role/internal-elb" = "1"
+        } -> null
+      - vpc_id                                         = "vpc-0839f9d03c9c81a24" -> null
+        # (4 unchanged attributes hidden)
+    }
+
+  # module.vpc.aws_subnet.private[1] will be destroyed
+  - resource "aws_subnet" "private" {
+      - arn                                            = "arn:aws:ec2:us-east-1:<account-id>:subnet/subnet-07c6394edc0fcf646" -> null
+      - assign_ipv6_address_on_creation                = false -> null
+      - availability_zone                              = "us-east-1b" -> null
+      - availability_zone_id                           = "use1-az4" -> null
+      - cidr_block                                     = "10.40.32.0/19" -> null
+      - enable_dns64                                   = false -> null
+      - enable_lni_at_device_index                     = 0 -> null
+      - enable_resource_name_dns_a_record_on_launch    = false -> null
+      - enable_resource_name_dns_aaaa_record_on_launch = false -> null
+      - id                                             = "subnet-07c6394edc0fcf646" -> null
+      - ipv6_native                                    = false -> null
+      - map_customer_owned_ip_on_launch                = false -> null
+      - map_public_ip_on_launch                        = false -> null
+      - owner_id                                       = "<account-id>" -> null
+      - private_dns_hostname_type_on_launch            = "ip-name" -> null
+      - region                                         = "us-east-1" -> null
+      - tags                                           = {
+          - "Name"                            = "ticketdrop-private-us-east-1b"
+          - "karpenter.sh/discovery"          = "ticketdrop"
+          - "kubernetes.io/role/internal-elb" = "1"
+        } -> null
+      - tags_all                                       = {
+          - "Layer"                           = "cluster"
+          - "ManagedBy"                       = "terraform"
+          - "Name"                            = "ticketdrop-private-us-east-1b"
+          - "Project"                         = "ticketdrop"
+          - "karpenter.sh/discovery"          = "ticketdrop"
+          - "kubernetes.io/role/internal-elb" = "1"
+        } -> null
+      - vpc_id                                         = "vpc-0839f9d03c9c81a24" -> null
+        # (4 unchanged attributes hidden)
+    }
+
+  # module.vpc.aws_subnet.private[2] will be destroyed
+  - resource "aws_subnet" "private" {
+      - arn                                            = "arn:aws:ec2:us-east-1:<account-id>:subnet/subnet-0169d9235696f86f0" -> null
+      - assign_ipv6_address_on_creation                = false -> null
+      - availability_zone                              = "us-east-1c" -> null
+      - availability_zone_id                           = "use1-az6" -> null
+      - cidr_block                                     = "10.40.64.0/19" -> null
+      - enable_dns64                                   = false -> null
+      - enable_lni_at_device_index                     = 0 -> null
+      - enable_resource_name_dns_a_record_on_launch    = false -> null
+      - enable_resource_name_dns_aaaa_record_on_launch = false -> null
+      - id                                             = "subnet-0169d9235696f86f0" -> null
+      - ipv6_native                                    = false -> null
+      - map_customer_owned_ip_on_launch                = false -> null
+      - map_public_ip_on_launch                        = false -> null
+      - owner_id                                       = "<account-id>" -> null
+      - private_dns_hostname_type_on_launch            = "ip-name" -> null
+      - region                                         = "us-east-1" -> null
+      - tags                                           = {
+          - "Name"                            = "ticketdrop-private-us-east-1c"
+          - "karpenter.sh/discovery"          = "ticketdrop"
+          - "kubernetes.io/role/internal-elb" = "1"
+        } -> null
+      - tags_all                                       = {
+          - "Layer"                           = "cluster"
+          - "ManagedBy"                       = "terraform"
+          - "Name"                            = "ticketdrop-private-us-east-1c"
+          - "Project"                         = "ticketdrop"
+          - "karpenter.sh/discovery"          = "ticketdrop"
+          - "kubernetes.io/role/internal-elb" = "1"
+        } -> null
+      - vpc_id                                         = "vpc-0839f9d03c9c81a24" -> null
+        # (4 unchanged attributes hidden)
+    }
+
+  # module.vpc.aws_subnet.public[0] will be destroyed
+  - resource "aws_subnet" "public" {
+      - arn                                            = "arn:aws:ec2:us-east-1:<account-id>:subnet/subnet-081fcc7a471cbda98" -> null
+      - assign_ipv6_address_on_creation                = false -> null
+      - availability_zone                              = "us-east-1a" -> null
+      - availability_zone_id                           = "use1-az2" -> null
+      - cidr_block                                     = "10.40.96.0/24" -> null
+      - enable_dns64                                   = false -> null
+      - enable_lni_at_device_index                     = 0 -> null
+      - enable_resource_name_dns_a_record_on_launch    = false -> null
+      - enable_resource_name_dns_aaaa_record_on_launch = false -> null
+      - id                                             = "subnet-081fcc7a471cbda98" -> null
+      - ipv6_native                                    = false -> null
+      - map_customer_owned_ip_on_launch                = false -> null
+      - map_public_ip_on_launch                        = false -> null
+      - owner_id                                       = "<account-id>" -> null
+      - private_dns_hostname_type_on_launch            = "ip-name" -> null
+      - region                                         = "us-east-1" -> null
+      - tags                                           = {
+          - "Name"                   = "ticketdrop-public-us-east-1a"
+          - "kubernetes.io/role/elb" = "1"
+        } -> null
+      - tags_all                                       = {
+          - "Layer"                  = "cluster"
+          - "ManagedBy"              = "terraform"
+          - "Name"                   = "ticketdrop-public-us-east-1a"
+          - "Project"                = "ticketdrop"
+          - "kubernetes.io/role/elb" = "1"
+        } -> null
+      - vpc_id                                         = "vpc-0839f9d03c9c81a24" -> null
+        # (4 unchanged attributes hidden)
+    }
+
+  # module.vpc.aws_subnet.public[1] will be destroyed
+  - resource "aws_subnet" "public" {
+      - arn                                            = "arn:aws:ec2:us-east-1:<account-id>:subnet/subnet-0b1385c6f8f134c4f" -> null
+      - assign_ipv6_address_on_creation                = false -> null
+      - availability_zone                              = "us-east-1b" -> null
+      - availability_zone_id                           = "use1-az4" -> null
+      - cidr_block                                     = "10.40.97.0/24" -> null
+      - enable_dns64                                   = false -> null
+      - enable_lni_at_device_index                     = 0 -> null
+      - enable_resource_name_dns_a_record_on_launch    = false -> null
+      - enable_resource_name_dns_aaaa_record_on_launch = false -> null
+      - id                                             = "subnet-0b1385c6f8f134c4f" -> null
+      - ipv6_native                                    = false -> null
+      - map_customer_owned_ip_on_launch                = false -> null
+      - map_public_ip_on_launch                        = false -> null
+      - owner_id                                       = "<account-id>" -> null
+      - private_dns_hostname_type_on_launch            = "ip-name" -> null
+      - region                                         = "us-east-1" -> null
+      - tags                                           = {
+          - "Name"                   = "ticketdrop-public-us-east-1b"
+          - "kubernetes.io/role/elb" = "1"
+        } -> null
+      - tags_all                                       = {
+          - "Layer"                  = "cluster"
+          - "ManagedBy"              = "terraform"
+          - "Name"                   = "ticketdrop-public-us-east-1b"
+          - "Project"                = "ticketdrop"
+          - "kubernetes.io/role/elb" = "1"
+        } -> null
+      - vpc_id                                         = "vpc-0839f9d03c9c81a24" -> null
+        # (4 unchanged attributes hidden)
+    }
+
+  # module.vpc.aws_subnet.public[2] will be destroyed
+  - resource "aws_subnet" "public" {
+      - arn                                            = "arn:aws:ec2:us-east-1:<account-id>:subnet/subnet-07f6cf250baab616a" -> null
+      - assign_ipv6_address_on_creation                = false -> null
+      - availability_zone                              = "us-east-1c" -> null
+      - availability_zone_id                           = "use1-az6" -> null
+      - cidr_block                                     = "10.40.98.0/24" -> null
+      - enable_dns64                                   = false -> null
+      - enable_lni_at_device_index                     = 0 -> null
+      - enable_resource_name_dns_a_record_on_launch    = false -> null
+      - enable_resource_name_dns_aaaa_record_on_launch = false -> null
+      - id                                             = "subnet-07f6cf250baab616a" -> null
+      - ipv6_native                                    = false -> null
+      - map_customer_owned_ip_on_launch                = false -> null
+      - map_public_ip_on_launch                        = false -> null
+      - owner_id                                       = "<account-id>" -> null
+      - private_dns_hostname_type_on_launch            = "ip-name" -> null
+      - region                                         = "us-east-1" -> null
+      - tags                                           = {
+          - "Name"                   = "ticketdrop-public-us-east-1c"
+          - "kubernetes.io/role/elb" = "1"
+        } -> null
+      - tags_all                                       = {
+          - "Layer"                  = "cluster"
+          - "ManagedBy"              = "terraform"
+          - "Name"                   = "ticketdrop-public-us-east-1c"
+          - "Project"                = "ticketdrop"
+          - "kubernetes.io/role/elb" = "1"
+        } -> null
+      - vpc_id                                         = "vpc-0839f9d03c9c81a24" -> null
+        # (4 unchanged attributes hidden)
+    }
+
+  # module.vpc.aws_vpc.this[0] will be destroyed
+  - resource "aws_vpc" "this" {
+      - arn                                  = "arn:aws:ec2:us-east-1:<account-id>:vpc/vpc-0839f9d03c9c81a24" -> null
+      - assign_generated_ipv6_cidr_block     = false -> null
+      - cidr_block                           = "10.40.0.0/16" -> null
+      - default_network_acl_id               = "acl-077a0ca224f03b778" -> null
+      - default_route_table_id               = "rtb-0f561a74e9f49d5e3" -> null
+      - default_security_group_id            = "sg-06121a78a8456aa61" -> null
+      - dhcp_options_id                      = "dopt-0e5539affda57a754" -> null
+      - enable_dns_hostnames                 = true -> null
+      - enable_dns_support                   = true -> null
+      - enable_network_address_usage_metrics = false -> null
+      - id                                   = "vpc-0839f9d03c9c81a24" -> null
+      - instance_tenancy                     = "default" -> null
+      - ipv6_netmask_length                  = 0 -> null
+      - main_route_table_id                  = "rtb-0f561a74e9f49d5e3" -> null
+      - owner_id                             = "<account-id>" -> null
+      - region                               = "us-east-1" -> null
+      - tags                                 = {
+          - "Name" = "ticketdrop"
+        } -> null
+      - tags_all                             = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Name"      = "ticketdrop"
+          - "Project"   = "ticketdrop"
+        } -> null
+        # (4 unchanged attributes hidden)
+    }
+
+  # module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0] will be destroyed
+  - resource "aws_eks_node_group" "this" {
+      - ami_type               = "AL2023_ARM_64_STANDARD" -> null
+      - arn                    = "arn:aws:eks:us-east-1:<account-id>:nodegroup/ticketdrop/system-c2b0d57b1cac756daf1eac7af3/c4d10e7c-e1b1-ec26-cfe9-9ce9cd657244" -> null
+      - capacity_type          = "ON_DEMAND" -> null
+      - cluster_name           = "ticketdrop" -> null
+      - disk_size              = 0 -> null
+      - id                     = "ticketdrop:system-c2b0d57b1cac756daf1eac7af3" -> null
+      - instance_types         = [
+          - "t4g.medium",
+        ] -> null
+      - labels                 = {} -> null
+      - node_group_name        = "system-c2b0d57b1cac756daf1eac7af3" -> null
+      - node_group_name_prefix = "system-" -> null
+      - node_role_arn          = "arn:aws:iam::<account-id>:role/system-eks-node-group-5e30670a2ef846bb0a2eb4bf51" -> null
+      - region                 = "us-east-1" -> null
+      - release_version        = "1.36.5-20261119" -> null
+      - resources              = [
+          - {
+              - autoscaling_groups              = [
+                  - {
+                      - name = "eks-system-c2b0d57b1cac756daf1eac7af3-c4d10e7c-e1b1-ec26-cfe9-9ce9cd657244"
+                    },
+                ]
+                # (1 unchanged attribute hidden)
+            },
+        ] -> null
+      - status                 = "ACTIVE" -> null
+      - subnet_ids             = [
+          - "subnet-012827ca4ae4956ad",
+          - "subnet-0169d9235696f86f0",
+          - "subnet-07c6394edc0fcf646",
+        ] -> null
+      - tags                   = {
+          - "Name" = "system"
+        } -> null
+      - tags_all               = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Name"      = "system"
+          - "Project"   = "ticketdrop"
+        } -> null
+      - version                = "1.36" -> null
+
+      - launch_template {
+          - id      = "lt-0ee6f563b672bbef8" -> null
+          - name    = "system-f5af24b79a469b7a7b55c3df35" -> null
+          - version = "1" -> null
+        }
+
+      - scaling_config {
+          - desired_size = 2 -> null
+          - max_size     = 3 -> null
+          - min_size     = 2 -> null
+        }
+
+      - update_config {
+          - max_unavailable            = 0 -> null
+          - max_unavailable_percentage = 33 -> null
+            # (1 unchanged attribute hidden)
+        }
+    }
+
+  # module.eks.module.eks_managed_node_group["system"].aws_iam_role.this[0] will be destroyed
+  - resource "aws_iam_role" "this" {
+      - arn                   = "arn:aws:iam::<account-id>:role/system-eks-node-group-5e30670a2ef846bb0a2eb4bf51" -> null
+      - assume_role_policy    = jsonencode(
+            {
+              - Statement = [
+                  - {
+                      - Action    = "sts:AssumeRole"
+                      - Effect    = "Allow"
+                      - Principal = {
+                          - Service = "ec2.amazonaws.com"
+                        }
+                      - Sid       = "EKSNodeAssumeRole"
+                    },
+                ]
+              - Version   = "2012-10-17"
+            }
+        ) -> null
+      - create_date           = "2026-11-27T12:16:20Z" -> null
+      - description           = "EKS managed node group IAM role" -> null
+      - force_detach_policies = true -> null
+      - id                    = "system-eks-node-group-5e30670a2ef846bb0a2eb4bf51" -> null
+      - managed_policy_arns   = [
+          - "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
+          - "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
+          - "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
+        ] -> null
+      - max_session_duration  = 3600 -> null
+      - name                  = "system-eks-node-group-5e30670a2ef846bb0a2eb4bf51" -> null
+      - name_prefix           = "system-eks-node-group-" -> null
+      - path                  = "/" -> null
+      - tags                  = {} -> null
+      - tags_all              = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Project"   = "ticketdrop"
+        } -> null
+      - unique_id             = "<role-id>" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.eks.module.eks_managed_node_group["system"].aws_iam_role_policy_attachment.this["AmazonEC2ContainerRegistryReadOnly"] will be destroyed
+  - resource "aws_iam_role_policy_attachment" "this" {
+      - id         = "system-eks-node-group-5e30670a2ef846bb0a2eb4bf51/arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly" -> null
+      - policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly" -> null
+      - role       = "system-eks-node-group-5e30670a2ef846bb0a2eb4bf51" -> null
+    }
+
+  # module.eks.module.eks_managed_node_group["system"].aws_iam_role_policy_attachment.this["AmazonEKSWorkerNodePolicy"] will be destroyed
+  - resource "aws_iam_role_policy_attachment" "this" {
+      - id         = "system-eks-node-group-5e30670a2ef846bb0a2eb4bf51/arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy" -> null
+      - policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy" -> null
+      - role       = "system-eks-node-group-5e30670a2ef846bb0a2eb4bf51" -> null
+    }
+
+  # module.eks.module.eks_managed_node_group["system"].aws_iam_role_policy_attachment.this["AmazonEKS_CNI_Policy"] will be destroyed
+  - resource "aws_iam_role_policy_attachment" "this" {
+      - id         = "system-eks-node-group-5e30670a2ef846bb0a2eb4bf51/arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy" -> null
+      - policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy" -> null
+      - role       = "system-eks-node-group-5e30670a2ef846bb0a2eb4bf51" -> null
+    }
+
+  # module.eks.module.eks_managed_node_group["system"].aws_launch_template.this[0] will be destroyed
+  - resource "aws_launch_template" "this" {
+      - arn                                  = "arn:aws:ec2:us-east-1:<account-id>:launch-template/lt-0ee6f563b672bbef8" -> null
+      - default_version                      = 1 -> null
+      - description                          = "Custom launch template for system EKS managed node group" -> null
+      - disable_api_stop                     = false -> null
+      - disable_api_termination              = false -> null
+      - id                                   = "lt-0ee6f563b672bbef8" -> null
+      - latest_version                       = 1 -> null
+      - name                                 = "system-f5af24b79a469b7a7b55c3df35" -> null
+      - name_prefix                          = "system-" -> null
+      - region                               = "us-east-1" -> null
+      - security_group_names                 = [] -> null
+      - tags                                 = {} -> null
+      - tags_all                             = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Project"   = "ticketdrop"
+        } -> null
+      - update_default_version               = true -> null
+      - vpc_security_group_ids               = [
+          - "sg-000f89f52c5eff983",
+        ] -> null
+        # (8 unchanged attributes hidden)
+
+      - block_device_mappings {
+          - device_name  = "/dev/xvda" -> null
+            # (2 unchanged attributes hidden)
+
+          - ebs {
+              - delete_on_termination      = "true" -> null
+              - encrypted                  = "true" -> null
+              - iops                       = 0 -> null
+              - throughput                 = 0 -> null
+              - volume_initialization_rate = 0 -> null
+              - volume_size                = 20 -> null
+              - volume_type                = "gp3" -> null
+                # (2 unchanged attributes hidden)
+            }
+        }
+
+      - metadata_options {
+          - http_endpoint               = "enabled" -> null
+          - http_put_response_hop_limit = 1 -> null
+          - http_tokens                 = "required" -> null
+            # (2 unchanged attributes hidden)
+        }
+
+      - tag_specifications {
+          - resource_type = "instance" -> null
+          - tags          = {
+              - "Name" = "system"
+            } -> null
+        }
+      - tag_specifications {
+          - resource_type = "network-interface" -> null
+          - tags          = {
+              - "Name" = "system"
+            } -> null
+        }
+      - tag_specifications {
+          - resource_type = "volume" -> null
+          - tags          = {
+              - "Name" = "system"
+            } -> null
+        }
+    }
+
+  # module.eks.module.kms.aws_kms_alias.this["cluster"] will be destroyed
+  - resource "aws_kms_alias" "this" {
+      - arn            = "arn:aws:kms:us-east-1:<account-id>:alias/eks/ticketdrop" -> null
+      - id             = "alias/eks/ticketdrop" -> null
+      - name           = "alias/eks/ticketdrop" -> null
+      - region         = "us-east-1" -> null
+      - target_key_arn = "arn:aws:kms:us-east-1:<account-id>:key/6b510b5b-6b3d-4020-8179-0e960c3d5cbf" -> null
+      - target_key_id  = "6b510b5b-6b3d-4020-8179-0e960c3d5cbf" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.eks.module.kms.aws_kms_key.this[0] will be destroyed
+  - resource "aws_kms_key" "this" {
+      - arn                                = "arn:aws:kms:us-east-1:<account-id>:key/6b510b5b-6b3d-4020-8179-0e960c3d5cbf" -> null
+      - bypass_policy_lockout_safety_check = false -> null
+      - customer_master_key_spec           = "SYMMETRIC_DEFAULT" -> null
+      - deletion_window_in_days            = 7 -> null
+      - description                        = "ticketdrop cluster encryption key" -> null
+      - enable_key_rotation                = true -> null
+      - id                                 = "6b510b5b-6b3d-4020-8179-0e960c3d5cbf" -> null
+      - is_enabled                         = true -> null
+      - key_id                             = "6b510b5b-6b3d-4020-8179-0e960c3d5cbf" -> null
+      - key_usage                          = "ENCRYPT_DECRYPT" -> null
+      - multi_region                       = false -> null
+      - policy                             = jsonencode(
+            {
+              - Statement = [
+                  - {
+                      - Action    = "kms:*"
+                      - Effect    = "Allow"
+                      - Principal = {
+                          - AWS = "arn:aws:iam::<account-id>:root"
+                        }
+                      - Resource  = "*"
+                      - Sid       = "Default"
+                    },
+                  - {
+                      - Action    = [
+                          - "kms:Update*",
+                          - "kms:UntagResource",
+                          - "kms:TagResource",
+                          - "kms:ScheduleKeyDeletion",
+                          - "kms:Revoke*",
+                          - "kms:ReplicateKey",
+                          - "kms:Put*",
+                          - "kms:List*",
+                          - "kms:ImportKeyMaterial",
+                          - "kms:Get*",
+                          - "kms:Enable*",
+                          - "kms:Disable*",
+                          - "kms:Describe*",
+                          - "kms:Delete*",
+                          - "kms:Create*",
+                          - "kms:CancelKeyDeletion",
+                        ]
+                      - Effect    = "Allow"
+                      - Principal = {
+                          - AWS = "arn:aws:iam::<account-id>:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AdministratorAccess_<suffix>"
+                        }
+                      - Resource  = "*"
+                      - Sid       = "KeyAdministration"
+                    },
+                  - {
+                      - Action    = [
+                          - "kms:ReEncrypt*",
+                          - "kms:GenerateDataKey*",
+                          - "kms:Encrypt",
+                          - "kms:DescribeKey",
+                          - "kms:Decrypt",
+                        ]
+                      - Effect    = "Allow"
+                      - Principal = {
+                          - AWS = "arn:aws:iam::<account-id>:role/ticketdrop-cluster-deed80eef76c7dfbbb0558deb3"
+                        }
+                      - Resource  = "*"
+                      - Sid       = "KeyUsage"
+                    },
+                ]
+              - Version   = "2012-10-17"
+            }
+        ) -> null
+      - region                             = "us-east-1" -> null
+      - rotation_period_in_days            = 365 -> null
+      - tags                               = {} -> null
+      - tags_all                           = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Project"   = "ticketdrop"
+        } -> null
+        # (2 unchanged attributes hidden)
+    }
+
+  # module.eks.module.eks_managed_node_group["system"].module.user_data.null_resource.validate_cluster_service_cidr will be destroyed
+  - resource "null_resource" "validate_cluster_service_cidr" {
+      - id = "697324781536978615" -> null
+    }
+
+Plan: 0 to add, 0 to change, 61 to destroy.
+
+Changes to Outputs:
+  - cluster_endpoint       = "https://989DC9D392C228FDB0E2BB12DB731899.gr7.us-east-1.eks.amazonaws.com" -> null
+  - cluster_name           = "ticketdrop" -> null
+  - kubeconfig_command     = "aws eks update-kubeconfig --name ticketdrop --alias ticketdrop-eks" -> null
+  - node_security_group_id = "sg-000f89f52c5eff983" -> null
+  - private_subnets        = [
+      - "subnet-012827ca4ae4956ad",
+      - "subnet-07c6394edc0fcf646",
+      - "subnet-0169d9235696f86f0",
+    ] -> null
+  - public_subnets         = [
+      - "subnet-081fcc7a471cbda98",
+      - "subnet-0b1385c6f8f134c4f",
+      - "subnet-07f6cf250baab616a",
+    ] -> null
+  - vpc_id                 = "vpc-0839f9d03c9c81a24" -> null
+module.vpc.aws_route_table_association.public[0]: Destroying... [id=rtbassoc-07258dcfe3fd7ba75]
+module.vpc.aws_route_table_association.private[2]: Destroying... [id=rtbassoc-06ee8351567455077]
+module.vpc.aws_route_table_association.public[2]: Destroying... [id=rtbassoc-0ed8e4da5ae4bdc1c]
+module.eks.module.kms.aws_kms_alias.this["cluster"]: Destroying... [id=alias/eks/ticketdrop]
+module.vpc.aws_route_table_association.public[1]: Destroying... [id=rtbassoc-058f59e77ed9de1ef]
+module.vpc.aws_default_route_table.default[0]: Destroying... [id=rtb-0f561a74e9f49d5e3]
+module.eks.aws_eks_addon.before_compute["eks-pod-identity-agent"]: Destroying... [id=ticketdrop:eks-pod-identity-agent]
+module.eks.aws_eks_addon.this["coredns"]: Destroying... [id=ticketdrop:coredns]
+module.eks.aws_eks_addon.this["kube-proxy"]: Destroying... [id=ticketdrop:kube-proxy]
+aws_vpc_endpoint.s3: Destroying... [id=vpce-0f668b5832175f589]
+module.vpc.aws_default_route_table.default[0]: Destruction complete after 0s
+module.eks.aws_eks_addon.before_compute["vpc-cni"]: Destroying... [id=ticketdrop:vpc-cni]
+module.eks.module.kms.aws_kms_alias.this["cluster"]: Destruction complete after 1s
+module.vpc.aws_route.public_internet_gateway[0]: Destroying... [id=r-rtb-04c6e616b20740e8b1080289494]
+module.vpc.aws_route_table_association.public[2]: Destruction complete after 2s
+module.vpc.aws_route_table_association.private[0]: Destroying... [id=rtbassoc-0ca405b67372da9fa]
+module.vpc.aws_route_table_association.private[2]: Destruction complete after 2s
+module.vpc.aws_route_table_association.private[1]: Destroying... [id=rtbassoc-02b72a3405fe6ce2e]
+module.vpc.aws_route_table_association.public[1]: Destruction complete after 2s
+module.vpc.aws_default_security_group.this[0]: Destroying... [id=sg-06121a78a8456aa61]
+module.vpc.aws_default_security_group.this[0]: Destruction complete after 0s
+module.vpc.aws_route.private_nat_gateway[0]: Destroying... [id=r-rtb-09bb3799f14cef1f61080289494]
+module.vpc.aws_route_table_association.private[0]: Destruction complete after 0s
+module.vpc.aws_default_network_acl.this[0]: Destroying... [id=acl-077a0ca224f03b778]
+module.vpc.aws_default_network_acl.this[0]: Destruction complete after 0s
+module.eks.aws_iam_role_policy_attachment.cluster_encryption[0]: Destroying... [id=ticketdrop-cluster-deed80eef76c7dfbbb0558deb3/arn:aws:iam::<account-id>:policy/ticketdrop-cluster-ClusterEncryptionddc9fb98bf91f238b2296832ed]
+module.vpc.aws_route_table_association.private[1]: Destruction complete after 0s
+module.eks.aws_eks_access_policy_association.this["sso_admin_admin"]: Destroying... [id=ticketdrop#arn:aws:iam::<account-id>:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AdministratorAccess_<suffix>#arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy]
+module.vpc.aws_route.private_nat_gateway[0]: Destruction complete after 1s
+module.vpc.aws_nat_gateway.this[0]: Destroying... [id=nat-0c4268614b377991a]
+module.vpc.aws_route_table_association.public[0]: Destruction complete after 3s
+module.eks.aws_eks_access_policy_association.this["sso_admin_admin"]: Destruction complete after 1s
+module.eks.aws_eks_access_entry.this["sso_admin"]: Destroying... [id=ticketdrop:arn:aws:iam::<account-id>:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AdministratorAccess_<suffix>]
+module.eks.aws_eks_addon.before_compute["eks-pod-identity-agent"]: Destruction complete after 3s
+module.eks.aws_iam_role_policy_attachment.cluster_encryption[0]: Destruction complete after 1s
+module.eks.aws_iam_policy.cluster_encryption[0]: Destroying... [id=arn:aws:iam::<account-id>:policy/ticketdrop-cluster-ClusterEncryptionddc9fb98bf91f238b2296832ed]
+module.vpc.aws_route.public_internet_gateway[0]: Destruction complete after 2s
+module.vpc.aws_route_table.public[0]: Destroying... [id=rtb-04c6e616b20740e8b]
+module.eks.aws_eks_access_entry.this["sso_admin"]: Destruction complete after 0s
+module.eks.aws_eks_addon.this["kube-proxy"]: Destruction complete after 4s
+module.eks.aws_eks_addon.before_compute["vpc-cni"]: Destruction complete after 4s
+module.eks.aws_iam_policy.cluster_encryption[0]: Destruction complete after 1s
+module.vpc.aws_route_table.public[0]: Destruction complete after 2s
+module.eks.aws_eks_addon.this["coredns"]: Destruction complete after 5s
+module.eks.module.eks_managed_node_group["system"].module.user_data.null_resource.validate_cluster_service_cidr: Destroying... [id=697324781536978615]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3]
+module.eks.module.eks_managed_node_group["system"].module.user_data.null_resource.validate_cluster_service_cidr: Destruction complete after 0s
+aws_vpc_endpoint.s3: Still destroying... [id=vpce-0f668b5832175f589, 00m10s elapsed]
+aws_vpc_endpoint.s3: Destruction complete after 12s
+module.vpc.aws_route_table.private[0]: Destroying... [id=rtb-09bb3799f14cef1f6]
+module.vpc.aws_nat_gateway.this[0]: Still destroying... [id=nat-0c4268614b377991a, 00m10s elapsed]
+module.vpc.aws_route_table.private[0]: Destruction complete after 1s
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 00m10s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still destroying... [id=nat-0c4268614b377991a, 00m20s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 00m20s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still destroying... [id=nat-0c4268614b377991a, 00m30s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 00m30s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still destroying... [id=nat-0c4268614b377991a, 00m40s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 00m40s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still destroying... [id=nat-0c4268614b377991a, 00m50s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 00m50s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still destroying... [id=nat-0c4268614b377991a, 01m00s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 01m00s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still destroying... [id=nat-0c4268614b377991a, 01m10s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Destruction complete after 1m12s
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 01m10s elapsed]
+module.vpc.aws_subnet.public[1]: Destroying... [id=subnet-0b1385c6f8f134c4f]
+module.vpc.aws_eip.nat[0]: Destroying... [id=eipalloc-09e75c3b54e5a8ec9]
+module.vpc.aws_subnet.public[2]: Destroying... [id=subnet-07f6cf250baab616a]
+module.vpc.aws_subnet.public[0]: Destroying... [id=subnet-081fcc7a471cbda98]
+module.vpc.aws_subnet.public[1]: Destruction complete after 1s
+module.vpc.aws_subnet.public[0]: Destruction complete after 1s
+module.vpc.aws_subnet.public[2]: Destruction complete after 1s
+module.vpc.aws_eip.nat[0]: Destruction complete after 1s
+module.vpc.aws_internet_gateway.this[0]: Destroying... [id=igw-04e8400a47a4e19bb]
+module.vpc.aws_internet_gateway.this[0]: Destruction complete after 1s
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 01m20s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 01m30s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 01m40s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 01m50s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 02m00s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 02m10s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 02m20s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 02m30s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 02m40s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 02m50s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 03m00s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 03m10s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 03m20s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 03m30s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 03m40s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 03m50s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 04m00s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 04m10s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 04m20s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 04m30s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 04m40s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 04m50s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 05m00s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 05m10s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 05m20s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 05m30s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 05m40s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 05m50s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 06m00s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 06m10s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 06m20s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 06m30s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 06m40s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 06m50s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 07m00s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 07m10s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 07m20s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 07m30s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 07m40s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 07m50s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 08m00s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Still destroying... [id=ticketdrop:system-c2b0d57b1cac756daf1eac7af3, 08m10s elapsed]
+module.eks.module.eks_managed_node_group["system"].aws_eks_node_group.this[0]: Destruction complete after 8m11s
+module.eks.module.eks_managed_node_group["system"].aws_launch_template.this[0]: Destroying... [id=lt-0ee6f563b672bbef8]
+module.eks.module.eks_managed_node_group["system"].aws_launch_template.this[0]: Destruction complete after 1s
+module.eks.module.eks_managed_node_group["system"].aws_iam_role_policy_attachment.this["AmazonEC2ContainerRegistryReadOnly"]: Destroying... [id=system-eks-node-group-5e30670a2ef846bb0a2eb4bf51/arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly]
+module.eks.module.eks_managed_node_group["system"].aws_iam_role_policy_attachment.this["AmazonEKS_CNI_Policy"]: Destroying... [id=system-eks-node-group-5e30670a2ef846bb0a2eb4bf51/arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy]
+module.eks.module.eks_managed_node_group["system"].aws_iam_role_policy_attachment.this["AmazonEKSWorkerNodePolicy"]: Destroying... [id=system-eks-node-group-5e30670a2ef846bb0a2eb4bf51/arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy]
+module.eks.time_sleep.this[0]: Destroying... [id=2026-11-27T12:27:29Z]
+module.eks.time_sleep.this[0]: Destruction complete after 0s
+module.eks.aws_eks_cluster.this[0]: Destroying... [id=ticketdrop]
+module.eks.module.eks_managed_node_group["system"].aws_iam_role_policy_attachment.this["AmazonEKS_CNI_Policy"]: Destruction complete after 1s
+module.eks.module.eks_managed_node_group["system"].aws_iam_role_policy_attachment.this["AmazonEC2ContainerRegistryReadOnly"]: Destruction complete after 1s
+module.eks.module.eks_managed_node_group["system"].aws_iam_role_policy_attachment.this["AmazonEKSWorkerNodePolicy"]: Destruction complete after 2s
+module.eks.module.eks_managed_node_group["system"].aws_iam_role.this[0]: Destroying... [id=system-eks-node-group-5e30670a2ef846bb0a2eb4bf51]
+module.eks.module.eks_managed_node_group["system"].aws_iam_role.this[0]: Destruction complete after 1s
+module.eks.aws_eks_cluster.this[0]: Still destroying... [id=ticketdrop, 00m10s elapsed]
+module.eks.aws_eks_cluster.this[0]: Still destroying... [id=ticketdrop, 00m20s elapsed]
+module.eks.aws_eks_cluster.this[0]: Still destroying... [id=ticketdrop, 00m30s elapsed]
+module.eks.aws_eks_cluster.this[0]: Still destroying... [id=ticketdrop, 00m40s elapsed]
+module.eks.aws_eks_cluster.this[0]: Still destroying... [id=ticketdrop, 00m50s elapsed]
+module.eks.aws_eks_cluster.this[0]: Still destroying... [id=ticketdrop, 01m00s elapsed]
+module.eks.aws_eks_cluster.this[0]: Still destroying... [id=ticketdrop, 01m10s elapsed]
+module.eks.aws_eks_cluster.this[0]: Still destroying... [id=ticketdrop, 01m20s elapsed]
+module.eks.aws_eks_cluster.this[0]: Still destroying... [id=ticketdrop, 01m30s elapsed]
+module.eks.aws_eks_cluster.this[0]: Still destroying... [id=ticketdrop, 01m40s elapsed]
+module.eks.aws_eks_cluster.this[0]: Still destroying... [id=ticketdrop, 01m50s elapsed]
+module.eks.aws_eks_cluster.this[0]: Still destroying... [id=ticketdrop, 02m00s elapsed]
+module.eks.aws_eks_cluster.this[0]: Still destroying... [id=ticketdrop, 02m10s elapsed]
+module.eks.aws_eks_cluster.this[0]: Still destroying... [id=ticketdrop, 02m20s elapsed]
+module.eks.aws_eks_cluster.this[0]: Still destroying... [id=ticketdrop, 02m30s elapsed]
+module.eks.aws_eks_cluster.this[0]: Still destroying... [id=ticketdrop, 02m40s elapsed]
+module.eks.aws_eks_cluster.this[0]: Destruction complete after 2m41s
+module.eks.aws_security_group_rule.cluster["ingress_nodes_443"]: Destroying... [id=sgrule-1187009142]
+module.eks.aws_security_group_rule.node["ingress_self_coredns_tcp"]: Destroying... [id=sgrule-1124764533]
+module.eks.aws_security_group_rule.node["ingress_cluster_8443_webhook"]: Destroying... [id=sgrule-49950772]
+module.eks.aws_security_group_rule.node["ingress_self_coredns_udp"]: Destroying... [id=sgrule-3881117850]
+module.eks.aws_security_group_rule.node["ingress_self_all"]: Destroying... [id=sgrule-373802189]
+module.eks.aws_security_group_rule.node["ingress_cluster_10251_webhook"]: Destroying... [id=sgrule-535866784]
+module.eks.aws_cloudwatch_log_group.this[0]: Destroying... [id=/aws/eks/ticketdrop/cluster]
+module.eks.aws_security_group_rule.node["ingress_cluster_4443_webhook"]: Destroying... [id=sgrule-3638848387]
+module.eks.aws_security_group_rule.node["ingress_cluster_9443_webhook"]: Destroying... [id=sgrule-1717240831]
+module.vpc.aws_subnet.private[0]: Destroying... [id=subnet-012827ca4ae4956ad]
+module.eks.aws_cloudwatch_log_group.this[0]: Destruction complete after 1s
+module.eks.aws_security_group_rule.node["ingress_nodes_ephemeral"]: Destroying... [id=sgrule-1578366891]
+module.vpc.aws_subnet.private[0]: Destruction complete after 1s
+module.eks.aws_security_group_rule.node["ingress_cluster_443"]: Destroying... [id=sgrule-2085760026]
+module.eks.aws_security_group_rule.node["ingress_cluster_4443_webhook"]: Destruction complete after 1s
+module.eks.aws_iam_role_policy_attachment.this["AmazonEKSClusterPolicy"]: Destroying... [id=ticketdrop-cluster-deed80eef76c7dfbbb0558deb3/arn:aws:iam::aws:policy/AmazonEKSClusterPolicy]
+module.eks.aws_security_group_rule.cluster["ingress_nodes_443"]: Destruction complete after 2s
+module.eks.module.kms.aws_kms_key.this[0]: Destroying... [id=6b510b5b-6b3d-4020-8179-0e960c3d5cbf]
+module.eks.aws_iam_role_policy_attachment.this["AmazonEKSClusterPolicy"]: Destruction complete after 1s
+module.eks.aws_security_group_rule.node["ingress_cluster_kubelet"]: Destroying... [id=sgrule-733609435]
+module.eks.aws_security_group_rule.node["ingress_self_coredns_tcp"]: Destruction complete after 2s
+module.vpc.aws_subnet.private[2]: Destroying... [id=subnet-0169d9235696f86f0]
+module.eks.module.kms.aws_kms_key.this[0]: Destruction complete after 1s
+module.eks.aws_security_group_rule.node["egress_all"]: Destroying... [id=sgrule-3505081288]
+module.vpc.aws_subnet.private[2]: Destruction complete after 1s
+module.eks.aws_security_group_rule.node["ingress_cluster_6443_webhook"]: Destroying... [id=sgrule-296094741]
+module.eks.aws_security_group_rule.node["ingress_cluster_9443_webhook"]: Destruction complete after 4s
+module.vpc.aws_subnet.private[1]: Destroying... [id=subnet-07c6394edc0fcf646]
+module.vpc.aws_subnet.private[1]: Destruction complete after 1s
+module.eks.aws_iam_role.this[0]: Destroying... [id=ticketdrop-cluster-deed80eef76c7dfbbb0558deb3]
+module.eks.aws_security_group_rule.node["ingress_cluster_8443_webhook"]: Destruction complete after 5s
+module.eks.aws_iam_role.this[0]: Destruction complete after 1s
+module.eks.aws_security_group_rule.node["ingress_self_all"]: Destruction complete after 6s
+module.eks.aws_security_group_rule.node["ingress_cluster_10251_webhook"]: Destruction complete after 7s
+module.eks.aws_security_group_rule.node["ingress_self_coredns_udp"]: Destruction complete after 8s
+module.eks.aws_security_group_rule.node["ingress_nodes_ephemeral"]: Destruction complete after 8s
+module.eks.aws_security_group_rule.node["ingress_cluster_443"]: Destruction complete after 10s
+module.eks.aws_security_group_rule.node["ingress_cluster_kubelet"]: Destruction complete after 10s
+module.eks.aws_security_group_rule.node["egress_all"]: Destruction complete after 10s
+module.eks.aws_security_group_rule.node["ingress_cluster_6443_webhook"]: Still destroying... [id=sgrule-296094741, 00m10s elapsed]
+module.eks.aws_security_group_rule.node["ingress_cluster_6443_webhook"]: Destruction complete after 11s
+module.eks.aws_security_group.cluster[0]: Destroying... [id=sg-0dbdd14adf1bac7ab]
+module.eks.aws_security_group.node[0]: Destroying... [id=sg-000f89f52c5eff983]
+module.eks.aws_security_group.cluster[0]: Destruction complete after 1s
+module.eks.aws_security_group.node[0]: Destruction complete after 1s
+module.vpc.aws_vpc.this[0]: Destroying... [id=vpc-0839f9d03c9c81a24]
+module.vpc.aws_vpc.this[0]: Destruction complete after 2s
+Releasing state lock. This may take a few moments...
+
+Destroy complete! Resources: 61 destroyed.
+took 709s
+orphan-check as arn:aws:sts::<account-id>:assumed-role/AWSReservedSSO_AdministratorAccess_<id>/Jose-temp-IAM-user
+== us-east-1
+  ok     EKS clusters
+  ok     EC2 instances
+  ok     EBS volumes
+  ok     EBS snapshots
+  ok     AMIs
+  ok     NAT gateways
+  ok     Elastic IPs
+  ok     other public IPv4 addresses
+  ok     load balancers
+  ok     classic load balancers
+  ok     VPC endpoints
+  ok     non-default VPCs
+  ok     customer-managed KMS keys
+  INFO   KMS keys pending deletion: 2
+           6b510b5b-6b3d-4020-8179-0e960c3d5cbf PendingDeletion, deleted on 2026-12-04T22:57:57.225000+09:00
+           mrk-a18b79bd24cf4cea8855f12bfe8281da PendingReplicaDeletion, deleted on a date set once its replicas are gone
+  ok     secrets
+  ok     EKS log groups
+  INFO   other log groups: 4
+           /aws/rds/instance/fastapi-react-dev-k8s-postgres/postgresql 37340 bytes
+           /aws/rds/instance/fastapi-react-dev-postgres/postgresql 96907 bytes
+           /aws/transfer/s-02d6c68b111248538 0 bytes
+           /aws/transfer/s-958f54bf60c44d4e8 0 bytes
+
+orphan-check: nothing billable found
+orphan-check exit 0

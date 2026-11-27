@@ -251,11 +251,14 @@ jobs:
             echo "::endgroup::"
           done < <(find terraform -type f -name '*.tf' -not -path '*/.terraform/*' -printf '%h\n' | sort -u)
 
+      # Terraform only: the modules that validate downloads bring example
+      # Kubernetes YAML (the EKS module's examples/), which is not ours.
       - name: Trivy Terraform configuration scan
         run: |
           docker run --rm \
             -v "$GITHUB_WORKSPACE/terraform:/scan:ro" \
             "$TRIVY_IMAGE" config \
+            --misconfig-scanners terraform \
             --severity HIGH,CRITICAL \
             --exit-code 1 \
             /scan

@@ -1,4 +1,4 @@
-# The layer that bills by the hour: the network now, EKS from step 7. It goes
+# The layer that bills by the hour: the network (step 6) and EKS (step 7). It goes
 # up and comes down from a laptop, never from CI, and is destroyed at the end
 # of every session.
 

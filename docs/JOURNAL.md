@@ -272,3 +272,42 @@ November 19, 2026: GitOps proof PR set orders' pool size to "10x". Lint passed, 
 2. The local checks, the first PR run and the proof PRs in [evidence/phase-3/](evidence/phase-3/).
 3. The exit check in [PROOF.md](PROOF.md).
 4. The kind install test in [08-kind-install-test.txt](evidence/phase-3/08-kind-install-test.txt) and the new-pod window in [fail-8-networkpolicy-new-pod-window.txt](evidence/phase-3/fail-8-networkpolicy-new-pod-window.txt).
+
+## Phase 4: AWS with Terraform
+
+Dates: <start> to <end>. Exit check: `make aws-up` gives Ready nodes, and
+`make aws-down` leaves nothing billing. Both are timed.
+
+I did step 1 by hand, wrote the step 5 jobs, and ran every apply and destroy
+from my laptop. Steps 2, 3, 4, 6 and 7, and the fixes to my step 5 jobs, were
+written for me.
+
+### Notes
+November 22, 2026: The account check found a dangling delegation on `kahmedt.com`: Porkbun still named the name servers of a deleted Route 53 zone. Made a new zone and pointed Porkbun at it the same day.
+November 22, 2026: Set up IAM Identity Center and the `ticketdrop` SSO profile, so the CLI no longer needs a stored key.
+November 23, 2026: The first orphan check found a multi-Region KMS key that Identity Center's setup had left unused, with a replica in us-west-2. Scheduled both for deletion (TROUBLESHOOTING 21).
+November 23, 2026: Applied the state bucket, 6 resources, then moved its own state into it. The plan after the move changed nothing (DECISIONS 68).
+November 24, 2026: Applied `live/foundation`: imported the zone, the budget and the OIDC provider, and added the three CI roles and nine ECR repositories (DECISIONS 69).
+November 25, 2026: The CI roles trusted the wrong `sub` format. This repo issues GitHub's immutable subjects, which carry the owner and repo IDs, so every role would have refused CI. Fixed and applied before the first run.
+November 26, 2026: My step 5 jobs had five bugs, all found before the first run: an empty `AWS_REGION`, the budget email missing from the plan, tflint not finding its config, Trivy failing on the state bucket's key, and a summary full of no-op resources.
+November 26, 2026: PR #17's plan ran as the plan role, the merge applied as the apply role with no changes, and a throwaway PR #18 showed a PR cannot take the apply role (DECISIONS 70).
+November 27, 2026: Applied the network: 24 resources, the NAT took 1m57s. Plan clean afterwards, and every subnet tagged (DECISIONS 71).
+November 27, 2026: My destroy sat at a confirmation prompt the pipe was hiding, for almost two hours, and left the state lock behind when it died. Released the lock, destroyed with `-auto-approve`, orphan check exit 0. About $0.10 (TROUBLESHOOTING 22).
+November 27, 2026: Step 7's EKS plan is 60 to add. Trivy raised two CRITICALs inside the EKS module, the public endpoint and the nodes' open egress, both accepted with a reason (DECISIONS 72, 73).
+November 27, 2026: Applied EKS: 60 resources in 848s, both nodes Ready and arm64. Then the NetworkPolicy check failed before the policy: pods on different nodes could not reach each other on port 80. The module's node security group only opens 53 and 1025-65535 between nodes (TROUBLESHOOTING 23).
+November 27, 2026: After the fix: default-deny blocked the probe. The new-pod window is on EKS too: in standard mode a new pod's first three calls, about 1.5s, got through; in strict mode none did (TROUBLESHOOTING 18). Keeping standard.
+November 27, 2026: Changed my mind and made strict the default. A pod getting traffic out before its policy applies is not what I want, and our services retry their startup connections anyway.
+
+### 1. The problem
+
+### 2. What I built
+
+### 3. Why this approach
+
+### 4. What broke
+
+### 5. What I changed
+
+### 6. At a different scale
+
+### Evidence
