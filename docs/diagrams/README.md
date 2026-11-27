@@ -8,6 +8,7 @@ Pick whichever suits the document you are writing.
 | `phase2-cluster.excalidraw` (+ `.svg`, `.png`) | The system on Docker Desktop Kubernetes | Hand-drawn house style, with logos | [excalidraw.com](https://excalidraw.com), or the Excalidraw VS Code extension |
 | `order-journey.excalidraw` (+ `.svg`) | One order's path through the services | Hand-drawn house style, with logos | Excalidraw |
 | `aws-target.excalidraw` (+ `.svg`) | The AWS platform, in the hand-drawn style | Hand-drawn house style, with logos | Excalidraw |
+| `aws-network.excalidraw` (+ `.svg`) | The Phase 4 network: three zones, their public and private subnets, the one NAT and the S3 endpoint | Hand-drawn house style, with logos | Excalidraw |
 | `delivery.excalidraw` (+ `.svg`) | How a change reaches the cluster | Hand-drawn house style, with logos | Excalidraw |
 | `scaling-loop.excalidraw` (+ `.svg`) | KEDA and Karpenter during a drop | Hand-drawn house style, with logos | Excalidraw |
 
