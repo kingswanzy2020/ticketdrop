@@ -1719,3 +1719,33 @@ in AWS between the PR's plan and the merge is applied, or undone, without
 anyone reading it first. Nothing pauses the apply for approval: the
 environment limits it to `main` and has no required reviewer, since one person
 both reviews and merges.
+
+## 71. The cluster's network has one NAT gateway, not one per zone
+
+**Decision.** `terraform/live/cluster` builds a VPC, `10.40.0.0/16`, across
+`us-east-1a`, `1b` and `1c` (`use1-az2`, `az4`, `az6` in this account; never
+`1e`, which EKS refuses), with the `terraform-aws-modules/vpc` module pinned to
+6.8.0. Each zone has a private `/19` for nodes and pods and a public `/24` for
+load balancers. There is one NAT gateway, in `us-east-1a`, shared by all three
+private subnets, and a free S3 gateway endpoint on their route tables. The
+subnets carry the tags the load balancer controller and Karpenter look for
+(`kubernetes.io/role/elb`, `kubernetes.io/role/internal-elb`,
+`karpenter.sh/discovery`). Public subnets do not give out addresses on
+launch, the default security group has no rules, and flow logs are off. The
+layer is applied and destroyed from a laptop, never from CI: the apply role
+cannot write `cluster/*` state.
+
+**Why.** A NAT gateway costs $0.045 an hour plus $0.005 for its address, so
+two more would add about $66 a month, and $7 for their addresses, were the
+cluster up all month. The cluster is up a few hours at a time, and nothing in
+it needs to survive a zone failing. The S3 endpoint keeps image layers pulled
+from ECR, which are served from S3, off the NAT's $0.045 per GB. Flow logs
+bill per GB as well, and Trivy rates their absence MEDIUM (AWS-0178), below
+the gate CI fails on.
+
+**Cost.** If `us-east-1a` fails, every private subnet loses its way out, and
+nodes in the other zones cannot reach ECR's API, AWS endpoints or the
+internet until it is back. Traffic from `1b` and `1c` crosses zones to reach
+the NAT, about $0.01 per GB. With no flow logs, there is no record of who
+talked to what. About $0.05 an hour while the network is up, which is $1.20 a
+day if it is left running.
