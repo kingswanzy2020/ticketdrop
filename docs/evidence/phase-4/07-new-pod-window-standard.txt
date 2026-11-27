@@ -1,0 +1,29 @@
+Fri Nov 27 10:42:33 PM KST 2026
++ kubectl get ds aws-node -n kube-system -o 'jsonpath={.spec.template.spec.containers[0].env[?(@.name=="NETWORK_POLICY_ENFORCING_MODE")].value}'
+standard+ echo
+
++ kubectl rollout status ds/aws-node -n kube-system --timeout=180s
+daemon set "aws-node" successfully rolled out
+++ kubectl get pod web -n np-test -o 'jsonpath={.status.podIP}'
++ WEB=10.40.6.92
++ kubectl exec -n np-test client -- curl -s -m 5 -o /dev/null -w '%{http_code}\n' http://10.40.6.92
+200
++ kubectl run early -n np-test --labels=app=early --image=curlimages/curl:8.17.0 --restart=Never --command -- sh -c 'for i in 1 2 3 4 5 6; do date +%T; curl -s -m 1 -o /dev/null -w '\''%{http_code}\n'\'' http://10.40.6.92; sleep 0.5; done'
+pod/early created
++ kubectl wait pod/early -n np-test '--for=jsonpath={.status.phase}=Succeeded' --timeout=120s
+pod/early condition met
++ kubectl logs -n np-test early
+13:42:43
+200
+13:42:44
+200
+13:42:44
+200
+13:42:45
+000
+13:42:46
+000
+13:42:48
+000
++ kubectl delete pod early -n np-test
+pod "early" deleted from np-test namespace

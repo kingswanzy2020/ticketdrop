@@ -1,0 +1,42 @@
+Fri Nov 27 10:07:07 PM KST 2026
++ kubectl get nodes -L kubernetes.io/arch,topology.kubernetes.io/zone,node.kubernetes.io/instance-type
+NAME                           STATUS   ROLES    AGE   VERSION               ARCH    ZONE         INSTANCE-TYPE
+ip-10-40-4-164.ec2.internal    Ready    <none>   38m   v1.36.5-eks-9adbfea   arm64   us-east-1a   t4g.medium
+ip-10-40-43-223.ec2.internal   Ready    <none>   38m   v1.36.5-eks-9adbfea   arm64   us-east-1b   t4g.medium
++ aws eks describe-cluster --name ticketdrop --query 'cluster.{version:version,
+  publicCidrs:resourcesVpcConfig.publicAccessCidrs,auth:accessConfig.authenticationMode,
+  encrypted:encryptionConfig[0].resources}'
+{
+    "version": "1.36",
+    "publicCidrs": [
+        "<my-ip>/32"
+    ],
+    "auth": "API",
+    "encrypted": [
+        "secrets"
+    ]
+}
++ aws eks list-access-entries --cluster-name ticketdrop
+{
+    "accessEntries": [
+        "arn:aws:iam::<account-id>:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AdministratorAccess_<suffix>",
+        "arn:aws:iam::<account-id>:role/aws-service-role/eks.amazonaws.com/AWSServiceRoleForAmazonEKS",
+        "arn:aws:iam::<account-id>:role/system-eks-node-group-5e30670a2ef846bb0a2eb4bf51"
+    ]
+}
++ aws eks list-addons --cluster-name ticketdrop
+{
+    "addons": [
+        "coredns",
+        "eks-pod-identity-agent",
+        "kube-proxy",
+        "vpc-cni"
+    ]
+}
++ aws ec2 describe-instances --output table --filters Name=tag:eks:cluster-name,Values=ticketdrop Name=instance-state-name,Values=running --query 'Reservations[].Instances[].[InstanceId,InstanceType,MetadataOptions.HttpTokens,MetadataOptions.HttpPutResponseHopLimit]'
+--------------------------------------------------------
+|                   DescribeInstances                  |
++----------------------+--------------+-----------+----+
+|  i-0fcd52dfda1ac27ac |  t4g.medium  |  required |  1 |
+|  i-0eef22da2e45f084e |  t4g.medium  |  required |  1 |
++----------------------+--------------+-----------+----+

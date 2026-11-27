@@ -405,6 +405,14 @@ On EKS the policies are enforced by the VPC CNI's policy agent instead, so a
 new pod's first moments have to be tested there in Phase 4, not assumed from
 here.
 
+*Tested on EKS, 27 November 2026.* With the VPC CNI's policy agent, a new
+pod whose egress is denied called a pod that accepts traffic, every half
+second from the moment it started. In `standard` mode its first three calls,
+over about 1.5 seconds, got `200` and the rest `000`; in `strict` mode all six
+got `000`. Evidence:
+[`07-new-pod-window-standard.txt`](evidence/phase-4/07-new-pod-window-standard.txt),
+[`07-new-pod-window-strict.txt`](evidence/phase-4/07-new-pod-window-strict.txt).
+
 ## 19. The one-service proof PR failed `make vet` on its own comment
 
 **Seen.** PR #5, meant to show that a comment in `services/orders/` builds only
@@ -470,3 +478,50 @@ pending deletion can still be restored with `aws kms cancel-key-deletion`.
 region. Evidence:
 [`fail-2-unused-kms-key.txt`](evidence/phase-4/fail-2-unused-kms-key.txt),
 [`02-orphan-check-baseline.txt`](evidence/phase-4/02-orphan-check-baseline.txt).
+
+## 22. The network's destroy sat at a hidden prompt for two hours, and left its state lock behind
+
+**Seen.** On 27 November 2026 the step 6 capture ran `terraform destroy` inside
+`{ ...; } 2>&1 | mask | tee`. The terminal printed the plan and then nothing
+for almost two hours; the NAT gateway, its Elastic IP, the S3 endpoint and the
+VPC were all still up and billing. Once the process was gone, a new destroy
+failed with "Error acquiring the state lock": `cluster/terraform.tfstate.tflock`
+was still in the bucket, taken at 11:55:54 KST by the run that had hung.
+
+**Cause.** `terraform destroy` was waiting for `yes` at its confirmation
+prompt. The prompt ends without a newline, and `sed` in the pipe holds a
+partial line until the line ends, so it never reached the screen. A Terraform
+process that is killed, rather than allowed to finish, does not release an
+S3 lock file (`use_lockfile`).
+
+**Fix.** The lock's details (`aws s3 cp s3://…/cluster/terraform.tfstate.tflock -`)
+showed it was the hung run's, taken from this machine, so it was released with
+`terraform force-unlock <ID>` and the destroy run again with `-auto-approve`:
+24 destroyed, orphan check exit 0. Every capture that applies or destroys now
+passes `-auto-approve`, or applies a saved plan, so no prompt can hide in a
+pipe. The network was up from 11:53 to 13:46 KST, about $0.10. Evidence:
+[`06-network-destroy-orphan-check.txt`](evidence/phase-4/06-network-destroy-orphan-check.txt).
+
+## 23. On EKS a pod could not reach a pod on the other node, before any NetworkPolicy
+
+**Seen.** On 27 November 2026, in step 7's NetworkPolicy check, the call from
+`client` to `web` that should answer `200` before the deny is applied timed
+out (`000`, curl exit 28), in standard mode with no policy in the namespace.
+`client` was on the node in us-east-1b and `web` on the one in us-east-1a. A
+pod on `web`'s own node got `200`; one on the other node got `000`; DNS worked
+from both.
+
+**Cause.** The EKS module's default rules for the node security group let
+nodes reach each other only on 53 (TCP and UDP) and 1025-65535. With the VPC
+CNI every pod has a VPC address and its traffic crosses that group between
+nodes, so a pod listening below 1025, here nginx on 80, could be reached only
+from its own node.
+
+**Fix.** `node_security_group_additional_rules` in `eks.tf` adds one rule:
+nodes may reach each other on every port and protocol. What a pod may reach
+is left to NetworkPolicy. The plan was 1 to add. The two new-pod-window
+probes taken before the fix were not valid either: they called a `web` that
+already denied all ingress, so they were blocked in either mode. The workbook
+now gives `web` an allow rule and denies egress to the probe pod instead.
+Evidence:
+[`fail-7-pod-traffic-blocked-across-nodes.txt`](evidence/phase-4/fail-7-pod-traffic-blocked-across-nodes.txt).
