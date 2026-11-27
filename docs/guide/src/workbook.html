@@ -1134,6 +1134,28 @@ kubectl config use-context docker-desktop    <span class="cm"># so nothing local
 </section>
 
 <section>
+  <span class="eyebrow">The network, step 6</span>
+  <h2>Three zones, and what sits in each</h2>
+  <div class="prose">
+    <p>Each zone gets the same pair: a small public subnet for what must face the internet, and a large private one for everything else. Only the NAT gateway breaks the pattern, because there is one, in <code>us-east-1a</code>. The EKS and Phase 5 parts are drawn where they will go; step 6 builds only the VPC, subnets, route tables, internet gateway, NAT and S3 endpoint.</p>
+  </div>
+  <figure class="diagram"><!--diagram:aws-network--></figure>
+  <div class="table"><table>
+    <thead><tr><th>Piece</th><th>Where</th><th>Why there</th></tr></thead>
+    <tbody>
+      <tr><td>Three zones</td><td><code>us-east-1a</code>, <code>1b</code>, <code>1c</code> (<code>use1-az2</code>, <code>az4</code>, <code>az6</code>)</td><td>EKS needs subnets in at least two zones. Three lets the nodes, the NLB and later the Postgres replicas spread out, so one failing zone takes a third of the capacity, not half. <code>us-east-1e</code> is left out: it is <code>use1-az3</code>, which EKS refuses and Graviton isn't offered in.</td></tr>
+      <tr><td>Public subnets</td><td>one <code>/24</code> per zone, <code>10.40.96.0</code> to <code>10.40.98.0</code></td><td>Only two things need a route to the internet gateway: the NLB's node in each zone (Phase 5) and the NAT gateway. 251 usable addresses each (AWS keeps 5) is plenty. Nothing here gets a public IP unless it asks.</td></tr>
+      <tr><td>Private subnets</td><td>one <code>/19</code> per zone, <code>10.40.0.0</code>, <code>.32.0</code>, <code>.64.0</code></td><td>The nodes, every pod and the EKS control plane's network interfaces. The VPC CNI gives every pod a real VPC address, and each node keeps spares ready, so these fill up fast once Karpenter adds nodes during a drop. 8,187 addresses each.</td></tr>
+      <tr><td>NAT gateway</td><td>one, in the public subnet of <code>us-east-1a</code></td><td>Private nodes have no public address, but must still reach out: ECR, the EKS API, SQS, STS, ghcr.io. A NAT allows that one way only. One instead of three saves about $73 a month; if <code>1a</code> fails, no zone gets out, and <code>1b</code> and <code>1c</code> pay about $0.01 per GB to cross to it (DECISIONS 71).</td></tr>
+      <tr><td>S3 gateway endpoint</td><td>on the three private route tables</td><td>ECR serves image layers from S3, so most of an image pull is S3 traffic. Through the endpoint it is free and skips the NAT's $0.045 per GB. The Gateway type is free; the Interface type bills by the hour in each zone.</td></tr>
+      <tr><td>Internet gateway</td><td>the VPC's edge</td><td>Free. The public route table's <code>0.0.0.0/0</code> points at it; the private ones point at the NAT instead.</td></tr>
+      <tr><td>Tags</td><td>public: <code>kubernetes.io/role/elb</code>; private: <code>kubernetes.io/role/internal-elb</code>, <code>karpenter.sh/discovery</code></td><td>How the load balancer controller and Karpenter find the right subnets in Phase 5. Without them the NLB gets no subnets and Karpenter's nodes never launch.</td></tr>
+      <tr><td>The address plan</td><td><code>10.40.0.0/16</code>; <code>10.40.99.0</code> up is unused</td><td>Clear of the default VPC (<code>172.31.0.0/16</code>) and of Docker's and kind's <code>172.x</code> ranges. The subnets use about 39% of it; the rest is left free for anything added later.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
   <span class="eyebrow">The work</span>
   <h2>Nine steps, in order</h2>
 

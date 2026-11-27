@@ -347,6 +347,75 @@ def service_calls():
 
 
 # --------------------------------------------------------------------------
+# 7. Phase 4: the network, zone by zone
+# --------------------------------------------------------------------------
+def aws_network():
+    d = Diagram.house()
+    d.title("TicketDrop on AWS: the network",
+            "VPC 10.40.0.0/16   |   3 zones, a public /24 and a private /19 in each   |   one NAT gateway   |   a free S3 gateway endpoint")
+
+    r53 = d.card(220, 120, "Route 53", "kahmedt.com, Phase 5", icon="amazonroute53", color="violet", width=300)
+    customer = d.card(640, 120, "Customers", "from Phase 5", color="gray", width=240)
+
+    d.zone(20, 230, 1880, 940, "", "black", fill=False)
+    d.icon(40, 244, "amazonwebservices", size=34)
+    d.text(86, 248, "AWS Cloud   -   us-east-1", size=18)
+
+    d.zone(50, 290, 1320, 860, "VPC  10.40.0.0/16", "violet", fill=False)
+    igw = d.card(220, 340, "Internet gateway", "the VPC's door to the internet", color="cyan", width=300)
+
+    zones = [("us-east-1a", "use1-az2"), ("us-east-1b", "use1-az4"), ("us-east-1c", "use1-az6")]
+    nodes, nlb = [], []
+    nat = None
+    for i, (az, zid) in enumerate(zones):
+        x = 80 + i * 430
+        d.zone(x, 440, 400, 470, f"{az}   -   {zid}", "gray")
+        d.zone(x + 15, 490, 370, 160, f"public  10.40.{96 + i}.0/24", "cyan")
+        nlb.append(d.card(x + 30, 540, "NLB node", "Phase 5", color="cyan", width=160, height=80))
+        if i == 0:
+            nat = d.card(x + 210, 540, "NAT gateway", "+ its Elastic IP", color="yellow", width=160, height=80)
+        else:
+            d.text(x + 216, 560, "no NAT here\n(DECISIONS 71)", size=13, hex_color="#868e96")
+        d.zone(x + 15, 670, 370, 225, f"private  10.40.{i * 32}.0/19", "blue")
+        nodes.append(d.card(x + 30, 730, "EKS nodes + pods", "step 7: two arm64 nodes\nPhase 5: Spot via Karpenter\nevery pod takes an IP here",
+                            icon="amazoneks", color="blue", width=340, height=110))
+
+    d.note(80, 935, "Route tables   (DNS hostnames and resolution on, which EKS needs)\n"
+           "public:   0.0.0.0/0  ->  internet gateway\n"
+           "private, one per zone:   0.0.0.0/0  ->  the NAT in 1a, so 1b and 1c cross zones;   S3  ->  the endpoint\n"
+           "Usable addresses:  251 in each public /24,  8,187 in each private /19\n"
+           "Free for later:  10.40.99.0 - 10.40.255.255,  about 61% of the VPC", color="gray", width=830)
+    s3ep = d.card(970, 1040, "S3 gateway endpoint", "free; on the 3 private route tables", color="green", width=340)
+
+    d.zone(1400, 290, 470, 860, "AWS services, outside the VPC", "gray")
+    eks = d.card(1420, 340, "EKS control plane", "step 7; run by AWS, API open\nto admin_cidr only", icon="amazoneks", color="orange", width=430, height=78)
+    d.card(1420, 440, "ECR", "image manifests; the layers come from S3", color="orange", width=430)
+    d.card(1420, 540, "SNS + SQS", "step 8: the event bus", icon="amazonsqs", color="orange", width=430)
+    d.card(1420, 640, "Secrets Manager", "step 8: database credentials", icon="awssecretsmanager", color="red", width=430)
+    d.card(1420, 740, "STS", "Pod Identity: short-lived credentials", color="red", width=430)
+    s3 = d.card(1420, 1040, "S3", "ECR's image layers", icon="amazons3", color="green", width=430)
+
+    d.flow(customer, r53, "HTTPS", "black", step=1, from_side="left", to_side="right")
+    d.flow(r53, igw, "alias to the NLB", "black", step=2, from_side="bottom", to_side="top")
+    d.flow(igw, nlb[1], color="black", step=3, from_side="bottom", to_side="top")
+    d.flow(nlb[1], nodes[1], color="black", step=4, from_side="bottom", to_side="top")
+    d.flow(nodes[0], nat, "out", "cyan", from_side="top", to_side="bottom")
+    d.flow(nodes[1], nat, "cross-zone", "cyan", dashed=True, from_side="left", to_side="right")
+    d.flow(nat, igw, color="cyan", from_side="top", to_side="bottom")
+    d.flow(igw, eks, "AWS APIs, ECR, ghcr.io, the internet", "cyan", from_side="right", to_side="left")
+    d.flow(nodes[2], s3ep, "image layers", "green", from_side="bottom", to_side="top")
+    d.flow(s3ep, s3, "free", "green", from_side="right", to_side="left")
+
+    d.legend(40, 1200, [
+        ("Customer traffic, from Phase 5", "black", False),
+        ("Out through the one NAT", "cyan", False),
+        ("Crossing zones to reach it, $0.01/GB", "cyan", True),
+        ("S3, through the free endpoint", "green", False),
+    ])
+    return d
+
+
+# --------------------------------------------------------------------------
 # Excalidraw JSON -> SVG
 # --------------------------------------------------------------------------
 FONT = "ui-sans-serif, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
@@ -434,6 +503,7 @@ DIAGRAMS = {
     "delivery": ("How a code change reaches the cluster", delivery),
     "scaling-loop": ("The scaling loop a ticket drop sets off", scaling_loop),
     "service-calls": ("Which services call which, by URL", service_calls),
+    "aws-network": ("The AWS network: three zones, their subnets, one NAT and the S3 endpoint", aws_network),
 }
 
 if __name__ == "__main__":
