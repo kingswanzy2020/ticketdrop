@@ -1,0 +1,769 @@
+Fri Nov 27 01:45:49 PM KST 2026
+module.vpc.aws_vpc.this[0]: Refreshing state... [id=vpc-0e756f0156b6e0eb7]
+module.vpc.aws_default_security_group.this[0]: Refreshing state... [id=sg-048c7376e1cf8c2e2]
+module.vpc.aws_default_route_table.default[0]: Refreshing state... [id=rtb-0776d6505b9253c67]
+module.vpc.aws_subnet.public[1]: Refreshing state... [id=subnet-0314128cbc6da4ae5]
+module.vpc.aws_subnet.public[0]: Refreshing state... [id=subnet-0c926a7fe632ed7d1]
+module.vpc.aws_subnet.public[2]: Refreshing state... [id=subnet-071b9f75b29cd4f2b]
+module.vpc.aws_default_network_acl.this[0]: Refreshing state... [id=acl-00fdd470a476f75bb]
+module.vpc.aws_route_table.private[0]: Refreshing state... [id=rtb-01c8f59075b80c496]
+module.vpc.aws_route_table.public[0]: Refreshing state... [id=rtb-0ea0db606d91a1cbc]
+module.vpc.aws_subnet.private[2]: Refreshing state... [id=subnet-066b5f6775fc68363]
+module.vpc.aws_subnet.private[0]: Refreshing state... [id=subnet-0208940a73d0d5df4]
+module.vpc.aws_subnet.private[1]: Refreshing state... [id=subnet-02f0faf801f92e656]
+module.vpc.aws_internet_gateway.this[0]: Refreshing state... [id=igw-0c65563dd31aa1f78]
+aws_vpc_endpoint.s3: Refreshing state... [id=vpce-039ce8c6439bea161]
+module.vpc.aws_eip.nat[0]: Refreshing state... [id=eipalloc-0ec6f20c6c3d0c07a]
+module.vpc.aws_route.public_internet_gateway[0]: Refreshing state... [id=r-rtb-0ea0db606d91a1cbc1080289494]
+module.vpc.aws_route_table_association.public[0]: Refreshing state... [id=rtbassoc-0acf47a3b71358df1]
+module.vpc.aws_route_table_association.public[2]: Refreshing state... [id=rtbassoc-028956105b027d2be]
+module.vpc.aws_route_table_association.public[1]: Refreshing state... [id=rtbassoc-0c25a3c94e87d008b]
+module.vpc.aws_route_table_association.private[0]: Refreshing state... [id=rtbassoc-095d20c18aebb449f]
+module.vpc.aws_route_table_association.private[2]: Refreshing state... [id=rtbassoc-0875cf7d24ff6f728]
+module.vpc.aws_route_table_association.private[1]: Refreshing state... [id=rtbassoc-0b52ca1c623e3f99c]
+module.vpc.aws_nat_gateway.this[0]: Refreshing state... [id=nat-0c9c953ddbea50216]
+module.vpc.aws_route.private_nat_gateway[0]: Refreshing state... [id=r-rtb-01c8f59075b80c4961080289494]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  - destroy
+
+Terraform will perform the following actions:
+
+  # aws_vpc_endpoint.s3 will be destroyed
+  - resource "aws_vpc_endpoint" "s3" {
+      - arn                        = "arn:aws:ec2:us-east-1:<account-id>:vpc-endpoint/vpce-039ce8c6439bea161" -> null
+      - cidr_blocks                = [
+          - "16.182.0.0/16",
+          - "54.231.0.0/16",
+          - "3.5.0.0/19",
+          - "52.216.0.0/15",
+          - "16.15.156.0/22",
+          - "16.15.96.0/20",
+          - "16.15.160.0/19",
+          - "18.34.0.0/19",
+          - "16.15.64.0/19",
+          - "3.2.103.0/24",
+          - "18.34.232.0/21",
+          - "16.15.192.0/18",
+          - "16.15.112.0/21",
+          - "16.15.120.0/22",
+        ] -> null
+      - dns_entry                  = [] -> null
+      - id                         = "vpce-039ce8c6439bea161" -> null
+      - ip_address_type            = "ipv4" -> null
+      - network_interface_ids      = [] -> null
+      - owner_id                   = "<account-id>" -> null
+      - policy                     = jsonencode(
+            {
+              - Statement = [
+                  - {
+                      - Action    = "*"
+                      - Effect    = "Allow"
+                      - Principal = "*"
+                      - Resource  = "*"
+                    },
+                ]
+              - Version   = "2008-10-17"
+            }
+        ) -> null
+      - prefix_list_id             = "pl-63a5400a" -> null
+      - private_dns_enabled        = false -> null
+      - region                     = "us-east-1" -> null
+      - requester_managed          = false -> null
+      - route_table_ids            = [
+          - "rtb-01c8f59075b80c496",
+        ] -> null
+      - security_group_ids         = [] -> null
+      - service_name               = "com.amazonaws.us-east-1.s3" -> null
+      - service_region             = "us-east-1" -> null
+      - state                      = "available" -> null
+      - subnet_ids                 = [] -> null
+      - tags                       = {
+          - "Name" = "ticketdrop-s3"
+        } -> null
+      - tags_all                   = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Name"      = "ticketdrop-s3"
+          - "Project"   = "ticketdrop"
+        } -> null
+      - vpc_endpoint_type          = "Gateway" -> null
+      - vpc_id                     = "vpc-0e756f0156b6e0eb7" -> null
+        # (2 unchanged attributes hidden)
+
+      - dns_options {
+          - dns_record_ip_type                             = "service-defined" -> null
+          - private_dns_only_for_inbound_resolver_endpoint = false -> null
+          - private_dns_specified_domains                  = [] -> null
+            # (1 unchanged attribute hidden)
+        }
+    }
+
+  # module.vpc.aws_default_network_acl.this[0] will be destroyed
+  - resource "aws_default_network_acl" "this" {
+      - arn                    = "arn:aws:ec2:us-east-1:<account-id>:network-acl/acl-00fdd470a476f75bb" -> null
+      - default_network_acl_id = "acl-00fdd470a476f75bb" -> null
+      - id                     = "acl-00fdd470a476f75bb" -> null
+      - owner_id               = "<account-id>" -> null
+      - region                 = "us-east-1" -> null
+      - subnet_ids             = [
+          - "subnet-0208940a73d0d5df4",
+          - "subnet-02f0faf801f92e656",
+          - "subnet-0314128cbc6da4ae5",
+          - "subnet-066b5f6775fc68363",
+          - "subnet-071b9f75b29cd4f2b",
+          - "subnet-0c926a7fe632ed7d1",
+        ] -> null
+      - tags                   = {
+          - "Name" = "ticketdrop-default"
+        } -> null
+      - tags_all               = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Name"      = "ticketdrop-default"
+          - "Project"   = "ticketdrop"
+        } -> null
+      - vpc_id                 = "vpc-0e756f0156b6e0eb7" -> null
+
+      - egress {
+          - action          = "allow" -> null
+          - from_port       = 0 -> null
+          - icmp_code       = 0 -> null
+          - icmp_type       = 0 -> null
+          - ipv6_cidr_block = "::/0" -> null
+          - protocol        = "-1" -> null
+          - rule_no         = 101 -> null
+          - to_port         = 0 -> null
+            # (1 unchanged attribute hidden)
+        }
+      - egress {
+          - action          = "allow" -> null
+          - cidr_block      = "0.0.0.0/0" -> null
+          - from_port       = 0 -> null
+          - icmp_code       = 0 -> null
+          - icmp_type       = 0 -> null
+          - protocol        = "-1" -> null
+          - rule_no         = 100 -> null
+          - to_port         = 0 -> null
+            # (1 unchanged attribute hidden)
+        }
+
+      - ingress {
+          - action          = "allow" -> null
+          - from_port       = 0 -> null
+          - icmp_code       = 0 -> null
+          - icmp_type       = 0 -> null
+          - ipv6_cidr_block = "::/0" -> null
+          - protocol        = "-1" -> null
+          - rule_no         = 101 -> null
+          - to_port         = 0 -> null
+            # (1 unchanged attribute hidden)
+        }
+      - ingress {
+          - action          = "allow" -> null
+          - cidr_block      = "0.0.0.0/0" -> null
+          - from_port       = 0 -> null
+          - icmp_code       = 0 -> null
+          - icmp_type       = 0 -> null
+          - protocol        = "-1" -> null
+          - rule_no         = 100 -> null
+          - to_port         = 0 -> null
+            # (1 unchanged attribute hidden)
+        }
+    }
+
+  # module.vpc.aws_default_route_table.default[0] will be destroyed
+  - resource "aws_default_route_table" "default" {
+      - arn                    = "arn:aws:ec2:us-east-1:<account-id>:route-table/rtb-0776d6505b9253c67" -> null
+      - default_route_table_id = "rtb-0776d6505b9253c67" -> null
+      - id                     = "rtb-0776d6505b9253c67" -> null
+      - owner_id               = "<account-id>" -> null
+      - propagating_vgws       = [] -> null
+      - region                 = "us-east-1" -> null
+      - route                  = [] -> null
+      - tags                   = {
+          - "Name" = "ticketdrop-default"
+        } -> null
+      - tags_all               = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Name"      = "ticketdrop-default"
+          - "Project"   = "ticketdrop"
+        } -> null
+      - vpc_id                 = "vpc-0e756f0156b6e0eb7" -> null
+
+      - timeouts {
+          - create = "5m" -> null
+          - update = "5m" -> null
+        }
+    }
+
+  # module.vpc.aws_default_security_group.this[0] will be destroyed
+  - resource "aws_default_security_group" "this" {
+      - arn                    = "arn:aws:ec2:us-east-1:<account-id>:security-group/sg-048c7376e1cf8c2e2" -> null
+      - description            = "default VPC security group" -> null
+      - egress                 = [] -> null
+      - id                     = "sg-048c7376e1cf8c2e2" -> null
+      - ingress                = [] -> null
+      - name                   = "default" -> null
+      - owner_id               = "<account-id>" -> null
+      - region                 = "us-east-1" -> null
+      - revoke_rules_on_delete = false -> null
+      - tags                   = {
+          - "Name" = "ticketdrop-default"
+        } -> null
+      - tags_all               = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Name"      = "ticketdrop-default"
+          - "Project"   = "ticketdrop"
+        } -> null
+      - vpc_id                 = "vpc-0e756f0156b6e0eb7" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.vpc.aws_eip.nat[0] will be destroyed
+  - resource "aws_eip" "nat" {
+      - allocation_id            = "eipalloc-0ec6f20c6c3d0c07a" -> null
+      - arn                      = "arn:aws:ec2:us-east-1:<account-id>:elastic-ip/eipalloc-0ec6f20c6c3d0c07a" -> null
+      - association_id           = "eipassoc-0e695f2b268c8505b" -> null
+      - domain                   = "vpc" -> null
+      - id                       = "eipalloc-0ec6f20c6c3d0c07a" -> null
+      - network_border_group     = "us-east-1" -> null
+      - network_interface        = "eni-0ccccd47e25829cb7" -> null
+      - private_dns              = "ip-10-40-96-15.ec2.internal" -> null
+      - private_ip               = "10.40.96.15" -> null
+      - public_dns               = "ec2-44-209-253-194.compute-1.amazonaws.com" -> null
+      - public_ip                = "44.209.253.194" -> null
+      - public_ipv4_pool         = "amazon" -> null
+      - region                   = "us-east-1" -> null
+      - tags                     = {
+          - "Name" = "ticketdrop-us-east-1a"
+        } -> null
+      - tags_all                 = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Name"      = "ticketdrop-us-east-1a"
+          - "Project"   = "ticketdrop"
+        } -> null
+        # (6 unchanged attributes hidden)
+    }
+
+  # module.vpc.aws_internet_gateway.this[0] will be destroyed
+  - resource "aws_internet_gateway" "this" {
+      - arn      = "arn:aws:ec2:us-east-1:<account-id>:internet-gateway/igw-0c65563dd31aa1f78" -> null
+      - id       = "igw-0c65563dd31aa1f78" -> null
+      - owner_id = "<account-id>" -> null
+      - region   = "us-east-1" -> null
+      - tags     = {
+          - "Name" = "ticketdrop"
+        } -> null
+      - tags_all = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Name"      = "ticketdrop"
+          - "Project"   = "ticketdrop"
+        } -> null
+      - vpc_id   = "vpc-0e756f0156b6e0eb7" -> null
+    }
+
+  # module.vpc.aws_nat_gateway.this[0] will be destroyed
+  - resource "aws_nat_gateway" "this" {
+      - allocation_id                      = "eipalloc-0ec6f20c6c3d0c07a" -> null
+      - association_id                     = "eipassoc-0e695f2b268c8505b" -> null
+      - availability_mode                  = "zonal" -> null
+      - connectivity_type                  = "public" -> null
+      - id                                 = "nat-0c9c953ddbea50216" -> null
+      - network_interface_id               = "eni-0ccccd47e25829cb7" -> null
+      - private_ip                         = "10.40.96.15" -> null
+      - public_ip                          = "44.209.253.194" -> null
+      - region                             = "us-east-1" -> null
+      - regional_nat_gateway_address       = [] -> null
+      - secondary_allocation_ids           = [] -> null
+      - secondary_private_ip_address_count = 0 -> null
+      - secondary_private_ip_addresses     = [] -> null
+      - subnet_id                          = "subnet-0c926a7fe632ed7d1" -> null
+      - tags                               = {
+          - "Name" = "ticketdrop-us-east-1a"
+        } -> null
+      - tags_all                           = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Name"      = "ticketdrop-us-east-1a"
+          - "Project"   = "ticketdrop"
+        } -> null
+      - vpc_id                             = "vpc-0e756f0156b6e0eb7" -> null
+    }
+
+  # module.vpc.aws_route.private_nat_gateway[0] will be destroyed
+  - resource "aws_route" "private_nat_gateway" {
+      - destination_cidr_block      = "0.0.0.0/0" -> null
+      - id                          = "r-rtb-01c8f59075b80c4961080289494" -> null
+      - nat_gateway_id              = "nat-0c9c953ddbea50216" -> null
+      - origin                      = "CreateRoute" -> null
+      - region                      = "us-east-1" -> null
+      - route_table_id              = "rtb-01c8f59075b80c496" -> null
+      - state                       = "active" -> null
+        # (14 unchanged attributes hidden)
+
+      - timeouts {
+          - create = "5m" -> null
+        }
+    }
+
+  # module.vpc.aws_route.public_internet_gateway[0] will be destroyed
+  - resource "aws_route" "public_internet_gateway" {
+      - destination_cidr_block      = "0.0.0.0/0" -> null
+      - gateway_id                  = "igw-0c65563dd31aa1f78" -> null
+      - id                          = "r-rtb-0ea0db606d91a1cbc1080289494" -> null
+      - origin                      = "CreateRoute" -> null
+      - region                      = "us-east-1" -> null
+      - route_table_id              = "rtb-0ea0db606d91a1cbc" -> null
+      - state                       = "active" -> null
+        # (14 unchanged attributes hidden)
+
+      - timeouts {
+          - create = "5m" -> null
+        }
+    }
+
+  # module.vpc.aws_route_table.private[0] will be destroyed
+  - resource "aws_route_table" "private" {
+      - arn              = "arn:aws:ec2:us-east-1:<account-id>:route-table/rtb-01c8f59075b80c496" -> null
+      - id               = "rtb-01c8f59075b80c496" -> null
+      - owner_id         = "<account-id>" -> null
+      - propagating_vgws = [] -> null
+      - region           = "us-east-1" -> null
+      - route            = [
+          - {
+              - cidr_block                 = "0.0.0.0/0"
+              - nat_gateway_id             = "nat-0c9c953ddbea50216"
+                # (12 unchanged attributes hidden)
+            },
+        ] -> null
+      - tags             = {
+          - "Name" = "ticketdrop-private"
+        } -> null
+      - tags_all         = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Name"      = "ticketdrop-private"
+          - "Project"   = "ticketdrop"
+        } -> null
+      - vpc_id           = "vpc-0e756f0156b6e0eb7" -> null
+    }
+
+  # module.vpc.aws_route_table.public[0] will be destroyed
+  - resource "aws_route_table" "public" {
+      - arn              = "arn:aws:ec2:us-east-1:<account-id>:route-table/rtb-0ea0db606d91a1cbc" -> null
+      - id               = "rtb-0ea0db606d91a1cbc" -> null
+      - owner_id         = "<account-id>" -> null
+      - propagating_vgws = [] -> null
+      - region           = "us-east-1" -> null
+      - route            = [
+          - {
+              - cidr_block                 = "0.0.0.0/0"
+              - gateway_id                 = "igw-0c65563dd31aa1f78"
+                # (12 unchanged attributes hidden)
+            },
+        ] -> null
+      - tags             = {
+          - "Name" = "ticketdrop-public"
+        } -> null
+      - tags_all         = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Name"      = "ticketdrop-public"
+          - "Project"   = "ticketdrop"
+        } -> null
+      - vpc_id           = "vpc-0e756f0156b6e0eb7" -> null
+    }
+
+  # module.vpc.aws_route_table_association.private[0] will be destroyed
+  - resource "aws_route_table_association" "private" {
+      - id             = "rtbassoc-095d20c18aebb449f" -> null
+      - region         = "us-east-1" -> null
+      - route_table_id = "rtb-01c8f59075b80c496" -> null
+      - subnet_id      = "subnet-0208940a73d0d5df4" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.vpc.aws_route_table_association.private[1] will be destroyed
+  - resource "aws_route_table_association" "private" {
+      - id             = "rtbassoc-0b52ca1c623e3f99c" -> null
+      - region         = "us-east-1" -> null
+      - route_table_id = "rtb-01c8f59075b80c496" -> null
+      - subnet_id      = "subnet-02f0faf801f92e656" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.vpc.aws_route_table_association.private[2] will be destroyed
+  - resource "aws_route_table_association" "private" {
+      - id             = "rtbassoc-0875cf7d24ff6f728" -> null
+      - region         = "us-east-1" -> null
+      - route_table_id = "rtb-01c8f59075b80c496" -> null
+      - subnet_id      = "subnet-066b5f6775fc68363" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.vpc.aws_route_table_association.public[0] will be destroyed
+  - resource "aws_route_table_association" "public" {
+      - id             = "rtbassoc-0acf47a3b71358df1" -> null
+      - region         = "us-east-1" -> null
+      - route_table_id = "rtb-0ea0db606d91a1cbc" -> null
+      - subnet_id      = "subnet-0c926a7fe632ed7d1" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.vpc.aws_route_table_association.public[1] will be destroyed
+  - resource "aws_route_table_association" "public" {
+      - id             = "rtbassoc-0c25a3c94e87d008b" -> null
+      - region         = "us-east-1" -> null
+      - route_table_id = "rtb-0ea0db606d91a1cbc" -> null
+      - subnet_id      = "subnet-0314128cbc6da4ae5" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.vpc.aws_route_table_association.public[2] will be destroyed
+  - resource "aws_route_table_association" "public" {
+      - id             = "rtbassoc-028956105b027d2be" -> null
+      - region         = "us-east-1" -> null
+      - route_table_id = "rtb-0ea0db606d91a1cbc" -> null
+      - subnet_id      = "subnet-071b9f75b29cd4f2b" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # module.vpc.aws_subnet.private[0] will be destroyed
+  - resource "aws_subnet" "private" {
+      - arn                                            = "arn:aws:ec2:us-east-1:<account-id>:subnet/subnet-0208940a73d0d5df4" -> null
+      - assign_ipv6_address_on_creation                = false -> null
+      - availability_zone                              = "us-east-1a" -> null
+      - availability_zone_id                           = "use1-az2" -> null
+      - cidr_block                                     = "10.40.0.0/19" -> null
+      - enable_dns64                                   = false -> null
+      - enable_lni_at_device_index                     = 0 -> null
+      - enable_resource_name_dns_a_record_on_launch    = false -> null
+      - enable_resource_name_dns_aaaa_record_on_launch = false -> null
+      - id                                             = "subnet-0208940a73d0d5df4" -> null
+      - ipv6_native                                    = false -> null
+      - map_customer_owned_ip_on_launch                = false -> null
+      - map_public_ip_on_launch                        = false -> null
+      - owner_id                                       = "<account-id>" -> null
+      - private_dns_hostname_type_on_launch            = "ip-name" -> null
+      - region                                         = "us-east-1" -> null
+      - tags                                           = {
+          - "Name"                            = "ticketdrop-private-us-east-1a"
+          - "karpenter.sh/discovery"          = "ticketdrop"
+          - "kubernetes.io/role/internal-elb" = "1"
+        } -> null
+      - tags_all                                       = {
+          - "Layer"                           = "cluster"
+          - "ManagedBy"                       = "terraform"
+          - "Name"                            = "ticketdrop-private-us-east-1a"
+          - "Project"                         = "ticketdrop"
+          - "karpenter.sh/discovery"          = "ticketdrop"
+          - "kubernetes.io/role/internal-elb" = "1"
+        } -> null
+      - vpc_id                                         = "vpc-0e756f0156b6e0eb7" -> null
+        # (4 unchanged attributes hidden)
+    }
+
+  # module.vpc.aws_subnet.private[1] will be destroyed
+  - resource "aws_subnet" "private" {
+      - arn                                            = "arn:aws:ec2:us-east-1:<account-id>:subnet/subnet-02f0faf801f92e656" -> null
+      - assign_ipv6_address_on_creation                = false -> null
+      - availability_zone                              = "us-east-1b" -> null
+      - availability_zone_id                           = "use1-az4" -> null
+      - cidr_block                                     = "10.40.32.0/19" -> null
+      - enable_dns64                                   = false -> null
+      - enable_lni_at_device_index                     = 0 -> null
+      - enable_resource_name_dns_a_record_on_launch    = false -> null
+      - enable_resource_name_dns_aaaa_record_on_launch = false -> null
+      - id                                             = "subnet-02f0faf801f92e656" -> null
+      - ipv6_native                                    = false -> null
+      - map_customer_owned_ip_on_launch                = false -> null
+      - map_public_ip_on_launch                        = false -> null
+      - owner_id                                       = "<account-id>" -> null
+      - private_dns_hostname_type_on_launch            = "ip-name" -> null
+      - region                                         = "us-east-1" -> null
+      - tags                                           = {
+          - "Name"                            = "ticketdrop-private-us-east-1b"
+          - "karpenter.sh/discovery"          = "ticketdrop"
+          - "kubernetes.io/role/internal-elb" = "1"
+        } -> null
+      - tags_all                                       = {
+          - "Layer"                           = "cluster"
+          - "ManagedBy"                       = "terraform"
+          - "Name"                            = "ticketdrop-private-us-east-1b"
+          - "Project"                         = "ticketdrop"
+          - "karpenter.sh/discovery"          = "ticketdrop"
+          - "kubernetes.io/role/internal-elb" = "1"
+        } -> null
+      - vpc_id                                         = "vpc-0e756f0156b6e0eb7" -> null
+        # (4 unchanged attributes hidden)
+    }
+
+  # module.vpc.aws_subnet.private[2] will be destroyed
+  - resource "aws_subnet" "private" {
+      - arn                                            = "arn:aws:ec2:us-east-1:<account-id>:subnet/subnet-066b5f6775fc68363" -> null
+      - assign_ipv6_address_on_creation                = false -> null
+      - availability_zone                              = "us-east-1c" -> null
+      - availability_zone_id                           = "use1-az6" -> null
+      - cidr_block                                     = "10.40.64.0/19" -> null
+      - enable_dns64                                   = false -> null
+      - enable_lni_at_device_index                     = 0 -> null
+      - enable_resource_name_dns_a_record_on_launch    = false -> null
+      - enable_resource_name_dns_aaaa_record_on_launch = false -> null
+      - id                                             = "subnet-066b5f6775fc68363" -> null
+      - ipv6_native                                    = false -> null
+      - map_customer_owned_ip_on_launch                = false -> null
+      - map_public_ip_on_launch                        = false -> null
+      - owner_id                                       = "<account-id>" -> null
+      - private_dns_hostname_type_on_launch            = "ip-name" -> null
+      - region                                         = "us-east-1" -> null
+      - tags                                           = {
+          - "Name"                            = "ticketdrop-private-us-east-1c"
+          - "karpenter.sh/discovery"          = "ticketdrop"
+          - "kubernetes.io/role/internal-elb" = "1"
+        } -> null
+      - tags_all                                       = {
+          - "Layer"                           = "cluster"
+          - "ManagedBy"                       = "terraform"
+          - "Name"                            = "ticketdrop-private-us-east-1c"
+          - "Project"                         = "ticketdrop"
+          - "karpenter.sh/discovery"          = "ticketdrop"
+          - "kubernetes.io/role/internal-elb" = "1"
+        } -> null
+      - vpc_id                                         = "vpc-0e756f0156b6e0eb7" -> null
+        # (4 unchanged attributes hidden)
+    }
+
+  # module.vpc.aws_subnet.public[0] will be destroyed
+  - resource "aws_subnet" "public" {
+      - arn                                            = "arn:aws:ec2:us-east-1:<account-id>:subnet/subnet-0c926a7fe632ed7d1" -> null
+      - assign_ipv6_address_on_creation                = false -> null
+      - availability_zone                              = "us-east-1a" -> null
+      - availability_zone_id                           = "use1-az2" -> null
+      - cidr_block                                     = "10.40.96.0/24" -> null
+      - enable_dns64                                   = false -> null
+      - enable_lni_at_device_index                     = 0 -> null
+      - enable_resource_name_dns_a_record_on_launch    = false -> null
+      - enable_resource_name_dns_aaaa_record_on_launch = false -> null
+      - id                                             = "subnet-0c926a7fe632ed7d1" -> null
+      - ipv6_native                                    = false -> null
+      - map_customer_owned_ip_on_launch                = false -> null
+      - map_public_ip_on_launch                        = false -> null
+      - owner_id                                       = "<account-id>" -> null
+      - private_dns_hostname_type_on_launch            = "ip-name" -> null
+      - region                                         = "us-east-1" -> null
+      - tags                                           = {
+          - "Name"                   = "ticketdrop-public-us-east-1a"
+          - "kubernetes.io/role/elb" = "1"
+        } -> null
+      - tags_all                                       = {
+          - "Layer"                  = "cluster"
+          - "ManagedBy"              = "terraform"
+          - "Name"                   = "ticketdrop-public-us-east-1a"
+          - "Project"                = "ticketdrop"
+          - "kubernetes.io/role/elb" = "1"
+        } -> null
+      - vpc_id                                         = "vpc-0e756f0156b6e0eb7" -> null
+        # (4 unchanged attributes hidden)
+    }
+
+  # module.vpc.aws_subnet.public[1] will be destroyed
+  - resource "aws_subnet" "public" {
+      - arn                                            = "arn:aws:ec2:us-east-1:<account-id>:subnet/subnet-0314128cbc6da4ae5" -> null
+      - assign_ipv6_address_on_creation                = false -> null
+      - availability_zone                              = "us-east-1b" -> null
+      - availability_zone_id                           = "use1-az4" -> null
+      - cidr_block                                     = "10.40.97.0/24" -> null
+      - enable_dns64                                   = false -> null
+      - enable_lni_at_device_index                     = 0 -> null
+      - enable_resource_name_dns_a_record_on_launch    = false -> null
+      - enable_resource_name_dns_aaaa_record_on_launch = false -> null
+      - id                                             = "subnet-0314128cbc6da4ae5" -> null
+      - ipv6_native                                    = false -> null
+      - map_customer_owned_ip_on_launch                = false -> null
+      - map_public_ip_on_launch                        = false -> null
+      - owner_id                                       = "<account-id>" -> null
+      - private_dns_hostname_type_on_launch            = "ip-name" -> null
+      - region                                         = "us-east-1" -> null
+      - tags                                           = {
+          - "Name"                   = "ticketdrop-public-us-east-1b"
+          - "kubernetes.io/role/elb" = "1"
+        } -> null
+      - tags_all                                       = {
+          - "Layer"                  = "cluster"
+          - "ManagedBy"              = "terraform"
+          - "Name"                   = "ticketdrop-public-us-east-1b"
+          - "Project"                = "ticketdrop"
+          - "kubernetes.io/role/elb" = "1"
+        } -> null
+      - vpc_id                                         = "vpc-0e756f0156b6e0eb7" -> null
+        # (4 unchanged attributes hidden)
+    }
+
+  # module.vpc.aws_subnet.public[2] will be destroyed
+  - resource "aws_subnet" "public" {
+      - arn                                            = "arn:aws:ec2:us-east-1:<account-id>:subnet/subnet-071b9f75b29cd4f2b" -> null
+      - assign_ipv6_address_on_creation                = false -> null
+      - availability_zone                              = "us-east-1c" -> null
+      - availability_zone_id                           = "use1-az6" -> null
+      - cidr_block                                     = "10.40.98.0/24" -> null
+      - enable_dns64                                   = false -> null
+      - enable_lni_at_device_index                     = 0 -> null
+      - enable_resource_name_dns_a_record_on_launch    = false -> null
+      - enable_resource_name_dns_aaaa_record_on_launch = false -> null
+      - id                                             = "subnet-071b9f75b29cd4f2b" -> null
+      - ipv6_native                                    = false -> null
+      - map_customer_owned_ip_on_launch                = false -> null
+      - map_public_ip_on_launch                        = false -> null
+      - owner_id                                       = "<account-id>" -> null
+      - private_dns_hostname_type_on_launch            = "ip-name" -> null
+      - region                                         = "us-east-1" -> null
+      - tags                                           = {
+          - "Name"                   = "ticketdrop-public-us-east-1c"
+          - "kubernetes.io/role/elb" = "1"
+        } -> null
+      - tags_all                                       = {
+          - "Layer"                  = "cluster"
+          - "ManagedBy"              = "terraform"
+          - "Name"                   = "ticketdrop-public-us-east-1c"
+          - "Project"                = "ticketdrop"
+          - "kubernetes.io/role/elb" = "1"
+        } -> null
+      - vpc_id                                         = "vpc-0e756f0156b6e0eb7" -> null
+        # (4 unchanged attributes hidden)
+    }
+
+  # module.vpc.aws_vpc.this[0] will be destroyed
+  - resource "aws_vpc" "this" {
+      - arn                                  = "arn:aws:ec2:us-east-1:<account-id>:vpc/vpc-0e756f0156b6e0eb7" -> null
+      - assign_generated_ipv6_cidr_block     = false -> null
+      - cidr_block                           = "10.40.0.0/16" -> null
+      - default_network_acl_id               = "acl-00fdd470a476f75bb" -> null
+      - default_route_table_id               = "rtb-0776d6505b9253c67" -> null
+      - default_security_group_id            = "sg-048c7376e1cf8c2e2" -> null
+      - dhcp_options_id                      = "dopt-0e5539affda57a754" -> null
+      - enable_dns_hostnames                 = true -> null
+      - enable_dns_support                   = true -> null
+      - enable_network_address_usage_metrics = false -> null
+      - id                                   = "vpc-0e756f0156b6e0eb7" -> null
+      - instance_tenancy                     = "default" -> null
+      - ipv6_netmask_length                  = 0 -> null
+      - main_route_table_id                  = "rtb-0776d6505b9253c67" -> null
+      - owner_id                             = "<account-id>" -> null
+      - region                               = "us-east-1" -> null
+      - tags                                 = {
+          - "Name" = "ticketdrop"
+        } -> null
+      - tags_all                             = {
+          - "Layer"     = "cluster"
+          - "ManagedBy" = "terraform"
+          - "Name"      = "ticketdrop"
+          - "Project"   = "ticketdrop"
+        } -> null
+        # (4 unchanged attributes hidden)
+    }
+
+Plan: 0 to add, 0 to change, 24 to destroy.
+
+Changes to Outputs:
+  - private_subnets = [
+      - "subnet-0208940a73d0d5df4",
+      - "subnet-02f0faf801f92e656",
+      - "subnet-066b5f6775fc68363",
+    ] -> null
+  - public_subnets  = [
+      - "subnet-0c926a7fe632ed7d1",
+      - "subnet-0314128cbc6da4ae5",
+      - "subnet-071b9f75b29cd4f2b",
+    ] -> null
+  - vpc_id          = "vpc-0e756f0156b6e0eb7" -> null
+module.vpc.aws_route_table_association.public[0]: Destroying... [id=rtbassoc-0acf47a3b71358df1]
+module.vpc.aws_route_table_association.private[0]: Destroying... [id=rtbassoc-095d20c18aebb449f]
+module.vpc.aws_route_table_association.private[2]: Destroying... [id=rtbassoc-0875cf7d24ff6f728]
+module.vpc.aws_route_table_association.public[1]: Destroying... [id=rtbassoc-0c25a3c94e87d008b]
+module.vpc.aws_route_table_association.private[1]: Destroying... [id=rtbassoc-0b52ca1c623e3f99c]
+module.vpc.aws_route.public_internet_gateway[0]: Destroying... [id=r-rtb-0ea0db606d91a1cbc1080289494]
+module.vpc.aws_route_table_association.public[2]: Destroying... [id=rtbassoc-028956105b027d2be]
+module.vpc.aws_route.private_nat_gateway[0]: Destroying... [id=r-rtb-01c8f59075b80c4961080289494]
+aws_vpc_endpoint.s3: Destroying... [id=vpce-039ce8c6439bea161]
+module.vpc.aws_default_network_acl.this[0]: Destroying... [id=acl-00fdd470a476f75bb]
+module.vpc.aws_default_network_acl.this[0]: Destruction complete after 0s
+module.vpc.aws_default_route_table.default[0]: Destroying... [id=rtb-0776d6505b9253c67]
+module.vpc.aws_default_route_table.default[0]: Destruction complete after 0s
+module.vpc.aws_default_security_group.this[0]: Destroying... [id=sg-048c7376e1cf8c2e2]
+module.vpc.aws_default_security_group.this[0]: Destruction complete after 0s
+module.vpc.aws_route_table_association.public[0]: Destruction complete after 2s
+module.vpc.aws_route_table_association.private[2]: Destruction complete after 2s
+module.vpc.aws_route_table_association.public[1]: Destruction complete after 2s
+module.vpc.aws_route_table_association.private[1]: Destruction complete after 2s
+module.vpc.aws_route_table_association.private[0]: Destruction complete after 2s
+module.vpc.aws_subnet.private[2]: Destroying... [id=subnet-066b5f6775fc68363]
+module.vpc.aws_subnet.private[1]: Destroying... [id=subnet-02f0faf801f92e656]
+module.vpc.aws_subnet.private[0]: Destroying... [id=subnet-0208940a73d0d5df4]
+module.vpc.aws_route_table_association.public[2]: Destruction complete after 2s
+module.vpc.aws_route.public_internet_gateway[0]: Destruction complete after 2s
+module.vpc.aws_route_table.public[0]: Destroying... [id=rtb-0ea0db606d91a1cbc]
+module.vpc.aws_route.private_nat_gateway[0]: Destruction complete after 2s
+module.vpc.aws_nat_gateway.this[0]: Destroying... [id=nat-0c9c953ddbea50216]
+module.vpc.aws_subnet.private[0]: Destruction complete after 1s
+module.vpc.aws_subnet.private[1]: Destruction complete after 1s
+module.vpc.aws_subnet.private[2]: Destruction complete after 1s
+module.vpc.aws_route_table.public[0]: Destruction complete after 1s
+aws_vpc_endpoint.s3: Still destroying... [id=vpce-039ce8c6439bea161, 00m10s elapsed]
+aws_vpc_endpoint.s3: Destruction complete after 12s
+module.vpc.aws_route_table.private[0]: Destroying... [id=rtb-01c8f59075b80c496]
+module.vpc.aws_nat_gateway.this[0]: Still destroying... [id=nat-0c9c953ddbea50216, 00m10s elapsed]
+module.vpc.aws_route_table.private[0]: Destruction complete after 1s
+module.vpc.aws_nat_gateway.this[0]: Still destroying... [id=nat-0c9c953ddbea50216, 00m20s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still destroying... [id=nat-0c9c953ddbea50216, 00m30s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still destroying... [id=nat-0c9c953ddbea50216, 00m40s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still destroying... [id=nat-0c9c953ddbea50216, 00m50s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Destruction complete after 51s
+module.vpc.aws_subnet.public[0]: Destroying... [id=subnet-0c926a7fe632ed7d1]
+module.vpc.aws_eip.nat[0]: Destroying... [id=eipalloc-0ec6f20c6c3d0c07a]
+module.vpc.aws_subnet.public[1]: Destroying... [id=subnet-0314128cbc6da4ae5]
+module.vpc.aws_subnet.public[2]: Destroying... [id=subnet-071b9f75b29cd4f2b]
+module.vpc.aws_subnet.public[2]: Destruction complete after 1s
+module.vpc.aws_subnet.public[0]: Destruction complete after 2s
+module.vpc.aws_subnet.public[1]: Destruction complete after 2s
+module.vpc.aws_eip.nat[0]: Destruction complete after 2s
+module.vpc.aws_internet_gateway.this[0]: Destroying... [id=igw-0c65563dd31aa1f78]
+module.vpc.aws_internet_gateway.this[0]: Destruction complete after 1s
+module.vpc.aws_vpc.this[0]: Destroying... [id=vpc-0e756f0156b6e0eb7]
+module.vpc.aws_vpc.this[0]: Destruction complete after 1s
+Releasing state lock. This may take a few moments...
+
+Destroy complete! Resources: 24 destroyed.
+destroy exit 0
+orphan-check as arn:aws:sts::<account-id>:assumed-role/AWSReservedSSO_AdministratorAccess_<id>/Jose-temp-IAM-user
+== us-east-1
+  ok     EKS clusters
+  ok     EC2 instances
+  ok     EBS volumes
+  ok     EBS snapshots
+  ok     AMIs
+  ok     NAT gateways
+  ok     Elastic IPs
+  ok     other public IPv4 addresses
+  ok     load balancers
+  ok     classic load balancers
+  ok     VPC endpoints
+  ok     non-default VPCs
+  ok     customer-managed KMS keys
+  INFO   KMS keys pending deletion: 1
+           mrk-a18b79bd24cf4cea8855f12bfe8281da PendingReplicaDeletion, deleted on a date set once its replicas are gone
+  ok     secrets
+  ok     EKS log groups
+  INFO   other log groups: 4
+           /aws/rds/instance/fastapi-react-dev-k8s-postgres/postgresql 37340 bytes
+           /aws/rds/instance/fastapi-react-dev-postgres/postgresql 96907 bytes
+           /aws/transfer/s-02d6c68b111248538 0 bytes
+           /aws/transfer/s-958f54bf60c44d4e8 0 bytes
+
+orphan-check: nothing billable found
+orphan-check exit 0
